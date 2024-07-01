@@ -52,7 +52,9 @@ def get_user(db: Session, email: str):
     return db.query(UserModel).filter(UserModel.email == email).first()
 
 def authenticate_user(db: Session, email: str, password: str):
+    print("authenticate_user", email, password)
     user = get_user(db, email)
+    print("user", user)
     if not user:
         return False
     if not verify_password(password, user.password):

@@ -1,58 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 import logo from '../assets/images/logo.png'; 
-
-const Navbar = styled.nav`
-  background: #282c34;
-  padding: 10px 20px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-`;
-
-const NavList = styled.ul`
-  list-style: none;
-  display: flex;
-  padding: 0;
-  margin: 0;
-`;
-
-const NavItem = styled.li`
-  margin: 0 15px;
-`;
-
-const NavLink = styled(Link)`
-  color: #61dafb;
-  text-decoration: none;
-  font-size: 1.2em;
-  &:hover {
-    color: white;
-  }
-`;
-
-const Logo = styled.img`
-  height: 40px;
-  margin-right: 15px;
-`;
-
-const LanguageSwitcher = styled.div`
-  position: relative;
-  display: inline-block;
-`;
-
-const LanguageDropdown = styled.select`
-  background: #282c34;
-  color: #61dafb;
-  border: none;
-  padding: 5px 10px;
-  font-size: 1.2em;
-  cursor: pointer;
-  &:hover {
-    color: white;
-  }
-`;
+import '../styles/Header.css'; 
 
 const Header = () => {
   const { t, i18n } = useTranslation();
@@ -63,23 +13,23 @@ const Header = () => {
 
   return (
     <header>
-      <Navbar>
+      <nav className="navbar">
         <Link to="/">
-          <Logo src={logo} alt="NO MORE WASTE Logo" />
+          <img src={logo} alt="NO MORE WASTE Logo" className="logo" />
         </Link>
-        <NavList>
-          <NavItem>
-            <NavLink to="/">{t('home')}</NavLink>
-          </NavItem>
-          <NavItem>
-            <NavLink to="/signin">{t('sign_in')}</NavLink>
-          </NavItem>
-          <NavItem>
-            <NavLink to="/signup">{t('sign_up')}</NavLink>
-          </NavItem>
-        </NavList>
-        <LanguageSwitcher>
-          <LanguageDropdown onChange={changeLanguage} defaultValue={i18n.language}>
+        <ul className="nav-list">
+          <li className="nav-item">
+            <Link to="/" className="nav-link">{t('home')}</Link>
+          </li>
+          <li className="nav-item">
+            <Link to="/signin" className="nav-link">{t('sign_in')}</Link>
+          </li>
+          <li className="nav-item">
+            <Link to="/signup" className="nav-link">{t('sign_up')}</Link>
+          </li>
+        </ul>
+        <div className="language-switcher">
+          <select onChange={changeLanguage} defaultValue={i18n.language} className="language-dropdown">
             <option value="en">EN</option>
             <option value="fr">FR</option>
             {/* Ajouter plus d'options ici pour d'autres langues */}
@@ -88,9 +38,9 @@ const Header = () => {
             <option value="it">IT</option>
             <option value="pt">PT</option>
             <option value="jp">JP</option>
-          </LanguageDropdown>
-        </LanguageSwitcher>
-      </Navbar>
+          </select>
+        </div>
+      </nav>
     </header>
   );
 };

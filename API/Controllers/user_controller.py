@@ -58,3 +58,14 @@ def delete_user(user_id: int, db: Session = Depends(get_db)):
     db.delete(db_user)
     db.commit()
     return db_user
+
+# Approuver un utilisateur 
+@router.put("/users/approve/{user_id}", response_model=User)
+def approve_user(user_id: int, db: Session = Depends(get_db)):
+    db_user = db.query(UserModel).filter(UserModel.id == user_id).first()
+    if db_user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    db_user.is_active = True
+    db.commit()
+    db.refresh(db_user)
+    return db_user
