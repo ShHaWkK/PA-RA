@@ -1,6 +1,8 @@
 {
     "home": "Home",
     "sign_in": "Sign In",
+    "sign_up": "Sign Up",
+    "confirm_password": "Confirm Password",
     "welcome": "Welcome to NO MORE WASTE",
     "description": "NO MORE WASTE is dedicated to reducing food waste by collecting unsold goods and redistributing them to those in need. We provide various services to help individuals and organizations minimize waste, share resources, and save money.",
     "founded": "Founded in 2013 in Paris, NO MORE WASTE has progressively expanded to other cities and internationally. We collect commercial unsold items or products nearing their expiration date from individuals and redistribute them wherever necessary.",

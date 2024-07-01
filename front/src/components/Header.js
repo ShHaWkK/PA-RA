@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
+import logo from '../assets/images/logo.png'; 
 
 const Navbar = styled.nav`
   background: #282c34;
@@ -31,6 +32,11 @@ const NavLink = styled(Link)`
   }
 `;
 
+const Logo = styled.img`
+  height: 40px;
+  margin-right: 15px;
+`;
+
 const LanguageSwitcher = styled.div`
   display: flex;
 `;
@@ -56,12 +62,18 @@ const Header = () => {
   return (
     <header>
       <Navbar>
+        <Link to="/">
+          <Logo src={logo} alt="NO MORE WASTE Logo" />
+        </Link>
         <NavList>
           <NavItem>
             <NavLink to="/">{t('home')}</NavLink>
           </NavItem>
           <NavItem>
             <NavLink to="/signin">{t('sign_in')}</NavLink>
+          </NavItem>
+          <NavItem>
+            <NavLink to="/signup">{t('sign_up')}</NavLink>
           </NavItem>
         </NavList>
         <LanguageSwitcher>

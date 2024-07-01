@@ -1,6 +1,7 @@
 {
     "home": "Accueil",
     "sign_in": "Se connecter",
+    "confirm_password": "Confirmez le mot de passe",
     "password": "Mot de passe",
     "no_account": "Vous n'avez pas de compte ?",
     "sign_up": "S'inscrire",
