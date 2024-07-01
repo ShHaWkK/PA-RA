@@ -1,17 +1,19 @@
 import React from 'react';
-import  SignIn  from './pages/signin/client-signin';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import './styles/global.css';
+import { Route, Routes } from 'react-router-dom';
+import Home from './pages/homepage/Home';
+import SignIn from './pages/signin/client-signin';
+import './App.css';
 
-
-const App = () => {
+function App() {
   return (
-    <Router>
+    <div>
       <Routes>
-        <Route path="/" element={<SignIn />} />
+        <Route path="/" element={<Home />} />
+        <Route path="/signin" element={<SignIn />} />
+        {/* Ajouter d'autres routes ici */}
       </Routes>
-    </Router>
+    </div>
   );
-};
+}
 
 export default App;
