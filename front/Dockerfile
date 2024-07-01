@@ -13,5 +13,8 @@ RUN npm install
 # Copier le reste des fichiers de l'application
 COPY . .
 
+# Exposer le port sur lequel tourne l'application
+EXPOSE 3000
+
 # Commande pour démarrer le front-end
 CMD ["npm", "start"]

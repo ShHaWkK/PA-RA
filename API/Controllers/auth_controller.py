@@ -20,6 +20,7 @@ logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 SECRET_KEY = os.getenv("SECRET_KEY")
+print("SECRET_KEY", SECRET_KEY)
 if not SECRET_KEY:
     logger.error("SECRET_KEY is not set")
 

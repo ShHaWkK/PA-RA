@@ -12,7 +12,8 @@ services:
       db:
         condition: service_healthy
     environment:
-      - DATABASE_URL=mysql+pymysql://user:password@db:3306/no_more_waste
+      DATABASE_URL : ${DATABASE_URL}
+      SECRET_KEY : ${SECRET_KEY}
     volumes:
       - ./API:/app
 
