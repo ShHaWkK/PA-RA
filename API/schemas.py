@@ -10,15 +10,15 @@ class UserRole(str, Enum):
     client = "client"
 
 class UserBase(BaseModel):
-    nom: str
+    name: str
     email: EmailStr
     role: UserRole
 
 class UserCreate(UserBase):
-    mot_de_passe: str
+    password: str
 
 class UserUpdate(UserBase):
-    mot_de_passe: Optional[str] = None
+    password: Optional[str] = None
 
 class User(UserBase):
     id: int

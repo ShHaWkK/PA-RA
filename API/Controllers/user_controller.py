@@ -18,11 +18,11 @@ def create_user(user: UserCreate, db: Session = Depends(get_db)):
     db_user = db.query(UserModel).filter(UserModel.email == user.email).first()
     if db_user:
         raise HTTPException(status_code=400, detail="Email already registered")
-    hashed_password = get_password_hash(user.mot_de_passe)
+    hashed_password = get_password_hash(user.password)
     new_user = UserModel(
-        nom=user.nom,
+        name=user.name,
         email=user.email,
-        mot_de_passe=hashed_password,
+        password=hashed_password,
         role=user.role,
     )
     db.add(new_user)
@@ -42,11 +42,11 @@ def update_user(user_id: int, user: UserUpdate, db: Session = Depends(get_db)):
     db_user = db.query(UserModel).filter(UserModel.id == user_id).first()
     if db_user is None:
         raise HTTPException(status_code=404, detail="User not found")
-    db_user.nom = user.nom
+    db_user.name = user.name
     db_user.email = user.email
     db_user.role = user.role
-    if user.mot_de_passe:
-        db_user.mot_de_passe = get_password_hash(user.mot_de_passe)
+    if user.password:
+        db_user.password = get_password_hash(user.password)
     db.commit()
     db.refresh(db_user)
     return db_user
