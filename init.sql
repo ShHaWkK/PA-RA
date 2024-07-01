@@ -116,7 +116,7 @@ INSERT INTO services (name, description, schedule) VALUES
 
 -- Adding users
 INSERT INTO users (name, email, password, role) VALUES 
-('Admin', 'admin@admin.com', 'password', 'admin'),
+('Admin', 'admin@admin.com', '$2b$12$smiPWbByjWInDohGQtMgSeMOE.CH7i/ZW3AWXCKhDbtw/QJW7umKS', 'admin'),
 ('Merchant 1', 'merchant1@merchant.com', 'password', 'merchant'),
 ('Volunteer 1', 'volunteer1@volunteer.com', 'password', 'volunteer'),
 ('Client 1', 'client@example.com', 'password', 'client');

@@ -3,11 +3,24 @@ from fastapi import FastAPI
 from database import engine, Base
 from Controllers import user_controller, merchant_controller, product_controller, collection_controller, delivery_controller, volunteer_controller, service_controller, service_registration_controller, auth_controller
 from fastapi.openapi.docs import get_redoc_html
+from fastapi.middleware.cors import CORSMiddleware
 
 # Créer les tables de la base de données
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
+
+
+# Configuration de CORS
+origins = ["*"]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Inclure les routeurs des contrôleurs
 app.include_router(user_controller.router)
