@@ -4,10 +4,10 @@ from datetime import datetime
 from enum import Enum
 
 class UserRole(str, Enum):
-    admin = "admin"
-    commercant = "commercant"
-    benevole = "benevole"
-    client = "client"
+    admin = 'admin'
+    merchant = 'merchant'
+    volunteer = 'volunteer'
+    client = 'client'
 
 class UserBase(BaseModel):
     name: str
