@@ -38,14 +38,16 @@ const Logo = styled.img`
 `;
 
 const LanguageSwitcher = styled.div`
-  display: flex;
+  position: relative;
+  display: inline-block;
 `;
 
-const LanguageButton = styled.button`
-  background: none;
-  border: none;
+const LanguageDropdown = styled.select`
+  background: #282c34;
   color: #61dafb;
-  margin: 0 5px;
+  border: none;
+  padding: 5px 10px;
+  font-size: 1.2em;
   cursor: pointer;
   &:hover {
     color: white;
@@ -55,8 +57,8 @@ const LanguageButton = styled.button`
 const Header = () => {
   const { t, i18n } = useTranslation();
 
-  const changeLanguage = (lng) => {
-    i18n.changeLanguage(lng);
+  const changeLanguage = (e) => {
+    i18n.changeLanguage(e.target.value);
   };
 
   return (
@@ -77,8 +79,16 @@ const Header = () => {
           </NavItem>
         </NavList>
         <LanguageSwitcher>
-          <LanguageButton onClick={() => changeLanguage('en')}>EN</LanguageButton>
-          <LanguageButton onClick={() => changeLanguage('fr')}>FR</LanguageButton>
+          <LanguageDropdown onChange={changeLanguage} defaultValue={i18n.language}>
+            <option value="en">EN</option>
+            <option value="fr">FR</option>
+            {/* Ajouter plus d'options ici pour d'autres langues */}
+            <option value="es">ES</option>
+            <option value="de">DE</option>
+            <option value="it">IT</option>
+            <option value="pt">PT</option>
+            <option value="jp">JP</option>
+          </LanguageDropdown>
         </LanguageSwitcher>
       </Navbar>
     </header>
