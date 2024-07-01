@@ -5,19 +5,21 @@ import styled from 'styled-components';
 
 const Navbar = styled.nav`
   background: #282c34;
-  padding: 10px;
+  padding: 10px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 `;
 
 const NavList = styled.ul`
   list-style: none;
   display: flex;
-  justify-content: space-around;
   padding: 0;
   margin: 0;
 `;
 
 const NavItem = styled.li`
-  margin: 0 10px;
+  margin: 0 15px;
 `;
 
 const NavLink = styled(Link)`
@@ -31,8 +33,6 @@ const NavLink = styled(Link)`
 
 const LanguageSwitcher = styled.div`
   display: flex;
-  justify-content: flex-end;
-  padding: 10px;
 `;
 
 const LanguageButton = styled.button`
@@ -55,10 +55,6 @@ const Header = () => {
 
   return (
     <header>
-      <LanguageSwitcher>
-        <LanguageButton onClick={() => changeLanguage('en')}>EN</LanguageButton>
-        <LanguageButton onClick={() => changeLanguage('fr')}>FR</LanguageButton>
-      </LanguageSwitcher>
       <Navbar>
         <NavList>
           <NavItem>
@@ -67,8 +63,11 @@ const Header = () => {
           <NavItem>
             <NavLink to="/signin">{t('sign_in')}</NavLink>
           </NavItem>
-          {/* Ajouter d'autres liens ici */}
         </NavList>
+        <LanguageSwitcher>
+          <LanguageButton onClick={() => changeLanguage('en')}>EN</LanguageButton>
+          <LanguageButton onClick={() => changeLanguage('fr')}>FR</LanguageButton>
+        </LanguageSwitcher>
       </Navbar>
     </header>
   );

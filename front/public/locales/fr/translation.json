@@ -4,6 +4,16 @@
     "password": "Mot de passe",
     "no_account": "Vous n'avez pas de compte ?",
     "sign_up": "S'inscrire",
-    "welcome":  "NO MORE WASTE s’engage à réduire le gaspillage alimentaire en collectant les invendus et en les redistribuant à ceux qui en ont besoin. Nous fournissons divers services pour aider les individus et les organisations à minimiser le gaspillage, partager les ressources et économiser de l’argent."
-  }
+    "welcome": "Bienvenue chez NO MORE WASTE",
+    "description": "NO MORE WASTE se consacre à la réduction du gaspillage alimentaire en collectant les invendus et en les redistribuant à ceux qui en ont besoin. Nous fournissons divers services pour aider les individus et les organisations à minimiser le gaspillage, partager des ressources et économiser de l'argent.",
+    "founded": "Fondée en 2013 à Paris, NO MORE WASTE s'est progressivement étendue à d'autres villes et à l'international. Nous collectons les invendus commerciaux ou les produits approchant leur date de péremption des particuliers et les redistribuons partout où cela est nécessaire.",
+    "services_offered": "Services Proposés",
+    "anti_waste_tips": "Conseils anti-gaspi",
+    "cooking_classes": "Cours de cuisine",
+    "vehicle_sharing": "Partage de véhicules",
+    "service_exchange": "Échange de services entre particuliers (bricolage, électricité, plomberie)",
+    "repair_services": "Services de réparation",
+    "guarding": "Gardiennage"
+  
+}
   
