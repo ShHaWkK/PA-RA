@@ -12,7 +12,7 @@ const Home = () => {
       <main>
         <h1>{t('home')}</h1>
         <p>
-          NO MORE WASTE is dedicated to reducing food waste by collecting unsold goods and redistributing them to those in need. We provide various services to help individuals and organizations minimize waste, share resources, and save money.
+            {t('welcome')}
         </p>
       </main>
       <footer>
