@@ -1,8 +1,7 @@
-# user_controller.py
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from Models.user import User as UserModel
-from schemas import User, UserCreate, UserUpdate
+from Schemas.user import User, UserCreate, UserUpdate
 from database import get_db
 from passlib.context import CryptContext
 
