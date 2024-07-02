@@ -1,32 +1,41 @@
-# Utiliser l'image officielle PHP avec Apache
+# Utilise l'image officielle de PHP avec Apache
 FROM php:8.1-apache
 
-# Mettre à jour les paquets et installer les dépendances nécessaires
-RUN apt-get update && apt-get install -y \
-    libpq-dev \
-    libssl-dev \
-    && docker-php-ext-install pdo pdo_mysql pdo_pgsql
+# Installe les extensions PHP nécessaires et les outils de base
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        git \
+        zip \
+        unzip \
+        libzip-dev \
+    && docker-php-ext-install zip pdo_mysql \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
-# Installer Composer
+# Installe Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Copier les fichiers de l'application dans le répertoire de travail du conteneur
-COPY . /var/www/html
+# Définit COMPOSER_ALLOW_SUPERUSER à 1 pour autoriser l'exécution de plugins
+ENV COMPOSER_ALLOW_SUPERUSER 1
 
-# Installer les dépendances PHP via Composer
-# RUN composer install --no-scripts --no-autoloader --working-dir=/var/www/html
+# Copie le contenu du dossier de l'application dans le dossier racine du serveur web
+COPY . /var/www/html/
 
-# Configurer Apache pour utiliser le répertoire public comme document root
-ENV APACHE_DOCUMENT_ROOT /var/www/html/public
+# Change le répertoire de travail
+WORKDIR /var/www/html
 
-# Activer le module mod_rewrite d'Apache
-RUN a2enmod rewrite
+# Supprime le fichier composer.lock pour éviter les erreurs de dépendances (s'il est présent)
+RUN rm -f composer.lock
 
-# Définir les permissions appropriées
-RUN chown -R www-data:www-data /var/www/html
+# Installe les dépendances Composer sans les dépendances de développement
+RUN composer install --no-dev --optimize-autoloader
 
-# Exposer le port 80 pour permettre l'accès au serveur Apache
+# Assure que les permissions sont correctes pour Apache
+RUN chown -R www-data:www-data /var/www/html/
+RUN chmod -R 755 /var/www/html/
+
+# Expose le port 80
 EXPOSE 80
 
-# Démarrer Apache en mode premier plan
+# Démarrer Apache dans le conteneur
 CMD ["apache2-foreground"]

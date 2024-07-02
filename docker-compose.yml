@@ -4,18 +4,15 @@ services:
   api:
     build:
       context: ./backend
-      dockerfile: Dockerfile
     container_name: backend
+    volumes:
+      - ./backend/:/var/www/html
+      - ./backend/composer.json:/var/www/html/composer.json
+      - ./backend/composer.lock:/var/www/html/composer.lock
     ports:
       - "80:80"
     depends_on:
-      db:
-        condition: service_healthy
-    environment:
-      DATABASE_URL : ${DATABASE_URL}
-      SECRET_KEY : ${SECRET_KEY}
-    volumes:
-      - ./backend:/app
+      - db
 
   db:
     image: mysql:latest
