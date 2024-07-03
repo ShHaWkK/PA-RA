@@ -21,18 +21,15 @@ ENV COMPOSER_ALLOW_SUPERUSER 1
 # Copie le contenu du dossier de l'application dans le dossier racine du serveur web
 COPY . /var/www/html/
 
-# Change le répertoire de travail
-WORKDIR /var/www/html
-
-# Supprime le fichier composer.lock pour éviter les erreurs de dépendances (s'il est présent)
-RUN rm -f composer.lock
-
-# Installe les dépendances Composer sans les dépendances de développement
-RUN composer install --no-dev --optimize-autoloader
-
 # Assure que les permissions sont correctes pour Apache
 RUN chown -R www-data:www-data /var/www/html/
 RUN chmod -R 755 /var/www/html/
+
+# Active le module de réécriture d'URL dans Apache
+RUN a2enmod rewrite
+
+# Copie le fichier .htaccess pour la réécriture d'URL
+COPY .htaccess /var/www/html/.htaccess
 
 # Expose le port 80
 EXPOSE 80
