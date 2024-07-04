@@ -5,10 +5,10 @@ services:
     build:
       context: ./backend
     container_name: backend
-    volumes:
-      - ./backend/:/var/www/html
-      - ./backend/composer.json:/var/www/html/composer.json
-      - ./backend/composer.lock:/var/www/html/composer.lock
+    # volumes:
+    #   - ./backend/:/var/www/html
+    #   - ./backend/composer.json:/var/www/html/composer.json
+    #   - ./backend/composer.lock:/var/www/html/composer.lock
     ports:
       - "80:80"
     depends_on:
