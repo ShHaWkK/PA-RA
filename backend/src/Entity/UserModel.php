@@ -1,4 +1,5 @@
 <?php
+// file : backend/src/Entity/UserModel.php
 namespace Entity;
 
 use Doctrine\ORM\Mapping as ORM;

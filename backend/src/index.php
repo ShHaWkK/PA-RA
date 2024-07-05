@@ -1,6 +1,8 @@
 <?php
-use Entity\UserModel;
+// Path: backend/src/index.php
 require_once "../bootstrap.php";
+
+use Controller\UserController;
 
 // Obtenir l'URI de la requête
 $requestUri = $_SERVER['REQUEST_URI'];
@@ -13,25 +15,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Définit le type de contenu à JSON
     header('Content-Type: application/json');
     
-    // Vérifie si uri[1] est définie (puisque uri[0] est 'index.php')
+    // Vérifie si uri[0] est définie
     if (isset($uriParts[0])) {
         switch ($uriParts[0]) {
             case 'users':
-                // Création d'une nouvelle instance de UserModel
-                $user = new UserModel();
-                $user->setName("John Doe");
-                $user->setEmail("johndoe@example.com");
-                $user->setPassword(password_hash("securepassword", PASSWORD_BCRYPT));
-                $user->setRole("client");
-                $user->setCreatedAt(new \DateTime("now"));
-                $user->setUpdatedAt(new \DateTime("now"));
-
-                // Persistance de l'utilisateur dans la base de données
-                $entityManager->persist($user);
-                $entityManager->flush();
-
-                echo "Utilisateur créé avec l'ID " . $user->getId() . "\n";
-                $response = ["Utilisateur créé avec l'ID " => $user->getId()];
+                $userController = new UserController($entityManager);
+                $data = json_decode(file_get_contents('php://input'), true);
+                $response = $userController->createUser($data);
                 break;
             case 'hello':
                 $response = ['message' => 'Hello World'];
@@ -40,7 +30,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $response = ['message' => 'Goodbye World'];
                 break;
             case 'greet':
-                $name = isset($uriParts[2]) ? $uriParts[2] : 'Guest';
+                $name = isset($uriParts[1]) ? $uriParts[1] : 'Guest';
                 $response = ['message' => "Hello, $name!"];
                 break;
             default:
@@ -60,4 +50,3 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     http_response_code(405);
     echo json_encode(['error' => 'Method Not Allowed']);
 }
-?>
