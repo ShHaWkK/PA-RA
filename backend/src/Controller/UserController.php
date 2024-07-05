@@ -37,12 +37,14 @@ class UserController
                 if (isset($uriParts[1])) {
                     return $this->updateUser((int) $uriParts[1], $input);
                 }
-                throw new EntityNotFoundException('User ID not specified');
+                http_response_code(400);
+                return ['error' => 'User ID not specified'];
             case 'DELETE':
                 if (isset($uriParts[1])) {
                     return $this->deleteUser((int) $uriParts[1]);
                 }
-                throw new EntityNotFoundException('User ID not specified');
+                http_response_code(400);
+                return ['error' => 'User ID not specified'];
             default:
                 http_response_code(405);
                 return ['error' => 'Method Not Allowed'];
@@ -51,6 +53,19 @@ class UserController
 
     public function createUser($data)
     {
+        $validationResult = $this->validateUserData($data, true);
+        if ($validationResult !== true) {
+            http_response_code(400);
+            return ['error' => $validationResult];
+        }
+
+        // Vérifie si l'email existe déjà
+        $existingUser = $this->entityManager->getRepository(UserModel::class)->findOneBy(['email' => $data['email']]);
+        if ($existingUser) {
+            http_response_code(400);
+            return ['error' => 'Email already exists'];
+        }
+
         $user = new UserModel();
         $user->setName($data['name']);
         $user->setEmail($data['email']);
@@ -69,25 +84,44 @@ class UserController
     {
         $user = $this->entityManager->find(UserModel::class, $id);
         if (!$user) {
-            throw new EntityNotFoundException('User not found');
+            http_response_code(404);
+            return ['error' => 'User not found'];
         }
         return json_decode($this->serializer->serialize($user, 'json'), true);
     }
 
     public function updateUser($id, $data)
     {
+        $validationResult = $this->validateUserData($data, false);
+        if ($validationResult !== true) {
+            http_response_code(400);
+            return ['error' => $validationResult];
+        }
+
         $user = $this->entityManager->find(UserModel::class, $id);
         if (!$user) {
-            throw new EntityNotFoundException('User not found');
+            http_response_code(404);
+            return ['error' => 'User not found'];
         }
 
         if (isset($data['name'])) {
             $user->setName($data['name']);
         }
         if (isset($data['email'])) {
+            // Regarde si l'email existe déjà
+            $existingUser = $this->entityManager->getRepository(UserModel::class)->findOneBy(['email' => $data['email']]);
+            if ($existingUser && $existingUser->getId() !== $user->getId()) {
+                http_response_code(400);
+                return ['error' => 'Email already exists'];
+            }
             $user->setEmail($data['email']);
         }
+        // Vérifie si le mot de passe est défini et le met à jour
         if (isset($data['password'])) {
+            if (strlen($data['password']) < 7) {
+                http_response_code(400);
+                return ['error' => 'Password must be at least 7 characters long'];
+            }
             $user->setPassword(password_hash($data['password'], PASSWORD_BCRYPT));
         }
         if (isset($data['role'])) {
@@ -104,7 +138,8 @@ class UserController
     {
         $user = $this->entityManager->find(UserModel::class, $id);
         if (!$user) {
-            throw new EntityNotFoundException('User not found');
+            http_response_code(404);
+            return ['error' => 'User not found'];
         }
 
         $this->entityManager->remove($user);
@@ -118,5 +153,31 @@ class UserController
         $userRepository = $this->entityManager->getRepository(UserModel::class);
         $users = $userRepository->findAll();
         return json_decode($this->serializer->serialize($users, 'json'), true);
+    }
+
+    /*
+     * Cette fonction vérifie les données utilisateur pour les champs obligatoires et les formats valides 
+    */
+    private function validateUserData($data, $isNew = true)
+    {
+        if ($isNew) {
+            if (!isset($data['name']) || !isset($data['email']) || !isset($data['password']) || !isset($data['role'])) {
+                return 'Missing required fields for new user';
+            }
+        }
+
+        if (isset($data['email']) && !filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
+            return 'Invalid email format';
+        }
+
+        if (isset($data['password']) && strlen($data['password']) < 7) {
+            return 'Password must be at least 7 characters long';
+        }
+
+        if (isset($data['role']) && !in_array($data['role'], ['admin', 'merchant', 'volunteer', 'client'])) {
+            return 'Invalid role specified';
+        }
+
+        return true;
     }
 }
