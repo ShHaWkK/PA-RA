@@ -1,5 +1,5 @@
 <?php
-// file : backend/src/Entity/UserModel.php
+// Path: backend/src/Entity/UserModel.php
 namespace Entity;
 
 use Doctrine\ORM\Mapping as ORM;
@@ -14,16 +14,25 @@ class UserModel
     private $id;
 
     #[ORM\Column(type: "string", length: 255)]
-    private $name;
+    private $first_name;
+
+    #[ORM\Column(type: "string", length: 255)]
+    private $last_name;
 
     #[ORM\Column(type: "string", length: 255, unique: true)]
     private $email;
 
+    #[ORM\Column(type: "string", length: 20, nullable: true)]
+    private $phone_number;
+
     #[ORM\Column(type: "string", length: 255)]
     private $password;
 
-    #[ORM\Column(type: "string", columnDefinition: "ENUM('admin', 'merchant', 'volunteer', 'client')")]
+    #[ORM\Column(type: "string", columnDefinition: "ENUM('admin', 'volunteer', 'employee', 'manager', 'merchant')")]
     private $role;
+
+    #[ORM\Column(type: "string", columnDefinition: "ENUM('pending', 'active', 'inactive')")]
+    private $status;
 
     #[ORM\Column(type: "datetime", options: ["default" => "CURRENT_TIMESTAMP"])]
     private $created_at;
@@ -38,14 +47,25 @@ class UserModel
         return $this->id;
     }
 
-    public function getName(): ?string
+    public function getFirstName(): ?string
     {
-        return $this->name;
+        return $this->first_name;
     }
 
-    public function setName(string $name): self
+    public function setFirstName(string $firstName): self
     {
-        $this->name = $name;
+        $this->first_name = $firstName;
+        return $this;
+    }
+
+    public function getLastName(): ?string
+    {
+        return $this->last_name;
+    }
+
+    public function setLastName(string $lastName): self
+    {
+        $this->last_name = $lastName;
         return $this;
     }
 
@@ -57,6 +77,17 @@ class UserModel
     public function setEmail(string $email): self
     {
         $this->email = $email;
+        return $this;
+    }
+
+    public function getPhoneNumber(): ?string
+    {
+        return $this->phone_number;
+    }
+
+    public function setPhoneNumber(?string $phoneNumber): self
+    {
+        $this->phone_number = $phoneNumber;
         return $this;
     }
 
@@ -82,6 +113,17 @@ class UserModel
         return $this;
     }
 
+    public function getStatus(): ?string
+    {
+        return $this->status;
+    }
+
+    public function setStatus(string $status): self
+    {
+        $this->status = $status;
+        return $this;
+    }
+
     public function getCreatedAt(): ?\DateTimeInterface
     {
         return $this->created_at;
@@ -104,4 +146,3 @@ class UserModel
         return $this;
     }
 }
-?>

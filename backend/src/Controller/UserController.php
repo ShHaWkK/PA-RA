@@ -4,7 +4,6 @@ namespace Controller;
 
 use Entity\UserModel;
 use Doctrine\ORM\EntityManager;
-use Doctrine\ORM\EntityNotFoundException;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
@@ -67,10 +66,13 @@ class UserController
         }
 
         $user = new UserModel();
-        $user->setName($data['name']);
+        $user->setFirstName($data['first_name']);
+        $user->setLastName($data['last_name']);
         $user->setEmail($data['email']);
+        $user->setPhoneNumber($data['phone_number'] ?? null);
         $user->setPassword(password_hash($data['password'], PASSWORD_BCRYPT));
         $user->setRole($data['role']);
+        $user->setStatus($data['status']);
         $user->setCreatedAt(new \DateTime("now"));
         $user->setUpdatedAt(new \DateTime("now"));
 
@@ -104,8 +106,11 @@ class UserController
             return ['error' => 'User not found'];
         }
 
-        if (isset($data['name'])) {
-            $user->setName($data['name']);
+        if (isset($data['first_name'])) {
+            $user->setFirstName($data['first_name']);
+        }
+        if (isset($data['last_name'])) {
+            $user->setLastName($data['last_name']);
         }
         if (isset($data['email'])) {
             // Regarde si l'email existe déjà
@@ -126,6 +131,9 @@ class UserController
         }
         if (isset($data['role'])) {
             $user->setRole($data['role']);
+        }
+        if (isset($data['status'])) {
+            $user->setStatus($data['status']);
         }
         $user->setUpdatedAt(new \DateTime("now"));
 
@@ -161,7 +169,7 @@ class UserController
     private function validateUserData($data, $isNew = true)
     {
         if ($isNew) {
-            if (!isset($data['name']) || !isset($data['email']) || !isset($data['password']) || !isset($data['role'])) {
+            if (!isset($data['first_name']) || !isset($data['last_name']) || !isset($data['email']) || !isset($data['password']) || !isset($data['role']) || !isset($data['status'])) {
                 return 'Missing required fields for new user';
             }
         }
@@ -174,10 +182,15 @@ class UserController
             return 'Password must be at least 7 characters long';
         }
 
-        if (isset($data['role']) && !in_array($data['role'], ['admin', 'merchant', 'volunteer', 'client'])) {
+        if (isset($data['role']) && !in_array($data['role'], ['admin', 'volunteer', 'employee', 'manager', 'merchant'])) {
             return 'Invalid role specified';
+        }
+
+        if (isset($data['status']) && !in_array($data['status'], ['pending', 'active', 'inactive'])) {
+            return 'Invalid status specified';
         }
 
         return true;
     }
 }
+?>

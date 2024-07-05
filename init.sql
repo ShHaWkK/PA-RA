@@ -14,7 +14,6 @@ CREATE TABLE IF NOT EXISTS users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
-
 -- Table des entreprises (companies)
 CREATE TABLE IF NOT EXISTS companies (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -132,7 +131,7 @@ CREATE TABLE IF NOT EXISTS stocks (
     FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
 );
 
--- Insertion de données d'exemple
+-- Insertion de données 
 -- Produits
 INSERT INTO products (name, barcode, expiration_date, quantity) VALUES 
 ('Product 1', '1234567890123', '2025-12-31', 100),
