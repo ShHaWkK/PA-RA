@@ -9,9 +9,11 @@ services:
       - ./backend/:/var/www/html
     ports:
       - "80:80"
+    env_file:
+      - .env
     depends_on:
       - db
-    entrypoint: ["/bin/sh", "-c", "composer install && apache2-foreground"]
+    entrypoint: ["/bin/sh", "-c","composer install && apache2-foreground"]
 
 
   db:

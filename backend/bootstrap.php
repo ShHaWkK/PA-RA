@@ -11,12 +11,12 @@ $isDevMode = true;
 
 // Configuration de la connexion à la base de données
 $dbParams = [
-    'driver'   => 'pdo_mysql',
-    'host'     => 'db', // Utilisation du nom de service Docker pour MySQL
-    'port'     => '3306',
-    'user'     => 'user', // Utilisez les variables d'environnement définies dans Docker Compose
-    'password' => 'password',
-    'dbname'   => 'no_more_waste',
+    'driver'   => getenv('MYSQL_DRIVER'),
+    'host'     => getenv('MYSQL_HOST'), 
+    'port'     => getenv('MYSQL_PORT'),
+    'user'     => getenv('MYSQL_USER'), 
+    'password' => getenv('MYSQL_PASSWORD'),
+    'dbname'   => getenv('MYSQL_DATABASE'),
 ];
 
 // Configuration de Doctrine ORM
