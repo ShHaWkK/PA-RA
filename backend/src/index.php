@@ -7,6 +7,9 @@ error_reporting(E_ALL);
 require_once "../bootstrap.php";
 
 use Controller\UserController;
+use Controller\CompanyController;
+use Controller\SkillController;
+use Controller\AvailabilityController;
 
 error_log("Traitement de la requête: " . $_SERVER['REQUEST_METHOD'] . " " . $_SERVER['REQUEST_URI']);
 
@@ -21,12 +24,29 @@ if ($uriParts[0] === '') {
     exit;
 }
 
-// Appelle le contrôleur approprié en fonction de la première partie de l'URI
+// Mappe les contrôleurs aux chemins d'URI
+$controllerMap = [
+    'users' => UserController::class,
+    'companies' => CompanyController::class,
+    'skills' => SkillController::class,
+    'availabilities' => AvailabilityController::class,
+];
+
+// Vérifie si le contrôleur existe 
+if (array_key_exists($uriParts[0], $controllerMap)) {
+    $controllerClass = $controllerMap[$uriParts[0]];
+} else {
+    http_response_code(404);
+    echo json_encode(['error' => 'Endpoint not found']);
+    exit;
+}
+
+// Instancie le contrôleur approprié
 try {
-    $userController = new UserController($entityManager);
-    error_log("UserController instancié avec succès.");
+    $controller = new $controllerClass($entityManager);
+    error_log("$controllerClass instancié avec succès.");
 } catch (Exception $e) {
-    error_log("Erreur lors de l'instanciation de UserController: " . $e->getMessage());
+    error_log("Erreur lors de l'instanciation de $controllerClass: " . $e->getMessage());
     http_response_code(500);
     echo json_encode(['error' => 'Internal Server Error']);
     exit;
@@ -38,7 +58,7 @@ error_log("Données d'entrée: " . json_encode($input));
 
 // Processus de la requête
 try {
-    $response = $userController->processRequest($_SERVER['REQUEST_METHOD'], $uriParts, $input);
+    $response = $controller->processRequest($_SERVER['REQUEST_METHOD'], $uriParts, $input);
 } catch (EntityNotFoundException $e) {
     http_response_code(404);
     $response = ['error' => $e->getMessage()];
