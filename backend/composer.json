@@ -1,7 +1,9 @@
 {
     "require": {
         "doctrine/orm": "^2.9",
-        "symfony/cache": "^6.0"
+        "symfony/cache": "^6.0",
+        "symfony/serializer": "^7.1",
+        "symfony/property-access": "^7.1"
     },
     "autoload": {
         "psr-4": {
