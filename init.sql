@@ -1,16 +1,68 @@
 CREATE DATABASE IF NOT EXISTS no_more_waste;
 USE no_more_waste;
 
-CREATE TABLE IF NOT EXISTS merchants (
+-- Table des utilisateurs
+CREATE TABLE IF NOT EXISTS users (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    address VARCHAR(255) NOT NULL,
-    contact_info VARCHAR(255) NOT NULL,
-    membership_expiration_date DATE NOT NULL,
+    first_name VARCHAR(255) NOT NULL,
+    last_name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    phone_number VARCHAR(20),
+    password VARCHAR(255) NOT NULL,
+    role ENUM('admin', 'volunteer', 'employee', 'manager', 'merchant') NOT NULL,
+    status ENUM('pending', 'active', 'inactive') NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
+-- Table des entreprises (companies)
+CREATE TABLE IF NOT EXISTS companies (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    address VARCHAR(255) NOT NULL,
+    contact_info VARCHAR(255) NOT NULL,
+    siret VARCHAR(14) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- Table de liaison entre utilisateurs et entreprises (user_companies)
+CREATE TABLE IF NOT EXISTS user_companies (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    company_id INT NOT NULL,
+    role ENUM('employee', 'manager', 'merchant') NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (company_id) REFERENCES companies(id) ON DELETE CASCADE
+);
+
+-- Table des disponibilités des bénévoles (availabilities)
+CREATE TABLE IF NOT EXISTS availabilities (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    day_of_week ENUM('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday') NOT NULL,
+    start_time TIME NOT NULL,
+    end_time TIME NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- Table des compétences (skills)
+CREATE TABLE IF NOT EXISTS skills (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    description TEXT NOT NULL
+);
+
+-- Table de liaison entre bénévoles et compétences (user_skills)
+CREATE TABLE IF NOT EXISTS user_skills (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    skill_id INT NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (skill_id) REFERENCES skills(id) ON DELETE CASCADE
+);
+
+-- Table des produits (products)
 CREATE TABLE IF NOT EXISTS products (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
@@ -21,17 +73,19 @@ CREATE TABLE IF NOT EXISTS products (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
+-- Table des collectes (collections)
 CREATE TABLE IF NOT EXISTS collections (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    merchant_id INT NOT NULL,
+    company_id INT NOT NULL,
     product_id INT NOT NULL,
     collection_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (merchant_id) REFERENCES merchants(id) ON DELETE CASCADE,
+    FOREIGN KEY (company_id) REFERENCES companies(id) ON DELETE CASCADE,
     FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
 );
 
+-- Table des livraisons (deliveries)
 CREATE TABLE IF NOT EXISTS deliveries (
     id INT AUTO_INCREMENT PRIMARY KEY,
     route_name VARCHAR(255) NOT NULL,
@@ -44,15 +98,7 @@ CREATE TABLE IF NOT EXISTS deliveries (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
-CREATE TABLE IF NOT EXISTS volunteers (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    skills JSON NOT NULL,
-    availabilities JSON NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-);
-
+-- Table des services (services)
 CREATE TABLE IF NOT EXISTS services (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
@@ -62,27 +108,19 @@ CREATE TABLE IF NOT EXISTS services (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
+-- Table des inscriptions aux services (service_registrations)
 CREATE TABLE IF NOT EXISTS service_registrations (
     id INT AUTO_INCREMENT PRIMARY KEY,
     service_id INT NOT NULL,
-    volunteer_id INT NOT NULL,
+    user_id INT NOT NULL,
     registration_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (service_id) REFERENCES services(id) ON DELETE CASCADE,
-    FOREIGN KEY (volunteer_id) REFERENCES volunteers(id) ON DELETE CASCADE
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS users (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    email VARCHAR(255) UNIQUE NOT NULL,
-    password VARCHAR(255) NOT NULL,
-    role ENUM('admin', 'merchant', 'volunteer', 'client') NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-);
-
+-- Table des stocks (stocks)
 CREATE TABLE IF NOT EXISTS stocks (
     id INT AUTO_INCREMENT PRIMARY KEY,
     product_id INT NOT NULL,
@@ -94,29 +132,37 @@ CREATE TABLE IF NOT EXISTS stocks (
     FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
 );
 
--- Adding merchants
-INSERT INTO merchants (name, address, contact_info, membership_expiration_date) VALUES 
-('Merchant 1', 'Address 1', 'Contact 1', '2025-06-30'),
-('Merchant 2', 'Address 2', 'Contact 2', '2025-06-30');
-
--- Adding products
+-- Insertion de données d'exemple
+-- Produits
 INSERT INTO products (name, barcode, expiration_date, quantity) VALUES 
 ('Product 1', '1234567890123', '2025-12-31', 100),
 ('Product 2', '1234567890124', '2025-12-31', 200);
 
--- Adding volunteers
-INSERT INTO volunteers (name, skills, availabilities) VALUES 
-('Volunteer 1', '["driver", "cook"]', '["Monday", "Wednesday"]'),
-('Volunteer 2', '["plumber"]', '["Tuesday", "Thursday"]');
+-- Utilisateurs
+INSERT INTO users (first_name, last_name, email, phone_number, password, role, status) VALUES 
+('Admin', 'Admin', 'admin@admin.com', '1234567890', '$2b$12$smiPWbByjWInDohGQtMgSeMOE.CH7i/ZW3AWXCKhDbtw/QJW7umKS', 'admin', 'active'),
+('John', 'Doe', 'john.doe@example.com', '0987654321', '$2b$12$smiPWbByjWInDohGQtMgSeMOE.CH7i/ZW3AWXCKhDbtw/QJW7umKS', 'volunteer', 'active');
 
--- Adding services
-INSERT INTO services (name, description, schedule) VALUES 
-('Cooking Class', 'Learn to cook with anti-waste products', '2024-07-01 10:00:00'),
-('Anti-Waste Advice', 'Tips to avoid waste daily', '2024-07-02 14:00:00');
+-- Entreprises
+INSERT INTO companies (name, address, contact_info, siret) VALUES 
+('Company 1', 'Company Address 1', 'Company Contact 1', '12345678901234'),
+('Company 2', 'Company Address 2', 'Company Contact 2', '12345678901235');
 
--- Adding users
-INSERT INTO users (name, email, password, role) VALUES 
-('Admin', 'admin@admin.com', '$2b$12$smiPWbByjWInDohGQtMgSeMOE.CH7i/ZW3AWXCKhDbtw/QJW7umKS', 'admin'),
-('Merchant 1', 'merchant1@merchant.com', 'password', 'merchant'),
-('Volunteer 1', 'volunteer1@volunteer.com', 'password', 'volunteer'),
-('Client 1', 'client@example.com', 'password', 'client');
+-- Liaison utilisateurs et entreprises
+INSERT INTO user_companies (user_id, company_id, role) VALUES 
+(2, 1, 'employee');
+
+-- Compétences
+INSERT INTO skills (name, description) VALUES 
+('driver', 'Ability to drive various vehicles.'),
+('cook', 'Ability to prepare meals and follow recipes.');
+
+-- Liaison bénévoles et compétences
+INSERT INTO user_skills (user_id, skill_id) VALUES 
+(2, 1),
+(2, 2);
+
+-- Disponibilités des bénévoles
+INSERT INTO availabilities (user_id, day_of_week, start_time, end_time) VALUES 
+(2, 'Monday', '09:00:00', '12:00:00'),
+(2, 'Wednesday', '14:00:00', '18:00:00');
