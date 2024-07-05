@@ -32,7 +32,7 @@ $controllerMap = [
     'availabilities' => AvailabilityController::class,
 ];
 
-// Vérifie si le contrôleur existe 
+// Vérifie si le contrôleur existe pour le premier élément de l'URI
 if (array_key_exists($uriParts[0], $controllerMap)) {
     $controllerClass = $controllerMap[$uriParts[0]];
 } else {
