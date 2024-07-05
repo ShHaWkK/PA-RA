@@ -1,70 +1,29 @@
-# NO MORE WASTE
+# NO MORE WASTE - Project Annual Catch-Up 2023-2024
+## Overview
 
-## Description
+NO MORE WASTE is a humanitarian association founded in 2013 in Paris, focusing on fighting waste by collecting unsold commercial goods and products nearing their expiration date from individuals. The association redistributes these products to those in need and offers various services to help members avoid waste. With rapid expansion into cities like Nantes, Marseille, Limoges, and internationally to Naples, Porto, and Dublin, the association aims to modernize its information system.
+Project Goals
 
-NO MORE WASTE est une association humanitaire de lutte contre le gaspillage. Ce projet vise à moderniser leur système d'information. Vous pouvez trouver plus d'informations dans la documentation.
+The project involves two primary missions:
 
-## Structure du Projet
+    - Development of applications
+    - Network architecture and system for hosting and production deployment
 
-### API
+### Mission 1: Development of Applications
 
-- **FastAPI** pour le backend
-- **SQLAlchemy** pour l'ORM
-- **Pydantic** pour la validation des données
-- **Uvicorn** pour le serveur ASGI
-- **Gunicorn** pour le déploiement en production
-- **Redoc** pour la documentation API
-- **Swagger** pour tester les endpoints
+The goal is to migrate from the old, slow IT system to a more efficient toolset, which includes:
 
-### Front-end
+    Managing merchant memberships
+    Managing collections, stocks, and distribution rounds
+    Tracking volunteers from application to service assignment
+    Managing services offered to members
 
-- **React** pour le front-end
-- **Redux** pour la gestion de l'état (potentiellement)
+### Requirements
 
-## Configuration et Installation
-
-### Prérequis
-
-- **Docker** et **Docker Compose** installés sur votre machine
-
-### Installation
-
-1. Clonez ce repository sur votre machine locale :
-
-    ```bash
-    git clone https://github.com/votre-utilisateur/no-more-waste.git
-    cd no-more-waste
-    ```
-
-2. Créez un fichier `.env` dans le répertoire `API` et ajoutez les variables d'environnement suivantes :
-### Par exemple : 
-    ```env
-    DATABASE_URL=mysql+pymysql://Utilisateur:password@host:port/Database
-    ```
-
-3. Démarrez les conteneurs Docker :
-
-    ```bash
-    docker-compose up --build
-    ```
-
-4. Accédez à l'API à l'adresse `http://localhost:8000` et à la documentation Redoc à `http://localhost:8000/redoc`.
-
-### Structure des Répertoires
-
-- **API** : Contient le code source de l'API
-  - **Controllers** : Contient les contrôleurs pour les différentes entités
-  - **Models** : Contient les modèles SQLAlchemy
-  - **Schemas** : Contient les modèles Pydantic pour la validation des données
-  - **config.py** : Configuration de l'application
-  - **database.py** : Configuration de la base de données
-  - **main.py** : Point d'entrée de l'application FastAPI
-- **front** : Contient le code source du front-end React
-- **init.sql** : Script d'initialisation de la base de données
-- **docker-compose.yml** : Fichier de configuration Docker Compose
-
-### Swagger UI : 
-![image](https://github.com/ShHaWkK/PA-RA/assets/51519814/e598b1aa-c2ec-439b-a0b3-4e60dc7ef591)
-
-### Redoc : 
-![image](https://github.com/ShHaWkK/PA-RA/assets/51519814/602ccdcc-c608-4a90-b17a-8161c51469a4)
+    - Web application with Javascript/PHP for managing merchant memberships, collections, stock, and distribution rounds.
+    - Barcode referencing for products.
+    - PDF summaries for each delivery.
+    - Volunteer management, including skills and daily planning, with Excel file outputs.
+    - Multilingual site to support international expansion.
+    - Configuration of a personal web server for the demonstration.
+    - Implementation of a "smart fridge" feature to suggest menus based on available stock, preferably with an Android mobile application.
