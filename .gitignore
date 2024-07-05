@@ -2,3 +2,5 @@
 .dist/
 .idea/
 .env
+/backend/vendor
+/backend/composer.lock
