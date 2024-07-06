@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS users (
     phone_number VARCHAR(20),
     password VARCHAR(255) NOT NULL,
     role ENUM('admin', 'volunteer', 'employee', 'manager', 'merchant') NOT NULL,
-    status ENUM('pending', 'active', 'inactive') NOT NULL,
+    status ENUM('pending', 'approved', 'rejected') NOT NULL DEFAULT 'pending',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
@@ -27,7 +27,6 @@ CREATE TABLE IF NOT EXISTS companies (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
-
 
 -- Table de liaison entre utilisateurs et entreprises (user_companies)
 CREATE TABLE IF NOT EXISTS user_companies (
@@ -59,6 +58,8 @@ CREATE TABLE IF NOT EXISTS skills (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
+
+
 
 -- Table de liaison entre bénévoles et compétences (user_skills)
 CREATE TABLE IF NOT EXISTS user_skills (
@@ -147,8 +148,9 @@ INSERT INTO products (name, barcode, expiration_date, quantity) VALUES
 
 -- Utilisateurs
 INSERT INTO users (first_name, last_name, email, phone_number, password, role, status) VALUES 
-('Admin', 'Admin', 'admin@admin.com', '1234567890', '$2b$12$smiPWbByjWInDohGQtMgSeMOE.CH7i/ZW3AWXCKhDbtw/QJW7umKS', 'admin', 'active'),
-('John', 'Doe', 'john.doe@example.com', '0987654321', '$2b$12$smiPWbByjWInDohGQtMgSeMOE.CH7i/ZW3AWXCKhDbtw/QJW7umKS', 'volunteer', 'active');
+('Admin', 'Admin', 'admin@admin.com', '1234567890', '$2b$12$smiPWbByjWInDohGQtMgSeMOE.CH7i/ZW3AWXCKhDbtw/QJW7umKS', 'admin', 'approved'),
+('John', 'Doe', 'john.doe@example.com', '0987654321', '$2b$12$smiPWbByjWInDohGQtMgSeMOE.CH7i/ZW3AWXCKhDbtw/QJW7umKS', 'volunteer', 'approved'),
+('Jane', 'Doe', 'jane.doe@example.com', '0987654322', '$2b$12$smiPWbByjWInDohGQtMgSeMOE.CH7i/ZW3AWXCKhDbtw/QJW7umKS', 'employee', 'pending');
 
 -- Entreprises
 INSERT INTO companies (name, address, contact_info, siret, renewal_date) VALUES 
@@ -178,3 +180,10 @@ INSERT INTO availabilities (user_id, day_of_week, start_time, end_time) VALUES
 INSERT INTO companies (name, address, contact_info, siret, renewal_date) VALUES 
 ('Company 1', 'Company Address 1', 'Company Contact 1', '12345678901234', '2024-07-01'),
 ('Company 2', 'Company Address 2', 'Company Contact 2', '12345678901235', '2024-08-01');
+
+-- Insertion des compétences
+INSERT INTO skills (name, description) VALUES 
+('driver', 'Ability to drive various vehicles.'),
+('cook', 'Ability to prepare meals and follow recipes.'),
+('plumber', 'Ability to fix plumbing issues.'),
+('electrician', 'Ability to fix electrical issues.');
