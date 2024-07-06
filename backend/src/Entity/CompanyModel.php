@@ -25,6 +25,12 @@ class CompanyModel
     #[ORM\Column(type: "string", length: 14)]
     private $siret;
 
+    #[ORM\Column(type: "date")]
+    private $renewal_date;
+
+    #[ORM\Column(type: "string", length: 50, options: ["default" => "pending"])]
+    private $renewal_status;
+
     #[ORM\Column(type: "datetime", options: ["default" => "CURRENT_TIMESTAMP"])]
     private $created_at;
 
@@ -82,6 +88,28 @@ class CompanyModel
         return $this;
     }
 
+    public function getRenewalDate(): ?\DateTimeInterface
+    {
+        return $this->renewal_date;
+    }
+
+    public function setRenewalDate(\DateTimeInterface $renewalDate): self
+    {
+        $this->renewal_date = $renewalDate;
+        return $this;
+    }
+
+    public function getRenewalStatus(): ?string
+    {
+        return $this->renewal_status;
+    }
+
+    public function setRenewalStatus(string $renewalStatus): self
+    {
+        $this->renewal_status = $renewalStatus;
+        return $this;
+    }
+
     public function getCreatedAt(): ?\DateTimeInterface
     {
         return $this->created_at;
@@ -104,3 +132,4 @@ class CompanyModel
         return $this;
     }
 }
+?>

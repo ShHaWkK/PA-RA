@@ -12,8 +12,9 @@ use Controller\SkillController;
 use Controller\AvailabilityController;
 use Controller\CollectionController;
 use Controller\DeliveryController;
-use Service\PDFService;
 use Controller\ProductController;
+use Controller\ReminderController;
+use Service\PDFService;
 
 error_log("Traitement de la requête: " . $_SERVER['REQUEST_METHOD'] . " " . $_SERVER['REQUEST_URI']);
 
@@ -39,7 +40,8 @@ $controllerMap = [
     'availabilities' => AvailabilityController::class,
     'collections' => CollectionController::class,
     'deliveries' => DeliveryController::class,
-    'products' => ProductController::class
+    'products' => ProductController::class, 
+    'reminders' => ReminderController::class
 ];
 
 // Vérifie si le contrôleur existe pour le premier élément de l'URI

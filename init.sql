@@ -22,9 +22,12 @@ CREATE TABLE IF NOT EXISTS companies (
     address VARCHAR(255) NOT NULL,
     contact_info VARCHAR(255) NOT NULL,
     siret VARCHAR(14) NOT NULL,
+    renewal_date DATE NOT NULL,
+    renewal_status ENUM('pending', 'notified', 'renewed') NOT NULL DEFAULT 'pending',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
+
 
 -- Table de liaison entre utilisateurs et entreprises (user_companies)
 CREATE TABLE IF NOT EXISTS user_companies (
@@ -71,13 +74,11 @@ CREATE TABLE IF NOT EXISTS products (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     barcode VARCHAR(255) UNIQUE NOT NULL,
-    qr_code_path VARCHAR(255),
     expiration_date DATE NOT NULL,
     quantity INT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
-
 
 -- Table des collectes (collections)
 CREATE TABLE IF NOT EXISTS collections (
@@ -150,9 +151,9 @@ INSERT INTO users (first_name, last_name, email, phone_number, password, role, s
 ('John', 'Doe', 'john.doe@example.com', '0987654321', '$2b$12$smiPWbByjWInDohGQtMgSeMOE.CH7i/ZW3AWXCKhDbtw/QJW7umKS', 'volunteer', 'active');
 
 -- Entreprises
-INSERT INTO companies (name, address, contact_info, siret) VALUES 
-('Company 1', 'Company Address 1', 'Company Contact 1', '12345678901234'),
-('Company 2', 'Company Address 2', 'Company Contact 2', '12345678901235');
+INSERT INTO companies (name, address, contact_info, siret, renewal_date) VALUES 
+('Company 1', 'Company Address 1', 'Company Contact 1', '12345678901234', '2024-07-01'),
+('Company 2', 'Company Address 2', 'Company Contact 2', '12345678901235', '2024-08-01');
 
 -- Liaison utilisateurs et entreprises
 INSERT INTO user_companies (user_id, company_id, role) VALUES 
@@ -172,3 +173,8 @@ INSERT INTO user_skills (user_id, skill_id) VALUES
 INSERT INTO availabilities (user_id, day_of_week, start_time, end_time) VALUES 
 (2, 'Monday', '09:00:00', '12:00:00'),
 (2, 'Wednesday', '14:00:00', '18:00:00');
+
+-- Insertion des entreprises avec une date de renouvellement valide
+INSERT INTO companies (name, address, contact_info, siret, renewal_date) VALUES 
+('Company 1', 'Company Address 1', 'Company Contact 1', '12345678901234', '2024-07-01'),
+('Company 2', 'Company Address 2', 'Company Contact 2', '12345678901235', '2024-08-01');
