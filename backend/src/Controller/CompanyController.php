@@ -60,7 +60,7 @@ class CompanyController
     {
         try {
             // Validate input data (add your own validation logic)
-            if (!isset($data['name']) || !isset($data['address']) || !isset($data['contact_info']) || !isset($data['siret'])) {
+            if (!isset($data['name']) || !isset($data['address']) || !isset($data['contact_info']) || !isset($data['siret']) || !isset($data['renewal_date']) || !isset($data['renewal_status'])) {
                 http_response_code(400);
                 return ['error' => 'Missing required fields for new company'];
             }
@@ -70,6 +70,8 @@ class CompanyController
             $company->setAddress($data['address']);
             $company->setContactInfo($data['contact_info']);
             $company->setSiret($data['siret']);
+            $company->setRenewalDate(new \DateTime($data['renewal_date']));
+            $company->setRenewalStatus($data['renewal_status']);
             $company->setCreatedAt(new \DateTime("now"));
             $company->setUpdatedAt(new \DateTime("now"));
 
@@ -102,7 +104,7 @@ class CompanyController
     {
         try {
             // Validate input data (add your own validation logic)
-            if (!isset($data['name']) && !isset($data['address']) && !isset($data['contact_info']) && !isset($data['siret'])) {
+            if (!isset($data['name']) && !isset($data['address']) && !isset($data['contact_info']) && !isset($data['siret']) && !isset($data['renewal_date']) && !isset($data['renewal_status'])) {
                 http_response_code(400);
                 return ['error' => 'No fields to update'];
             }
@@ -124,6 +126,12 @@ class CompanyController
             }
             if (isset($data['siret'])) {
                 $company->setSiret($data['siret']);
+            }
+            if (isset($data['renewal_date'])) {
+                $company->setRenewalDate(new \DateTime($data['renewal_date']));
+            }
+            if (isset($data['renewal_status'])) {
+                $company->setRenewalStatus($data['renewal_status']);
             }
             $company->setUpdatedAt(new \DateTime("now"));
 

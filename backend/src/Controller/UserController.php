@@ -3,6 +3,10 @@
 namespace Controller;
 
 use Entity\UserModel;
+use Entity\UserSkillModel;
+use Entity\CompanyModel;
+use Entity\UserCompanyModel;
+use Entity\SkillModel;
 use Doctrine\ORM\EntityManager;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
@@ -25,22 +29,26 @@ class UserController
     {
         switch ($method) {
             case 'POST':
-                return $this->createUser($input);
+                if (isset($uriParts[1])) {
+                    if ($uriParts[1] === 'registerVolunteer') {
+                        return $this->registerVolunteer($input);
+                    } elseif ($uriParts[1] === 'registerMerchant') {
+                        return $this->registerMerchant($input);
+                    } elseif ($uriParts[1] === 'approveUser') {
+                        return $this->approveUser($input, $uriParts[2] ?? null);
+                    }
+                }
+                http_response_code(400);
+                return ['error' => 'Invalid endpoint'];
             case 'GET':
                 if (isset($uriParts[1])) {
-                    return $this->getUser((int) $uriParts[1]);
+                    return $this->getUser($uriParts[1]);
                 } else {
                     return $this->getAllUsers();
                 }
             case 'PUT':
                 if (isset($uriParts[1])) {
-                    return $this->updateUser((int) $uriParts[1], $input);
-                }
-                http_response_code(400);
-                return ['error' => 'User ID not specified'];
-            case 'DELETE':
-                if (isset($uriParts[1])) {
-                    return $this->deleteUser((int) $uriParts[1]);
+                    return $this->updateUserStatus($uriParts[1], $input);
                 }
                 http_response_code(400);
                 return ['error' => 'User ID not specified'];
@@ -50,15 +58,14 @@ class UserController
         }
     }
 
-    public function createUser($data)
+    private function registerVolunteer($data)
     {
-        $validationResult = $this->validateUserData($data, true);
-        if ($validationResult !== true) {
+        if (!isset($data['first_name']) || !isset($data['last_name']) || !isset($data['email']) || !isset($data['phone_number']) || !isset($data['password']) || !isset($data['skills'])) {
             http_response_code(400);
-            return ['error' => $validationResult];
+            return ['error' => 'Missing required fields'];
         }
 
-        // Vérifie si l'email existe déjà
+        // Check if the email already exists
         $existingUser = $this->entityManager->getRepository(UserModel::class)->findOneBy(['email' => $data['email']]);
         if ($existingUser) {
             http_response_code(400);
@@ -69,20 +76,113 @@ class UserController
         $user->setFirstName($data['first_name']);
         $user->setLastName($data['last_name']);
         $user->setEmail($data['email']);
-        $user->setPhoneNumber($data['phone_number'] ?? null);
+        $user->setPhoneNumber($data['phone_number']);
         $user->setPassword(password_hash($data['password'], PASSWORD_BCRYPT));
-        $user->setRole($data['role']);
-        $user->setStatus($data['status']);
+        $user->setRole('volunteer');
+        $user->setStatus('pending');
         $user->setCreatedAt(new \DateTime("now"));
         $user->setUpdatedAt(new \DateTime("now"));
 
         $this->entityManager->persist($user);
         $this->entityManager->flush();
 
-        return ['id' => $user->getId(), 'message' => 'User created successfully'];
+        // Handle skills assignment
+        foreach ($data['skills'] as $skillId) {
+            $skill = $this->entityManager->find(SkillModel::class, $skillId);
+            if (!$skill) {
+                http_response_code(400);
+                return ['error' => 'Invalid skill ID: ' . $skillId];
+            }
+
+            $userSkill = new UserSkillModel();
+            $userSkill->setUser($user);  
+            $userSkill->setSkill($skill);
+            $this->entityManager->persist($userSkill);
+        }
+        $this->entityManager->flush();
+
+        return ['id' => $user->getId(), 'message' => 'Volunteer registered successfully. Awaiting approval.'];
     }
 
-    public function getUser($id)
+    private function registerMerchant($data)
+    {
+        if (!isset($data['first_name']) || !isset($data['last_name']) || !isset($data['email']) || !isset($data['phone_number']) || !isset($data['password']) || !isset($data['company_name']) || !isset($data['siret']) || !isset($data['address']) || !isset($data['renewal_date'])) {
+            http_response_code(400);
+            return ['error' => 'Missing required fields'];
+        }
+
+        $user = new UserModel();
+        $user->setFirstName($data['first_name']);
+        $user->setLastName($data['last_name']);
+        $user->setEmail($data['email']);
+        $user->setPhoneNumber($data['phone_number']);
+        $user->setPassword(password_hash($data['password'], PASSWORD_BCRYPT));
+        $user->setRole('merchant');
+        $user->setStatus('pending');
+        $user->setCreatedAt(new \DateTime("now"));
+        $user->setUpdatedAt(new \DateTime("now"));
+
+        $this->entityManager->persist($user);
+        $this->entityManager->flush();
+
+        // Handle company assignment
+        $company = new CompanyModel();
+        $company->setName($data['company_name']);
+        $company->setSiret($data['siret']);
+        $company->setAddress($data['address']);
+        $company->setRenewalDate(new \DateTime($data['renewal_date']));
+        $company->setRenewalStatus('pending'); 
+        $company->setContactInfo($data['email']);
+        $company->setCreatedAt(new \DateTime("now"));
+        $company->setUpdatedAt(new \DateTime("now"));
+
+        $this->entityManager->persist($company);
+        $this->entityManager->flush();
+
+        $userCompany = new UserCompanyModel();
+        $userCompany->setUser($user);
+        $userCompany->setCompany($company);
+        $userCompany->setRole('merchant');
+
+        $this->entityManager->persist($userCompany);
+        $this->entityManager->flush();
+
+        return ['id' => $user->getId(), 'message' => 'Merchant registered successfully. Awaiting approval.'];
+    }
+
+    private function approveUser($data, $adminUserId)
+    {
+        if (!isset($data['user_id']) || !isset($data['status'])) {
+            http_response_code(400);
+            return ['error' => 'Missing required fields'];
+        }
+
+        // Check if the user is an admin
+        $adminUser = $this->entityManager->find(UserModel::class, $adminUserId);
+        if (!$adminUser || $adminUser->getRole() !== 'admin') {
+            http_response_code(403);
+            return ['error' => 'Only administrators can approve users'];
+        }
+
+        $user = $this->entityManager->find(UserModel::class, $data['user_id']);
+        if (!$user) {
+            http_response_code(404);
+            return ['error' => 'User not found'];
+        }
+
+        if ($data['status'] !== 'approved' && $data['status'] !== 'rejected') {
+            http_response_code(400);
+            return ['error' => 'Invalid status'];
+        }
+
+        $user->setStatus($data['status']);
+        $user->setUpdatedAt(new \DateTime("now"));
+        $this->entityManager->flush();
+
+        return ['id' => $user->getId(), 'message' => 'User status updated to ' . $data['status']];
+    }
+
+    private function getUser($id)
     {
         $user = $this->entityManager->find(UserModel::class, $id);
         if (!$user) {
@@ -92,105 +192,29 @@ class UserController
         return json_decode($this->serializer->serialize($user, 'json'), true);
     }
 
-    public function updateUser($id, $data)
+    private function getAllUsers()
     {
-        $validationResult = $this->validateUserData($data, false);
-        if ($validationResult !== true) {
-            http_response_code(400);
-            return ['error' => $validationResult];
-        }
-
-        $user = $this->entityManager->find(UserModel::class, $id);
-        if (!$user) {
-            http_response_code(404);
-            return ['error' => 'User not found'];
-        }
-
-        if (isset($data['first_name'])) {
-            $user->setFirstName($data['first_name']);
-        }
-        if (isset($data['last_name'])) {
-            $user->setLastName($data['last_name']);
-        }
-        if (isset($data['email'])) {
-            // Regarde si l'email existe déjà
-            $existingUser = $this->entityManager->getRepository(UserModel::class)->findOneBy(['email' => $data['email']]);
-            if ($existingUser && $existingUser->getId() !== $user->getId()) {
-                http_response_code(400);
-                return ['error' => 'Email already exists'];
-            }
-            $user->setEmail($data['email']);
-        }
-        // Vérifie si le mot de passe est défini et le met à jour
-        if (isset($data['password'])) {
-            if (strlen($data['password']) < 7) {
-                http_response_code(400);
-                return ['error' => 'Password must be at least 7 characters long'];
-            }
-            $user->setPassword(password_hash($data['password'], PASSWORD_BCRYPT));
-        }
-        if (isset($data['role'])) {
-            $user->setRole($data['role']);
-        }
-        if (isset($data['status'])) {
-            $user->setStatus($data['status']);
-        }
-        $user->setUpdatedAt(new \DateTime("now"));
-
-        $this->entityManager->flush();
-
-        return ['id' => $user->getId(), 'message' => 'User updated successfully'];
-    }
-
-    public function deleteUser($id)
-    {
-        $user = $this->entityManager->find(UserModel::class, $id);
-        if (!$user) {
-            http_response_code(404);
-            return ['error' => 'User not found'];
-        }
-
-        $this->entityManager->remove($user);
-        $this->entityManager->flush();
-
-        return ['message' => 'User deleted successfully'];
-    }
-
-    public function getAllUsers()
-    {
-        $userRepository = $this->entityManager->getRepository(UserModel::class);
-        $users = $userRepository->findAll();
+        $users = $this->entityManager->getRepository(UserModel::class)->findAll();
         return json_decode($this->serializer->serialize($users, 'json'), true);
     }
 
-    /*
-     * Cette fonction vérifie les données utilisateur pour les champs obligatoires et les formats valides 
-    */
-    private function validateUserData($data, $isNew = true)
+    private function updateUserStatus($id, $data)
     {
-        if ($isNew) {
-            if (!isset($data['first_name']) || !isset($data['last_name']) || !isset($data['email']) || !isset($data['password']) || !isset($data['role']) || !isset($data['status'])) {
-                return 'Missing required fields for new user';
-            }
+        $user = $this->entityManager->find(UserModel::class, $id);
+        if (!$user) {
+            http_response_code(404);
+            return ['error' => 'User not found'];
         }
 
-        if (isset($data['email']) && !filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
-            return 'Invalid email format';
+        if (isset($data['status'])) {
+            $user->setStatus($data['status']);
+            $user->setUpdatedAt(new \DateTime("now"));
+            $this->entityManager->flush();
+            return ['id' => $user->getId(), 'message' => 'User status updated successfully'];
         }
 
-        if (isset($data['password']) && strlen($data['password']) < 7) {
-            return 'Password must be at least 7 characters long';
-        }
-
-        if (isset($data['role']) && !in_array($data['role'], ['admin', 'volunteer', 'employee', 'manager', 'merchant'])) {
-            return 'Invalid role specified';
-        }
-
-        if (isset($data['status']) && !in_array($data['status'], ['pending', 'active', 'inactive'])) {
-            return 'Invalid status specified';
-        }
-
-        return true;
+        http_response_code(400);
+        return ['error' => 'Status not specified'];
     }
 }
 ?>

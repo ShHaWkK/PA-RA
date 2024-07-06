@@ -13,40 +13,39 @@ class UserSkillModel
     #[ORM\Column(type: "integer")]
     private $id;
 
-    #[ORM\ManyToOne(targetEntity: "UserModel", inversedBy: "user_skills")]
-    #[ORM\JoinColumn(name: "user_id", referencedColumnName: "id", onDelete: "CASCADE")]
-    private $user;
+    #[ORM\Column(type: "integer")]
+    private $user_id;
 
-    #[ORM\ManyToOne(targetEntity: "SkillModel", inversedBy: "user_skills")]
-    #[ORM\JoinColumn(name: "skill_id", referencedColumnName: "id", onDelete: "CASCADE")]
-    private $skill;
+    #[ORM\Column(type: "integer")]
+    private $skill_id;
 
-    // Getters and setters for each property
+    // Getters and setters
 
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getUser(): ?UserModel
+    public function getUserId(): int
     {
-        return $this->user;
+        return $this->user_id;
     }
 
-    public function setUser(UserModel $user): self
+    public function setUserId(int $user_id): self
     {
-        $this->user = $user;
+        $this->user_id = $user_id;
         return $this;
     }
 
-    public function getSkill(): ?SkillModel
+    public function getSkillId(): int
     {
-        return $this->skill;
+        return $this->skill_id;
     }
 
-    public function setSkill(SkillModel $skill): self
+    public function setSkillId(int $skill_id): self
     {
-        $this->skill = $skill;
+        $this->skill_id = $skill_id;
         return $this;
     }
 }
+?>

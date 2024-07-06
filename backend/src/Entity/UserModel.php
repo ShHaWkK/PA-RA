@@ -31,7 +31,7 @@ class UserModel
     #[ORM\Column(type: "string", columnDefinition: "ENUM('admin', 'volunteer', 'employee', 'manager', 'merchant')")]
     private $role;
 
-    #[ORM\Column(type: "string", columnDefinition: "ENUM('pending', 'active', 'inactive')")]
+    #[ORM\Column(type: "string", columnDefinition: "ENUM('pending', 'approved', 'rejected')", options: ["default" => "pending"])]
     private $status;
 
     #[ORM\Column(type: "datetime", options: ["default" => "CURRENT_TIMESTAMP"])]
@@ -146,3 +146,4 @@ class UserModel
         return $this;
     }
 }
+?>

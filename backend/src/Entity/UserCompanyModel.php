@@ -64,3 +64,4 @@ class UserCompanyModel
         return $this;
     }
 }
+?>

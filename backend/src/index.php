@@ -12,9 +12,9 @@ use Controller\SkillController;
 use Controller\AvailabilityController;
 use Controller\CollectionController;
 use Controller\DeliveryController;
-use Controller\ProductController;
 use Controller\ReminderController;
 use Service\PDFService;
+use Controller\ProductController;
 
 error_log("Traitement de la requête: " . $_SERVER['REQUEST_METHOD'] . " " . $_SERVER['REQUEST_URI']);
 
@@ -40,8 +40,8 @@ $controllerMap = [
     'availabilities' => AvailabilityController::class,
     'collections' => CollectionController::class,
     'deliveries' => DeliveryController::class,
-    'products' => ProductController::class, 
-    'reminders' => ReminderController::class
+    'products' => ProductController::class,
+    "reminders" => ReminderController::class
 ];
 
 // Vérifie si le contrôleur existe pour le premier élément de l'URI
@@ -72,24 +72,23 @@ try {
 $input = json_decode(file_get_contents('php://input'), true);
 error_log("Données d'entrée: " . json_encode($input));
 
-// Processus de la requête
 try {
-    $response = $controller->processRequest($_SERVER['REQUEST_METHOD'], $uriParts, $input);
+    if ($uriParts[0] === 'users' && isset($uriParts[2]) && $uriParts[1] === 'approveUser') {
+        // Approuver un utilisateur
+        $response = $controller->processRequest($_SERVER['REQUEST_METHOD'], $uriParts, $input, $uriParts[2]);
+    } else {
+        // Traiter la requête
+        $response = $controller->processRequest($_SERVER['REQUEST_METHOD'], $uriParts, $input);
+    }
 } catch (EntityNotFoundException $e) {
     http_response_code(404);
     $response = ['error' => $e->getMessage()];
     error_log("EntityNotFoundException: " . $e->getMessage());
 } catch (Exception $e) {
     http_response_code(500);
-    $response = [
-        'error' => 'Internal Server Error',
-        'message' => $e->getMessage(),
-        'trace' => $e->getTraceAsString()
-    ];
+    $response = ['error' => 'Internal Server Error'];
     error_log("Exception: " . $e->getMessage());
-    error_log("Stack trace: " . $e->getTraceAsString());
 }
-
 
 // Définit le type de contenu à JSON et encode le tableau de réponse en JSON
 header('Content-Type: application/json');
