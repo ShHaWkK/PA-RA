@@ -59,8 +59,6 @@ CREATE TABLE IF NOT EXISTS skills (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
-
-
 -- Table de liaison entre bénévoles et compétences (user_skills)
 CREATE TABLE IF NOT EXISTS user_skills (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -141,50 +139,78 @@ CREATE TABLE IF NOT EXISTS stocks (
     FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
 );
 
--- Insertion de données 
+-- Insertion 
+
 -- Produits
 INSERT INTO products (name, barcode, expiration_date, quantity) VALUES 
 ('Product 1', '1234567890123', '2025-12-31', 100),
-('Product 2', '1234567890124', '2025-12-31', 200);
+('Product 2', '1234567890124', '2025-12-31', 200),
+('Product 3', '1234567890125', '2026-01-01', 300),
+('Product 4', '1234567890126', '2026-06-01', 400),
+('Product 5', '1234567890127', '2026-12-31', 500);
 
 -- Utilisateurs
 INSERT INTO users (first_name, last_name, email, phone_number, password, role, status) VALUES 
 ('Admin', 'Admin', 'admin@admin.com', '1234567890', '$2b$12$smiPWbByjWInDohGQtMgSeMOE.CH7i/ZW3AWXCKhDbtw/QJW7umKS', 'admin', 'approved'),
 ('John', 'Doe', 'john.doe@example.com', '0987654321', '$2b$12$smiPWbByjWInDohGQtMgSeMOE.CH7i/ZW3AWXCKhDbtw/QJW7umKS', 'volunteer', 'approved'),
-('Jane', 'Doe', 'jane.doe@example.com', '0987654322', '$2b$12$smiPWbByjWInDohGQtMgSeMOE.CH7i/ZW3AWXCKhDbtw/QJW7umKS', 'employee', 'pending');
+('Jane', 'Doe', 'jane.doe@example.com', '0987654322', '$2b$12$smiPWbByjWInDohGQtMgSeMOE.CH7i/ZW3AWXCKhDbtw/QJW7umKS', 'employee', 'pending'),
+('Alice', 'Smith', 'alice.smith@example.com', '0987654323', '$2b$12$smiPWbByjWInDohGQtMgSeMOE.CH7i/ZW3AWXCKhDbtw/QJW7umKS', 'manager', 'approved'),
+('Bob', 'Johnson', 'bob.johnson@example.com', '0987654324', '$2b$12$smiPWbByjWInDohGQtMgSeMOE.CH7i/ZW3AWXCKhDbtw/QJW7umKS', 'merchant', 'pending');
 
 -- Entreprises
 INSERT INTO companies (name, address, contact_info, siret, renewal_date) VALUES 
-('Company 1', 'Company Address 1', 'Company Contact 1', '12345678901234', '2024-07-01'),
-('Company 2', 'Company Address 2', 'Company Contact 2', '12345678901235', '2024-08-01');
+('Company 1', 'Company Address 1', 'contact@company1.com', '12345678901234', '2024-07-01'),
+('Company 2', 'Company Address 2', 'contact@company2.com', '12345678901235', '2024-08-01'),
+('Company 3', 'Company Address 3', 'contact@company3.com', '12345678901236', '2024-09-01'),
+('Company 4', 'Company Address 4', 'contact@company4.com', '12345678901237', '2024-10-01'),
+('Company 5', 'Company Address 5', 'contact@company5.com', '12345678901238', '2024-11-01');
 
 -- Liaison utilisateurs et entreprises
 INSERT INTO user_companies (user_id, company_id, role) VALUES 
-(2, 1, 'employee');
+(2, 1, 'employee'),
+(3, 2, 'manager'),
+(4, 3, 'merchant'),
+(5, 4, 'merchant'),
+(2, 5, 'employee');
 
 -- Compétences
 INSERT INTO skills (name, description) VALUES 
 ('driver', 'Ability to drive various vehicles.'),
-('cook', 'Ability to prepare meals and follow recipes.');
+('cook', 'Ability to prepare meals and follow recipes.'),
+('plumber', 'Ability to fix plumbing issues.'),
+('electrician', 'Ability to fix electrical issues.'),
+('teacher', 'Ability to teach various subjects.'),
+('gardener', 'Ability to maintain gardens and landscapes.');
 
 -- Liaison bénévoles et compétences
 INSERT INTO user_skills (user_id, skill_id) VALUES 
 (2, 1),
-(2, 2);
+(2, 2),
+(3, 3),
+(3, 4),
+(4, 5),
+(5, 6);
 
 -- Disponibilités des bénévoles
 INSERT INTO availabilities (user_id, day_of_week, start_time, end_time) VALUES 
 (2, 'Monday', '09:00:00', '12:00:00'),
-(2, 'Wednesday', '14:00:00', '18:00:00');
+(2, 'Wednesday', '14:00:00', '18:00:00'),
+(3, 'Tuesday', '10:00:00', '13:00:00'),
+(3, 'Thursday', '15:00:00', '19:00:00'),
+(4, 'Friday', '08:00:00', '11:00:00'),
+(5, 'Saturday', '12:00:00', '16:00:00');
 
 -- Insertion des entreprises avec une date de renouvellement valide
 INSERT INTO companies (name, address, contact_info, siret, renewal_date) VALUES 
-('Company 1', 'Company Address 1', 'Company Contact 1', '12345678901234', '2024-07-01'),
-('Company 2', 'Company Address 2', 'Company Contact 2', '12345678901235', '2024-08-01');
+('Company 6', 'Company Address 6', 'contact@company6.com', '12345678901239', '2024-12-01'),
+('Company 7', 'Company Address 7', 'contact@company7.com', '12345678901240', '2025-01-01'),
+('Company 8', 'Company Address 8', 'contact@company8.com', '12345678901241', '2025-02-01'),
+('Company 9', 'Company Address 9', 'contact@company9.com', '12345678901242', '2025-03-01'),
+('Company 10', 'Company Address 10', 'contact@company10.com', '12345678901243', '2025-04-01');
 
--- Insertion des compétences
+-- Insertion des compétences supplémentaires
 INSERT INTO skills (name, description) VALUES 
-('driver', 'Ability to drive various vehicles.'),
-('cook', 'Ability to prepare meals and follow recipes.'),
-('plumber', 'Ability to fix plumbing issues.'),
-('electrician', 'Ability to fix electrical issues.');
+('programmer', 'Ability to write and maintain computer programs.'),
+('designer', 'Ability to create visual designs and graphics.'),
+('mechanic', 'Ability to repair and maintain vehicles and machinery.'),
+('nurse', 'Ability to provide medical care and assistance.');
