@@ -10,6 +10,9 @@ use Controller\UserController;
 use Controller\CompanyController;
 use Controller\SkillController;
 use Controller\AvailabilityController;
+use Controller\CollectionController;
+use Controller\DeliveryController;
+use Service\PDFService;
 
 error_log("Traitement de la requête: " . $_SERVER['REQUEST_METHOD'] . " " . $_SERVER['REQUEST_URI']);
 
@@ -24,12 +27,17 @@ if ($uriParts[0] === '') {
     exit;
 }
 
+// Instancie le service PDF
+$pdfService = new PDFService();
+
 // Mappe les contrôleurs aux chemins d'URI
 $controllerMap = [
     'users' => UserController::class,
     'companies' => CompanyController::class,
     'skills' => SkillController::class,
     'availabilities' => AvailabilityController::class,
+    'collections' => CollectionController::class,
+    'deliveries' => DeliveryController::class,
 ];
 
 // Vérifie si le contrôleur existe pour le premier élément de l'URI
@@ -43,7 +51,11 @@ if (array_key_exists($uriParts[0], $controllerMap)) {
 
 // Instancie le contrôleur approprié
 try {
-    $controller = new $controllerClass($entityManager);
+    if ($controllerClass === DeliveryController::class) {
+        $controller = new $controllerClass($entityManager, $pdfService);
+    } else {
+        $controller = new $controllerClass($entityManager);
+    }
     error_log("$controllerClass instancié avec succès.");
 } catch (Exception $e) {
     error_log("Erreur lors de l'instanciation de $controllerClass: " . $e->getMessage());

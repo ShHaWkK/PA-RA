@@ -3,12 +3,14 @@
         "doctrine/orm": "^2.9",
         "symfony/cache": "^6.0",
         "symfony/serializer": "^7.1",
-        "symfony/property-access": "^7.1"
+        "symfony/property-access": "^7.1",
+        "setasign/fpdf": "^1.8"
     },
     "autoload": {
         "psr-4": {
             "Entity\\": "src/Entity/",
-            "Controller\\": "src/Controller/"
+            "Controller\\": "src/Controller/",
+            "Service\\": "src/Service/"
         }
     }
 }
