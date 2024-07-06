@@ -13,6 +13,7 @@ use Controller\AvailabilityController;
 use Controller\CollectionController;
 use Controller\DeliveryController;
 use Service\PDFService;
+use Controller\ProductController;
 
 error_log("Traitement de la requête: " . $_SERVER['REQUEST_METHOD'] . " " . $_SERVER['REQUEST_URI']);
 
@@ -38,6 +39,7 @@ $controllerMap = [
     'availabilities' => AvailabilityController::class,
     'collections' => CollectionController::class,
     'deliveries' => DeliveryController::class,
+    'products' => ProductController::class
 ];
 
 // Vérifie si le contrôleur existe pour le premier élément de l'URI
@@ -77,9 +79,15 @@ try {
     error_log("EntityNotFoundException: " . $e->getMessage());
 } catch (Exception $e) {
     http_response_code(500);
-    $response = ['error' => 'Internal Server Error'];
+    $response = [
+        'error' => 'Internal Server Error',
+        'message' => $e->getMessage(),
+        'trace' => $e->getTraceAsString()
+    ];
     error_log("Exception: " . $e->getMessage());
+    error_log("Stack trace: " . $e->getTraceAsString());
 }
+
 
 // Définit le type de contenu à JSON et encode le tableau de réponse en JSON
 header('Content-Type: application/json');

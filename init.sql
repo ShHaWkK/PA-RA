@@ -71,11 +71,13 @@ CREATE TABLE IF NOT EXISTS products (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     barcode VARCHAR(255) UNIQUE NOT NULL,
+    qr_code_path VARCHAR(255),
     expiration_date DATE NOT NULL,
     quantity INT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
+
 
 -- Table des collectes (collections)
 CREATE TABLE IF NOT EXISTS collections (
