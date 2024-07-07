@@ -2,7 +2,7 @@
 
 // Fonction pour enregistrer un nouveau bénévole
 async function registerVolunteer(userData) {
-        const response = await fetch('/api/users/registerVolunteer', {
+        const response = await fetch(apiEndpoint+'/users/registerVolunteer', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -17,7 +17,7 @@ async function registerVolunteer(userData) {
 
 // Fonction pour enregistrer un nouveau commerçant
 async function registerMerchant(userData) {
-        const response = await fetch('http://localhost:80/users/registerMerchant', {
+        const response = await fetch(apiEndpoint+'/users/registerMerchant', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -34,7 +34,7 @@ async function registerMerchant(userData) {
 
 // Fonction pour approuver un utilisateur par un administrateur
 async function approveUser(userData, adminUserId) {
-        const response = await fetch(`http://localhost:80/users/approveUser/${adminUserId}`, {
+        const response = await fetch(apiEndpoint+`/users/approveUser/${adminUserId}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json'
@@ -51,7 +51,7 @@ async function approveUser(userData, adminUserId) {
 
 // Fonction pour récupérer un utilisateur par son ID
 async function getUser(userId) {
-    const response = await fetch(`http://localhost:80/users/${userId}`, {
+    const response = await fetch(apiEndpoint+`/users/${userId}`, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json'
@@ -65,7 +65,7 @@ async function getUser(userId) {
 
 // Fonction pour récupérer tous les utilisateurs
 async function getAllUsers() {
-        const response = await fetch('http://localhost:80/users', {
+        const response = await fetch(apiEndpoint+'/users', {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json'
