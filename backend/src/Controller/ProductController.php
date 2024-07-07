@@ -12,7 +12,6 @@ use Doctrine\ORM\EntityNotFoundException;
 use Endroid\QrCode\QrCode;
 use Endroid\QrCode\Writer\PngWriter;
 
-
 class ProductController
 {
     private $entityManager;
@@ -61,65 +60,70 @@ class ProductController
     }
 
     public function createProduct($data)
-{
-    try {
-        // Validate input data
-        if (!isset($data['name']) || !isset($data['barcode']) || !isset($data['expiration_date']) || !isset($data['quantity'])) {
-            http_response_code(400);
-            return ['error' => 'Missing required fields for new product'];
-        }
-
-        $product = new ProductModel();
-        $product->setName($data['name']);
-        $product->setBarcode($data['barcode']);
-        $product->setExpirationDate(new \DateTime($data['expiration_date']));
-        $product->setQuantity($data['quantity']);
-        $product->setCreatedAt(new \DateTime("now"));
-        $product->setUpdatedAt(new \DateTime("now"));
-
-        // Generate QR code
-        $qrCode = QrCode::create($data['barcode'])
-            ->setSize(300)
-            ->setMargin(10);
-
-        $writer = new PngWriter();
-        $result = $writer->write($qrCode);
-
-        $qrCodeDir = __DIR__ . '/../public/qrcodes';
-        if (!is_dir($qrCodeDir)) {
-            if (!mkdir($qrCodeDir, 0777, true)) {
-                throw new \Exception("Failed to create directory: $qrCodeDir");
+    {
+        try {
+            // Validate input data
+            if (!isset($data['name']) || !isset($data['barcode']) || !isset($data['expiration_date']) || !isset($data['quantity'])) {
+                http_response_code(400);
+                return ['error' => 'Missing required fields for new product'];
             }
+
+            $product = new ProductModel();
+            $product->setName($data['name']);
+            $product->setBarcode($data['barcode']);
+            $product->setExpirationDate(new \DateTime($data['expiration_date']));
+            $product->setQuantity($data['quantity']);
+            $product->setCreatedAt(new \DateTime("now"));
+            $product->setUpdatedAt(new \DateTime("now"));
+
+            // Generate QR code
+            $qrCode = new QrCode(json_encode([
+                'name' => $data['name'],
+                'barcode' => $data['barcode'],
+                'expiration_date' => $data['expiration_date'],
+                'quantity' => $data['quantity']
+            ]));
+            $qrCode->setSize(300);
+            $qrCode->setMargin(10);
+
+            $writer = new PngWriter();
+            $result = $writer->write($qrCode);
+
+            $qrCodeDir = __DIR__ . '/../../public/qrcodes';
+            if (!is_dir($qrCodeDir)) {
+                if (!mkdir($qrCodeDir, 0777, true)) {
+                    throw new \Exception("Failed to create directory: $qrCodeDir");
+                }
+            }
+
+            $qrCodePath = '/qrcodes/' . $data['barcode'] . '.png';
+            $fullPath = $qrCodeDir . '/' . $data['barcode'] . '.png';
+            if (file_put_contents($fullPath, $result->getString()) === false) {
+                throw new \Exception("Failed to write QR code to file: $fullPath");
+            }
+            $product->setQrCodePath($qrCodePath);
+
+            $this->entityManager->persist($product);
+            $this->entityManager->flush();
+
+            // Add to stocks
+            $stock = new StockModel();
+            $stock->setProductId($product->getId());
+            $stock->setQuantity($data['quantity']);
+            $stock->setEntryDate(new \DateTime("now"));
+            $stock->setCreatedAt(new \DateTime("now"));
+            $stock->setUpdatedAt(new \DateTime("now"));
+
+            $this->entityManager->persist($stock);
+            $this->entityManager->flush();
+
+            return ['id' => $product->getId(), 'message' => 'Product created successfully'];
+        } catch (\Exception $e) {
+            error_log("Exception in createProduct: " . $e->getMessage());
+            error_log("Stack trace: " . $e->getTraceAsString());
+            throw $e;
         }
-
-        $qrCodePath = '/qrcodes/' . $data['barcode'] . '.png';
-        $fullPath = $qrCodeDir . '/' . $data['barcode'] . '.png';
-        if (file_put_contents($fullPath, $result->getString()) === false) {
-            throw new \Exception("Failed to write QR code to file: $fullPath");
-        }
-        $product->setQrCodePath($qrCodePath);
-
-        $this->entityManager->persist($product);
-        $this->entityManager->flush();
-
-        // Add to stocks
-        $stock = new StockModel();
-        $stock->setProductId($product->getId());
-        $stock->setQuantity($data['quantity']);
-        $stock->setEntryDate(new \DateTime("now"));
-        $stock->setCreatedAt(new \DateTime("now"));
-        $stock->setUpdatedAt(new \DateTime("now"));
-
-        $this->entityManager->persist($stock);
-        $this->entityManager->flush();
-
-        return ['id' => $product->getId(), 'message' => 'Product created successfully'];
-    } catch (\Exception $e) {
-        error_log("Exception in createProduct: " . $e->getMessage());
-        error_log("Stack trace: " . $e->getTraceAsString());
-        throw $e;
     }
-}
 
     public function getProductByBarcode($barcode)
     {
