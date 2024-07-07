@@ -19,19 +19,22 @@ class StockModel
     #[ORM\Column(type: "integer")]
     private $quantity;
 
-    #[ORM\Column(type: "datetime", options: ["default" => "CURRENT_TIMESTAMP"])]
+    #[ORM\Column(type: "datetime")]
     private $entry_date;
 
     #[ORM\Column(type: "datetime", nullable: true)]
     private $exit_date;
 
-    #[ORM\Column(type: "datetime", options: ["default" => "CURRENT_TIMESTAMP"])]
+    #[ORM\Column(type: "string", columnDefinition: "ENUM('available', 'in_route', 'collected')")]
+    private $availability;
+
+    #[ORM\Column(type: "datetime")]
     private $created_at;
 
-    #[ORM\Column(type: "datetime", options: ["default" => "CURRENT_TIMESTAMP", "onUpdate" => "CURRENT_TIMESTAMP"])]
+    #[ORM\Column(type: "datetime")]
     private $updated_at;
 
-    // Getters and setters for each property
+    // Getters and setters for each property...
 
     public function getId(): ?int
     {
@@ -43,9 +46,9 @@ class StockModel
         return $this->product_id;
     }
 
-    public function setProductId(int $product_id): self
+    public function setProductId(int $productId): self
     {
-        $this->product_id = $product_id;
+        $this->product_id = $productId;
         return $this;
     }
 
@@ -65,9 +68,9 @@ class StockModel
         return $this->entry_date;
     }
 
-    public function setEntryDate(\DateTimeInterface $entry_date): self
+    public function setEntryDate(\DateTimeInterface $entryDate): self
     {
-        $this->entry_date = $entry_date;
+        $this->entry_date = $entryDate;
         return $this;
     }
 
@@ -76,9 +79,20 @@ class StockModel
         return $this->exit_date;
     }
 
-    public function setExitDate(?\DateTimeInterface $exit_date): self
+    public function setExitDate(?\DateTimeInterface $exitDate): self
     {
-        $this->exit_date = $exit_date;
+        $this->exit_date = $exitDate;
+        return $this;
+    }
+
+    public function getAvailability(): ?string
+    {
+        return $this->availability;
+    }
+
+    public function setAvailability(string $availability): self
+    {
+        $this->availability = $availability;
         return $this;
     }
 
@@ -87,9 +101,9 @@ class StockModel
         return $this->created_at;
     }
 
-    public function setCreatedAt(\DateTimeInterface $created_at): self
+    public function setCreatedAt(\DateTimeInterface $createdAt): self
     {
-        $this->created_at = $created_at;
+        $this->created_at = $createdAt;
         return $this;
     }
 
@@ -98,9 +112,9 @@ class StockModel
         return $this->updated_at;
     }
 
-    public function setUpdatedAt(\DateTimeInterface $updated_at): self
+    public function setUpdatedAt(\DateTimeInterface $updatedAt): self
     {
-        $this->updated_at = $updated_at;
+        $this->updated_at = $updatedAt;
         return $this;
     }
 }

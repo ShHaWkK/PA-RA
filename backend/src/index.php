@@ -11,6 +11,7 @@ use Controller\UserController;
 use Controller\CompanyController;
 use Controller\SkillController;
 use Controller\AvailabilityController;
+use Controller\StockController;
 use Controller\CollectionController;
 use Controller\DeliveryController;
 use Service\PDFService;
@@ -45,6 +46,7 @@ $controllerMap = [
     'users' => UserController::class,
     'companies' => CompanyController::class,
     'skills' => SkillController::class,
+    'stocks' => StockController::class,
     'availabilities' => AvailabilityController::class,
     'collections' => CollectionController::class,
     'deliveries' => DeliveryController::class,

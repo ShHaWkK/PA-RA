@@ -134,6 +134,7 @@ CREATE TABLE IF NOT EXISTS stocks (
     quantity INT NOT NULL,
     entry_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     exit_date TIMESTAMP,
+    availability ENUM('available', 'in_route', 'delivered') NOT NULL DEFAULT 'available',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
