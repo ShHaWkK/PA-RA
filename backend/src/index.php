@@ -12,6 +12,7 @@ use Controller\SkillController;
 use Controller\AvailabilityController;
 use Controller\CollectionController;
 use Controller\DeliveryController;
+use Controller\ReminderController;
 use Service\PDFService;
 use Controller\ProductController;
 use Service\JWTService;
