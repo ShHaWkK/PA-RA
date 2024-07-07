@@ -6,13 +6,13 @@ error_reporting(E_ALL);
 
 require_once "../bootstrap.php";
 
+use Controller\ReminderController;
 use Controller\UserController;
 use Controller\CompanyController;
 use Controller\SkillController;
 use Controller\AvailabilityController;
 use Controller\CollectionController;
 use Controller\DeliveryController;
-use Controller\ReminderController;
 use Service\PDFService;
 use Controller\ProductController;
 use Service\JWTService;
@@ -22,7 +22,7 @@ use Controller\PrivateAreaController;
 
 error_log("Traitement de la requête: " . $_SERVER['REQUEST_METHOD'] . " " . $_SERVER['REQUEST_URI']);
 
-$secretKey = getenv('JWT_SECRET'); 
+$secretKey = getenv('JWT_SECRET');
 $jwtService = new JWTService($secretKey);
 $jwtMiddleware = new JWTMiddleware($jwtService);
 
@@ -57,15 +57,15 @@ $controllerMap = [
 ];
 
 // Vérifie si le contrôleur existe pour le premier élément de l'URI
-if (array_key_exists($uriParts[0], $controllerMap)) {
-    $controllerClass = $controllerMap[$uriParts[0]];
-} else {
+$route = $uriParts[0];
+if (!array_key_exists($route, $controllerMap)) {
     http_response_code(404);
     echo json_encode(['error' => 'Endpoint not found']);
     exit;
 }
 
 // Instancie le contrôleur approprié
+$controllerClass = $controllerMap[$route];
 try {
     if ($controllerClass === DeliveryController::class) {
         $controller = new $controllerClass($entityManager, $pdfService);
@@ -87,22 +87,15 @@ $input = json_decode(file_get_contents('php://input'), true);
 error_log("Données d'entrée: " . json_encode($input));
 
 try {
-    if ($uriParts[0] === 'users' && isset($uriParts[2]) && $uriParts[1] === 'approveUser') {
-        // Approuver un utilisateur
+    // Vérifier les routes nécessitant une vérification JWT
+    $requiresAuth = in_array($route, ['admin', 'volunteer', 'merchant']);
+    if ($requiresAuth) {
         $decodedToken = $jwtMiddleware->verifyToken();
-        $response = $controller->processRequest($_SERVER['REQUEST_METHOD'], $uriParts, $input, $uriParts[2]);
-    } elseif ($uriParts[0] === 'login') {
-        // Traiter la requête de login
-        $response = $controller->login($input);
-    } else {
-        // Routes protégées
-        $decodedToken = $jwtMiddleware->verifyToken();
-        if (in_array($uriParts[0], ['admin', 'volunteer', 'merchant'])) {
-            $response = $controller->privateArea($uriParts[0], $decodedToken);
-        } else {
-            $response = $controller->processRequest($_SERVER['REQUEST_METHOD'], $uriParts, $input);
-        }
     }
+
+    // Appel à la méthode processRequest du contrôleur
+    $response = $controller->processRequest($_SERVER['REQUEST_METHOD'], $uriParts, $input);
+
 } catch (EntityNotFoundException $e) {
     http_response_code(404);
     $response = ['error' => $e->getMessage()];
@@ -116,4 +109,11 @@ try {
 // Définit le type de contenu à JSON et encode le tableau de réponse en JSON
 header('Content-Type: application/json');
 echo json_encode($response);
+
+// Fonction pour afficher un message et quitter
+function exit_with_message($message, $code = 200) {
+    http_response_code($code);
+    echo json_encode(['message' => $message]);
+    exit;
+}
 ?>
