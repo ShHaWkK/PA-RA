@@ -95,8 +95,8 @@ class UserController
             }
 
             $userSkill = new UserSkillModel();
-            $userSkill->setUser($user);  
-            $userSkill->setSkill($skill);
+            $userSkill->setUserId($user->getId());  
+            $userSkill->setSkillId($skill->getId());
             $this->entityManager->persist($userSkill);
         }
         $this->entityManager->flush();
