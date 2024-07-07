@@ -3,6 +3,8 @@
 namespace Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\ArrayCollection;
 
 #[ORM\Entity]
 #[ORM\Table(name: "users")]
@@ -39,6 +41,22 @@ class UserModel
 
     #[ORM\Column(type: "datetime", options: ["default" => "CURRENT_TIMESTAMP", "onUpdate" => "CURRENT_TIMESTAMP"])]
     private $updated_at;
+
+    #[ORM\ManyToMany(targetEntity: SkillModel::class, inversedBy: "users")]
+    #[ORM\JoinTable(name: "user_skills",
+        joinColumns: [new ORM\JoinColumn(name: "user_id", referencedColumnName: "id")],
+        inverseJoinColumns: [new ORM\JoinColumn(name: "skill_id", referencedColumnName: "id")]
+    )]
+    private $skills;
+
+    #[ORM\OneToMany(targetEntity: AvailabilityModel::class, mappedBy: "user")]
+    private $availabilities;
+
+    public function __construct()
+    {
+        $this->skills = new ArrayCollection();
+        $this->availabilities = new ArrayCollection();
+    }
 
     // Getters and setters for each property
 
@@ -143,6 +161,54 @@ class UserModel
     public function setUpdatedAt(\DateTimeInterface $updatedAt): self
     {
         $this->updated_at = $updatedAt;
+        return $this;
+    }
+
+    public function getSkills(): Collection
+    {
+        return $this->skills;
+    }
+
+    public function addSkill(SkillModel $skill): self
+    {
+        if (!$this->skills->contains($skill)) {
+            $this->skills[] = $skill;
+        }
+
+        return $this;
+    }
+
+    public function removeSkill(SkillModel $skill): self
+    {
+        $this->skills->removeElement($skill);
+
+        return $this;
+    }
+
+    public function getAvailabilities(): Collection
+    {
+        return $this->availabilities;
+    }
+
+    public function addAvailability(AvailabilityModel $availability): self
+    {
+        if (!$this->availabilities->contains($availability)) {
+            $this->availabilities[] = $availability;
+            $availability->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeAvailability(AvailabilityModel $availability): self
+    {
+        if ($this->availabilities->removeElement($availability)) {
+            // set the owning side to null (unless already changed)
+            if ($availability->getUser() === $this) {
+                $availability->setUser(null);
+            }
+        }
+
         return $this;
     }
 }

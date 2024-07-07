@@ -17,6 +17,16 @@ class LoginController
         $this->jwtService = $jwtService;
     }
 
+    public function processRequest($method, $uriParts, $input)
+    {
+        if ($method === 'POST' && isset($uriParts[0]) && $uriParts[0] === 'login') {
+            return $this->login($input);
+        }
+
+        http_response_code(405);
+        return ['error' => 'Method Not Allowed'];
+    }
+
     public function login($data)
     {
         if (!isset($data['email']) || !isset($data['password'])) {
@@ -27,26 +37,17 @@ class LoginController
         $email = $data['email'];
         $password = $data['password'];
 
-        error_log("Email: $email");
-        error_log("Password (plain text): $password");
-
         $user = $this->entityManager->getRepository(UserModel::class)->findOneBy(['email' => $email]);
 
         if (!$user) {
-            error_log("User not found");
             http_response_code(401);
             return ['error' => 'Invalid email or password'];
         }
-
-        error_log("Stored hash: " . $user->getPassword());
 
         if (!password_verify($password, $user->getPassword())) {
-            error_log("Password verification failed");
             http_response_code(401);
             return ['error' => 'Invalid email or password'];
         }
-
-        error_log("User authenticated successfully");
 
         // Générer un token JWT
         $payload = [

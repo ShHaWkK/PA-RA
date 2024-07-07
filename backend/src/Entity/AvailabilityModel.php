@@ -3,6 +3,7 @@
 namespace Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Entity\UserModel;
 
 #[ORM\Entity]
 #[ORM\Table(name: "availabilities")]
@@ -13,8 +14,9 @@ class AvailabilityModel
     #[ORM\Column(type: "integer")]
     private $id;
 
-    #[ORM\Column(type: "integer")]
-    private $user_id;
+    #[ORM\ManyToOne(targetEntity: UserModel::class, inversedBy: "availabilities")]
+    #[ORM\JoinColumn(nullable: false)]
+    private $user;
 
     #[ORM\Column(type: "string", columnDefinition: "ENUM('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday')")]
     private $day_of_week;
@@ -38,14 +40,14 @@ class AvailabilityModel
         return $this->id;
     }
 
-    public function getUserId(): ?int
+    public function getUser(): ?UserModel
     {
-        return $this->user_id;
+        return $this->user;
     }
 
-    public function setUserId(int $userId): self
+    public function setUser(UserModel $user): self
     {
-        $this->user_id = $userId;
+        $this->user = $user;
         return $this;
     }
 

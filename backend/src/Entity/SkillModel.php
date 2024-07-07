@@ -3,6 +3,8 @@
 namespace Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\ArrayCollection;
 
 #[ORM\Entity]
 #[ORM\Table(name: "skills")]
@@ -16,14 +18,16 @@ class SkillModel
     #[ORM\Column(type: "string", length: 255)]
     private $name;
 
-    #[ORM\Column(type: "string", length: 255)]
+    #[ORM\Column(type: "text")]
     private $description;
 
-    #[ORM\Column(type: "datetime", options: ["default" => "CURRENT_TIMESTAMP"])]
-    private $created_at;
+    #[ORM\ManyToMany(targetEntity: UserModel::class, mappedBy: "skills")]
+    private $users;
 
-    #[ORM\Column(type: "datetime", options: ["default" => "CURRENT_TIMESTAMP", "onUpdate" => "CURRENT_TIMESTAMP"])]
-    private $updated_at;
+    public function __construct()
+    {
+        $this->users = new ArrayCollection();
+    }
 
     // Getters and setters for each property
 
@@ -54,25 +58,28 @@ class SkillModel
         return $this;
     }
 
-    public function getCreatedAt(): ?\DateTimeInterface
+    public function getUsers(): Collection
     {
-        return $this->created_at;
+        return $this->users;
     }
 
-    public function setCreatedAt(\DateTimeInterface $createdAt): self
+    public function addUser(UserModel $user): self
     {
-        $this->created_at = $createdAt;
+        if (!$this->users->contains($user)) {
+            $this->users[] = $user;
+            $user->addSkill($this);
+        }
+
         return $this;
     }
 
-    public function getUpdatedAt(): ?\DateTimeInterface
+    public function removeUser(UserModel $user): self
     {
-        return $this->updated_at;
-    }
+        if ($this->users->removeElement($user)) {
+            $user->removeSkill($this);
+        }
 
-    public function setUpdatedAt(\DateTimeInterface $updatedAt): self
-    {
-        $this->updated_at = $updatedAt;
         return $this;
     }
 }
+?>

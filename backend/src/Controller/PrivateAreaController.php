@@ -13,7 +13,17 @@ class PrivateAreaController
         $this->entityManager = $entityManager;
     }
 
-    public function privateArea($role, $decodedToken)
+    public function processRequest($method, $uriParts, $input, $decodedToken)
+    {
+        if ($method === 'GET' && isset($uriParts[0])) {
+            return $this->privateArea($uriParts[0], $decodedToken);
+        }
+
+        http_response_code(405);
+        return ['error' => 'Method Not Allowed'];
+    }
+
+    private function privateArea($role, $decodedToken)
     {
         switch ($role) {
             case 'admin':

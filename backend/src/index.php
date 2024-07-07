@@ -93,10 +93,10 @@ try {
     $requiresAuth = in_array($route, ['admin', 'volunteer', 'merchant']);
     if ($requiresAuth) {
         $decodedToken = $jwtMiddleware->verifyToken();
+        $response = $controller->processRequest($_SERVER['REQUEST_METHOD'], $uriParts, $input, $decodedToken);
+    } else {
+        $response = $controller->processRequest($_SERVER['REQUEST_METHOD'], $uriParts, $input);
     }
-
-    // Appel à la méthode processRequest du contrôleur
-    $response = $controller->processRequest($_SERVER['REQUEST_METHOD'], $uriParts, $input);
 
 } catch (EntityNotFoundException $e) {
     http_response_code(404);
