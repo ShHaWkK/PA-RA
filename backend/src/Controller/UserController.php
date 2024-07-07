@@ -4,6 +4,8 @@ namespace Controller;
 
 use Entity\UserModel;
 use Entity\UserSkillModel;
+use Entity\CompanyModel;
+use Entity\UserCompanyModel;
 use Entity\SkillModel;
 use Entity\AvailabilityModel;
 use Doctrine\ORM\EntityManager;
