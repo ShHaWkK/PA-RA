@@ -12,11 +12,18 @@ use Controller\SkillController;
 use Controller\AvailabilityController;
 use Controller\CollectionController;
 use Controller\DeliveryController;
-use Controller\ReminderController;
 use Service\PDFService;
 use Controller\ProductController;
+use Service\JWTService;
+use Middleware\JWTMiddleware;
+use Controller\LoginController;
+use Controller\PrivateAreaController;
 
 error_log("Traitement de la requête: " . $_SERVER['REQUEST_METHOD'] . " " . $_SERVER['REQUEST_URI']);
+
+$secretKey = getenv('JWT_SECRET'); 
+$jwtService = new JWTService($secretKey);
+$jwtMiddleware = new JWTMiddleware($jwtService);
 
 // Obtenir l'URI de la requête
 $requestUri = $_SERVER['REQUEST_URI'];
@@ -41,7 +48,11 @@ $controllerMap = [
     'collections' => CollectionController::class,
     'deliveries' => DeliveryController::class,
     'products' => ProductController::class,
-    "reminders" => ReminderController::class
+    'reminders' => ReminderController::class,
+    'login' => LoginController::class,
+    'admin' => PrivateAreaController::class,
+    'volunteer' => PrivateAreaController::class,
+    'merchant' => PrivateAreaController::class,
 ];
 
 // Vérifie si le contrôleur existe pour le premier élément de l'URI
@@ -57,6 +68,8 @@ if (array_key_exists($uriParts[0], $controllerMap)) {
 try {
     if ($controllerClass === DeliveryController::class) {
         $controller = new $controllerClass($entityManager, $pdfService);
+    } elseif ($controllerClass === LoginController::class) {
+        $controller = new $controllerClass($entityManager, $jwtService);
     } else {
         $controller = new $controllerClass($entityManager);
     }
@@ -75,10 +88,19 @@ error_log("Données d'entrée: " . json_encode($input));
 try {
     if ($uriParts[0] === 'users' && isset($uriParts[2]) && $uriParts[1] === 'approveUser') {
         // Approuver un utilisateur
+        $decodedToken = $jwtMiddleware->verifyToken();
         $response = $controller->processRequest($_SERVER['REQUEST_METHOD'], $uriParts, $input, $uriParts[2]);
+    } elseif ($uriParts[0] === 'login') {
+        // Traiter la requête de login
+        $response = $controller->login($input);
     } else {
-        // Traiter la requête
-        $response = $controller->processRequest($_SERVER['REQUEST_METHOD'], $uriParts, $input);
+        // Routes protégées
+        $decodedToken = $jwtMiddleware->verifyToken();
+        if (in_array($uriParts[0], ['admin', 'volunteer', 'merchant'])) {
+            $response = $controller->privateArea($uriParts[0], $decodedToken);
+        } else {
+            $response = $controller->processRequest($_SERVER['REQUEST_METHOD'], $uriParts, $input);
+        }
     }
 } catch (EntityNotFoundException $e) {
     http_response_code(404);
