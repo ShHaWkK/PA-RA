@@ -4,6 +4,20 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
+//-------------------- CORS --------------------//
+// Autorise les requêtes depuis localhost
+header("Access-Control-Allow-Origin: http://localhost:3000");
+header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
+header("Access-Control-Allow-Headers: Content-Type, Authorization");
+header("Access-Control-Allow-Credentials: true");
+
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    // Log pour vérifier que la requête OPTIONS est reçue
+    error_log("CORS preflight request received.");
+    http_response_code(200);
+    exit();
+}
+
 require_once "../bootstrap.php";
 
 use Controller\ReminderController;
