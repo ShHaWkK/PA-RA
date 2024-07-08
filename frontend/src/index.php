@@ -7,7 +7,7 @@ $request = $_SERVER['REQUEST_URI'];
 
 // Fonction simple pour nettoyer l'URL
 function cleanUrl($url) {
-    return rtrim($url, '/');
+    return $url === '/' ? $url : rtrim($url, '/');
 }
 
 // Supprimer les paramètres de requête
@@ -18,14 +18,14 @@ $request = cleanUrl($request);
 switch ($request) {
     case '':
     case '/':
-        require __DIR__ . '/views/SignUp/MerchantSignUp.php';
+        require __DIR__ . '/views/SignUp/VolunteerSignUp.php';
         break;
-//    case '/login':
-//        require __DIR__ . '/views/login/login_admin.php';
-//        break;
-//    case '/logout':
-//        require __DIR__ . '/views/login/login_admin.php';
-//        break;
+    case '/Merchant/SignUp':
+        require './views/SignUp/MerchantSignUp.php';
+        break;
+    case '/Volunteer/SignUp':
+        require __DIR__ . '/views/SignUp/VolunteerSignUp.php';
+        break;
 //    case '/register':
 //        require __DIR__ . '/views/login/login_admin.php';
 //        break;
