@@ -5,8 +5,7 @@ document.getElementById('registrationForm').addEventListener('submit', async fun
     const userData = Object.fromEntries(formData.entries());
     console.log(formData);
     console.log(userData);
-        const result = await registerMerchant(userData);
-        console.log('Merchant registered:', result);
+    const result = await registerMerchant(userData);
 
     if (!result.ok) {
         switch (result.status){

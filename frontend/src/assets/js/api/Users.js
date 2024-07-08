@@ -2,30 +2,24 @@
 
 // Fonction pour enregistrer un nouveau bénévole
 async function registerVolunteer(userData) {
-        const response = await fetch(apiEndpoint+'/users/registerVolunteer', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(userData)
-        });
-        if (!response.ok) {
-            throw new Error('Failed to register volunteer');
-        }
-        return await response.json();
+    return await fetch(apiEndpoint + '/users/registerVolunteer', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(userData)
+    })
 }
 
 // Fonction pour enregistrer un nouveau commerçant
 async function registerMerchant(userData) {
-        const response = await fetch(apiEndpoint+'/users/registerMerchant', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(userData)
-        });
-
-        return response;
+    return await fetch(apiEndpoint + '/users/registerMerchant', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(userData)
+    });
 }
 
 // Fonction pour approuver un utilisateur par un administrateur
