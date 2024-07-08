@@ -24,12 +24,8 @@ async function registerMerchant(userData) {
             },
             body: JSON.stringify(userData)
         });
-        if (!response.ok) {
-            console.error('Failed to register merchant');
-        } else {
-            console.log('Merchant registered successfully');
-        }
-        return await response.json();
+
+        return response;
 }
 
 // Fonction pour approuver un utilisateur par un administrateur

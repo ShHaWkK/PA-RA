@@ -7,4 +7,19 @@ document.getElementById('registrationForm').addEventListener('submit', async fun
     console.log(userData);
         const result = await registerMerchant(userData);
         console.log('Merchant registered:', result);
+
+    if (!result.ok) {
+        switch (result.status){
+            case 409:
+                alert("User with this email or SIRET already exists");
+                break;
+            default:
+                console.log('Failed to register merchant');
+                alert('Failed to register merchant');
+                break;
+        }
+    } else {
+        console.log('Merchant registered successfully');
+        alert('Merchant registered successfully');
+    }
 });

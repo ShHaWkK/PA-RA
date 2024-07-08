@@ -208,53 +208,74 @@ class UserController
     $writer->save($filePath);
 
     return ['message' => 'Planning generated successfully', 'path' => $filePath];
-}   
-    
+}
+
 
     private function registerMerchant($data)
     {
-        if (!isset($data['first_name']) || !isset($data['last_name']) || !isset($data['email']) || !isset($data['phone_number']) || !isset($data['password']) || !isset($data['company_name']) || !isset($data['siret']) || !isset($data['address']) || !isset($data['renewal_date'])) {
-            http_response_code(400);
-            return ['error' => 'Missing required fields'];
+        try {
+            $this->entityManager->beginTransaction();
+
+            // Vérifier les champs obligatoires
+            if (!isset($data['first_name']) || !isset($data['last_name']) || !isset($data['email']) || !isset($data['phone_number']) || !isset($data['password']) || !isset($data['company_name']) || !isset($data['siret']) || !isset($data['address']) || !isset($data['renewal_date'])) {
+                http_response_code(400);
+                return ['error' => 'Missing required fields'];
+            }
+
+            // Création de l'utilisateur
+            $user = new UserModel();
+            $user->setFirstName($data['first_name']);
+            $user->setLastName($data['last_name']);
+            $user->setEmail($data['email']);
+            $user->setPhoneNumber($data['phone_number']);
+            $user->setPassword(password_hash($data['password'], PASSWORD_BCRYPT));
+            $user->setRole('merchant');
+            $user->setStatus('pending');
+            $user->setCreatedAt(new \DateTime("now"));
+            $user->setUpdatedAt(new \DateTime("now"));
+
+            $this->entityManager->persist($user);
+            $this->entityManager->flush();
+
+            // Création de l'entreprise associée
+            $company = new CompanyModel();
+            $company->setName($data['company_name']);
+            $company->setSiret($data['siret']);
+            $company->setAddress($data['address']);
+            $company->setRenewalDate(new \DateTime($data['renewal_date']));
+            $company->setRenewalStatus('pending');
+            $company->setContactInfo($data['email']);
+            $company->setCreatedAt(new \DateTime("now"));
+            $company->setUpdatedAt(new \DateTime("now"));
+
+            $this->entityManager->persist($company);
+            $this->entityManager->flush();
+
+            // Lien entre l'utilisateur et l'entreprise
+            $userCompany = new UserCompanyModel();
+            $userCompany->setUser($user);
+            $userCompany->setCompany($company);
+            $userCompany->setRole('merchant');
+
+            $this->entityManager->persist($userCompany);
+            $this->entityManager->flush();
+
+            $this->entityManager->commit();
+
+            return ['id' => $user->getId(), 'message' => 'Merchant registered successfully. Awaiting approval.'];
+
+        } catch (\Doctrine\DBAL\Exception\UniqueConstraintViolationException $e) {
+            $this->entityManager->rollback();
+
+            http_response_code(409);
+            return ['error' => 'Integrity constraint violation', 'message' => 'User with this email or SIRET already exists'];
+
+        } catch (\Exception $e) {
+            $this->entityManager->rollback();
+
+            http_response_code(500);
+            return ['error' => 'Internal Server Error'];
         }
-
-        $user = new UserModel();
-        $user->setFirstName($data['first_name']);
-        $user->setLastName($data['last_name']);
-        $user->setEmail($data['email']);
-        $user->setPhoneNumber($data['phone_number']);
-        $user->setPassword(password_hash($data['password'], PASSWORD_BCRYPT));
-        $user->setRole('merchant');
-        $user->setStatus('pending');
-        $user->setCreatedAt(new \DateTime("now"));
-        $user->setUpdatedAt(new \DateTime("now"));
-
-        $this->entityManager->persist($user);
-        $this->entityManager->flush();
-
-        // Handle company assignment
-        $company = new CompanyModel();
-        $company->setName($data['company_name']);
-        $company->setSiret($data['siret']);
-        $company->setAddress($data['address']);
-        $company->setRenewalDate(new \DateTime($data['renewal_date']));
-        $company->setRenewalStatus('pending');
-        $company->setContactInfo($data['email']);
-        $company->setCreatedAt(new \DateTime("now"));
-        $company->setUpdatedAt(new \DateTime("now"));
-
-        $this->entityManager->persist($company);
-        $this->entityManager->flush();
-
-        $userCompany = new UserCompanyModel();
-        $userCompany->setUserId($user->getId());
-        $userCompany->setCompanyId($company->getId());
-        $userCompany->setRole('merchant');
-
-        $this->entityManager->persist($userCompany);
-        $this->entityManager->flush();
-
-        return ['id' => $user->getId(), 'message' => 'Merchant registered successfully. Awaiting approval.'];
     }
 
     private function approveUser($data, $adminUserId)
