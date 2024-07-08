@@ -21,12 +21,12 @@ class SkillModel
     #[ORM\Column(type: "text")]
     private $description;
 
-    #[ORM\ManyToMany(targetEntity: UserModel::class, mappedBy: "skills")]
-    private $users;
+//    #[ORM\ManyToMany(targetEntity: UserModel::class, mappedBy: "skills")]
+//    private $users;
 
     public function __construct()
     {
-        $this->users = new ArrayCollection();
+//        $this->users = new ArrayCollection();
     }
 
     // Getters and setters for each property
@@ -58,28 +58,28 @@ class SkillModel
         return $this;
     }
 
-    public function getUsers(): Collection
-    {
-        return $this->users;
-    }
+//    public function getUsers(): Collection
+//    {
+//        return $this->users;
+//    }
 
-    public function addUser(UserModel $user): self
-    {
-        if (!$this->users->contains($user)) {
-            $this->users[] = $user;
-            $user->addSkill($this);
-        }
+//    public function addUser(UserModel $user): self
+//    {
+//        if (!$this->users->contains($user)) {
+//            $this->users[] = $user;
+//            $user->addSkill($this);
+//        }
+//
+//        return $this;
+//    }
 
-        return $this;
-    }
-
-    public function removeUser(UserModel $user): self
-    {
-        if ($this->users->removeElement($user)) {
-            $user->removeSkill($this);
-        }
-
-        return $this;
-    }
+//    public function removeUser(UserModel $user): self
+//    {
+//        if ($this->users->removeElement($user)) {
+//            $user->removeSkill($this);
+//        }
+//
+//        return $this;
+//    }
 }
 ?>

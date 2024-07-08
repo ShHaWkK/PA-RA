@@ -69,6 +69,7 @@ class UserController
 
     private function registerVolunteer($data)
     {
+        try{
         if (!isset($data['first_name']) || !isset($data['last_name']) || !isset($data['email']) || !isset($data['phone_number']) || !isset($data['password']) || !isset($data['skills']) || !isset($data['availabilities'])) {
             http_response_code(400);
             return ['error' => 'Missing required fields'];
@@ -77,7 +78,7 @@ class UserController
         // Check if the email already exists
         $existingUser = $this->entityManager->getRepository(UserModel::class)->findOneBy(['email' => $data['email']]);
         if ($existingUser) {
-            http_response_code(400);
+            http_response_code(409);
             return ['error' => 'Email already exists'];
         }
 
@@ -130,6 +131,13 @@ class UserController
         $this->entityManager->flush();
 
         return ['id' => $user->getId(), 'message' => 'Volunteer registered successfully. Awaiting approval.'];
+
+        } catch (\Exception $e) {
+            $this->entityManager->rollback();
+
+            http_response_code(500);
+            return ['error' => 'Internal Server Error'];
+        }
     }
 
     private function addAvailability($data)
