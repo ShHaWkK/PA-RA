@@ -69,72 +69,65 @@ class UserController
 
     private function registerVolunteer($data)
     {
-        try{
-        if (!isset($data['first_name']) || !isset($data['last_name']) || !isset($data['email']) || !isset($data['phone_number']) || !isset($data['password']) || !isset($data['skills']) || !isset($data['availabilities'])) {
-            http_response_code(400);
-            return ['error' => 'Missing required fields'];
-        }
-
-        // Check if the email already exists
-        $existingUser = $this->entityManager->getRepository(UserModel::class)->findOneBy(['email' => $data['email']]);
-        if ($existingUser) {
-            http_response_code(409);
-            return ['error' => 'Email already exists'];
-        }
-
-        $user = new UserModel();
-        $user->setFirstName($data['first_name']);
-        $user->setLastName($data['last_name']);
-        $user->setEmail($data['email']);
-        $user->setPhoneNumber($data['phone_number']);
-        $user->setPassword(password_hash($data['password'], PASSWORD_BCRYPT));
-        $user->setRole('volunteer');
-        $user->setStatus('pending');
-        $user->setCreatedAt(new \DateTime("now"));
-        $user->setUpdatedAt(new \DateTime("now"));
-
-        $this->entityManager->persist($user);
-        $this->entityManager->flush();
-
-        // Handle skills assignment
-        foreach ($data['skills'] as $skillId) {
-            $skill = $this->entityManager->find(SkillModel::class, $skillId);
-            if (!$skill) {
+        try {
+            if (!isset($data['first_name']) || !isset($data['last_name']) || !isset($data['email']) || !isset($data['phone_number']) || !isset($data['password'])) {
                 http_response_code(400);
-                return ['error' => 'Invalid skill ID: ' . $skillId];
+                return ['error' => 'Missing required fields'];
             }
 
-            $userSkill = new UserSkillModel();
-            $userSkill->setUserId($user->getId());
-            $userSkill->setSkillId($skill->getId());
-            $this->entityManager->persist($userSkill);
-        }
-
-        // Handle availabilities assignment
-        foreach ($data['availabilities'] as $availabilityData) {
-            if (!isset($availabilityData['day_of_week']) || !isset($availabilityData['start_time']) || !isset($availabilityData['end_time'])) {
-                http_response_code(400);
-                return ['error' => 'Missing required fields for availability'];
+            // Check if the email already exists
+            $existingUser = $this->entityManager->getRepository(UserModel::class)->findOneBy(['email' => $data['email']]);
+            if ($existingUser) {
+                http_response_code(409);
+                return ['error' => 'Email already exists'];
             }
 
-            $availability = new AvailabilityModel();
-            $availability->setUser($user);
-            $availability->setDayOfWeek($availabilityData['day_of_week']);
-            $availability->setStartTime(new \DateTime($availabilityData['start_time']));
-            $availability->setEndTime(new \DateTime($availabilityData['end_time']));
-            $availability->setCreatedAt(new \DateTime("now"));
-            $availability->setUpdatedAt(new \DateTime("now"));
+            $user = new UserModel();
+            $user->setFirstName($data['first_name']);
+            $user->setLastName($data['last_name']);
+            $user->setEmail($data['email']);
+            $user->setPhoneNumber($data['phone_number']);
+            $user->setPassword(password_hash($data['password'], PASSWORD_BCRYPT));
+            $user->setRole('volunteer');
+            $user->setStatus('pending');
+            $user->setCreatedAt(new \DateTime("now"));
+            $user->setUpdatedAt(new \DateTime("now"));
 
-            $this->entityManager->persist($availability);
-        }
+            $this->entityManager->persist($user);
+            $this->entityManager->flush();
 
-        $this->entityManager->flush();
+            // Handle skills assignment
+            if (isset($data['skills'])) {
+                foreach ($data['skills'] as $skillId) {
+                    $skill = $this->entityManager->find(SkillModel::class, $skillId);
+                    $userSkill = new UserSkillModel();
+                    $userSkill->setUserId($user->getId());
+                    $userSkill->setSkillId($skill->getId());
+                    $this->entityManager->persist($userSkill);
+                }
+            }
 
-        return ['id' => $user->getId(), 'message' => 'Volunteer registered successfully. Awaiting approval.'];
+            // Handle availabilities assignment
+            if (isset($data['availabilities'])) {
+                foreach ($data['availabilities'] as $index => $availabilityData) {
+                    if (!isset($availabilityData['day_of_week']) || !isset($availabilityData['start_time']) || !isset($availabilityData['end_time'])) {
+                        http_response_code(400);
+                        return ['error' => "Missing required fields for availability at index $index"];
+                    }
+                    // Add user_id to availability data
+                    $availabilityData['user_id'] = $user->getId();
+                    $this->addAvailability($availabilityData);
+                }
+            }
+
+            $this->entityManager->flush();
+
+            return ['id' => $user->getId(), 'message' => 'Volunteer registered successfully. Awaiting approval.'];
 
         } catch (\Exception $e) {
             $this->entityManager->rollback();
 
+            error_log("Exception in registerVolunteer: " . $e->getMessage());
             http_response_code(500);
             return ['error' => 'Internal Server Error'];
         }
