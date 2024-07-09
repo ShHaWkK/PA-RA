@@ -2,23 +2,24 @@
 // Path: backend/src/Controller/UserController.php
 namespace Controller;
 
-use Entity\UserModel;
-use Entity\UserSkillModel;
-use Entity\CompanyModel;
-use Entity\UserCompanyModel;
-use Entity\SkillModel;
-use Entity\AvailabilityModel;
 use Doctrine\ORM\EntityManager;
+use Entity\UserModel;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
-use PhpOffice\PhpSpreadsheet\Spreadsheet;
-use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use Service\UserService;
+use Service\CompanyService;
+use Service\SkillService;
+use Service\AvailabilityService;
 
 class UserController
 {
     private $entityManager;
     private $serializer;
+    private $userService;
+    private $companyService;
+    private $skillService;
+    private $availabilityService;
 
     public function __construct(EntityManager $entityManager)
     {
@@ -26,6 +27,11 @@ class UserController
         $normalizers = [new ObjectNormalizer()];
         $encoders = [new JsonEncoder()];
         $this->serializer = new Serializer($normalizers, $encoders);
+
+        $this->userService = new UserService($entityManager);
+        $this->companyService = new CompanyService($entityManager);
+        $this->skillService = new SkillService($entityManager);
+        $this->availabilityService = new AvailabilityService($entityManager);
     }
 
     public function processRequest($method, $uriParts, $input)
@@ -77,34 +83,18 @@ class UserController
 
             // Check if the email already exists
             $existingUser = $this->entityManager->getRepository(UserModel::class)->findOneBy(['email' => $data['email']]);
+            error_log("wesh");
+
             if ($existingUser) {
                 http_response_code(409);
                 return ['error' => 'Email already exists'];
             }
 
-            $user = new UserModel();
-            $user->setFirstName($data['first_name']);
-            $user->setLastName($data['last_name']);
-            $user->setEmail($data['email']);
-            $user->setPhoneNumber($data['phone_number']);
-            $user->setPassword(password_hash($data['password'], PASSWORD_BCRYPT));
-            $user->setRole('volunteer');
-            $user->setStatus('pending');
-            $user->setCreatedAt(new \DateTime("now"));
-            $user->setUpdatedAt(new \DateTime("now"));
-
-            $this->entityManager->persist($user);
-            $this->entityManager->flush();
+            $user = $this->userService->addUser($data, 'volunteer');
 
             // Handle skills assignment
             if (isset($data['skills'])) {
-                foreach ($data['skills'] as $skillId) {
-                    $skill = $this->entityManager->find(SkillModel::class, $skillId);
-                    $userSkill = new UserSkillModel();
-                    $userSkill->setUserId($user->getId());
-                    $userSkill->setSkillId($skill->getId());
-                    $this->entityManager->persist($userSkill);
-                }
+                $this->skillService->addSkills($user, $data['skills']);
             }
 
             // Handle availabilities assignment
@@ -116,7 +106,7 @@ class UserController
                     }
                     // Add user_id to availability data
                     $availabilityData['user_id'] = $user->getId();
-                    $this->addAvailability($availabilityData);
+                    $this->availabilityService->addAvailability($availabilityData);
                 }
             }
 
@@ -135,215 +125,117 @@ class UserController
 
     private function addAvailability($data)
     {
-        if (!isset($data['user_id']) || !isset($data['day_of_week']) || !isset($data['start_time']) || !isset($data['end_time'])) {
-            http_response_code(400);
-            return ['error' => 'Missing required fields for availability'];
-        }
-
-        $user = $this->entityManager->find(UserModel::class, $data['user_id']);
-        if (!$user) {
-            http_response_code(404);
-            return ['error' => 'User not found'];
-        }
-
-        $availability = new AvailabilityModel();
-        $availability->setUser($user);
-        $availability->setDayOfWeek($data['day_of_week']);
-        $availability->setStartTime(new \DateTime($data['start_time']));
-        $availability->setEndTime(new \DateTime($data['end_time']));
-        $availability->setCreatedAt(new \DateTime("now"));
-        $availability->setUpdatedAt(new \DateTime("now"));
-
-        $this->entityManager->persist($availability);
-        $this->entityManager->flush();
-
-        return ['id' => $availability->getId(), 'message' => 'Availability added successfully'];
-    }
-
-    private function generatePlanning()
-{
-    $volunteers = $this->entityManager->getRepository(UserModel::class)->findBy(['role' => 'volunteer', 'status' => 'approved']);
-    $spreadsheet = new Spreadsheet();
-    $sheet = $spreadsheet->getActiveSheet();
-
-    $sheet->setCellValue('A1', 'First Name');
-    $sheet->setCellValue('B1', 'Last Name');
-    $sheet->setCellValue('C1', 'Email');
-    $sheet->setCellValue('D1', 'Phone Number');
-    $sheet->setCellValue('E1', 'Skills');
-    $sheet->setCellValue('F1', 'Availabilities');
-
-    $row = 2;
-    foreach ($volunteers as $volunteer) {
-        $sheet->setCellValue('A' . $row, $volunteer->getFirstName());
-        $sheet->setCellValue('B' . $row, $volunteer->getLastName());
-        $sheet->setCellValue('C' . $row, $volunteer->getEmail());
-        $sheet->setCellValue('D' . $row, $volunteer->getPhoneNumber());
-
-        $skills = [];
-        foreach ($volunteer->getSkills() as $skill) {
-            $skills[] = $skill->getName();
-        }
-        $sheet->setCellValue('E' . $row, implode(', ', $skills));
-
-        $availabilities = [];
-        foreach ($volunteer->getAvailabilities() as $availability) {
-            $availabilities[] = $availability->getDayOfWeek() . ' ' . $availability->getStartTime()->format('H:i') . '-' . $availability->getEndTime()->format('H:i');
-        }
-        $sheet->setCellValue('F' . $row, implode(', ', $availabilities));
-
-        $row++;
-    }
-
-    $publicDir = __DIR__ . '/../public';
-    $planningsDir = $publicDir . '/plannings';
-
-    // Vérifie si le répertoire public/plannings existe, sinon le crée
-    if (!file_exists($planningsDir)) {
-        mkdir($planningsDir, 0777, true);
-    }
-
-    $filePath = $planningsDir . '/planning_' . date('Y-m-d') . '.xlsx';
-
-    $writer = new Xlsx($spreadsheet);
-    $writer->save($filePath);
-
-    return ['message' => 'Planning generated successfully', 'path' => $filePath];
-}
-
-
-    private function registerMerchant($data)
-    {
         try {
-            $this->entityManager->beginTransaction();
-
-            // Vérifier les champs obligatoires
-            if (!isset($data['first_name']) || !isset($data['last_name']) || !isset($data['email']) || !isset($data['phone_number']) || !isset($data['password']) || !isset($data['company_name']) || !isset($data['siret']) || !isset($data['address']) || !isset($data['renewal_date'])) {
-                http_response_code(400);
-                return ['error' => 'Missing required fields'];
-            }
-
-            // Création de l'utilisateur
-            $user = new UserModel();
-            $user->setFirstName($data['first_name']);
-            $user->setLastName($data['last_name']);
-            $user->setEmail($data['email']);
-            $user->setPhoneNumber($data['phone_number']);
-            $user->setPassword(password_hash($data['password'], PASSWORD_BCRYPT));
-            $user->setRole('merchant');
-            $user->setStatus('pending');
-            $user->setCreatedAt(new \DateTime("now"));
-            $user->setUpdatedAt(new \DateTime("now"));
-
-            $this->entityManager->persist($user);
-            $this->entityManager->flush();
-
-            // Création de l'entreprise associée
-            $company = new CompanyModel();
-            $company->setName($data['company_name']);
-            $company->setSiret($data['siret']);
-            $company->setAddress($data['address']);
-            $company->setRenewalDate(new \DateTime($data['renewal_date']));
-            $company->setRenewalStatus('pending');
-            $company->setContactInfo($data['email']);
-            $company->setCreatedAt(new \DateTime("now"));
-            $company->setUpdatedAt(new \DateTime("now"));
-
-            $this->entityManager->persist($company);
-            $this->entityManager->flush();
-
-            // Lien entre l'utilisateur et l'entreprise
-            $userCompany = new UserCompanyModel();
-            $userCompany->setUser($user);
-            $userCompany->setCompany($company);
-            $userCompany->setRole('merchant');
-
-            $this->entityManager->persist($userCompany);
-            $this->entityManager->flush();
-
-            $this->entityManager->commit();
-
-            return ['id' => $user->getId(), 'message' => 'Merchant registered successfully. Awaiting approval.'];
-
-        } catch (\Doctrine\DBAL\Exception\UniqueConstraintViolationException $e) {
-            $this->entityManager->rollback();
-
-            http_response_code(409);
-            return ['error' => 'Integrity constraint violation', 'message' => 'User with this email or SIRET already exists'];
-
+            return $this->availabilityService->addAvailability($data);
         } catch (\Exception $e) {
-            $this->entityManager->rollback();
-
             http_response_code(500);
             return ['error' => 'Internal Server Error'];
         }
     }
 
-    private function approveUser($data, $adminUserId)
+    private function generatePlanning()
     {
-        if (!isset($data['user_id']) || !isset($data['status'])) {
-            http_response_code(400);
-            return ['error' => 'Missing required fields'];
+        $volunteers = $this->entityManager->getRepository(UserModel::class)->findBy(['role' => 'volunteer', 'status' => 'approved']);
+        $availabilityRepository = $this->entityManager->getRepository(AvailabilityModel::class);
+
+        $planning = [];
+
+        foreach ($volunteers as $volunteer) {
+            $availabilities = $availabilityRepository->findBy(['user' => $volunteer->getId()]);
+            foreach ($availabilities as $availability) {
+                $planning[$availability->getDayOfWeek()][] = [
+                    'volunteer_id' => $volunteer->getId(),
+                    'start_time' => $availability->getStartTime()->format('H:i'),
+                    'end_time' => $availability->getEndTime()->format('H:i'),
+                ];
+            }
         }
 
-        // Check if the user is an admin
-        $adminUser = $this->entityManager->find(UserModel::class, $adminUserId);
-        if (!$adminUser || $adminUser->getRole() !== 'admin') {
-            http_response_code(403);
-            return ['error' => 'Only administrators can approve users'];
-        }
-
-        $user = $this->entityManager->find(UserModel::class, $data['user_id']);
-        if (!$user) {
-            http_response_code(404);
-            return ['error' => 'User not found'];
-        }
-
-        if ($data['status'] !== 'approved' && $data['status'] !== 'rejected') {
-            http_response_code(400);
-            return ['error' => 'Invalid status'];
-        }
-
-        $user->setStatus($data['status']);
-        $user->setUpdatedAt(new \DateTime("now"));
-        $this->entityManager->flush();
-
-        return ['id' => $user->getId(), 'message' => 'User status updated to ' . $data['status']];
+        return $planning;
     }
 
-    private function getUser($id)
+    private function updateUserStatus($id, $data)
     {
-        $user = $this->entityManager->find(UserModel::class, $id);
-        if (!$user) {
-            http_response_code(404);
-            return ['error' => 'User not found'];
+        try {
+            if (!isset($data['status'])) {
+                http_response_code(400);
+                return ['error' => 'Missing status field'];
+            }
+
+            $user = $this->userService->updateUserStatus($id, $data['status']);
+            return ['message' => 'User status updated successfully'];
+        } catch (\Exception $e) {
+            http_response_code(500);
+            return ['error' => 'Internal Server Error'];
         }
-        return json_decode($this->serializer->serialize($user, 'json'), true);
+    }
+
+    private function registerMerchant($data)
+    {
+        try {
+            if (!isset($data['first_name']) || !isset($data['last_name']) || !isset($data['email']) || !isset($data['phone_number']) || !isset($data['password']) || !isset($data['company'])) {
+                http_response_code(400);
+                return ['error' => 'Missing required fields'];
+            }
+
+            // Check if the email already exists
+            $existingUser = $this->entityManager->getRepository(UserModel::class)->findOneBy(['email' => $data['email']]);
+            if ($existingUser) {
+                http_response_code(409);
+                return ['error' => 'Email already exists'];
+            }
+
+            $user = $this->userService->addUser($data, 'merchant');
+
+            // Handle company assignment
+            $companyData = $data['company'];
+            $this->companyService->addCompany($companyData, $user);
+
+            $this->entityManager->flush();
+
+            return ['id' => $user->getId(), 'message' => 'Merchant registered successfully. Awaiting approval.'];
+
+        } catch (\Exception $e) {
+            $this->entityManager->rollback();
+
+            error_log("Exception in registerMerchant: " . $e->getMessage());
+            http_response_code(500);
+            return ['error' => 'Internal Server Error'];
+        }
+    }
+
+    private function approveUser($data, $userId)
+    {
+        try {
+            if (!$userId) {
+                http_response_code(400);
+                return ['error' => 'User ID not provided'];
+            }
+
+            $user = $this->userService->updateUserStatus($userId, 'approved');
+            return ['message' => 'User approved successfully'];
+        } catch (\Exception $e) {
+            http_response_code(500);
+            return ['error' => 'Internal Server Error'];
+        }
     }
 
     private function getAllUsers()
     {
         $users = $this->entityManager->getRepository(UserModel::class)->findAll();
-        return json_decode($this->serializer->serialize($users, 'json'), true);
+        $data = $this->serializer->serialize($users, 'json');
+        return json_decode($data, true);
     }
 
-    private function updateUserStatus($id, $data)
+    private function getUser($id)
     {
-        $user = $this->entityManager->find(UserModel::class, $id);
+        $user = $this->entityManager->getRepository(UserModel::class)->find($id);
         if (!$user) {
             http_response_code(404);
             return ['error' => 'User not found'];
         }
-
-        if (isset($data['status'])) {
-            $user->setStatus($data['status']);
-            $user->setUpdatedAt(new \DateTime("now"));
-            $this->entityManager->flush();
-            return ['id' => $user->getId(), 'message' => 'User status updated successfully'];
-        }
-
-        http_response_code(400);
-        return ['error' => 'Status not specified'];
+        $data = $this->serializer->serialize($user, 'json');
+        return json_decode($data, true);
     }
 }
 ?>
