@@ -28,12 +28,15 @@ use Controller\AvailabilityController;
 use Controller\StockController;
 use Controller\CollectionController;
 use Controller\DeliveryController;
-use Service\PDFService;
+use Controller\ServiceController;
 use Controller\ProductController;
-use Service\JWTService;
-use Middleware\JWTMiddleware;
 use Controller\LoginController;
 use Controller\PrivateAreaController;
+use Controller\ServiceProposalController;
+use Service\PDFService;
+use Service\JWTService;
+use Middleware\JWTMiddleware;
+
 
 error_log("Traitement de la requête: " . $_SERVER['REQUEST_METHOD'] . " " . $_SERVER['REQUEST_URI']);
 
@@ -70,8 +73,9 @@ $controllerMap = [
     'admin' => PrivateAreaController::class,
     'volunteer' => PrivateAreaController::class,
     'merchant' => PrivateAreaController::class,
+    'services' => ServiceController::class, 
+    'service_proposals' => ServiceProposalController::class
 ];
-
 // Vérifie si le contrôleur existe pour le premier élément de l'URI
 $route = $uriParts[0];
 if (!array_key_exists($route, $controllerMap)) {
