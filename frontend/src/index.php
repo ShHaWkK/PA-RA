@@ -17,8 +17,8 @@ $request = cleanUrl($request);
 // Définir les routes
 switch ($request) {
     case '':
-    case '/':
-        require __DIR__ . '/views/SignUp/VolunteerSignUp.php';
+    case '/HomePage':
+        require __DIR__ . '/views/HomePage.php';
         break;
     case '/Merchant/SignUp':
         require './views/SignUp/MerchantSignUp.php';

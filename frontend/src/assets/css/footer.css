@@ -1,0 +1,44 @@
+footer {
+    background: #333;
+    color: #fff;
+    padding: 20px 0;
+    text-align: center;
+}
+
+footer .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.footer-logo a {
+    color: #fff;
+    font-size: 1.5em;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.footer-nav {
+    list-style: none;
+    padding: 0;
+    margin: 20px 0;
+    display: flex;
+    justify-content: center;
+}
+
+.footer-nav li {
+    margin: 0 15px;
+}
+
+.footer-nav a {
+    color: #fff;
+    text-decoration: none;
+}
+
+.footer-nav a:hover {
+    text-decoration: underline;
+}
+
+footer p {
+    margin: 10px 0 0;
+}
