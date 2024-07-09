@@ -22,6 +22,15 @@ class ServiceModel
     #[ORM\Column(type: "datetime")]
     private $schedule;
 
+    #[ORM\Column(type: "integer")]
+    private $capacity;
+
+    #[ORM\Column(type: "string", length: 50, options: ["default" => "open"])]
+    private $status;
+
+    #[ORM\Column(type: "string", length: 255)]
+    private $location;
+
     #[ORM\Column(type: "datetime", options: ["default" => "CURRENT_TIMESTAMP"])]
     private $created_at;
 
@@ -68,14 +77,47 @@ class ServiceModel
         return $this;
     }
 
+    public function getCapacity(): ?int
+    {
+        return $this->capacity;
+    }
+
+    public function setCapacity(int $capacity): self
+    {
+        $this->capacity = $capacity;
+        return $this;
+    }
+
+    public function getStatus(): ?string
+    {
+        return $this->status;
+    }
+
+    public function setStatus(string $status): self
+    {
+        $this->status = $status;
+        return $this;
+    }
+
+    public function getLocation(): ?string
+    {
+        return $this->location;
+    }
+
+    public function setLocation(string $location): self
+    {
+        $this->location = $location;
+        return $this;
+    }
+
     public function getCreatedAt(): ?\DateTimeInterface
     {
         return $this->created_at;
     }
 
-    public function setCreatedAt(\DateTimeInterface $created_at): self
+    public function setCreatedAt(\DateTimeInterface $createdAt): self
     {
-        $this->created_at = $created_at;
+        $this->created_at = $createdAt;
         return $this;
     }
 
@@ -84,10 +126,9 @@ class ServiceModel
         return $this->updated_at;
     }
 
-    public function setUpdatedAt(\DateTimeInterface $updated_at): self
+    public function setUpdatedAt(\DateTimeInterface $updatedAt): self
     {
-        $this->updated_at = $updated_at;
+        $this->updated_at = $updatedAt;
         return $this;
     }
 }
-?>
