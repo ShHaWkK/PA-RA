@@ -17,21 +17,22 @@ $request = cleanUrl($request);
 // Définir les routes
 switch ($request) {
     case '':
+    case '/':
     case '/HomePage':
         require __DIR__ . '/views/HomePage.php';
         break;
     case '/Merchant/SignUp':
-        require './views/SignUp/MerchantSignUp.php';
+        require __DIR__ . '/views/SignUp/MerchantSignUp.php';
         break;
     case '/Volunteer/SignUp':
         require __DIR__ . '/views/SignUp/VolunteerSignUp.php';
         break;
-//    case '/register':
-//        require __DIR__ . '/views/login/login_admin.php';
-//        break;
+    case '/Admin':
+        require __DIR__ . '/views/SignIn/AdminSignIn.php';
+        break;
     default:
         http_response_code(404);
-        require __DIR__ . '/views/404.php';
+//        require __DIR__ . '/views/404.php';
         break;
 }
 ?>

@@ -4,10 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>No More Waste</title>
-    <link rel="stylesheet" href="../../src/assets/css/global.css">
+    <link rel="stylesheet" href="/assets/css/global.css">
 </head>
 
-<?php require_once($_SERVER['DOCUMENT_ROOT'] . '/src/views/includes/Header.php'); ?>
+<?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/includes/Header.php'); ?>
 
 <body>
 <section class="hero">
@@ -56,6 +56,6 @@
 <!--</section>-->
 </body>
 
-<?php require_once($_SERVER['DOCUMENT_ROOT'] . '/src/views/includes/Footer.php'); ?>
+<?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/includes/Footer.php'); ?>
 
 </html>

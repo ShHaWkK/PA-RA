@@ -4,11 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Formulaire d'inscription</title>
-    <link rel="stylesheet" href="../../src/assets/css/global.css">
+    <link rel="stylesheet" href="/assets/css/global.css">
 </head>
 <body>
 
-<?php require_once($_SERVER['DOCUMENT_ROOT'] . '/src/views/includes/Loader.php'); ?>
+<?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/includes/Loader.php'); ?>
 
 <form id="registrationForm" class="hidden">
     <h2>Formulaire d'inscription</h2>
@@ -105,10 +105,10 @@
     </div>
 </form>
 
-<?php require_once($_SERVER['DOCUMENT_ROOT'] . '/src/assets/js/modules/env.php'); ?>
-<script src="../../src/assets/js/api/Users.js"></script>
-<script src="../../src/assets/js/api/Skills.js"></script>
-<script src="../../src/assets/js/pages/VolunteerSignUp.js"></script>
+<?php require_once($_SERVER['DOCUMENT_ROOT'] . '/assets/js/modules/env.php'); ?>
+<script src="/assets/js/api/Users.js"></script>
+<script src="/assets/js/api/Skills.js"></script>
+<script src="/assets/js/pages/VolunteerSignUp.js"></script>
 
 </body>
 </html>

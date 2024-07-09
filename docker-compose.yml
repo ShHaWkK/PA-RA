@@ -16,16 +16,15 @@ services:
     entrypoint: ["/bin/sh", "-c","composer install && apache2-foreground"]
 
   front:
-      build:
-        context: ./frontend
-      container_name: frontend
-      ports:
-        - "3000:80"
-      env_file:
-        - .env
-      volumes:
-        - ./frontend/:/var/www/html
-
+    build:
+      context: ./frontend
+    container_name: frontend
+    ports:
+      - "3000:80"
+    env_file:
+      - .env
+    volumes:
+      - ./frontend/src:/var/www/html
 
   db:
     image: mysql:latest

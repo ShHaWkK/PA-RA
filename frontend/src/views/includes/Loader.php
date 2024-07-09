@@ -1,6 +1,6 @@
 <head>
     <title>Loading...</title>
-    <link rel="stylesheet" href="../../src/assets/css/loader.css">
+    <link rel="stylesheet" href="/assets/css/loader.css">
 </head>
 <div id = "loading-body" class=" hidden">
     <div class="loading-container">

@@ -1,5 +1,5 @@
 <head>
-    <link rel="stylesheet" href="../../src/assets/css/header.css">
+    <link rel="stylesheet" href="/assets/css/header.css">
 </head>
 
 <header>
