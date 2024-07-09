@@ -113,6 +113,9 @@ CREATE TABLE IF NOT EXISTS services (
     name VARCHAR(255) NOT NULL,
     description TEXT NOT NULL,
     schedule TIMESTAMP NOT NULL,
+    capacity INT NOT NULL,
+    status ENUM('open', 'closed') NOT NULL DEFAULT 'open',
+    location VARCHAR(255) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
@@ -127,6 +130,18 @@ CREATE TABLE IF NOT EXISTS service_registrations (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (service_id) REFERENCES services(id) ON DELETE CASCADE,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- Table des propositions de services (service_proposals)
+CREATE TABLE IF NOT EXISTS service_proposals (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    description TEXT NOT NULL,
+    status ENUM('proposed', 'approved', 'rejected') NOT NULL DEFAULT 'proposed',
+    created_by INT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE
 );
 
 -- Table des stocks (stocks)
