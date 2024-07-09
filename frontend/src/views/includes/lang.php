@@ -5,8 +5,8 @@ if (headers_sent($filename, $linenum)) {
     exit;
 }
 
-$supportedLanguages = ['EN', 'FR']; 
-$languageDirectory = __DIR__ . '/../lang/';
+$supportedLanguages = ['EN', 'FR', 'ES', 'DE']; 
+$languageDirectory = $_SERVER['DOCUMENT_ROOT'] . '/lang/';
 
 $userLanguage = 'EN';
 if (isset($_GET["lang"]) && in_array(strtoupper($_GET['lang']), $supportedLanguages)) {

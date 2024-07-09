@@ -1,0 +1,62 @@
+{
+    "welcome": "Bienvenido a No More Waste",
+    "welcome_subtitle": "Juntos, luchemos contra el desperdicio para un futuro sostenible.",
+    "learn_more": "Saber más",
+    "about_us": "Sobre nosotros",
+    "about_us_text": "No More Waste es una asociación dedicada a luchar contra el desperdicio de alimentos y materiales. Creemos en un mundo donde los recursos se utilizan de manera responsable y sostenible.",
+    "our_activities": "Nuestras Actividades",
+    "activity_1": "Recolección y Redistribución",
+    "activity_1_text": "Organizamos recolecciones de excedentes de alimentos y materiales para redistribuirlos a las personas necesitadas.",
+    "activity_2": "Redistribución",
+    "activity_2_text": "Ofrecemos redistribuir los excedentes de alimentos a las personas necesitadas.",
+    "activity_3": "Asociaciones",
+    "activity_3_text": "Trabajamos con empresas y otras organizaciones para promover prácticas sostenibles.", 
+
+
+    "login_title": "Página de Inicio de Sesión",
+    "login_heading": "Iniciar Sesión",
+    "email_label": "Correo Electrónico:",
+    "password_label1": "Contraseña:",
+    "submit_button1": "Iniciar Sesión",
+    
+    "2fa_title": "Autenticación de Dos Factores",
+    "2fa_heading": "Autenticación de Dos Factores",
+    "2fa_instruction": "Por favor, ingrese el código que recibió por correo electrónico:",
+    "2fa_code_placeholder": "Código de Verificación",
+    "verify_button": "Verificar",
+
+    "signup_title": "Formulario de Registro",
+    "signup_heading": "Formulario de Registro",
+    "first_name_label": "Nombre",
+    "last_name_label": "Apellido",
+    "phone_label": "Número de Teléfono",
+    "password_label2": "Contraseña",
+    "company_name_label": "Nombre de la Empresa",
+    "siret_label": "SIRET",
+    "address_label": "Dirección",
+    "renewal_date_label": "Fecha de Renovación",
+    "submit_button2": "Enviar",
+
+    "skills_table_heading": "Habilidades",
+    "select_label": "Seleccionar",
+    "skill_name_label": "Nombre de la Habilidad",
+    "description_label": "Descripción",
+
+    "availabilities_heading": "Disponibilidades",
+    "day_of_week_label": "Día de la Semana",
+    "start_time_label": "Hora de Inicio",
+    "end_time_label": "Hora de Fin",
+    "monday": "Lunes",
+    "tuesday": "Martes",
+    "wednesday": "Miércoles",
+    "thursday": "Jueves",
+    "friday": "Viernes",
+    "saturday": "Sábado",
+    "sunday": "Domingo", 
+
+    "header_home": "Inicio",
+    "header_merchant_signup": "Registro de Comerciantes",
+    "header_volunteer_signup": "¡Hazte Voluntario!",
+    "header_contact": "Contacto"
+
+}

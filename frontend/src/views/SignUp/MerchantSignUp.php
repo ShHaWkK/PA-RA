@@ -1,56 +1,59 @@
+<?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/includes/lang.php'); ?>
+
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="<?php echo strtolower($userLanguage); ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Formulaire d'inscription</title>
+    <title><?php echo htmlspecialchars($data['signup_title']); ?></title>
     <link rel="stylesheet" href="/assets/css/global.css">
 </head>
 <body>
 
-<form id="registrationForm" >
-    <h2>Formulaire d'inscription</h2>
+<form id="registrationForm">
+    <h2><?php echo htmlspecialchars($data['signup_heading']); ?></h2>
     <div>
-        <label for="first_name">Prénom</label>
-        <input type="text" id="first_name" name="first_name" value="John" required>
+        <label for="first_name"><?php echo htmlspecialchars($data['first_name_label']); ?></label>
+        <input type="text" id="first_name" name="first_name" required>
     </div>
     <div>
-        <label for="last_name">Nom</label>
-        <input type="text" id="last_name" name="last_name" value="Smith" required>
+        <label for="last_name"><?php echo htmlspecialchars($data['last_name_label']); ?></label>
+        <input type="text" id="last_name" name="last_name" required>
     </div>
     <div>
-        <label for="email">Email</label>
-        <input type="email" id="email" name="email" value="john2d8dqs.smidtdddh@example.com" required>
+        <label for="email"><?php echo htmlspecialchars($data['email_label']); ?></label>
+        <input type="email" id="email" name="email" required>
     </div>
     <div>
-        <label for="phone_number">Numéro de téléphone</label>
-        <input type="tel" id="phone_number" name="phone_number" value="1234567890" required>
+        <label for="phone_number"><?php echo htmlspecialchars($data['phone_label']); ?></label>
+        <input type="tel" id="phone_number" name="phone_number" required>
     </div>
     <div>
-        <label for="password">Mot de passe</label>
-        <input type="password" id="password" name="password" value="securepassword" required>
+        <label for="password"><?php echo htmlspecialchars($data['password_label2']); ?></label>
+        <input type="password" id="password" name="password" required>
     </div>
     <div>
-        <label for="company_name">Nom de l'entreprise</label>
-        <input type="text" id="company_name" name="company_name" value="Corporation Enterprises" required>
+        <label for="company_name"><?php echo htmlspecialchars($data['company_name_label']); ?></label>
+        <input type="text" id="company_name" name="company_name" required>
     </div>
     <div>
-        <label for="siret">SIRET</label>
-        <input type="text" id="siret" name="siret" value="12345678901234" required>
+        <label for="siret"><?php echo htmlspecialchars($data['siret_label']); ?></label>
+        <input type="text" id="siret" name="siret" required>
     </div>
     <div>
-        <label for="address">Adresse</label>
-        <input type="text" id="address" name="address" value="123 Main St, Cityville, 12345" required>
+        <label for="address"><?php echo htmlspecialchars($data['address_label']); ?></label>
+        <input type="text" id="address" name="address" required>
     </div>
     <div>
-        <label for="renewal_date">Date de renouvellement</label>
-        <input type="date" id="renewal_date" name="renewal_date" value="2025-07-01" required>
+        <label for="renewal_date"><?php echo htmlspecialchars($data['renewal_date_label']); ?></label>
+        <input type="date" id="renewal_date" name="renewal_date" required>
     </div>
     <div>
-        <button type="submit">Soumettre</button>
+        <button type="submit"><?php echo htmlspecialchars($data['submit_button2']); ?></button>
     </div>
 </form>
-<!--¨Partie traitement API-->
+
+<!-- Partie traitement API -->
 <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/assets/js/modules/env.php'); ?>
 <script src="/assets/js/api/Users.js"></script>
 <script src="/assets/js/pages/MerchantSignUp.js"></script>

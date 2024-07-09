@@ -1,5 +1,9 @@
+<?php
+require_once($_SERVER['DOCUMENT_ROOT'] . '/views/includes/lang.php');
+?>
+
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="<?php echo strtolower($userLanguage); ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,47 +14,57 @@
 <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/includes/Header.php'); ?>
 
 <body>
+<!-- Language Selection Menu -->
+<div class="language-selector">
+    <select onchange="changeLanguage(this.value)">
+        <option value="EN" <?php echo $userLanguage == 'EN' ? 'selected' : ''; ?>>English</option>
+        <option value="FR" <?php echo $userLanguage == 'FR' ? 'selected' : ''; ?>>Français</option>
+        <option value="ES" <?php echo $userLanguage == 'ES' ? 'selected' : ''; ?>>Español</option>
+        <option value="DE" <?php echo $userLanguage == 'DE' ? 'selected' : ''; ?>>Deutsch</option>
+    </select>
+</div>
+
 <section class="hero">
     <div class="hero-content">
-        <h1>Bienvenue chez No More Waste</h1>
-        <p>Ensemble, luttons contre le gaspillage pour un avenir durable.</p>
-        <a href="#about" class="btn">En savoir plus</a>
+        <h1><?php echo htmlspecialchars($data['welcome']); ?></h1>
+        <p><?php echo htmlspecialchars($data['welcome_subtitle']); ?></p>
+        <a href="#about" class="btn"><?php echo htmlspecialchars($data['learn_more']); ?></a>
     </div>
 </section>
 
 <section id="about" class="about">
     <div class="container">
-        <h2>À propos de nous</h2>
-        <p>No More Waste est une association dédiée à la lutte contre le gaspillage alimentaire et matériel. Nous croyons en un monde où les ressources sont utilisées de manière responsable et durable.</p>
+        <h2><?php echo htmlspecialchars($data['about_us']); ?></h2>
+        <p><?php echo htmlspecialchars($data['about_us_text']); ?></p>
     </div>
 </section>
 
 <section id="activities" class="activities">
     <div class="container">
-        <h2>Nos Activités</h2>
+        <h2><?php echo htmlspecialchars($data['our_activities']); ?></h2>
         <div class="activity">
-            <h3>Collecte et Redistribution</h3>
-            <p>Nous organisons des collectes de surplus alimentaires et matériels pour les redistribuer aux personnes dans le besoin.</p>
+            <h3><?php echo htmlspecialchars($data['activity_1']); ?></h3>
+            <p><?php echo htmlspecialchars($data['activity_1_text']); ?></p>
         </div>
         <div class="activity">
-            <h3> et Redistribution</h3>
-            <p>Nous proposons de redistribuer les surplus alimentaires aux personnes dans le besoin.</p>
+            <h3><?php echo htmlspecialchars($data['activity_2']); ?></h3>
+            <p><?php echo htmlspecialchars($data['activity_2_text']); ?></p>
         </div>
         <div class="activity">
-            <h3>Partenariats</h3>
-            <p>Nous travaillons avec des entreprises et d'autres organisations pour promouvoir des pratiques durables.</p>
+            <h3><?php echo htmlspecialchars($data['activity_3']); ?></h3>
+            <p><?php echo htmlspecialchars($data['activity_3_text']); ?></p>
         </div>
     </div>
 </section>
 
 <!--<section id="contact" class="contact">-->
 <!--    <div class="container">-->
-<!--        <h2>Contactez-nous</h2>-->
+<!--        <h2><?php echo htmlspecialchars($data['contact_us']); ?></h2>-->
 <!--        <form action="/submit-form" method="post">-->
-<!--            <input type="text" name="name" placeholder="Votre Nom" required>-->
-<!--            <input type="email" name="email" placeholder="Votre Email" required>-->
-<!--            <textarea name="message" placeholder="Votre Message" required></textarea>-->
-<!--            <button type="submit">Envoyer</button>-->
+<!--            <input type="text" name="name" placeholder="<?php echo htmlspecialchars($data['your_name']); ?>" required>-->
+<!--            <input type="email" name="email" placeholder="<?php echo htmlspecialchars($data['your_email']); ?>" required>-->
+<!--            <textarea name="message" placeholder="<?php echo htmlspecialchars($data['your_message']); ?>" required></textarea>-->
+<!--            <button type="submit"><?php echo htmlspecialchars($data['send']); ?></button>-->
 <!--        </form>-->
 <!--    </div>-->
 <!--</section>-->
@@ -59,3 +73,9 @@
 <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/includes/Footer.php'); ?>
 
 </html>
+
+<script>
+function changeLanguage(lang) {
+    window.location.href = window.location.pathname + "?lang=" + lang;
+}
+</script>

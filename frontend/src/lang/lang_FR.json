@@ -1,0 +1,64 @@
+{
+
+    
+    "welcome": "Bienvenue chez No More Waste",
+    "welcome_subtitle": "Ensemble, luttons contre le gaspillage pour un avenir durable.",
+    "learn_more": "En savoir plus",
+    "about_us": "À propos de nous",
+    "about_us_text": "No More Waste est une association dédiée à la lutte contre le gaspillage alimentaire et matériel. Nous croyons en un monde où les ressources sont utilisées de manière responsable et durable.",
+    "our_activities": "Nos Activités",
+    "activity_1": "Collecte et Redistribution",
+    "activity_1_text": "Nous organisons des collectes de surplus alimentaires et matériels pour les redistribuer aux personnes dans le besoin.",
+    "activity_2": "Redistribution",
+    "activity_2_text": "Nous proposons de redistribuer les surplus alimentaires aux personnes dans le besoin.",
+    "activity_3": "Partenariats",
+    "activity_3_text": "Nous travaillons avec des entreprises et d'autres organisations pour promouvoir des pratiques durables.", 
+
+
+
+    "login_title": "Page de Login",
+    "login_heading": "Connexion",
+    "email_label": "Email :",
+    "password_label1": "Mot de passe :",
+    "submit_button1": "Se connecter",
+    
+    "2fa_title": "Double Authentification",
+    "2fa_heading": "Double Authentification",
+    "2fa_instruction": "Veuillez entrer le code que vous avez reçu par email :",
+    "2fa_code_placeholder": "Code de vérification",
+    "verify_button": "Vérifier",
+
+    "signup_title": "Formulaire d'inscription",
+    "signup_heading": "Formulaire d'inscription",
+    "first_name_label": "Prénom",
+    "last_name_label": "Nom",
+    "phone_label": "Numéro de téléphone",
+    "password_label2": "Mot de passe",
+    "company_name_label": "Nom de l'entreprise",
+    "siret_label": "SIRET",
+    "address_label": "Adresse",
+    "renewal_date_label": "Date de renouvellement",
+    "submit_button2": "Soumettre",
+
+    "skills_table_heading": "Compétences",
+    "select_label": "Sélectionner",
+    "skill_name_label": "Nom de la compétence",
+    "description_label": "Description",
+
+    "availabilities_heading": "Disponibilités",
+    "day_of_week_label": "Jour de la semaine",
+    "start_time_label": "Heure de début",
+    "end_time_label": "Heure de fin",
+    "monday": "Lundi",
+    "tuesday": "Mardi",
+    "wednesday": "Mercredi",
+    "thursday": "Jeudi",
+    "friday": "Vendredi",
+    "saturday": "Samedi",
+    "sunday": "Dimanche", 
+
+    "header_home": "Accueil",
+    "header_merchant_signup": "Inscription Commerçant",
+    "header_volunteer_signup": "Devenez Bénévole !",
+    "header_contact": "Contact"
+}
