@@ -4,8 +4,12 @@ document.getElementById('registrationForm').addEventListener('submit', async fun
     const formData = new FormData(this);
     const jsonData = {};
 
-    // Convert FormData to JSON object
+    // Convert FormData to JSON object, ignoring availabilities
     formData.forEach((value, key) => {
+        if (key.includes('availabilities')) {
+            // Skip availabilities keys
+            return;
+        }
         if (jsonData[key]) {
             if (!Array.isArray(jsonData[key])) {
                 jsonData[key] = [jsonData[key]];
@@ -13,16 +17,40 @@ document.getElementById('registrationForm').addEventListener('submit', async fun
             jsonData[key].push(value);
         } else {
             jsonData[key] = value;
-            console.log("jsonData[key] = value",jsonData[key],value);
+            console.log("jsonData[key] = value", jsonData[key], value);
         }
     });
 
+    // Handle availabilities
+    const availabilities = [];
+    const rows = document.querySelectorAll('#availabilities tr');
+
+    rows.forEach((row, index) => {
+        if (index === 0) return; // Skip the header row
+
+        const checkbox = row.querySelector('input[type="checkbox"]');
+        if (checkbox && checkbox.checked) {
+            const dayOfWeek = row.querySelector('input[name*="[day_of_week]"]').value;
+            const startTime = row.querySelector('input[name*="[start_time]"]').value;
+            const endTime = row.querySelector('input[name*="[end_time]"]').value;
+
+            availabilities.push({
+                day_of_week: dayOfWeek,
+                start_time: startTime,
+                end_time: endTime
+            });
+        }
+    });
+
+    jsonData.availabilities = availabilities;
+
     // Log the JSON data (you can send it to an API endpoint here)
     console.log(jsonData);
+
     const result = await registerVolunteer(jsonData);
 
     if (!result.ok) {
-        switch (result.status){
+        switch (result.status) {
             case 409:
                 alert("User with this email already exists");
                 break;
