@@ -24,9 +24,11 @@ CREATE TABLE IF NOT EXISTS companies (
     siret VARCHAR(14) NOT NULL,
     renewal_date DATE NOT NULL,
     renewal_status ENUM('pending', 'notified', 'renewed') NOT NULL DEFAULT 'pending',
+    last_notified TIMESTAMP NULL DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
+
 
 -- Table de liaison entre utilisateurs et entreprises (user_companies)
 CREATE TABLE IF NOT EXISTS user_companies (
