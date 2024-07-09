@@ -31,6 +31,9 @@ class CompanyModel
     #[ORM\Column(type: "string", length: 50, options: ["default" => "pending"])]
     private $renewal_status;
 
+    #[ORM\Column(type: "datetime", nullable: true)]
+    private $last_notified;
+
     #[ORM\Column(type: "datetime", options: ["default" => "CURRENT_TIMESTAMP"])]
     private $created_at;
 
@@ -107,6 +110,17 @@ class CompanyModel
     public function setRenewalStatus(string $renewalStatus): self
     {
         $this->renewal_status = $renewalStatus;
+        return $this;
+    }
+
+    public function getLastNotified(): ?\DateTimeInterface
+    {
+        return $this->last_notified;
+    }
+
+    public function setLastNotified(?\DateTimeInterface $lastNotified): self
+    {
+        $this->last_notified = $lastNotified;
         return $this;
     }
 

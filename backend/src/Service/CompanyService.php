@@ -1,4 +1,5 @@
 <?php
+// Path: backend/src/Service/CompanyService.php
 namespace Service;
 
 use Doctrine\ORM\EntityManager;
