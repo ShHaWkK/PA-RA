@@ -8,9 +8,9 @@
 </head>
 <body>
 
+<?php require_once($_SERVER['DOCUMENT_ROOT'] . '/src/views/includes/Loader.php'); ?>
 
-
-<form id="registrationForm">
+<form id="registrationForm" class="hidden">
     <h2>Formulaire d'inscription</h2>
     <div>
         <label for="first_name">Prénom</label>
@@ -32,11 +32,21 @@
         <label for="password">Mot de passe</label>
         <input type="password" id="password" name="password" value="password1423" required>
     </div>
-    <div>
-        <label for="skills">Compétences (sélectionnez plusieurs en maintenant la touche Ctrl/cmd)</label>
-        <select id="skills" name="skills" multiple >
-        </select>
+    <div id="skillsTable">
+        <table>
+            <thead>
+            <tr>
+                <th>Sélectionner</th>
+                <th>Nom de la compétence</th>
+                <th>Description</th>
+            </tr>
+            </thead>
+            <tbody>
+            <!-- Les compétences seront ajoutées ici dynamiquement -->
+            </tbody>
+        </table>
     </div>
+
     <div>
         <label>Disponibilités</label>
         <table id="availabilities">

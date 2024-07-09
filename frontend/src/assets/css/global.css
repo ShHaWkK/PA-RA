@@ -35,3 +35,8 @@ button {
 button:hover {
     background-color: #218838;
 }
+
+/*Style pour le contenu devant rester caché jusqu'au chargement d'informations de l'api*/
+.hidden {
+    display: none;
+}

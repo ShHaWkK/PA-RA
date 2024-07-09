@@ -6,7 +6,7 @@ document.getElementById('registrationForm').addEventListener('submit', async fun
 
     // Convert FormData to JSON object, ignoring availabilities
     formData.forEach((value, key) => {
-        if (key.includes('availabilities')) {
+        if (key.includes('availabilities') || key.includes('skills')) {
             // Skip availabilities keys
             return;
         }
@@ -21,7 +21,7 @@ document.getElementById('registrationForm').addEventListener('submit', async fun
         }
     });
 
-    // Handle availabilities
+    // Handle availabilities separately
     const availabilities = [];
     const rows = document.querySelectorAll('#availabilities tr');
 
@@ -43,6 +43,14 @@ document.getElementById('registrationForm').addEventListener('submit', async fun
     });
 
     jsonData.availabilities = availabilities;
+
+    // Handle skills separately
+    const skills = [];
+    document.querySelectorAll('input[name="skills[]"]:checked').forEach(checkbox => {
+        skills.push(checkbox.value);
+    });
+
+    jsonData.skills = skills;
 
     // Log the JSON data (you can send it to an API endpoint here)
     console.log(jsonData);
@@ -66,28 +74,49 @@ document.getElementById('registrationForm').addEventListener('submit', async fun
 });
 
 //-------------Récupérer les compétences depuis la BDD et les placer dans le select -------------
-// Fonction pour récupérer les compétences depuis l'API
-async function fetchSkillsAndPopulateSelector() {
+// Fonction pour mettre à jour le sélecteur HTML avec les compétences récupérées
+async function populateSkillTable() {
     try {
+        document.getElementById('loading-body').classList.remove('hidden');
         const response = await getAllSkills();
-        console.log("response",response);
         const skills = await response.json();
-        populateSkillsSelector(skills); // Appel de la fonction pour mettre à jour le sélecteur HTML
+        const skillsTable = document.getElementById('skillsTable').querySelector('tbody');
+
+        skills.forEach(skill => {
+            // Création de la ligne du tableau
+            const row = document.createElement('tr');
+
+            // Colonne pour la checkbox
+            const checkboxCell = document.createElement('td');
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.value = skill.id;
+            checkbox.name = 'skills[]';
+            checkboxCell.appendChild(checkbox);
+            row.appendChild(checkboxCell);
+
+            // Colonne pour le nom de la compétence
+            const nameCell = document.createElement('td');
+            nameCell.textContent = skill.name;
+            row.appendChild(nameCell);
+
+            // Colonne pour la description de la compétence
+            const descriptionCell = document.createElement('td');
+            descriptionCell.textContent = skill.description;
+            row.appendChild(descriptionCell);
+
+            // Ajout de la ligne au tableau
+            skillsTable.appendChild(row);
+
+            // Après avoir peuplé le tableau, afficher le contenu
+            document.getElementById('registrationForm').classList.remove('hidden');
+            document.getElementById('loading-body').classList.add('hidden');
+
+        });
     } catch (error) {
         console.error('Error fetching skills:', error.message);
     }
 }
 
-// Fonction pour mettre à jour le sélecteur HTML avec les compétences récupérées
-function populateSkillsSelector(skills) {
-    const skillsSelect = document.getElementById('skills');
-    skills.forEach(skill => {
-        const option = document.createElement('option');
-        option.value = skill.id;
-        option.textContent = `${skill.name} - ${skill.description}`;
-        skillsSelect.appendChild(option);
-    });
-}
-
 // Appel de la fonction au chargement de la page ou lorsque nécessaire
-document.addEventListener('DOMContentLoaded', fetchSkillsAndPopulateSelector);
+document.addEventListener('DOMContentLoaded', populateSkillTable);
