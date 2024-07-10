@@ -15,7 +15,8 @@
             "Entity\\": "src/Entity/",
             "Controller\\": "src/Controller/",
             "Service\\": "src/Service/", 
-            "Middleware\\": "src/Middleware/"
+            "Middleware\\": "src/Middleware/",
+            "Scripts\\": "src/Scripts/"
         }
     }
 }

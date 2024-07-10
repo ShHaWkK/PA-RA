@@ -33,6 +33,7 @@ use Controller\ProductController;
 use Controller\LoginController;
 use Controller\PrivateAreaController;
 use Controller\ServiceProposalController;
+use Controller\TicketController;
 use Service\PDFService;
 use Service\JWTService;
 use Middleware\JWTMiddleware;
@@ -74,7 +75,8 @@ $controllerMap = [
     'volunteer' => PrivateAreaController::class,
     'merchant' => PrivateAreaController::class,
     'services' => ServiceController::class, 
-    'service_proposals' => ServiceProposalController::class
+    'service_proposals' => ServiceProposalController::class, 
+    'tickets' => TicketController::class
 ];
 // Vérifie si le contrôleur existe pour le premier élément de l'URI
 $route = $uriParts[0];
