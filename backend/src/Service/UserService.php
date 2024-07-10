@@ -15,13 +15,14 @@ class UserService
 
     public function addUser($data, $role)
     {
+        error_log("Adding user with email: " . $data['email']);
+
         $user = new UserModel();
         $user->setFirstName($data['first_name']);
         $user->setLastName($data['last_name']);
         $user->setEmail($data['email']);
         $user->setPhoneNumber($data['phone_number']);
 
-        // On déclare le hash dans une variable préalablement pour éviter les erreurs d'encodage dans la BDD
         $password = password_hash($data['password'], PASSWORD_BCRYPT);
         $user->setPassword($password);
 
@@ -33,11 +34,7 @@ class UserService
         $this->entityManager->persist($user);
         $this->entityManager->flush();
 
-        // A supprimer:
-        error_log("user->getPassword()");
-        error_log($user->getPassword());
-        error_log("hasshed password");
-        error_log($password);
+        error_log("User added successfully with ID: " . $user->getId());
 
         return $user;
     }

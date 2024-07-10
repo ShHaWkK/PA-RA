@@ -15,19 +15,26 @@ class CompanyService
         $this->entityManager = $entityManager;
     }
 
-    public function addCompany($data, UserModel $user)
+    public function addCompany($data)
     {
+        error_log("Adding company with name: " . $data['company_name']);
+
         $company = new CompanyModel();
         $company->setName($data['company_name']);
         $company->setSiret($data['siret']);
         $company->setAddress($data['address']);
+        $company->setContactInfo($data['contact_info']);
         $company->setRenewalDate(new \DateTime($data['renewal_date']));
-        $company->setUser($user);
+        $company->setRenewalStatus('pending');
+
 
         $this->entityManager->persist($company);
         $this->entityManager->flush();
 
+        error_log("Company added successfully with ID: " . $company->getId());
+
         return $company;
     }
+
 }
 ?>

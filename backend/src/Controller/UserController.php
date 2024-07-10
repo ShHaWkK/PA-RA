@@ -83,7 +83,6 @@ class UserController
 
             // Check if the email already exists
             $existingUser = $this->entityManager->getRepository(UserModel::class)->findOneBy(['email' => $data['email']]);
-            error_log("wesh");
 
             if ($existingUser) {
                 http_response_code(409);
@@ -172,8 +171,10 @@ class UserController
 
     private function registerMerchant($data)
     {
+        $this->entityManager->beginTransaction();
+
         try {
-            if (!isset($data['first_name']) || !isset($data['last_name']) || !isset($data['email']) || !isset($data['phone_number']) || !isset($data['password']) || !isset($data['company'])) {
+            if (!isset($data['first_name']) || !isset($data['last_name']) || !isset($data['email']) || !isset($data['phone_number']) || !isset($data['password']) || !isset($data['company_name'])) {
                 http_response_code(400);
                 return ['error' => 'Missing required fields'];
             }
@@ -188,10 +189,15 @@ class UserController
             $user = $this->userService->addUser($data, 'merchant');
 
             // Handle company assignment
-            $companyData = $data['company'];
-            $this->companyService->addCompany($companyData, $user);
+            error_log("userController, data=");
+            error_log(print_r($data, true));
+            $this->companyService->addCompany($data);
 
+            error_log("bonjourent");
             $this->entityManager->flush();
+            error_log("post entity");
+
+            $this->entityManager->commit();
 
             return ['id' => $user->getId(), 'message' => 'Merchant registered successfully. Awaiting approval.'];
 
@@ -203,6 +209,7 @@ class UserController
             return ['error' => 'Internal Server Error'];
         }
     }
+
 
     private function approveUser($data, $userId)
     {
