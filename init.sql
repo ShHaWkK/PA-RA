@@ -177,12 +177,12 @@ INSERT INTO products (name, barcode, expiration_date, quantity) VALUES
 ('Product 5', '1234567890127', '2026-12-31', 500);
 
 -- Utilisateurs
-INSERT INTO users (first_name, last_name, email, phone_number, password, role, status) VALUES 
-('Admin', 'Admin', 'admin@admin.com', '1234567890', '$2b$12$smiPWbByjWInDohGQtMgSeMOE.CH7i/ZW3AWXCKhDbtw/QJW7umKS', 'admin', 'approved'),
-('John', 'Doe', 'john.doe@example.com', '0987654321', '$2b$12$smiPWbByjWInDohGQtMgSeMOE.CH7i/ZW3AWXCKhDbtw/QJW7umKS', 'volunteer', 'approved'),
-('Jane', 'Doe', 'jane.doe@example.com', '0987654322', '$2b$12$smiPWbByjWInDohGQtMgSeMOE.CH7i/ZW3AWXCKhDbtw/QJW7umKS', 'employee', 'pending'),
-('Alice', 'Smith', 'alice.smith@example.com', '0987654323', '$2b$12$smiPWbByjWInDohGQtMgSeMOE.CH7i/ZW3AWXCKhDbtw/QJW7umKS', 'manager', 'approved'),
-('Bob', 'Johnson', 'bob.johnson@example.com', '0987654324', '$2b$12$smiPWbByjWInDohGQtMgSeMOE.CH7i/ZW3AWXCKhDbtw/QJW7umKS', 'merchant', 'pending');
+INSERT INTO users (first_name, last_name, email, phone_number, password, role, status) VALUES
+('Admin', 'Admin', 'admin@admin.com', '1234567890', '$2y$10$KJ8zwrGJq9JfHywhUxxRheY.CgbYnBvGjUlhcXHup0DaF.IRtK/Sa', 'admin', 'approved'),
+('John', 'Doe', 'john.doe@example.com', '0987654321', '$2y$10$KJ8zwrGJq9JfHywhUxxRheY.CgbYnBvGjUlhcXHup0DaF.IRtK/Sa', 'volunteer', 'approved'),
+('Jane', 'Doe', 'jane.doe@example.com', '0987654322', '$2y$10$KJ8zwrGJq9JfHywhUxxRheY.CgbYnBvGjUlhcXHup0DaF.IRtK/Sa', 'employee', 'pending'),
+('Alice', 'Smith', 'alice.smith@example.com', '0987654323', '$2y$10$KJ8zwrGJq9JfHywhUxxRheY.CgbYnBvGjUlhcXHup0DaF.IRtK/Sa', 'manager', 'approved'),
+('Bob', 'Johnson', 'bob.johnson@example.com', '0987654324', '$2y$10$KJ8zwrGJq9JfHywhUxxRheY.CgbYnBvGjUlhcXHup0DaF.IRtK/Sa', 'merchant', 'pending');
 
 -- Entreprises
 INSERT INTO companies (name, address, contact_info, siret, renewal_date) VALUES 
