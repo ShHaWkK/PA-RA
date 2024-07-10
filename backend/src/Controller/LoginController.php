@@ -46,7 +46,7 @@ class LoginController
 
         if (!password_verify($password, $user->getPassword())) {
             http_response_code(401);
-            return ['error' => 'Invalid email or password'];
+            return ['error' => 'Invalid password'];
         }
 
         // Générer un token JWT
@@ -57,7 +57,7 @@ class LoginController
         ];
         $token = $this->jwtService->generateToken($payload);
 
-        return ['token' => $token, 'role' => $user->getRole()];
+        return ['token' => $token, 'role' =>$user->getRole()];
     }
 }
 ?>

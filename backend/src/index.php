@@ -80,6 +80,13 @@ $controllerMap = [
 ];
 // Vérifie si le contrôleur existe pour le premier élément de l'URI
 $route = $uriParts[0];
+
+// A retirer par la suite, permet de générer le token à mettre dans la table admin
+if($route == 'generate_token'){
+    echo json_encode(['token' => password_hash($uriParts[1], PASSWORD_BCRYPT)]);
+    password_hash($uriParts[1], PASSWORD_BCRYPT);
+}
+
 if (!array_key_exists($route, $controllerMap)) {
     http_response_code(404);
     echo json_encode(['error' => 'Endpoint not found']);

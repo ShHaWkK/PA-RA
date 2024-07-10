@@ -12,7 +12,6 @@ require_once($_SERVER['DOCUMENT_ROOT'] . '/views/includes/lang.php');
 </head>
 
 <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/includes/Header.php'); ?>
-
 <body>
 <!-- Language Selection Menu -->
 <div class="language-selector">
