@@ -166,6 +166,20 @@ CREATE TABLE IF NOT EXISTS user_tokens (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS tickets (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    type ENUM('adhesion', 'collecte', 'stock', 'tournee', 'benevole', 'service') NOT NULL,
+    description TEXT NOT NULL,
+    status ENUM('open', 'in_progress', 'closed') NOT NULL DEFAULT 'open',
+    created_by INT NOT NULL,
+    assigned_to INT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (assigned_to) REFERENCES users(id) ON DELETE SET NULL
+);
+
+
 -- Insertion 
 
 -- Produits
