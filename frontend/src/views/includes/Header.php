@@ -11,6 +11,7 @@
             <li><a href="/Merchant/SignUp"><?php echo htmlspecialchars($data['header_merchant_signup']); ?></a></li>
             <li><a href="/Volunteer/SignUp"><?php echo htmlspecialchars($data['header_volunteer_signup']); ?></a></li>
             <li><a href="/Contact"><?php echo htmlspecialchars($data['header_contact']); ?></a></li>
+            <li><a href="/Login"><?php echo htmlspecialchars($data['login_label']); ?></a></li>
         </ul>
     </nav>
 </header>

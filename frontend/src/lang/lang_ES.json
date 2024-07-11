@@ -11,9 +11,10 @@
     "activity_2": "Redistribución",
     "activity_2_text": "Ofrecemos redistribuir los excedentes de alimentos a las personas necesitadas.",
     "activity_3": "Asociaciones",
-    "activity_3_text": "Trabajamos con empresas y otras organizaciones para promover prácticas sostenibles.", 
+    "activity_3_text": "Trabajamos con empresas y otras organizaciones para promover prácticas sostenibles.",
 
 
+    "login_label": "conectarse",
     "login_title": "Página de Inicio de Sesión",
     "login_heading": "Iniciar Sesión",
     "email_label": "Correo Electrónico:",

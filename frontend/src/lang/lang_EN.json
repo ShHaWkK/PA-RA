@@ -11,9 +11,10 @@
     "activity_2": "Redistribution",
     "activity_2_text": "We offer to redistribute surplus food to those in need.",
     "activity_3": "Partnerships",
-    "activity_3_text": "We work with companies and other organizations to promote sustainable practices.", 
+    "activity_3_text": "We work with companies and other organizations to promote sustainable practices.",
 
 
+    "login_label": "log in",
     "login_title": "Login Page",
     "login_heading": "Login",
     "email_label": "Email:",

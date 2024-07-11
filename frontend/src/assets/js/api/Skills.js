@@ -76,9 +76,9 @@ async function deleteSkill(skillId) {
 
 async function getAllSkills() {
     return await fetch(apiEndpoint + '/skills', {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    });
 }

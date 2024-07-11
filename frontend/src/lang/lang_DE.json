@@ -11,8 +11,9 @@
     "activity_2": "Umverteilung",
     "activity_2_text": "Wir bieten an, überschüssige Lebensmittel an Bedürftige zu verteilen.",
     "activity_3": "Partnerschaften",
-    "activity_3_text": "Wir arbeiten mit Unternehmen und anderen Organisationen zusammen, um nachhaltige Praktiken zu fördern.", 
+    "activity_3_text": "Wir arbeiten mit Unternehmen und anderen Organisationen zusammen, um nachhaltige Praktiken zu fördern.",
 
+    "login_label": "Einloggen",
     "login_title": "Login-Seite",
     "login_heading": "Anmeldung",
     "email_label": "E-Mail:",

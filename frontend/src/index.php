@@ -28,7 +28,10 @@ switch ($request) {
         require __DIR__ . '/views/SignUp/VolunteerSignUp.php';
         break;
     case '/Admin':
-        require __DIR__ . '/views/SignIn/AdminSignIn.php';
+        require __DIR__ . '/views/Login/Login.php';
+        break;
+    case '/Login':
+        require __DIR__ . '/views/Login/LogIn.php';
         break;
     default:
         http_response_code(404);
