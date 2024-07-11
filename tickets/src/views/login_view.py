@@ -38,14 +38,13 @@ class LoginApp:
 
         response = TicketAPI.login(login_data)
 
-        if response and response.status_code == 200:
-            user_data = response.json()
-            if user_data['role'] == 'admin':
-                open_admin_dashboard(self.root, user_data)
-            elif user_data['role'] == 'volunteer':
-                open_volunteer_dashboard(self.root, user_data)
-            elif user_data['role'] == 'merchant':
-                open_merchant_dashboard(self.root, user_data)
+        if response and 'error' not in response:
+            if response['role'] == 'admin':
+                open_admin_dashboard(self.root, response)
+            elif response['role'] == 'volunteer':
+                open_volunteer_dashboard(self.root, response)
+            elif response['role'] == 'merchant':
+                open_merchant_dashboard(self.root, response)
             else:
                 messagebox.showerror("Error", "Unknown user role")
         else:

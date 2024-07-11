@@ -17,7 +17,7 @@ class TicketAPI:
             return response.json()
         except requests.exceptions.RequestException as e:
             logging.error(f"Failed to create ticket: {e}")
-            return None
+            return {"error": str(e)}
 
     @staticmethod
     def get_ticket(ticket_id):
@@ -27,7 +27,7 @@ class TicketAPI:
             return response.json()
         except requests.exceptions.RequestException as e:
             logging.error(f"Failed to get ticket: {e}")
-            return None
+            return {"error": str(e)}
 
     @staticmethod
     def update_ticket(ticket_id, data):
@@ -37,7 +37,7 @@ class TicketAPI:
             return response.json()
         except requests.exceptions.RequestException as e:
             logging.error(f"Failed to update ticket: {e}")
-            return None
+            return {"error": str(e)}
 
     @staticmethod
     def delete_ticket(ticket_id):
@@ -47,7 +47,7 @@ class TicketAPI:
             return response.json()
         except requests.exceptions.RequestException as e:
             logging.error(f"Failed to delete ticket: {e}")
-            return None
+            return {"error": str(e)}
 
     @staticmethod
     def get_all_tickets():
@@ -57,7 +57,27 @@ class TicketAPI:
             return response.json()
         except requests.exceptions.RequestException as e:
             logging.error(f"Failed to get all tickets: {e}")
-            return None
+            return {"error": str(e)}
+
+    @staticmethod
+    def search_tickets(criteria):
+        try:
+            response = requests.get(f"{TicketAPI.BASE_URL}/tickets/search", params=criteria)
+            response.raise_for_status()
+            return response.json()
+        except requests.exceptions.RequestException as e:
+            logging.error(f"Failed to search tickets: {e}")
+            return {"error": str(e)}
+
+    @staticmethod
+    def auto_assign_ticket(ticket_id):
+        try:
+            response = requests.put(f"{TicketAPI.BASE_URL}/tickets/assign/{ticket_id}")
+            response.raise_for_status()
+            return response.json()
+        except requests.exceptions.RequestException as e:
+            logging.error(f"Failed to auto-assign ticket: {e}")
+            return {"error": str(e)}
 
     @staticmethod
     def get_ticket_messages(ticket_id):
@@ -67,7 +87,7 @@ class TicketAPI:
             return response.json()
         except requests.exceptions.RequestException as e:
             logging.error(f"Failed to get ticket messages: {e}")
-            return None
+            return {"error": str(e)}
 
     @staticmethod
     def add_message(ticket_id, message_data):
@@ -94,7 +114,7 @@ class TicketAPI:
         try:
             response = requests.post(f"{TicketAPI.BASE_URL}/login", json=data)
             response.raise_for_status()
-            return response
+            return response.json()
         except requests.exceptions.RequestException as e:
             logging.error(f"Failed to login: {e}")
-            return None
+            return {"error": str(e)}
