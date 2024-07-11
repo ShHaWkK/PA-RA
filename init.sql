@@ -181,6 +181,17 @@ CREATE TABLE IF NOT EXISTS tickets (
 );
 
 
+-- Table Vehicules
+
+CREATE TABLE IF NOT EXISTS Vehicules (
+    ID_Vehicule INT AUTO_INCREMENT PRIMARY KEY,
+    Marque VARCHAR(255),
+    Modele VARCHAR(255),
+    Plaque_Immatriculation VARCHAR(50),
+    Statut VARCHAR(100),
+    Localisation_Actuelle TEXT
+);
+
 
 -- Insertion 
 
@@ -194,6 +205,7 @@ INSERT INTO products (name, barcode, expiration_date, quantity) VALUES
 
 -- Utilisateurs
 INSERT INTO users (first_name, last_name, email, phone_number, password, role, status) VALUES
+-- password1423
 ('Admin', 'Admin', 'admin@admin.com', '1234567890', '$2y$10$KJ8zwrGJq9JfHywhUxxRheY.CgbYnBvGjUlhcXHup0DaF.IRtK/Sa', 'admin', 'approved'),
 ('John', 'Doe', 'john.doe@example.com', '0987654321', '$2y$10$KJ8zwrGJq9JfHywhUxxRheY.CgbYnBvGjUlhcXHup0DaF.IRtK/Sa', 'volunteer', 'approved'),
 ('Jane', 'Doe', 'jane.doe@example.com', '0987654322', '$2y$10$KJ8zwrGJq9JfHywhUxxRheY.CgbYnBvGjUlhcXHup0DaF.IRtK/Sa', 'employee', 'pending'),
