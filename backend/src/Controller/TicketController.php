@@ -34,13 +34,21 @@ class TicketController
                     return $this->createTicket($input);
                 case 'GET':
                     if (isset($uriParts[1])) {
-                        return $this->getTicket((int)$uriParts[1]);
+                        if ($uriParts[1] === 'search') {
+                            return $this->searchTickets($input);
+                        } else {
+                            return $this->getTicket((int)$uriParts[1]);
+                        }
                     } else {
                         return $this->getAllTickets();
                     }
                 case 'PUT':
                     if (isset($uriParts[1])) {
-                        return $this->updateTicket((int)$uriParts[1], $input);
+                        if ($uriParts[1] === 'assign') {
+                            return $this->autoAssignTicket((int)$uriParts[2]);
+                        } else {
+                            return $this->updateTicket((int)$uriParts[1], $input);
+                        }
                     }
                     http_response_code(400);
                     return ['error' => 'Ticket ID not specified'];
@@ -63,7 +71,6 @@ class TicketController
     public function createTicket($data)
     {
         try {
-            // Validate input data (add your own validation logic)
             if (!isset($data['type']) || !isset($data['description']) || !isset($data['status']) || !isset($data['created_by'])) {
                 http_response_code(400);
                 return ['error' => 'Missing required fields for new ticket'];
@@ -76,6 +83,9 @@ class TicketController
             $ticket->setCreatedBy($this->entityManager->find(UserModel::class, $data['created_by']));
             if (isset($data['assigned_to'])) {
                 $ticket->setAssignedTo($this->entityManager->find(UserModel::class, $data['assigned_to']));
+            }
+            if (isset($data['attachments'])) {
+                $ticket->setAttachments($data['attachments']);
             }
             $ticket->setCreatedAt(new \DateTime("now"));
             $ticket->setUpdatedAt(new \DateTime("now"));
@@ -108,7 +118,6 @@ class TicketController
     public function updateTicket($id, $data)
     {
         try {
-            // Validate input data (add your own validation logic)
             if (!isset($data['type']) && !isset($data['description']) && !isset($data['status']) && !isset($data['assigned_to'])) {
                 http_response_code(400);
                 return ['error' => 'No fields to update'];
@@ -131,6 +140,9 @@ class TicketController
             }
             if (isset($data['assigned_to'])) {
                 $ticket->setAssignedTo($this->entityManager->find(UserModel::class, $data['assigned_to']));
+            }
+            if (isset($data['attachments'])) {
+                $ticket->setAttachments($data['attachments']);
             }
             $ticket->setUpdatedAt(new \DateTime("now"));
 
@@ -173,5 +185,30 @@ class TicketController
             throw $e;
         }
     }
+
+    public function searchTickets($criteria)
+    {
+        try {
+            $tickets = $this->entityManager->getRepository(TicketModel::class)->searchTickets($criteria);
+            return json_decode($this->serializer->serialize($tickets, 'json'), true);
+        } catch (\Exception $e) {
+            error_log("Exception in searchTickets: " . $e->getMessage());
+            http_response_code(500);
+            return ['error' => 'Internal Server Error'];
+        }
+    }
+
+    public function autoAssignTicket($ticketId)
+    {
+        try {
+            $ticket = $this->entityManager->getRepository(TicketModel::class)->autoAssignTicket($ticketId);
+            return json_decode($this->serializer->serialize($ticket, 'json'), true);
+        } catch (\Exception $e) {
+            error_log("Exception in autoAssignTicket: " . $e->getMessage());
+            http_response_code(500);
+            return ['error' => 'Internal Server Error'];
+        }
+    }
 }
+
 ?>

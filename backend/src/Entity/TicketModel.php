@@ -35,6 +35,9 @@ class TicketModel
     #[ORM\Column(type: "datetime")]
     private $updated_at;
 
+    #[ORM\Column(type: "array", nullable: true)]
+    private $attachments;
+
     // Getters and setters for each property...
 
     public function getId(): ?int
@@ -118,5 +121,17 @@ class TicketModel
         $this->updated_at = $updated_at;
         return $this;
     }
+
+    public function getAttachments(): ?array
+    {
+        return $this->attachments;
+    }
+
+    public function setAttachments(?array $attachments): self
+    {
+        $this->attachments = $attachments;
+        return $this;
+    }
 }
+
 ?>

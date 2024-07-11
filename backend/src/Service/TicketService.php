@@ -24,6 +24,9 @@ class TicketService
         if (isset($data['assigned_to'])) {
             $ticket->setAssignedTo($this->entityManager->find(User::class, $data['assigned_to']));
         }
+        if (isset($data['attachments'])) {
+            $ticket->setAttachments($data['attachments']);
+        }
         $ticket->setCreatedAt(new \DateTime("now"));
         $ticket->setUpdatedAt(new \DateTime("now"));
 
@@ -57,6 +60,9 @@ class TicketService
         if (isset($data['assigned_to'])) {
             $ticket->setAssignedTo($this->entityManager->find(User::class, $data['assigned_to']));
         }
+        if (isset($data['attachments'])) {
+            $ticket->setAttachments($data['attachments']);
+        }
         $ticket->setUpdatedAt(new \DateTime("now"));
 
         $this->entityManager->flush();
@@ -79,5 +85,56 @@ class TicketService
     {
         return $this->entityManager->getRepository(TicketModel::class)->findAll();
     }
+
+    public function searchTickets($criteria)
+    {
+        $repository = $this->entityManager->getRepository(TicketModel::class);
+        $queryBuilder = $repository->createQueryBuilder('t');
+
+        if (!empty($criteria['keyword'])) {
+            $queryBuilder->andWhere('t.description LIKE :keyword')
+                         ->setParameter('keyword', '%' . $criteria['keyword'] . '%');
+        }
+
+        if (!empty($criteria['status'])) {
+            $queryBuilder->andWhere('t.status = :status')
+                         ->setParameter('status', $criteria['status']);
+        }
+
+        if (!empty($criteria['createdAfter'])) {
+            $queryBuilder->andWhere('t.createdAt >= :createdAfter')
+                         ->setParameter('createdAfter', new \DateTime($criteria['createdAfter']));
+        }
+
+        if (!empty($criteria['createdBy'])) {
+            $queryBuilder->andWhere('t.created_by = :createdBy')
+                         ->setParameter('createdBy', $criteria['createdBy']);
+        }
+
+        return $queryBuilder->getQuery()->getResult();
+    }
+
+    public function autoAssignTicket($ticketId)
+    {
+        $ticket = $this->entityManager->find(TicketModel::class, $ticketId);
+        if (!$ticket) {
+            throw new \Exception('Ticket not found');
+        }
+
+        $admins = $this->entityManager->getRepository(User::class)
+                     ->findBy(['role' => 'admin', 'status' => 'active']);
+        
+        if (empty($admins)) {
+            throw new \Exception('No available admins');
+        }
+
+        $ticket->setAssignedTo($admins[0]);
+        $ticket->setUpdatedAt(new \DateTime("now"));
+
+        $this->entityManager->flush();
+
+        return $ticket;
+    }
 }
+
 ?>
