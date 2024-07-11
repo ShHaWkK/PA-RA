@@ -1,14 +1,14 @@
 import tkinter as tk
 from tkinter import messagebox
-from views.dashboard_view import open_dashboard
-import requests
+from src.api.ticket_api import TicketAPI
+from src.views.volunteer_dashboard import open_volunteer_dashboard
+from src.views.merchant_dashboard import open_merchant_dashboard
+from src.views.admin_dashboard import open_admin_dashboard
 
 class LoginApp:
     def __init__(self, root):
         self.root = root
         self.root.title("Login")
-
-        self.api_url = "http://localhost:80/login"  # Change this to your login API endpoint
 
         self.create_widgets()
 
@@ -21,11 +21,9 @@ class LoginApp:
         self.password_entry = tk.Entry(self.root, show="*")
         self.password_entry.grid(row=1, column=1)
 
-        tk.Button(self.root, text="Espace Bénévole", command=lambda: self.login("volunteer")).grid(row=2, column=0)
-        tk.Button(self.root, text="Espace Commerçant", command=lambda: self.login("merchant")).grid(row=2, column=1)
-        tk.Button(self.root, text="Espace Admin", command=lambda: self.login("admin")).grid(row=2, column=2)
+        tk.Button(self.root, text="Login", command=self.login).grid(row=2, column=0, columnspan=2)
 
-    def login(self, role):
+    def login(self):
         email = self.email_entry.get()
         password = self.password_entry.get()
 
@@ -35,14 +33,21 @@ class LoginApp:
 
         login_data = {
             "email": email,
-            "password": password,
-            "role": role
+            "password": password
         }
 
-        response = requests.post(self.api_url, json=login_data)
+        response = TicketAPI.login(login_data)
 
         if response.status_code == 200:
-            open_dashboard(self.root, role)
+            user_data = response.json()
+            if user_data['role'] == 'admin':
+                open_admin_dashboard(self.root, user_data)
+            elif user_data['role'] == 'volunteer':
+                open_volunteer_dashboard(self.root, user_data)
+            elif user_data['role'] == 'merchant':
+                open_merchant_dashboard(self.root, user_data)
+            else:
+                messagebox.showerror("Error", "Unknown user role")
         else:
             messagebox.showerror("Error", "Login failed")
 
@@ -50,6 +55,3 @@ def open_login():
     root = tk.Tk()
     app = LoginApp(root)
     root.mainloop()
-
-if __name__ == "__main__":
-    open_login()
