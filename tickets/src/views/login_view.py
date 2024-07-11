@@ -38,7 +38,7 @@ class LoginApp:
 
         response = TicketAPI.login(login_data)
 
-        if response.status_code == 200:
+        if response and response.status_code == 200:
             user_data = response.json()
             if user_data['role'] == 'admin':
                 open_admin_dashboard(self.root, user_data)

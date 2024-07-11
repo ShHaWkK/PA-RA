@@ -1,49 +1,100 @@
+import os
 import requests
+import logging
+from dotenv import load_dotenv
+
+# Charger les variables d'environnement depuis le fichier .env
+load_dotenv()
 
 class TicketAPI:
-    BASE_URL = "http://localhost:80/tickets"
+    BASE_URL = os.getenv("API_ENDPOINT")
 
     @staticmethod
     def create_ticket(data):
-        response = requests.post(TicketAPI.BASE_URL, json=data)
-        return response.json()
+        try:
+            response = requests.post(f"{TicketAPI.BASE_URL}/tickets", json=data)
+            response.raise_for_status()
+            return response.json()
+        except requests.exceptions.RequestException as e:
+            logging.error(f"Failed to create ticket: {e}")
+            return None
 
     @staticmethod
     def get_ticket(ticket_id):
-        response = requests.get(f"{TicketAPI.BASE_URL}/{ticket_id}")
-        return response.json()
+        try:
+            response = requests.get(f"{TicketAPI.BASE_URL}/tickets/{ticket_id}")
+            response.raise_for_status()
+            return response.json()
+        except requests.exceptions.RequestException as e:
+            logging.error(f"Failed to get ticket: {e}")
+            return None
 
     @staticmethod
     def update_ticket(ticket_id, data):
-        response = requests.put(f"{TicketAPI.BASE_URL}/{ticket_id}", json=data)
-        return response.json()
+        try:
+            response = requests.put(f"{TicketAPI.BASE_URL}/tickets/{ticket_id}", json=data)
+            response.raise_for_status()
+            return response.json()
+        except requests.exceptions.RequestException as e:
+            logging.error(f"Failed to update ticket: {e}")
+            return None
 
     @staticmethod
     def delete_ticket(ticket_id):
-        response = requests.delete(f"{TicketAPI.BASE_URL}/{ticket_id}")
-        return response.json()
+        try:
+            response = requests.delete(f"{TicketAPI.BASE_URL}/tickets/{ticket_id}")
+            response.raise_for_status()
+            return response.json()
+        except requests.exceptions.RequestException as e:
+            logging.error(f"Failed to delete ticket: {e}")
+            return None
 
     @staticmethod
     def get_all_tickets():
-        response = requests.get(TicketAPI.BASE_URL)
-        return response.json()
+        try:
+            response = requests.get(f"{TicketAPI.BASE_URL}/tickets")
+            response.raise_for_status()
+            return response.json()
+        except requests.exceptions.RequestException as e:
+            logging.error(f"Failed to get all tickets: {e}")
+            return None
 
     @staticmethod
     def get_ticket_messages(ticket_id):
-        response = requests.get(f"{TicketAPI.BASE_URL}/{ticket_id}/messages")
-        return response.json()
+        try:
+            response = requests.get(f"{TicketAPI.BASE_URL}/tickets/{ticket_id}/messages")
+            response.raise_for_status()
+            return response.json()
+        except requests.exceptions.RequestException as e:
+            logging.error(f"Failed to get ticket messages: {e}")
+            return None
 
     @staticmethod
     def add_message(ticket_id, message_data):
-        response = requests.post(f"{TicketAPI.BASE_URL}/{ticket_id}/messages", json=message_data)
-        return response.status_code == 200
+        try:
+            response = requests.post(f"{TicketAPI.BASE_URL}/tickets/{ticket_id}/messages", json=message_data)
+            response.raise_for_status()
+            return response.status_code == 200
+        except requests.exceptions.RequestException as e:
+            logging.error(f"Failed to add message to ticket: {e}")
+            return False
 
     @staticmethod
     def close_ticket(ticket_id, data):
-        response = requests.put(f"{TicketAPI.BASE_URL}/{ticket_id}/close", json=data)
-        return response.status_code == 200
+        try:
+            response = requests.put(f"{TicketAPI.BASE_URL}/tickets/{ticket_id}/close", json=data)
+            response.raise_for_status()
+            return response.status_code == 200
+        except requests.exceptions.RequestException as e:
+            logging.error(f"Failed to close ticket: {e}")
+            return False
 
     @staticmethod
     def login(data):
-        response = requests.post(f"http://localhost:80/login", json=data)
-        return response
+        try:
+            response = requests.post(f"{TicketAPI.BASE_URL}/login", json=data)
+            response.raise_for_status()
+            return response
+        except requests.exceptions.RequestException as e:
+            logging.error(f"Failed to login: {e}")
+            return None
