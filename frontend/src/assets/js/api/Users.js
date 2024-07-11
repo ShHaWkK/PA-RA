@@ -66,3 +66,5 @@ async function getAllUsers() {
         }
         return await response.json();
 }
+
+export { registerVolunteer, registerMerchant, approveUser, getUser, getAllUsers };

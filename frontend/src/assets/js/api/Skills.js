@@ -1,5 +1,3 @@
-console.log("apiEndpoint",apiEndpoint);
-
 async function createSkill(skillData) {
     try {
         const response = await fetch(apiEndpoint + '/skills', {
@@ -82,3 +80,5 @@ async function getAllSkills() {
         }
     });
 }
+
+export { createSkill, deleteSkill, getAllSkills, getSkill, updateSkill };

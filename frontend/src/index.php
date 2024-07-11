@@ -27,11 +27,11 @@ switch ($request) {
     case '/Volunteer/SignUp':
         require __DIR__ . '/views/SignUp/VolunteerSignUp.php';
         break;
-    case '/Admin':
+    case '/Login':
         require __DIR__ . '/views/Login/Login.php';
         break;
-    case '/Login':
-        require __DIR__ . '/views/Login/LogIn.php';
+    case '/Admin':
+        require __DIR__ . '/views/Admin/Volunteers.php';
         break;
     default:
         http_response_code(404);

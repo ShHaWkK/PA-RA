@@ -24,7 +24,6 @@
 </form>
 
 <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/assets/js/modules/env.php'); ?>
-<!--<script src="/assets/js/api/Login.js"></script>-->
 <script type="module" src="/assets/js/pages/LoginPage.js"></script>
 
 </body>

@@ -25,6 +25,7 @@ async function login(email, password) {
     if (data.token) {
         setJwtCookie(data.token);
         setJwtToken(data.token);
+        window.location.href = '/Admin';
     }
 
     return await data;

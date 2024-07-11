@@ -107,10 +107,9 @@
     </div>
 </form>
 
+<!-- Partie traitement API -->
 <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/assets/js/modules/env.php'); ?>
-<script src="/assets/js/api/Users.js"></script>
-<script src="/assets/js/api/Skills.js"></script>
-<script src="/assets/js/pages/VolunteerSignUp.js"></script>
+<script type="module" src="/assets/js/pages/VolunteerSignUp.js"></script>
 
 </body>
 </html>

@@ -55,8 +55,7 @@
 
 <!-- Partie traitement API -->
 <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/assets/js/modules/env.php'); ?>
-<script src="/assets/js/api/Users.js"></script>
-<script src="/assets/js/pages/MerchantSignUp.js"></script>
+<script type="module" src="/assets/js/pages/MerchantSignUp.js"></script>
 
 </body>
 </html>

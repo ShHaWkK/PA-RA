@@ -1,3 +1,6 @@
+import { registerVolunteer } from "../api/Users.js";
+import { getAllSkills } from "../api/Skills.js"
+
 document.getElementById('registrationForm').addEventListener('submit', async function(event) {
     event.preventDefault();
 
@@ -52,7 +55,6 @@ document.getElementById('registrationForm').addEventListener('submit', async fun
 
     jsonData.skills = skills;
 
-    // Log the JSON data (you can send it to an API endpoint here)
     console.log(jsonData);
 
     const result = await registerVolunteer(jsonData);
