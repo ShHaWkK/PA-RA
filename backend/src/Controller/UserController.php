@@ -3,6 +3,7 @@
 namespace Controller;
 
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\Exception\NotSupported;
 use Entity\UserModel;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
@@ -39,37 +40,49 @@ class UserController
         switch ($method) {
             case 'POST':
                 if (isset($uriParts[1])) {
-                    if ($uriParts[1] === 'registerVolunteer') {
-                        return $this->registerVolunteer($input);
-                    } elseif ($uriParts[1] === 'registerMerchant') {
-                        return $this->registerMerchant($input);
-                    } elseif ($uriParts[1] === 'approveUser') {
-                        return $this->approveUser($input, $uriParts[2] ?? null);
-                    } elseif ($uriParts[1] === 'addAvailability') {
-                        return $this->addAvailability($input);
+                    switch ($uriParts[1]) {
+                        case 'registerVolunteer':
+                            return $this->registerVolunteer($input);
+                        case 'registerMerchant':
+                            return $this->registerMerchant($input);
+                        case 'addAvailability':
+                            return $this->addAvailability($input);
+                        default:
+                            http_response_code(400);
+                            return ['error' => 'Invalid endpoint'];
                     }
-                }
-                http_response_code(400);
-                return ['error' => 'Invalid endpoint'];
+                } else {
+                    http_response_code(400);
+                    return ['error' => 'Invalid endpoint'];
+                } // Break for POST case
+
             case 'GET':
                 if (isset($uriParts[1])) {
-                    if ($uriParts[1] === 'generatePlanning') {
-                        return $this->generatePlanning();
-                    } else {
-                        return $this->getUser($uriParts[1]);
+                    switch ($uriParts[1]) {
+                        case 'generatePlanning':
+                            return $this->generatePlanning();
+                        case 'role':
+                            return $this->getByRole($input);
+                        case 'status':
+                            return $this->getByStatus($input);
+                        default:
+                            return $this->getUser($uriParts[1]);
                     }
                 } else {
                     return $this->getAllUsers();
-                }
+                } // Break for GET case
+
             case 'PUT':
-                if (isset($uriParts[1])) {
-                    return $this->updateUserStatus($uriParts[1], $input);
-                }
-                http_response_code(400);
-                return ['error' => 'User ID not specified'];
+                if (isset($uriParts[2])) {
+                    return $this->updateUserStatus($uriParts[2], $input);
+                } else {
+                    http_response_code(400);
+                    return ['error' => 'User ID not specified'];
+                } // Break for PUT case
+
             default:
                 http_response_code(405);
-                return ['error' => 'Method Not Allowed'];
+                return ['error' => 'Method Not Allowed']; // Break for default case
         }
     }
 
@@ -187,16 +200,8 @@ class UserController
             }
 
             $user = $this->userService->addUser($data, 'merchant');
-
-            // Handle company assignment
-            error_log("userController, data=");
-            error_log(print_r($data, true));
             $this->companyService->addCompany($data);
-
-            error_log("bonjourent");
             $this->entityManager->flush();
-            error_log("post entity");
-
             $this->entityManager->commit();
 
             return ['id' => $user->getId(), 'message' => 'Merchant registered successfully. Awaiting approval.'];
@@ -210,29 +215,23 @@ class UserController
         }
     }
 
-
-    private function approveUser($data, $userId)
-    {
-        try {
-            if (!$userId) {
-                http_response_code(400);
-                return ['error' => 'User ID not provided'];
-            }
-
-            $user = $this->userService->updateUserStatus($userId, 'approved');
-            return ['message' => 'User approved successfully'];
-        } catch (\Exception $e) {
-            http_response_code(500);
-            return ['error' => 'Internal Server Error'];
-        }
-    }
-
+    /**
+     * @throws NotSupported
+     */
     private function getAllUsers()
     {
         $users = $this->entityManager->getRepository(UserModel::class)->findAll();
-        $data = $this->serializer->serialize($users, 'json');
-        return json_decode($data, true);
+
+        // Prepare data using jsonSerialize() method
+        $serializedUsers = [];
+        foreach ($users as $user) {
+            $serializedUsers[] = $user->jsonSerialize();
+        }
+
+        return $serializedUsers;
     }
+
+
 
     private function getUser($id)
     {
@@ -243,6 +242,44 @@ class UserController
         }
         $data = $this->serializer->serialize($user, 'json');
         return json_decode($data, true);
+    }
+
+    private function getByStatus($data)
+    {
+        $userRepository = $this->entityManager->getRepository(UserModel::class);
+        $criteria = [];
+
+        if (isset($data['role'])){
+            $criteria['role'] = $data['role'];
+
+        }
+            $criteria['status'] = $data['status'];
+
+        $users = $userRepository->findBy($criteria);
+
+
+        // Prepare data using jsonSerialize() method
+        $serializedUsers = [];
+        foreach ($users as $user) {
+            $serializedUsers[] = $user->jsonSerialize();
+        }
+
+        return $serializedUsers;
+    }
+
+    private function getByRole($data)
+    {
+        $userRepository = $this->entityManager->getRepository(UserModel::class);
+
+        $users = $userRepository->findBy(['role' => $data['role']]);
+
+        // Prepare data using jsonSerialize() method
+        $serializedUsers = [];
+        foreach ($users as $user) {
+            $serializedUsers[] = $user->jsonSerialize();
+        }
+
+        return $serializedUsers;
     }
 }
 ?>

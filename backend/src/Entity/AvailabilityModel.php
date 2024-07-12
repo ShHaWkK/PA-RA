@@ -7,7 +7,7 @@ use Entity\UserModel;
 
 #[ORM\Entity]
 #[ORM\Table(name: "availabilities")]
-class AvailabilityModel
+class AvailabilityModel implements \JsonSerializable
 {
     #[ORM\Id]
     #[ORM\GeneratedValue(strategy: "AUTO")]
@@ -105,5 +105,18 @@ class AvailabilityModel
         $this->updated_at = $updatedAt;
         return $this;
     }
+
+    public function jsonSerialize(): array
+    {
+        return [
+            'id' => $this->id,
+            'day_of_week' => $this->day_of_week,
+            'start_time' => $this->start_time->format('H:i:s'),
+            'end_time' => $this->end_time->format('H:i:s'),
+            'created_at' => $this->created_at->format('Y-m-d H:i:s'),
+            'updated_at' => $this->updated_at->format('Y-m-d H:i:s'),
+        ];
+    }
+
 }
 ?>
