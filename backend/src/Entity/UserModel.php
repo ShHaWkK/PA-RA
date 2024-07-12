@@ -8,7 +8,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 
 #[ORM\Entity]
 #[ORM\Table(name: "users")]
-class UserModel
+class UserModel implements \JsonSerializable
 {
     #[ORM\Id]
     #[ORM\GeneratedValue(strategy: "AUTO")]
@@ -173,6 +173,8 @@ class UserModel
     {
         if (!$this->skills->contains($skill)) {
             $this->skills[] = $skill;
+            $skill->addUser($this);
+            error_log("UserModel: Added skill ID " . $skill->getId() . " to user ID " . $this->getId());
         }
 
         return $this;
@@ -180,14 +182,12 @@ class UserModel
 
     public function removeSkill(SkillModel $skill): self
     {
-        $this->skills->removeElement($skill);
+        if ($this->skills->removeElement($skill)) {
+            $skill->removeUser($this);
+            error_log("UserModel: Removed skill ID " . $skill->getId() . " from user ID " . $this->getId());
+        }
 
         return $this;
-    }
-
-    public function getAvailabilities(): Collection
-    {
-        return $this->availabilities;
     }
 
     public function addAvailability(AvailabilityModel $availability): self
@@ -195,6 +195,7 @@ class UserModel
         if (!$this->availabilities->contains($availability)) {
             $this->availabilities[] = $availability;
             $availability->setUser($this);
+            error_log("UserModel: Added availability ID " . $availability->getId() . " to user ID " . $this->getId());
         }
 
         return $this;
@@ -203,13 +204,27 @@ class UserModel
     public function removeAvailability(AvailabilityModel $availability): self
     {
         if ($this->availabilities->removeElement($availability)) {
-            // set the owning side to null (unless already changed)
             if ($availability->getUser() === $this) {
                 $availability->setUser(null);
+                error_log("UserModel: Removed availability ID " . $availability->getId() . " from user ID " . $this->getId());
             }
         }
 
         return $this;
+    }
+    public function jsonSerialize(): array
+    {
+        return [
+            'id' => $this->id,
+            'first_name' => $this->first_name,
+            'last_name' => $this->last_name,
+            'email' => $this->email,
+            'phone_number' => $this->phone_number,
+            'role' => $this->role,
+            'status' => $this->status,
+            'created_at' => $this->created_at->format('Y-m-d H:i:s'),
+            'updated_at' => $this->updated_at->format('Y-m-d H:i:s')
+        ];
     }
 }
 ?>

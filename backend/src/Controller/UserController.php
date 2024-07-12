@@ -3,6 +3,7 @@
 namespace Controller;
 
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\Exception\NotSupported;
 use Entity\UserModel;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
@@ -227,12 +228,23 @@ class UserController
         }
     }
 
+    /**
+     * @throws NotSupported
+     */
     private function getAllUsers()
     {
         $users = $this->entityManager->getRepository(UserModel::class)->findAll();
-        $data = $this->serializer->serialize($users, 'json');
-        return json_decode($data, true);
+
+        // Prepare data using jsonSerialize() method
+        $serializedUsers = [];
+        foreach ($users as $user) {
+            $serializedUsers[] = $user->jsonSerialize();
+        }
+
+        return $serializedUsers;
     }
+
+
 
     private function getUser($id)
     {

@@ -8,7 +8,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 
 #[ORM\Entity]
 #[ORM\Table(name: "skills")]
-class SkillModel
+class SkillModel implements \JsonSerializable
 {
     #[ORM\Id]
     #[ORM\GeneratedValue(strategy: "AUTO")]
@@ -21,12 +21,12 @@ class SkillModel
     #[ORM\Column(type: "text")]
     private $description;
 
-//    #[ORM\ManyToMany(targetEntity: UserModel::class, mappedBy: "skills")]
-//    private $users;
+    #[ORM\ManyToMany(targetEntity: UserModel::class, mappedBy: "skills")]
+    private $users;
 
     public function __construct()
     {
-//        $this->users = new ArrayCollection();
+        $this->users = new ArrayCollection();
     }
 
     // Getters and setters for each property
@@ -58,28 +58,39 @@ class SkillModel
         return $this;
     }
 
-//    public function getUsers(): Collection
-//    {
-//        return $this->users;
-//    }
+    public function getUsers(): Collection
+    {
+        return $this->users;
+    }
 
-//    public function addUser(UserModel $user): self
-//    {
-//        if (!$this->users->contains($user)) {
-//            $this->users[] = $user;
-//            $user->addSkill($this);
-//        }
-//
-//        return $this;
-//    }
+    public function addUser(UserModel $user): self
+    {
+        if (!$this->users->contains($user)) {
+            $this->users[] = $user;
+            $user->addSkill($this);
+            error_log("SkillModel: Added user ID " . $user->getId() . " to skill ID " . $this->getId());
+        }
 
-//    public function removeUser(UserModel $user): self
-//    {
-//        if ($this->users->removeElement($user)) {
-//            $user->removeSkill($this);
-//        }
-//
-//        return $this;
-//    }
+        return $this;
+    }
+
+    public function removeUser(UserModel $user): self
+    {
+        if ($this->users->removeElement($user)) {
+            $user->removeSkill($this);
+            error_log("SkillModel: Removed user ID " . $user->getId() . " from skill ID " . $this->getId());
+        }
+
+        return $this;
+    }
+
+    public function jsonSerialize() : array
+    {
+        return [
+            'id' => $this->id,
+            'name' => $this->name,
+            'description' => $this->description
+        ];
+    }
 }
 ?>
