@@ -44,9 +44,7 @@ class UserController
                         return $this->registerVolunteer($input);
                     } elseif ($uriParts[1] === 'registerMerchant') {
                         return $this->registerMerchant($input);
-                    } elseif ($uriParts[1] === 'approveUser') {
-                        return $this->approveUser($input, $uriParts[2] ?? null);
-                    } elseif ($uriParts[1] === 'addAvailability') {
+                    }elseif ($uriParts[1] === 'addAvailability') {
                         return $this->addAvailability($input);
                     }
                 }
@@ -64,7 +62,7 @@ class UserController
                 }
             case 'PUT':
                 if (isset($uriParts[1])) {
-                    return $this->updateUserStatus($uriParts[1], $input);
+                    return $this->updateUserStatus($uriParts[2], $input);
                 }
                 http_response_code(400);
                 return ['error' => 'User ID not specified'];
@@ -162,7 +160,6 @@ class UserController
                 return ['error' => 'Missing status field'];
             }
 
-            error_log("update User status");
             $user = $this->userService->updateUserStatus($id, $data['status']);
             return ['message' => 'User status updated successfully'];
         } catch (\Exception $e) {

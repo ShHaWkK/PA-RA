@@ -2,6 +2,9 @@
 namespace Service;
 
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\Exception\ORMException;
+use Doctrine\ORM\OptimisticLockException;
+use Doctrine\ORM\TransactionRequiredException;
 use Entity\UserModel;
 
 class UserService
@@ -39,10 +42,21 @@ class UserService
         return $user;
     }
 
+    /**
+     * @throws OptimisticLockException
+     * @throws ORMException
+     * @throws TransactionRequiredException
+     */
     public function updateUserStatus($id, $status)
     {
+        error_log("updateUserStatus()");
         $user = $this->entityManager->find(UserModel::class, $id);
+        error_log("id:");
+        error_log(print_r($id,true));
+        error_log("status:");
+        error_log(print_r($status,true));
         if (!$user) {
+            error_log("not found");
             throw new \Exception('User not found');
         }
         error_log("1");
