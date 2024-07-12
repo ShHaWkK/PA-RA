@@ -149,13 +149,14 @@ class SkillController
 
     public function getAllSkills()
     {
-        try {
-            $skillRepository = $this->entityManager->getRepository(SkillModel::class);
-            $skills = $skillRepository->findAll();
-            return json_decode($this->serializer->serialize($skills, 'json'), true);
-        } catch (\Exception $e) {
-            error_log("Exception in getAllSkills: " . $e->getMessage());
-            throw $e;
+        $skills = $this->entityManager->getRepository(SkillModel::class)->findAll();
+
+        // Prepare data using jsonSerialize() method
+        $serializedSkills = [];
+        foreach ($skills as $skill) {
+            $serializedSkills[] = $skill->jsonSerialize();
         }
+
+        return $serializedSkills;
     }
 }

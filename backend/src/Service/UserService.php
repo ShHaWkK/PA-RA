@@ -45,9 +45,11 @@ class UserService
         if (!$user) {
             throw new \Exception('User not found');
         }
-
+        error_log("1");
         $user->setStatus($status);
+        error_log("2");
         $user->setUpdatedAt(new \DateTime("now"));
+        error_log("3");
         $this->entityManager->flush();
 
         return $user;

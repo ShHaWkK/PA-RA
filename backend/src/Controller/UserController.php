@@ -162,6 +162,7 @@ class UserController
                 return ['error' => 'Missing status field'];
             }
 
+            error_log("update User status");
             $user = $this->userService->updateUserStatus($id, $data['status']);
             return ['message' => 'User status updated successfully'];
         } catch (\Exception $e) {
@@ -219,7 +220,7 @@ class UserController
                 http_response_code(400);
                 return ['error' => 'User ID not provided'];
             }
-
+            error_log("approveUser");
             $user = $this->userService->updateUserStatus($userId, 'approved');
             return ['message' => 'User approved successfully'];
         } catch (\Exception $e) {
