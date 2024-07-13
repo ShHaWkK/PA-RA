@@ -8,5 +8,5 @@
 </head>
 
 <body>
-<p>Espace admin</p>
+<p>Espace bénévole</p>
 </body>

@@ -71,12 +71,13 @@ $controllerMap = [
     'products' => ProductController::class,
     'reminders' => ReminderController::class,
     'login' => LoginController::class,
+    'checkSession' => LoginController::class,
     'admin' => PrivateAreaController::class,
     'volunteer' => PrivateAreaController::class,
     'merchant' => PrivateAreaController::class,
-    'services' => ServiceController::class, 
-    'service_proposals' => ServiceProposalController::class, 
-    'tickets' => TicketController::class
+    'services' => ServiceController::class,
+    'service_proposals' => ServiceProposalController::class,
+    'tickets' => TicketController::class,
 ];
 // Vérifie si le contrôleur existe pour le premier élément de l'URI
 $route = $uriParts[0];

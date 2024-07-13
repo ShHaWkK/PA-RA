@@ -31,4 +31,32 @@ async function login(email, password) {
     return await data;
 }
 
-export { login };
+async function authenticate(jwtToken, role) {
+    const response = await fetch(apiEndpoint + '/checkSession' + '/' + role, {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${jwtToken}`,
+            'Content-Type': 'application/json'
+        }
+    });
+
+    if (!response.ok) {
+        if (response.status === 401) {
+            throw new Error('Invalid token');
+        } else if (response.status === 403) {
+            throw new Error('Access denied');
+        } else {
+            throw new Error('Failed to authenticate');
+        }
+    }
+
+    const data = await response.json();
+
+    if (!data.valid) {
+        throw new Error('Invalid response format');
+    }
+
+    return data;
+}
+
+export { login, authenticate };
