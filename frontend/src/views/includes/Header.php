@@ -13,5 +13,14 @@
             <li><a href="/Contact"><?php echo htmlspecialchars($data['header_contact']); ?></a></li>
             <li><a href="/Login"><?php echo htmlspecialchars($data['login_label']); ?></a></li>
         </ul>
+        <div class="language-selector">
+    <select onchange="changeLanguage(this.value)">
+        <option value="EN" <?php echo $userLanguage == 'EN' ? 'selected' : ''; ?>>English</option>
+        <option value="FR" <?php echo $userLanguage == 'FR' ? 'selected' : ''; ?>>Français</option>
+        <option value="ES" <?php echo $userLanguage == 'ES' ? 'selected' : ''; ?>>Español</option>
+        <option value="DE" <?php echo $userLanguage == 'DE' ? 'selected' : ''; ?>>Deutsch</option>
+    </select>
     </nav>
+
+</div>
 </header>

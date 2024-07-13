@@ -12,21 +12,33 @@
     "activity_2_text": "Ofrecemos redistribuir los excedentes de alimentos a las personas necesitadas.",
     "activity_3": "Asociaciones",
     "activity_3_text": "Trabajamos con empresas y otras organizaciones para promover prácticas sostenibles.",
-
-
-    "login_label": "conectarse",
+    "testimonials": "Testimonios",
+    "testimonial_1": "No More Waste ha cambiado mi vida ayudando a reducir el desperdicio en mi comunidad.",
+    "testimonial_1_author": "Juan Pérez",
+    "testimonial_2": "Gracias a No More Waste, he podido ayudar a los que más lo necesitan.",
+    "testimonial_2_author": "Maria López",
+    "gallery": "Galería",
+    "statistics": "Estadísticas",
+    "stat_volunteers": "200+ Voluntarios",
+    "stat_donations": "1000+ Donaciones",
+    "stat_collections": "500+ Recolecciones",
+    "cta_title": "Únete a nosotros en la lucha contra el desperdicio",
+    "cta_text": "Hazte voluntario y sé parte de la solución.",
+    "cta_button": "Hazte Voluntario",
+    "footer_privacy": "Política de Privacidad",
+    "footer_terms": "Términos de Uso",
+    "footer_contact": "Contacto",
+    "login_label": "Conectarse",
     "login_title": "Página de Inicio de Sesión",
     "login_heading": "Iniciar Sesión",
     "email_label": "Correo Electrónico:",
     "password_label1": "Contraseña:",
     "submit_button1": "Iniciar Sesión",
-    
     "2fa_title": "Autenticación de Dos Factores",
     "2fa_heading": "Autenticación de Dos Factores",
     "2fa_instruction": "Por favor, ingrese el código que recibió por correo electrónico:",
     "2fa_code_placeholder": "Código de Verificación",
     "verify_button": "Verificar",
-
     "signup_title": "Formulario de Registro",
     "signup_heading": "Formulario de Registro",
     "first_name_label": "Nombre",
@@ -38,12 +50,10 @@
     "address_label": "Dirección",
     "renewal_date_label": "Fecha de Renovación",
     "submit_button2": "Enviar",
-
     "skills_table_heading": "Habilidades",
     "select_label": "Seleccionar",
     "skill_name_label": "Nombre de la Habilidad",
     "description_label": "Descripción",
-
     "availabilities_heading": "Disponibilidades",
     "day_of_week_label": "Día de la Semana",
     "start_time_label": "Hora de Inicio",
@@ -54,11 +64,9 @@
     "thursday": "Jueves",
     "friday": "Viernes",
     "saturday": "Sábado",
-    "sunday": "Domingo", 
-
+    "sunday": "Domingo",
     "header_home": "Inicio",
     "header_merchant_signup": "Registro de Comerciantes",
     "header_volunteer_signup": "¡Hazte Voluntario!",
     "header_contact": "Contacto"
-
 }
