@@ -3,5 +3,13 @@
 </head>
 
 <footer>
-    <p>&copy; 2024 No More Waste. Tous droits réservés.</p>
+    <div class="container">
+        <p>&copy; 2024 No More Waste. All rights reserved.</p>
+        <ul class="footer-links">
+            <li><a href="#"><?php echo htmlspecialchars($data['footer_privacy']); ?></a></li>
+            <li><a href="#"><?php echo htmlspecialchars($data['footer_terms']); ?></a></li>
+            <li><a href="#"><?php echo htmlspecialchars($data['footer_contact']); ?></a></li>
+        </ul>
+    </div>
 </footer>
+</body>

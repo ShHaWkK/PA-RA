@@ -6,54 +6,6 @@ body {
     background-color: #f0f0f0;
 }
 
-.header {
-    background-color: #333;
-    color: white;
-    padding: 1rem 0;
-}
-
-nav {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0 2rem;
-}
-
-nav .logo a {
-    color: white;
-    text-decoration: none;
-    font-size: 1.5rem;
-}
-
-nav .logo a {
-    color: white;
-    text-decoration: none;
-    font-size: 1.5rem;
-}
-
-nav ul {
-    list-style: none;
-    display: flex;
-    gap: 1rem;
-}
-
-nav ul li a {
-    color: white;
-    text-decoration: none;
-    padding: 0.5rem 1rem;
-    transition: background 0.3s ease;
-}
-
-nav ul li a:hover {
-    background: #555;
-    border-radius: 5px;
-}
-
-.language-selector {
-    text-align: right;
-    padding: 1rem;
-}
-
 .hero {
     background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('/assets/images/recycling_0.jpg') center/cover no-repeat;
     color: white;
@@ -99,46 +51,68 @@ section {
     margin: 0 auto;
 }
 
-.about, .activities {
+.about, .activities, .testimonials, .gallery, .statistics, .cta {
     background-color: white;
     box-shadow: 0 0 10px rgba(0,0,0,0.1);
     margin-bottom: 2rem;
+    padding: 2rem;
+    border-radius: 10px;
 }
 
-.about h2, .activities h2 {
+.about h2, .activities h2, .testimonials h2, .gallery h2, .statistics h2, .cta h2 {
     font-size: 2rem;
     margin-bottom: 1rem;
 }
 
-.activities .activity {
+.activities .activity, .testimonials .testimonial, .gallery .gallery-item, .statistics .stat {
     margin-bottom: 1rem;
 }
 
-.contact {
-    background-color: #333;
-    color: white;
+.testimonials .testimonial {
     text-align: center;
+    font-style: italic;
 }
 
-.contact form {
+.gallery {
     display: flex;
-    flex-direction: column;
     gap: 1rem;
 }
 
-.contact form input, .contact form textarea, .contact form button {
-    padding: 1rem;
-    border: none;
-    border-radius: 5px;
+.gallery-item img {
+    width: 100%;
+    height: auto;
+    border-radius: 10px;
 }
 
-.contact form button {
+.statistics {
+    display: flex;
+    justify-content: space-around;
+}
+
+.statistics .stat {
+    text-align: center;
+    font-size: 1.5rem;
+}
+
+.statistics .stat i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    color: #0288d1;
+}
+
+.cta {
+    text-align: center;
+}
+
+.cta .btn {
     background-color: #ff6f61;
     color: white;
-    cursor: pointer;
+    padding: 1rem 2rem;
+    text-decoration: none;
+    border-radius: 5px;
     transition: background 0.3s ease;
 }
 
-.contact form button:hover {
+.cta .btn:hover {
     background-color: #ff3b2f;
 }

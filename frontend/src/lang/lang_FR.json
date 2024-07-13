@@ -1,5 +1,4 @@
 {
-
     "loading_text": "Chargement...",
     "welcome": "Bienvenue chez No More Waste",
     "welcome_subtitle": "Ensemble, luttons contre le gaspillage pour un avenir durable.",
@@ -13,21 +12,33 @@
     "activity_2_text": "Nous proposons de redistribuer les surplus alimentaires aux personnes dans le besoin.",
     "activity_3": "Partenariats",
     "activity_3_text": "Nous travaillons avec des entreprises et d'autres organisations pour promouvoir des pratiques durables.",
-
-
+    "testimonials": "Témoignages",
+    "testimonial_1": "No More Waste a changé ma vie en m'aidant à réduire le gaspillage dans ma communauté.",
+    "testimonial_1_author": "Jean Dupont",
+    "testimonial_2": "Grâce à No More Waste, j'ai pu aider ceux qui en ont le plus besoin.",
+    "testimonial_2_author": "Marie Curie",
+    "gallery": "Galerie",
+    "statistics": "Statistiques",
+    "stat_volunteers": "200+ Bénévoles",
+    "stat_donations": "1000+ Dons",
+    "stat_collections": "500+ Collectes",
+    "cta_title": "Rejoignez-nous dans la lutte contre le gaspillage",
+    "cta_text": "Devenez bénévole et faites partie de la solution.",
+    "cta_button": "Devenez bénévole",
+    "footer_privacy": "Politique de confidentialité",
+    "footer_terms": "Conditions d'utilisation",
+    "footer_contact": "Contact",
     "login_label": "Se connecter",
     "login_title": "Page de Login",
     "login_heading": "Connexion",
     "email_label": "Email :",
     "password_label1": "Mot de passe :",
     "submit_button1": "Se connecter",
-    
     "2fa_title": "Double Authentification",
     "2fa_heading": "Double Authentification",
     "2fa_instruction": "Veuillez entrer le code que vous avez reçu par email :",
     "2fa_code_placeholder": "Code de vérification",
     "verify_button": "Vérifier",
-
     "signup_title": "Formulaire d'inscription",
     "signup_heading": "Formulaire d'inscription",
     "first_name_label": "Prénom",
@@ -39,12 +50,10 @@
     "address_label": "Adresse",
     "renewal_date_label": "Date de renouvellement",
     "submit_button2": "Soumettre",
-
     "skills_table_heading": "Compétences",
     "select_label": "Sélectionner",
     "skill_name_label": "Nom de la compétence",
     "description_label": "Description",
-
     "availabilities_heading": "Disponibilités",
     "day_of_week_label": "Jour de la semaine",
     "start_time_label": "Heure de début",
@@ -55,8 +64,7 @@
     "thursday": "Jeudi",
     "friday": "Vendredi",
     "saturday": "Samedi",
-    "sunday": "Dimanche", 
-
+    "sunday": "Dimanche",
     "header_home": "Accueil",
     "header_merchant_signup": "Inscription Commerçant",
     "header_volunteer_signup": "Devenez Bénévole !",
