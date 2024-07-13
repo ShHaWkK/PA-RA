@@ -3,7 +3,6 @@
 let jwtToken = null;
 
 function setJwtCookie(token, cookieName = 'jwt', expiresInDays = 1) {
-    console.log("we are in setJwtCookie");
     const date = new Date();
     date.setTime(date.getTime() + (expiresInDays * 24 * 60 * 60 * 1000));
     const expires = `expires=${date.toUTCString()}`;

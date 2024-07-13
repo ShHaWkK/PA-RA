@@ -23,7 +23,7 @@ class LoginController
         if ($method === 'POST' && isset($uriParts[0]) && $uriParts[0] === 'login') {
             return $this->login($input);
         } elseif ($method === 'GET' && isset($uriParts[0]) && $uriParts[0] === 'checkSession') {
-            return $this->checkSession();
+            return $this->checkSession($uriParts[1]);
         }
 
         http_response_code(405);
@@ -63,7 +63,7 @@ class LoginController
         return ['token' => $token, 'role' =>$user->getRole()];
     }
 
-    public function checkSession()
+    public function checkSession($role)
     {
         $headers = getallheaders();
         if (!isset($headers['Authorization'])) {
@@ -85,6 +85,11 @@ class LoginController
             if ($decodedToken == null) {
                 http_response_code(401);
                 return ['error' => 'Invalid or expired token'];
+            }
+
+            if($decodedToken->role != $role) {
+                http_response_code(401);
+                return ['error' => 'Unauthorized'];
             }
 
             return ['valid' => true, 'user_id' => $decodedToken->user_id, 'role' => $decodedToken->role];
