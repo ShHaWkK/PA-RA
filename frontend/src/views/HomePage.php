@@ -56,17 +56,17 @@ require_once($_SERVER['DOCUMENT_ROOT'] . '/views/includes/lang.php');
     </div>
 </section>
 
-<!--<section id="contact" class="contact">-->
-<!--    <div class="container">-->
-<!--        <h2><?php echo htmlspecialchars($data['contact_us']); ?></h2>-->
-<!--        <form action="/submit-form" method="post">-->
-<!--            <input type="text" name="name" placeholder="<?php echo htmlspecialchars($data['your_name']); ?>" required>-->
-<!--            <input type="email" name="email" placeholder="<?php echo htmlspecialchars($data['your_email']); ?>" required>-->
-<!--            <textarea name="message" placeholder="<?php echo htmlspecialchars($data['your_message']); ?>" required></textarea>-->
-<!--            <button type="submit"><?php echo htmlspecialchars($data['send']); ?></button>-->
-<!--        </form>-->
-<!--    </div>-->
-<!--</section>-->
+<!-- <section id="contact" class="contact">
+    <div class="container">
+        <h2><?php echo htmlspecialchars($data['contact_us']); ?></h2>
+        <form action="/submit-form" method="post">
+            <input type="text" name="name" placeholder="<?php echo htmlspecialchars($data['your_name']); ?>" required>
+            <input type="email" name="email" placeholder="<?php echo htmlspecialchars($data['your_email']); ?>" required>
+            <textarea name="message" placeholder="<?php echo htmlspecialchars($data['your_message']); ?>" required></textarea>
+            <button type="submit"><?php echo htmlspecialchars($data['send']); ?></button>
+        </form>
+    </div>
+</section> -->
 </body>
 
 <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/includes/Footer.php'); ?>
