@@ -1,7 +1,9 @@
+/* header.css */
 header {
     background: #28a745;
     color: #fff;
     padding: 10px 0;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 nav {
@@ -12,8 +14,23 @@ nav {
 }
 
 nav .logo {
+    display: flex;
+    align-items: center;
+}
+
+nav .logo a {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    color: #fff;
     font-size: 1.5em;
     font-weight: bold;
+}
+
+nav .logo img.logo-img {
+    width: 40px; 
+    height: auto;
+    margin-right: 10px; 
 }
 
 nav ul {
@@ -31,8 +48,13 @@ nav ul li a {
     color: #fff;
     text-decoration: none;
     font-size: 1em;
+    padding: 10px 15px;
+    transition: background 0.3s ease, color 0.3s ease;
 }
 
 nav ul li a:hover {
-    text-decoration: underline;
+    background: #fff;
+    color: #28a745;
+    border-radius: 5px;
+    text-decoration: none;
 }

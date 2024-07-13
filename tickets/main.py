@@ -2,6 +2,8 @@ import logging
 import os
 import subprocess
 import sys
+from tkinter import Tk
+from src.views.login_view import open_login
 
 def install_requirements():
     """Install packages from requirements.txt."""
@@ -29,8 +31,8 @@ logging.basicConfig(
 # Install requirements
 install_requirements()
 
-# Example usage of TicketAPI
-from src.views.login_view import open_login
-
+# Initialize Tkinter
 if __name__ == "__main__":
+    root = Tk()
     open_login()
+    root.mainloop()

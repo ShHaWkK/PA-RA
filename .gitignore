@@ -5,3 +5,4 @@
 /backend/vendor
 /backend/composer.lock
 tickets/venv/
+tickets/app.log
