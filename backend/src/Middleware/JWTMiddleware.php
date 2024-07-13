@@ -46,6 +46,11 @@ class JWTMiddleware
 
         error_log("JWTMiddleware: Token verified successfully");
 
+        if (!empty($this->requiredRoles) && !in_array($decoded->role, $this->requiredRoles)) {
+            error_log("JWTMiddleware: Access denied for role: " . $decoded->role);
+            return $response->withStatus(403)->withJson(['error' => 'Access denied']);
+        }
+
         $request = $request->withAttribute('user', $decoded);
         return $next($request, $response);
     }
