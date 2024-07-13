@@ -82,6 +82,11 @@ class LoginController
         try {
             $decodedToken = $this->jwtService->verifyToken($token);
 
+            if ($decodedToken == null) {
+                http_response_code(401);
+                return ['error' => 'Invalid or expired token'];
+            }
+
             return ['valid' => true, 'user_id' => $decodedToken->user_id, 'role' => $decodedToken->role];
         } catch (Exception $e) {
             http_response_code(401);
