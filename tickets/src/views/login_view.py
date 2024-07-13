@@ -1,15 +1,12 @@
 import tkinter as tk
-from tkinter import messagebox
+from tkinter import ttk, messagebox, simpledialog
 from src.api.ticket_api import TicketAPI
-from src.views.volunteer_dashboard import open_volunteer_dashboard
-from src.views.merchant_dashboard import open_merchant_dashboard
 from src.views.admin_dashboard import open_admin_dashboard
 
 class LoginApp:
     def __init__(self, root):
         self.root = root
         self.root.title("Login")
-
         self.create_widgets()
 
     def create_widgets(self):
@@ -26,7 +23,6 @@ class LoginApp:
     def login(self):
         email = self.email_entry.get()
         password = self.password_entry.get()
-
         if not email or not password:
             messagebox.showerror("Error", "Please enter both email and password")
             return
@@ -37,14 +33,9 @@ class LoginApp:
         }
 
         response = TicketAPI.login(login_data)
-
         if response and 'error' not in response:
             if response['role'] == 'admin':
                 open_admin_dashboard(self.root, response)
-            elif response['role'] == 'volunteer':
-                open_volunteer_dashboard(self.root, response)
-            elif response['role'] == 'merchant':
-                open_merchant_dashboard(self.root, response)
             else:
                 messagebox.showerror("Error", "Unknown user role")
         else:
@@ -54,3 +45,6 @@ def open_login():
     root = tk.Tk()
     app = LoginApp(root)
     root.mainloop()
+
+if __name__ == "__main__":
+    open_login()
