@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.example.nomoreswaste"
     xmlns:tools="http://schemas.android.com/tools">
 
     <application
@@ -19,10 +20,19 @@
             android:theme="@style/Theme.Nomorewaste.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".RegisterActivity"
+            android:exported="false"
+            android:label="@string/title_register"
+            android:theme="@style/Theme.Nomorewaste" />
+        <activity
+            android:name=".LoginActivity"
+            android:exported="false"
+            android:label="@string/title_login"
+            android:theme="@style/Theme.Nomorewaste" />
     </application>
 
 </manifest>

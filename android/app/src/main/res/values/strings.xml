@@ -1,5 +1,4 @@
 <resources>
-    <string name="app_name">nomorewaste</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="nav_header_title">Android Studio</string>
@@ -10,4 +9,32 @@
     <string name="menu_home">Home</string>
     <string name="menu_gallery">Gallery</string>
     <string name="menu_slideshow">Slideshow</string>
+    <string name="title_activity_login">LoginActivity</string>
+    <string name="title_activity_register">RegisterActivity</string>
+
+    <string name="app_name">No More Waste</string>
+    <string name="title_register">Inscription</string>
+    <string name="label_first_name">Prénom</string>
+    <string name="hint_first_name">Entrez votre prénom</string>
+    <string name="label_last_name">Nom</string>
+    <string name="hint_last_name">Entrez votre nom</string>
+    <string name="label_email">Email</string>
+    <string name="hint_email">Entrez votre email</string>
+    <string name="label_phone_number">Numéro de téléphone</string>
+    <string name="hint_phone_number">Entrez votre numéro de téléphone</string>
+    <string name="label_password">Mot de passe</string>
+    <string name="hint_password">Entrez votre mot de passe</string>
+    <string name="label_availability">Disponibilités</string>
+    <string name="label_day_of_week">Jour de la semaine</string>
+    <string name="label_start_time">Début</string>
+    <string name="label_end_time">Fin</string>
+    <string name="label_monday">Lundi</string>
+    <string name="label_tuesday">Mardi</string>
+    <string name="label_wednesday">Mercredi</string>
+    <string name="label_thursday">Jeudi</string>
+    <string name="label_friday">Vendredi</string>
+    <string name="label_saturday">Samedi</string>
+    <string name="label_sunday">Dimanche</string>
+    <string name="button_register">Inscrire</string>
+    <string name="title_login" />
 </resources>
