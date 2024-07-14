@@ -1,3 +1,5 @@
+# Patch: tickets/src/utils/helpers.py
+
 import hashlib
 
 def hash_password(password):
