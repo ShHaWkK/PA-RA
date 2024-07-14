@@ -3,19 +3,19 @@ body {
     font-family: 'Arial', sans-serif;
     margin: 0;
     padding: 0;
-    background: linear-gradient(to right, #ff6f61, #ff3b2f);
+    background: linear-gradient(to right, #ff6f61, #62a713);
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100vh;
     overflow: hidden;
-    animation: backgroundAnimation 5s ease infinite;
+    animation: backgroundAnimation 20s ease infinite;
 }
 
 @keyframes backgroundAnimation {
-    0% { background: linear-gradient(to right, #ff6f61, #62a713); }
-    50% { background: linear-gradient(to right, #ffffff, #98e442); }
-    100% { background: linear-gradient(to right, #ffcd61, #e76a64); }
+    0% { background: linear-gradient(to right, #98e442, #ffffff); }
+    40% { background: linear-gradient(to right, #ffffff, #98e442); }
+    100% { background: linear-gradient(to right, #add47a, #ffffff); }
 }
 
 .language-selector {
@@ -61,12 +61,6 @@ body {
 
 .form-group {
     margin-bottom: 1.5rem;
-}
-
-.form-group label {
-    display: block;
-    margin-bottom: 0.5rem;
-    color: #333;
     animation: fadeIn 0.5s ease-in-out;
 }
 
@@ -79,6 +73,12 @@ body {
     }
 }
 
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #333;
+}
+
 .form-group input {
     width: 100%;
     padding: 0.75rem;
@@ -89,12 +89,12 @@ body {
 }
 
 .form-group input:focus {
-    border: 1px solid #62a713;
+    border: 1px solid #ff6f61;
     outline: none;
 }
 
 .form-group input[type="submit"] {
-    background-color: #1364a7;
+    background-color: #ff6f61;
     color: white;
     border: none;
     cursor: pointer;
