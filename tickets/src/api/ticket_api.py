@@ -1,11 +1,9 @@
-# Patch: tickets/src/api/ticket_api.py
-
 import os
 import requests
 import logging
 from dotenv import load_dotenv
 
-# Charger les variables d'environnement depuis le fichier .env
+# Load environment variables from the .env file
 load_dotenv()
 
 class TicketAPI:
@@ -59,6 +57,16 @@ class TicketAPI:
             return response.json()
         except requests.exceptions.RequestException as e:
             logging.error(f"Failed to get all tickets: {e}")
+            return {"error": str(e)}
+
+    @staticmethod
+    def get_tickets_by_user(user_id):
+        try:
+            response = requests.get(f"{TicketAPI.BASE_URL}/users/{user_id}/tickets")
+            response.raise_for_status()
+            return response.json()
+        except requests.exceptions.RequestException as e:
+            logging.error(f"Failed to get tickets by user: {e}")
             return {"error": str(e)}
 
     @staticmethod
