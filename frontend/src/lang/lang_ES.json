@@ -68,5 +68,7 @@
     "header_home": "Inicio",
     "header_merchant_signup": "Registro de Comerciantes",
     "header_volunteer_signup": "¡Hazte Voluntario!",
-    "header_contact": "Contacto"
+    "header_contact": "Contacto",
+    "error_message": "Lo sentimos, la página que estás buscando no existe.",
+    "go_home": "Volver al inicio"
 }

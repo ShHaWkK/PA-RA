@@ -68,5 +68,8 @@
     "header_home": "Startseite",
     "header_merchant_signup": "Händler Registrierung",
     "header_volunteer_signup": "Freiwilliger Werden!",
-    "header_contact": "Kontakt"
+    "header_contact": "Kontakt", 
+
+    "error_message": "Entschuldigung, die von Ihnen gesuchte Seite existiert nicht.",
+    "go_home":  "Zurück zur Startseite"
 }
