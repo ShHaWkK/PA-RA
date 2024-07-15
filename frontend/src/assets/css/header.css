@@ -3,6 +3,21 @@
     background-color: #333;
     color: white;
     padding: 1rem 0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    position: fixed;
+    width: 100%;
+    top: 0;
+    z-index: 1000;
+    animation: slideDown 0.5s ease;
+}
+
+@keyframes slideDown {
+    from {
+        transform: translateY(-100%);
+    }
+    to {
+        transform: translateY(0);
+    }
 }
 
 nav {
@@ -16,19 +31,37 @@ nav .logo a {
     color: white;
     text-decoration: none;
     font-size: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+nav .logo img {
+    width: 40px;
+    height: auto;
 }
 
 nav ul {
     list-style: none;
     display: flex;
     gap: 1rem;
+    margin: 0;
+    padding: 0;
+}
+
+nav ul li {
+    display: flex;
+    align-items: center;
 }
 
 nav ul li a {
     color: white;
     text-decoration: none;
     padding: 0.5rem 1rem;
-    transition: background 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: background 0.3s ease, color 0.3s ease;
 }
 
 nav ul li a:hover {
@@ -39,4 +72,19 @@ nav ul li a:hover {
 .language-selector {
     text-align: right;
     padding: 1rem;
+}
+
+.language-selector select {
+    padding: 0.5rem;
+    border-radius: 5px;
+    border: none;
+    font-size: 1rem;
+    color: #333;
+    background-color: #fff;
+    cursor: pointer;
+    transition: background 0.3s ease, color 0.3s ease;
+}
+
+.language-selector select:hover {
+    background-color: #ddd;
 }

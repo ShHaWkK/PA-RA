@@ -1,3 +1,5 @@
+# Patch: tickets/src/models/ticket.py
+
 class Ticket:
     def __init__(self, ticket_id, type, description, status, created_by, assigned_to=None):
         self.ticket_id = ticket_id

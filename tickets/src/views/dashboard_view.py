@@ -1,3 +1,5 @@
+# Patch: tickets/src/views/dashboard_view.py
+
 import tkinter as tk
 from tkinter import messagebox
 from api.ticket_api import TicketAPI

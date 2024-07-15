@@ -1,3 +1,4 @@
+# main.py
 import logging
 import os
 import subprocess
@@ -34,5 +35,5 @@ install_requirements()
 # Initialize Tkinter
 if __name__ == "__main__":
     root = Tk()
-    open_login()
+    open_login(root)
     root.mainloop()
