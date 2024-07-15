@@ -14,7 +14,8 @@
 
     <div class="back-office-content">
         <h1>Bénévoles</h1>
-
+        <input type="text" id="searchInput" placeholder="Rechercher...">
+        <button>Ajouter un bénévole</button>
         <div class="volunteer-table"></div>
         <script type="module">
             import { populateVolunteerTable } from '/assets/js/pages/VolunteerTable.js';
@@ -24,3 +25,4 @@
     </div>
 </div>
 </body>
+</html>

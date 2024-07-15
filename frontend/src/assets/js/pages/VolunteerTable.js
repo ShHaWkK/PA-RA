@@ -1,4 +1,5 @@
 import { getAllUsers } from '/assets/js/api/Users.js';
+import { setupSearch } from '/assets/js/modules/SearchBar.js';
 
 export async function populateVolunteerTable() {
     const users = await getAllUsers('volunteer', null);
@@ -10,6 +11,7 @@ export async function populateVolunteerTable() {
 
     const table = document.createElement('table');
     table.classList.add('volunteer-table'); // Ajout de la classe volunteer-table pour le style
+    table.id = 'volunteerTable';
 
     const thead = document.createElement('thead');
     const headerRow = document.createElement('tr');
@@ -28,6 +30,7 @@ export async function populateVolunteerTable() {
 
     users.forEach(user => {
         const row = document.createElement('tr');
+        row.dataset.userId = user.id; // Ajout de l'id utilisateur en tant que dataset
 
         // Ajout de la checkbox dans la première cellule
         const checkboxCell = document.createElement('td');
@@ -65,6 +68,8 @@ export async function populateVolunteerTable() {
     if (backOfficeContent) {
         backOfficeContent.innerHTML = ''; // Effacer le contenu existant si nécessaire
         backOfficeContent.appendChild(table);
+
+        setupSearch(users); // Configuration de la recherche
     } else {
         console.error('Back office content container not found.');
     }
