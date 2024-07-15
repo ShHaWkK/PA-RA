@@ -3,23 +3,27 @@
 namespace Controller;
 
 use Entity\DeliveryModel;
+use Entity\PlannedRouteModel;
 use Doctrine\ORM\EntityManager;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Doctrine\ORM\EntityNotFoundException;
 use Service\PDFService;
+use Service\EmailService;
 
 class DeliveryController
 {
     private $entityManager;
     private $serializer;
     private $pdfService;
+    private $emailService;
 
-    public function __construct(EntityManager $entityManager, PDFService $pdfService)
+    public function __construct(EntityManager $entityManager, PDFService $pdfService, EmailService $emailService)
     {
         $this->entityManager = $entityManager;
         $this->pdfService = $pdfService;
+        $this->emailService = $emailService;
         $normalizers = [new ObjectNormalizer()];
         $encoders = [new JsonEncoder()];
         $this->serializer = new Serializer($normalizers, $encoders);
@@ -86,6 +90,9 @@ class DeliveryController
 
             $this->entityManager->persist($delivery);
             $this->entityManager->flush();
+
+            // Envoi de l'e-mail au bénévole
+            $this->emailService->sendRoutePlan($delivery);
 
             return ['id' => $delivery->getId(), 'message' => 'Delivery created successfully'];
         } catch (\Exception $e) {

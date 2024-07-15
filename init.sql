@@ -24,6 +24,7 @@ CREATE TABLE IF NOT EXISTS companies (
     siret VARCHAR(14) NOT NULL,
     renewal_date DATE NOT NULL,
     renewal_status ENUM('pending', 'notified', 'renewed') NOT NULL DEFAULT 'pending',
+    has_stock BOOLEAN DEFAULT FALSE,
     last_notified TIMESTAMP NULL DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
@@ -119,6 +120,16 @@ CREATE TABLE IF NOT EXISTS deliveries (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (warehouse_id) REFERENCES warehouses(id) ON DELETE CASCADE
+);
+
+-- Table des trajets planifiés (planned_routes)
+CREATE TABLE IF NOT EXISTS planned_routes (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    delivery_id INT NOT NULL,
+    date DATE NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (delivery_id) REFERENCES deliveries(id) ON DELETE CASCADE,
+    UNIQUE KEY unique_route_per_day (delivery_id, date)
 );
 
 -- Table des services (services)

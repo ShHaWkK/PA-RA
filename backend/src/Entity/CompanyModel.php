@@ -31,6 +31,9 @@ class CompanyModel
     #[ORM\Column(type: "string", length: 50, options: ["default" => "pending"])]
     private $renewal_status;
 
+    #[ORM\Column(type: "boolean", options: ["default" => false])]
+    private $has_stock;
+
     #[ORM\Column(type: "datetime", nullable: true)]
     private $last_notified;
 
@@ -110,6 +113,17 @@ class CompanyModel
     public function setRenewalStatus(string $renewalStatus): self
     {
         $this->renewal_status = $renewalStatus;
+        return $this;
+    }
+
+    public function getHasStock(): bool
+    {
+        return $this->has_stock;
+    }
+
+    public function setHasStock(bool $has_stock): self
+    {
+        $this->has_stock = $has_stock;
         return $this;
     }
 
