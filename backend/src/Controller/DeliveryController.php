@@ -8,10 +8,9 @@ use Doctrine\ORM\EntityManager;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
-use Doctrine\ORM\EntityNotFoundException;
-use Service\PDFService;
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
+use Service\PDFService;
 
 class DeliveryController
 {
@@ -68,7 +67,7 @@ class DeliveryController
     public function createDelivery($data)
     {
         try {
-            // Validate input data (add your own validation logic)
+            // Validate input data
             if (!isset($data['route_name']) || !isset($data['destination']) || !isset($data['recipient_type']) || !isset($data['status']) || !isset($data['warehouse_id']) || !isset($data['email']) || !isset($data['volunteer_name'])) {
                 http_response_code(400);
                 return ['error' => 'Missing required fields for new delivery'];
@@ -260,8 +259,8 @@ class DeliveryController
             // Contenu de l'email
             $mail->isHTML(true);
             $mail->Subject = 'New Delivery Assigned';
-            $mail->Body    = 'A new delivery has been assigned to you. Delivery details: ' . $delivery->getRouteName();
-            $mail->AltBody = 'A new delivery has been assigned to you. Delivery details: ' . $delivery->getRouteName();
+            $mail->Body    = $this->generateEmailBody($delivery, $volunteerName);
+            $mail->AltBody = $this->generateEmailAltBody($delivery, $volunteerName);
 
             $mail->send();
             return true;
@@ -269,6 +268,57 @@ class DeliveryController
             error_log("Message could not be sent. Mailer Error: {$mail->ErrorInfo}");
             return false;
         }
+    }
+
+    private function generateEmailBody($delivery, $volunteerName)
+    {
+        $googleMapsLink = $this->generateGoogleMapsLink($delivery->getRouteName(), $delivery->getDestination());
+        
+        return "
+            <html>
+            <body>
+                <h1>New Delivery Assigned</h1>
+                <p>Dear {$volunteerName},</p>
+                <p>A new delivery has been assigned to you. Please find the details below:</p>
+                <ul>
+                    <li><strong>Route Name:</strong> {$delivery->getRouteName()}</li>
+                    <li><strong>Destination:</strong> {$delivery->getDestination()}</li>
+                    <li><strong>Recipient Type:</strong> {$delivery->getRecipientType()}</li>
+                    <li><strong>Status:</strong> {$delivery->getStatus()}</li>
+                </ul>
+                <p>You can view the route on Google Maps <a href=\"{$googleMapsLink}\">here</a>.</p>
+                <p>Thank you for your continued support in helping us reduce waste and assist those in need.</p>
+                <p>Best regards,</p>
+                <p>No More Waste Team</p>
+            </body>
+            </html>
+        ";
+    }
+
+    private function generateEmailAltBody($delivery, $volunteerName)
+    {
+        $googleMapsLink = $this->generateGoogleMapsLink($delivery->getRouteName(), $delivery->getDestination());
+        
+        return "
+            Dear {$volunteerName},\n
+            A new delivery has been assigned to you. Please find the details below:\n
+            Route Name: {$delivery->getRouteName()}\n
+            Destination: {$delivery->getDestination()}\n
+            Recipient Type: {$delivery->getRecipientType()}\n
+            Status: {$delivery->getStatus()}\n
+            \n
+            You can view the route on Google Maps here: {$googleMapsLink}\n
+            \n
+            Thank you for your continued support in helping us reduce waste and assist those in need.\n
+            \n
+            Best regards,\n
+            No More Waste Team
+        ";
+    }
+
+    private function generateGoogleMapsLink($routeName, $destination)
+    {
+        return "https://www.google.com/maps/dir/?api=1&origin={$routeName}&destination={$destination}&travelmode=driving";
     }
 }
 ?>

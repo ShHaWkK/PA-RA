@@ -59,12 +59,11 @@ if ($uriParts[0] === '') {
     exit;
 }
 
-// Instancie le service PDF
-$pdfService = new PDFService();
+// Google Maps API Key
+$googleMapsApiKey = 'AIzaSyA0nZoj1xey1WSaaA_BdLH5CRca48aYQC0';
 
-// Instancie le service Email
-$sendgridApiKey = getenv('SENDGRID_API_KEY');
-$emailService = new EmailService($sendgridApiKey);
+// Instancie le service PDF
+$pdfService = new PDFService($googleMapsApiKey);
 
 // Mappe les contrôleurs aux chemins d'URI
 $controllerMap = [
@@ -86,12 +85,13 @@ $controllerMap = [
     'service_proposals' => ServiceProposalController::class,
     'tickets' => TicketController::class,
 ];
-
+// Vérifie si le contrôleur existe pour le premier élément de l'URI
 $route = $uriParts[0];
 
+// A retirer par la suite, permet de générer le token à mettre dans la table admin
 if($route == 'generate_token'){
     echo json_encode(['token' => password_hash($uriParts[1], PASSWORD_BCRYPT)]);
-    exit;
+    password_hash($uriParts[1], PASSWORD_BCRYPT);
 }
 
 if (!array_key_exists($route, $controllerMap)) {
@@ -104,7 +104,7 @@ if (!array_key_exists($route, $controllerMap)) {
 $controllerClass = $controllerMap[$route];
 try {
     if ($controllerClass === DeliveryController::class) {
-        $controller = new $controllerClass($entityManager, $pdfService, $emailService);
+        $controller = new $controllerClass($entityManager, $pdfService);
     } elseif ($controllerClass === LoginController::class) {
         $controller = new $controllerClass($entityManager, $jwtService);
     } else {
@@ -123,6 +123,7 @@ $input = json_decode(file_get_contents('php://input'), true);
 error_log("Données d'entrée: " . json_encode($input));
 
 try {
+    // Vérifier les routes nécessitant une vérification JWT
     $requiresAuth = in_array($route, ['admin', 'volunteer', 'merchant']);
     if ($requiresAuth) {
         $decodedToken = $jwtMiddleware->verifyToken();
@@ -131,21 +132,19 @@ try {
         $response = $controller->processRequest($_SERVER['REQUEST_METHOD'], $uriParts, $input);
     }
 
-    header('Content-Type: application/json');
-    echo json_encode($response);
 } catch (EntityNotFoundException $e) {
     http_response_code(404);
     $response = ['error' => $e->getMessage()];
     error_log("EntityNotFoundException: " . $e->getMessage());
-    header('Content-Type: application/json');
-    echo json_encode($response);
 } catch (Exception $e) {
     http_response_code(500);
     $response = ['error' => 'Internal Server Error'];
     error_log("Exception: " . $e->getMessage());
-    header('Content-Type: application/json');
-    echo json_encode($response);
 }
+
+// Définit le type de contenu à JSON et encode le tableau de réponse en JSON
+header('Content-Type: application/json');
+echo json_encode($response);
 
 // Fonction pour afficher un message et quitter
 function exit_with_message($message, $code = 200) {
