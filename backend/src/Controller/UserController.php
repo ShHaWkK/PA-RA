@@ -70,7 +70,10 @@ class UserController
 
             case 'PUT':
                 if (isset($uriParts[2])) {
-                    return $this->updateUserStatus($uriParts[2], $input);
+                    switch ($uriParts[1]) {
+                        case 'approval':
+                            return $this->updateUserStatus($uriParts[2], $input);
+                    }
                 } else {
                     http_response_code(400);
                     return ['error' => 'User ID not specified'];

@@ -26,15 +26,15 @@
         </div>
 
         <div class="row">
-            <button class="add-button"> Ajouter </button>
-            <button class="delete-button"> Supprimer </button>
-            <button class="neutral-button"> Modifier </button>
+            <button class="add-button" > Ajouter </button>
+            <button class="delete-button" > Supprimer </button>
+            <button class="neutral-button" id='modifyButton'> Modifier </button>
         </div>
 
         <div class="row">
-            <button class="add-button"> Approuver </button>
-            <button class="delete-button"> Refuser </button>
-            <button class="neutral-button"> Mettre en attente </button>
+            <button class="add-button" id='approveBtn'> Approuver </button>
+            <button class="delete-button" id='rejectButton'> Refuser </button>
+            <button class="neutral-button" id='putOnHoldButton'> Mettre en attente </button>
         </div>
 
         <div class="volunteer-table"></div>

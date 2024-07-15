@@ -9,7 +9,7 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
     try {
         const response = await login(email, password);
         console.log('Login successful:', response);
-        alert('Login successful:');
+        alert('Login successful');
 
 
         // Ajoutez ici le code pour rediriger l'utilisateur ou afficher un message de succès.

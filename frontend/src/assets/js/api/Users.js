@@ -23,20 +23,28 @@ async function registerMerchant(userData) {
 }
 
 // Fonction pour approuver un utilisateur par un administrateur
-async function approveUser(userData, adminUserId) {
-        const response = await fetch(apiEndpoint+`/users/approveUser/${adminUserId}`, {
+async function handleAprovals(userId, status) {
+        const response = await fetch(`${apiEndpoint}/users/approval/${userId}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(userData)
-        });
-        if (!response.ok) {
-            console.error('Failed to approve user');
-        } else {
-            console.log('User approved successfully');
-        }
-        return await response.json();
+            body: JSON.stringify({ status: status })
+        })
+            .then(response => {
+                if (response.ok) {
+                    console.log(`User ${userId} approved successfully.`);
+                    alert(`User ${userId} approved successfully.`);
+                } else {
+                    console.error(`Error approving user ${userId}:`, response.statusText);
+                    alert(`Error approving user ${userId}:`);
+                }
+            })
+            .catch(error => {
+                console.error(`Error approving user ${userId}:`, error);
+            });
+
+    return await response.json();
 }
 
 // Fonction pour récupérer un utilisateur par son ID
@@ -83,4 +91,4 @@ async function getAllUsers(role, status) {
     return await response.json();
 }
 
-export { registerVolunteer, registerMerchant, approveUser, getUser, getAllUsers };
+export { registerVolunteer, registerMerchant, handleAprovals, getUser, getAllUsers };

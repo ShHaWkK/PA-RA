@@ -6,6 +6,7 @@ export async function populateVolunteerTable(status) {
 
     if (!users || users.length === 0) {
         console.log('No volunteers found');
+        document.querySelector('.volunteer-table').innerHTML = '';
         return;
     }
 
@@ -16,7 +17,7 @@ export async function populateVolunteerTable(status) {
     const thead = document.createElement('thead');
     const headerRow = document.createElement('tr');
 
-    const headers = ['', 'First Name', 'Last Name', 'Email', 'Phone Number', 'Role', 'Status', 'Created At', 'Updated At'];
+    const headers = ['', 'First Name', 'Last Name', 'Email', 'Phone Number', 'Status', 'Created At', 'Updated At'];
     headers.forEach(headerText => {
         const th = document.createElement('th');
         th.textContent = headerText;
@@ -46,7 +47,6 @@ export async function populateVolunteerTable(status) {
             user.last_name,
             user.email,
             user.phone_number,
-            user.role,
             user.status,
             user.created_at,
             user.updated_at
