@@ -1,27 +1,38 @@
 <?php
 require 'vendor/autoload.php';
 
-use SendGrid\Mail\Mail;
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
 
-function sendTestEmail($sendgridApiKey)
+function sendTestEmail()
 {
-    $email = new Mail();
-    $email->setFrom("morewaste1@gmail.com", "No More Waste");
-    $email->setSubject("Test Email");
-    $email->addTo("alexandreuzan9@gmail.com", "Volunteer");
-    $email->addContent("text/plain", "This is a test email from No More Waste.");
+    $mail = new PHPMailer(true);
 
-    $sendgrid = new \SendGrid($sendgridApiKey);
     try {
-        $response = $sendgrid->send($email);
-        echo "Email sent successfully. Response code: " . $response->statusCode() . "\n";
-        print_r($response->headers());
-        echo $response->body() . "\n";
+        // Configuration du serveur SMTP
+        $mail->isSMTP();
+        $mail->Host = 'smtp.gmail.com'; 
+        $mail->SMTPAuth = true;
+        $mail->Username = 'morewaste1@gmail.com';
+        $mail->Password = 'vhpewmlkxxrpnioj '; 
+        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+        $mail->Port = 587;
+
+        // Destinataire
+        $mail->setFrom('morewaste1@gmail.com', 'No More Waste');
+        $mail->addAddress('alexandreuzan9@gmail.com', 'Volunteer');
+
+        // Contenu de l'email
+        $mail->isHTML(true);
+        $mail->Subject = 'Test Email';
+        $mail->Body    = 'This is a test email from No More Waste.';
+        $mail->AltBody = 'This is a test email from No More Waste.';
+
+        $mail->send();
+        echo 'Email sent successfully';
     } catch (Exception $e) {
-        echo 'Caught exception: ' . $e->getMessage() . "\n";
+        echo "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
     }
 }
 
-$sendgridApiKey = "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";
-sendTestEmail($sendgridApiKey);
-?>
+sendTestEmail();

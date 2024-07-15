@@ -1,8 +1,8 @@
 <?php
-// Path: backend/src/Controller/DeliveryController.php
 namespace Controller;
 
 use Entity\DeliveryModel;
+use Entity\CompanyModel;
 use Entity\PlannedRouteModel;
 use Doctrine\ORM\EntityManager;
 use Symfony\Component\Serializer\Serializer;
@@ -10,20 +10,19 @@ use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Doctrine\ORM\EntityNotFoundException;
 use Service\PDFService;
-use Service\EmailService;
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
 
 class DeliveryController
 {
     private $entityManager;
     private $serializer;
     private $pdfService;
-    private $emailService;
 
-    public function __construct(EntityManager $entityManager, PDFService $pdfService, EmailService $emailService)
+    public function __construct(EntityManager $entityManager, PDFService $pdfService)
     {
         $this->entityManager = $entityManager;
         $this->pdfService = $pdfService;
-        $this->emailService = $emailService;
         $normalizers = [new ObjectNormalizer()];
         $encoders = [new JsonEncoder()];
         $this->serializer = new Serializer($normalizers, $encoders);
@@ -70,16 +69,37 @@ class DeliveryController
     {
         try {
             // Validate input data (add your own validation logic)
-            if (!isset($data['route_name']) || !isset($data['destination']) || !isset($data['recipient_type']) || !isset($data['status']) || !isset($data['warehouse_id'])) {
+            if (!isset($data['route_name']) || !isset($data['destination']) || !isset($data['recipient_type']) || !isset($data['status']) || !isset($data['warehouse_id']) || !isset($data['email']) || !isset($data['volunteer_name'])) {
                 http_response_code(400);
                 return ['error' => 'Missing required fields for new delivery'];
             }
 
+            // Check if a delivery with the same route_name exists for today
+            $today = new \DateTime();
+            $existingDelivery = $this->entityManager->getRepository(DeliveryModel::class)->findOneBy([
+                'route_name' => $data['route_name'],
+                'delivery_date' => $today,
+            ]);
+
+            if ($existingDelivery) {
+                http_response_code(400);
+                return ['error' => 'A delivery with the same route_name already exists for today'];
+            }
+
+            // Check for companies with available stock
+            $company = $this->entityManager->getRepository(CompanyModel::class)->findOneBy(['has_stock' => true]);
+
+            if (!$company) {
+                http_response_code(400);
+                return ['error' => 'No companies with stock available'];
+            }
+
+            // Create new delivery
             $delivery = new DeliveryModel();
             $delivery->setRouteName($data['route_name']);
             $delivery->setDestination($data['destination']);
             $delivery->setRecipientType($data['recipient_type']);
-            $delivery->setDeliveryDate(new \DateTime("now"));
+            $delivery->setDeliveryDate($today);
             $delivery->setStatus($data['status']);
             if (isset($data['comment'])) {
                 $delivery->setComment($data['comment']);
@@ -91,8 +111,13 @@ class DeliveryController
             $this->entityManager->persist($delivery);
             $this->entityManager->flush();
 
-            // Envoi de l'e-mail au bénévole
-            $this->emailService->sendRoutePlan($delivery);
+            // Send email notification
+            $emailSent = $this->sendEmailNotification($delivery, $data['email'], $data['volunteer_name']);
+
+            if (!$emailSent) {
+                http_response_code(500);
+                return ['error' => 'Delivery created but email notification failed'];
+            }
 
             return ['id' => $delivery->getId(), 'message' => 'Delivery created successfully'];
         } catch (\Exception $e) {
@@ -205,6 +230,44 @@ class DeliveryController
         } catch (\Exception $e) {
             error_log("Exception in generateDeliveryPDF: " . $e->getMessage());
             throw $e;
+        }
+    }
+
+    private function sendEmailNotification($delivery, $email, $volunteerName)
+    {
+        $mail = new PHPMailer(true);
+
+        try {
+            // Configuration du serveur SMTP
+            $mail->isSMTP();
+            $mail->Host = 'smtp.gmail.com'; 
+            $mail->SMTPAuth = true;
+            $mail->Username = 'morewaste1@gmail.com';
+            $mail->Password = 'vhpewmlkxxrpnioj';
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+            $mail->Port = 587;
+
+            // Destinataire
+            $mail->setFrom('morewaste1@gmail.com', 'No More Waste');
+            $mail->addAddress($email, $volunteerName);
+
+            // Generate PDF
+            $pdf = $this->pdfService->createPDF($delivery);
+
+            // Attach PDF to email
+            $mail->addStringAttachment($pdf, 'delivery_details.pdf');
+
+            // Contenu de l'email
+            $mail->isHTML(true);
+            $mail->Subject = 'New Delivery Assigned';
+            $mail->Body    = 'A new delivery has been assigned to you. Delivery details: ' . $delivery->getRouteName();
+            $mail->AltBody = 'A new delivery has been assigned to you. Delivery details: ' . $delivery->getRouteName();
+
+            $mail->send();
+            return true;
+        } catch (Exception $e) {
+            error_log("Message could not be sent. Mailer Error: {$mail->ErrorInfo}");
+            return false;
         }
     }
 }

@@ -1,5 +1,4 @@
 <?php
-// Path: backend/src/Service/PDFService.php
 namespace Service;
 
 use FPDF;
@@ -28,7 +27,6 @@ class PDFService
             $pdf->Cell(40, 10, 'Comment: ' . $delivery->getComment());
         }
         
-        $pdf->Output('S');
         return $pdf->Output('S');
     }
 }
