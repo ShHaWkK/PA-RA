@@ -93,6 +93,19 @@ CREATE TABLE IF NOT EXISTS collections (
     FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
 );
 
+-- Table des entrepôts (warehouses)
+CREATE TABLE IF NOT EXISTS warehouses (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    address VARCHAR(255) NOT NULL,
+    contact_info VARCHAR(255),
+    capacity INT,
+    city VARCHAR(255),
+    country VARCHAR(255),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
 -- Table des livraisons (deliveries)
 CREATE TABLE IF NOT EXISTS deliveries (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -195,19 +208,6 @@ CREATE TABLE IF NOT EXISTS vehicles (
     current_location TEXT
 );
 
--- Table des entrepôts (warehouses)
-CREATE TABLE IF NOT EXISTS warehouses (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    address VARCHAR(255) NOT NULL,
-    contact_info VARCHAR(255),
-    capacity INT,
-    city VARCHAR(255),
-    country VARCHAR(255),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-);
-
 -- Insertion d'exemples d'entrepôts
 INSERT INTO warehouses (name, address, contact_info, capacity, city, country) VALUES 
 ('Paris Warehouse', '10 Rue de Paris, Paris', 'contact@pariswarehouse.com', 1000, 'Paris', 'France'),
@@ -227,6 +227,7 @@ INSERT INTO products (name, barcode, expiration_date, quantity) VALUES
 ('Product 5', '1234567890127', '2026-12-31', 500);
 
 -- Insertion des utilisateurs
+-- password1423
 INSERT INTO users (first_name, last_name, email, phone_number, password, role, status) VALUES
 ('Admin', 'Admin', 'admin@admin.com', '1234567890', '$2y$10$KJ8zwrGJq9JfHywhUxxRheY.CgbYnBvGjUlhcXHup0DaF.IRtK/Sa', 'admin', 'approved'),
 ('John', 'Doe', 'john.doe@example.com', '0987654321', '$2y$10$KJ8zwrGJq9JfHywhUxxRheY.CgbYnBvGjUlhcXHup0DaF.IRtK/Sa', 'volunteer', 'approved'),
