@@ -37,6 +37,9 @@ class DeliveryModel
     #[ORM\Column(type: "datetime", options: ["default" => "CURRENT_TIMESTAMP", "onUpdate" => "CURRENT_TIMESTAMP"])]
     private $updated_at;
 
+    #[ORM\Column(type: "integer")]
+    private $warehouse_id;
+
     // Getters and setters for each property
 
     public function getId(): ?int
@@ -129,6 +132,17 @@ class DeliveryModel
     public function setUpdatedAt(\DateTimeInterface $updated_at): self
     {
         $this->updated_at = $updated_at;
+        return $this;
+    }
+
+    public function getWarehouseId(): ?int
+    {
+        return $this->warehouse_id;
+    }
+
+    public function setWarehouseId(int $warehouse_id): self
+    {
+        $this->warehouse_id = $warehouse_id;
         return $this;
     }
 }

@@ -66,7 +66,7 @@ class DeliveryController
     {
         try {
             // Validate input data (add your own validation logic)
-            if (!isset($data['route_name']) || !isset($data['destination']) || !isset($data['recipient_type']) || !isset($data['status'])) {
+            if (!isset($data['route_name']) || !isset($data['destination']) || !isset($data['recipient_type']) || !isset($data['status']) || !isset($data['warehouse_id'])) {
                 http_response_code(400);
                 return ['error' => 'Missing required fields for new delivery'];
             }
@@ -80,6 +80,7 @@ class DeliveryController
             if (isset($data['comment'])) {
                 $delivery->setComment($data['comment']);
             }
+            $delivery->setWarehouseId($data['warehouse_id']);
             $delivery->setCreatedAt(new \DateTime("now"));
             $delivery->setUpdatedAt(new \DateTime("now"));
 
@@ -131,6 +132,9 @@ class DeliveryController
             }
             if (isset($data['comment'])) {
                 $delivery->setComment($data['comment']);
+            }
+            if (isset($data['warehouse_id'])) {
+                $delivery->setWarehouseId($data['warehouse_id']);
             }
             $delivery->setUpdatedAt(new \DateTime("now"));
 
