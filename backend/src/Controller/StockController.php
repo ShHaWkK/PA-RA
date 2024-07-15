@@ -52,7 +52,7 @@ class StockController
 
     public function createStock($data)
     {
-        if (!isset($data['product_id']) || !isset($data['quantity']) || !isset($data['availability'])) {
+        if (!isset($data['product_id']) || !isset($data['quantity']) || !isset($data['availability']) || !isset($data['warehouse_id'])) {
             http_response_code(400);
             return ['error' => 'Missing required fields for new stock'];
         }
@@ -61,6 +61,7 @@ class StockController
         $stock->setProductId($data['product_id']);
         $stock->setQuantity($data['quantity']);
         $stock->setAvailability($data['availability']);
+        $stock->setWarehouseId($data['warehouse_id']);
         $stock->setEntryDate(new \DateTime("now"));
         $stock->setCreatedAt(new \DateTime("now"));
         $stock->setUpdatedAt(new \DateTime("now"));
@@ -82,41 +83,43 @@ class StockController
     }
 
     public function updateStock($id, $data)
-{
-    $stock = $this->entityManager->find(StockModel::class, $id);
-    if (!$stock) {
-        http_response_code(404);
-        return ['error' => 'Stock not found'];
-    }
+    {
+        $stock = $this->entityManager->find(StockModel::class, $id);
+        if (!$stock) {
+            http_response_code(404);
+            return ['error' => 'Stock not found'];
+        }
 
-    // Prevent updating the stock if it's already in route
-    if ($stock->getAvailability() == 'in_route' && isset($data['availability']) && $data['availability'] != 'delivered') {
-        http_response_code(400);
-        return ['error' => 'Stock is already in route'];
-    }
+        // Prevent updating the stock if it's already in route
+        if ($stock->getAvailability() == 'in_route' && isset($data['availability']) && $data['availability'] != 'delivered') {
+            http_response_code(400);
+            return ['error' => 'Stock is already in route'];
+        }
 
-    if (isset($data['product_id'])) {
-        $stock->setProductId($data['product_id']);
-    }
-    if (isset($data['quantity'])) {
-        $stock->setQuantity($data['quantity']);
-    }
-    if (isset($data['entry_date'])) {
-        $stock->setEntryDate(new \DateTime($data['entry_date']));
-    }
-    if (isset($data['exit_date'])) {
-        $stock->setExitDate(new \DateTime($data['exit_date']));
-    }
-    if (isset($data['availability'])) {
-        $stock->setAvailability($data['availability']);
-    }
-    $stock->setUpdatedAt(new \DateTime("now"));
+        if (isset($data['product_id'])) {
+            $stock->setProductId($data['product_id']);
+        }
+        if (isset($data['quantity'])) {
+            $stock->setQuantity($data['quantity']);
+        }
+        if (isset($data['entry_date'])) {
+            $stock->setEntryDate(new \DateTime($data['entry_date']));
+        }
+        if (isset($data['exit_date'])) {
+            $stock->setExitDate(new \DateTime($data['exit_date']));
+        }
+        if (isset($data['availability'])) {
+            $stock->setAvailability($data['availability']);
+        }
+        if (isset($data['warehouse_id'])) {
+            $stock->setWarehouseId($data['warehouse_id']);
+        }
+        $stock->setUpdatedAt(new \DateTime("now"));
 
-    $this->entityManager->flush();
+        $this->entityManager->flush();
 
-    return ['id' => $stock->getId(), 'message' => 'Stock updated successfully'];
-}
-
+        return ['id' => $stock->getId(), 'message' => 'Stock updated successfully'];
+    }
 
     public function deleteStock($id)
     {

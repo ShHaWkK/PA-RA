@@ -25,7 +25,7 @@ class StockModel
     #[ORM\Column(type: "datetime", nullable: true)]
     private $exit_date;
 
-    #[ORM\Column(type: "string", columnDefinition: "ENUM('available', 'in_route', 'collected')")]
+    #[ORM\Column(type: "string", columnDefinition: "ENUM('available', 'in_route', 'delivered')")]
     private $availability;
 
     #[ORM\Column(type: "datetime")]
@@ -33,6 +33,9 @@ class StockModel
 
     #[ORM\Column(type: "datetime")]
     private $updated_at;
+
+    #[ORM\Column(type: "integer")]
+    private $warehouse_id;
 
     // Getters and setters for each property...
 
@@ -115,6 +118,17 @@ class StockModel
     public function setUpdatedAt(\DateTimeInterface $updatedAt): self
     {
         $this->updated_at = $updatedAt;
+        return $this;
+    }
+
+    public function getWarehouseId(): ?int
+    {
+        return $this->warehouse_id;
+    }
+
+    public function setWarehouseId(int $warehouse_id): self
+    {
+        $this->warehouse_id = $warehouse_id;
         return $this;
     }
 }
