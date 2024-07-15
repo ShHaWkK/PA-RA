@@ -5,8 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Formulaire d'inscription</title>
     <link rel="stylesheet" href="/assets/css/global.css">
+    <link rel="stylesheet" href="/assets/css/table.css">
 </head>
-
 <body>
-<p>Espace admin</p>
+    <div class="back-office-container">
+        <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/includes/AdminDashboard.php'); ?>
+
+        <div class="back-office-content">
+            <h1>Espace admin</h1>
+
+            <script type="module">
+                import { populateVolunteerTable } from '/assets/js/pages/VolunteerTable.js';
+
+                populateVolunteerTable();
+            </script>
+        </div>
+    </div>
 </body>

@@ -54,17 +54,29 @@ async function getUser(userId) {
 }
 
 // Fonction pour récupérer tous les utilisateurs
-async function getAllUsers() {
-        const response = await fetch(apiEndpoint+'/users', {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
-        if (!response.ok) {
-            console.error('Failed to get all users');
+async function getAllUsers(role, status) {
+    // Construction de l'URL avec les query parameters
+    const queryParams = new URLSearchParams();
+    if (role) {
+        queryParams.append('role', role);
+    }
+    if (status) {
+        queryParams.append('status', status);
+    }
+
+    const response = await fetch(`${apiEndpoint}/users?${queryParams.toString()}`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json'
         }
-        return await response.json();
+    });
+
+    if (!response.ok) {
+        console.error('Failed to get all users');
+        return null;
+    }
+
+    return await response.json();
 }
 
 export { registerVolunteer, registerMerchant, approveUser, getUser, getAllUsers };

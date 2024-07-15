@@ -42,7 +42,7 @@ async function authenticate(jwtToken, role) {
 
     if (!response.ok) {
         if (response.status === 401) {
-            throw new Error('Invalid token');
+            throw new Error('Expired Session');
         } else if (response.status === 403) {
             throw new Error('Access denied');
         } else {
