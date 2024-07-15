@@ -1,13 +1,14 @@
 <?php
-// Path: backend/src/Controller/DeliveryController.php
 namespace Controller;
 
 use Entity\DeliveryModel;
+use Entity\CompanyModel;
 use Doctrine\ORM\EntityManager;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
-use Doctrine\ORM\EntityNotFoundException;
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
 use Service\PDFService;
 
 class DeliveryController
@@ -65,26 +66,56 @@ class DeliveryController
     public function createDelivery($data)
     {
         try {
-            // Validate input data (add your own validation logic)
-            if (!isset($data['route_name']) || !isset($data['destination']) || !isset($data['recipient_type']) || !isset($data['status'])) {
+            // Validate input data
+            if (!isset($data['route_name']) || !isset($data['destination']) || !isset($data['recipient_type']) || !isset($data['status']) || !isset($data['warehouse_id']) || !isset($data['email']) || !isset($data['volunteer_name'])) {
                 http_response_code(400);
                 return ['error' => 'Missing required fields for new delivery'];
             }
 
+            // Check if a delivery with the same route_name exists for today
+            $today = new \DateTime();
+            $existingDelivery = $this->entityManager->getRepository(DeliveryModel::class)->findOneBy([
+                'route_name' => $data['route_name'],
+                'delivery_date' => $today,
+            ]);
+
+            if ($existingDelivery) {
+                http_response_code(400);
+                return ['error' => 'A delivery with the same route_name already exists for today'];
+            }
+
+            // Check for companies with available stock
+            $company = $this->entityManager->getRepository(CompanyModel::class)->findOneBy(['has_stock' => true]);
+
+            if (!$company) {
+                http_response_code(400);
+                return ['error' => 'No companies with stock available'];
+            }
+
+            // Create new delivery
             $delivery = new DeliveryModel();
             $delivery->setRouteName($data['route_name']);
             $delivery->setDestination($data['destination']);
             $delivery->setRecipientType($data['recipient_type']);
-            $delivery->setDeliveryDate(new \DateTime("now"));
+            $delivery->setDeliveryDate($today);
             $delivery->setStatus($data['status']);
             if (isset($data['comment'])) {
                 $delivery->setComment($data['comment']);
             }
+            $delivery->setWarehouseId($data['warehouse_id']);
             $delivery->setCreatedAt(new \DateTime("now"));
             $delivery->setUpdatedAt(new \DateTime("now"));
 
             $this->entityManager->persist($delivery);
             $this->entityManager->flush();
+
+            // Send email notification
+            $emailSent = $this->sendEmailNotification($delivery, $data['email'], $data['volunteer_name']);
+
+            if (!$emailSent) {
+                http_response_code(500);
+                return ['error' => 'Delivery created but email notification failed'];
+            }
 
             return ['id' => $delivery->getId(), 'message' => 'Delivery created successfully'];
         } catch (\Exception $e) {
@@ -131,6 +162,9 @@ class DeliveryController
             }
             if (isset($data['comment'])) {
                 $delivery->setComment($data['comment']);
+            }
+            if (isset($data['warehouse_id'])) {
+                $delivery->setWarehouseId($data['warehouse_id']);
             }
             $delivery->setUpdatedAt(new \DateTime("now"));
 
@@ -196,5 +230,93 @@ class DeliveryController
             throw $e;
         }
     }
+
+    private function sendEmailNotification($delivery, $email, $volunteerName)
+    {
+        $mail = new PHPMailer(true);
+
+        try {
+            // Configuration du serveur SMTP
+            $mail->isSMTP();
+            $mail->Host = 'smtp.gmail.com';
+            $mail->SMTPAuth = true;
+            $mail->Username = 'morewaste1@gmail.com';
+            $mail->Password = 'vhpewmlkxxrpnioj';
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+            $mail->Port = 587;
+
+            // Destinataire
+            $mail->setFrom('morewaste1@gmail.com', 'No More Waste');
+            $mail->addAddress($email, $volunteerName);
+
+            // Generate PDF
+            $pdf = $this->pdfService->createPDF($delivery);
+
+            // Attach PDF to email
+            $mail->addStringAttachment($pdf, 'delivery_details.pdf');
+
+            // Contenu de l'email
+            $mail->isHTML(true);
+            $mail->Subject = 'New Delivery Assigned';
+            $mail->Body    = $this->generateEmailBody($delivery, $volunteerName);
+            $mail->AltBody = $this->generateEmailAltBody($delivery, $volunteerName);
+
+            $mail->send();
+            return true;
+        } catch (Exception $e) {
+            error_log("Message could not be sent. Mailer Error: {$mail->ErrorInfo}");
+            return false;
+        }
+    }
+
+    private function generateEmailBody($delivery, $volunteerName)
+    {
+        $googleMapsLink = $this->generateGoogleMapsLink($delivery->getRouteName(), $delivery->getDestination());
+
+        return "
+            <html>
+            <body>
+                <h1>New Delivery Assigned</h1>
+                <p>Dear {$volunteerName},</p>
+                <p>A new delivery has been assigned to you. Please find the details below:</p>
+                <ul>
+                    <li><strong>Route Name:</strong> {$delivery->getRouteName()}</li>
+                    <li><strong>Destination:</strong> {$delivery->getDestination()}</li>
+                    <li><strong>Recipient Type:</strong> {$delivery->getRecipientType()}</li>
+                    <li><strong>Status:</strong> {$delivery->getStatus()}</li>
+                </ul>
+                <p>You can view the route on Google Maps <a href=\"{$googleMapsLink}\">here</a>.</p>
+                <p>Thank you for your continued support in helping us reduce waste and assist those in need.</p>
+                <p>Best regards,</p>
+                <p>No More Waste Team</p>
+            </body>
+            </html>
+        ";
+    }
+
+    private function generateEmailAltBody($delivery, $volunteerName)
+    {
+        $googleMapsLink = $this->generateGoogleMapsLink($delivery->getRouteName(), $delivery->getDestination());
+
+        return "
+            Dear {$volunteerName},\n
+            A new delivery has been assigned to you. Please find the details below:\n
+            Route Name: {$delivery->getRouteName()}\n
+            Destination: {$delivery->getDestination()}\n
+            Recipient Type: {$delivery->getRecipientType()}\n
+            Status: {$delivery->getStatus()}\n
+            \n
+            You can view the route on Google Maps here: {$googleMapsLink}\n
+            \n
+            Thank you for your continued support in helping us reduce waste and assist those in need.\n
+            \n
+            Best regards,\n
+            No More Waste Team
+        ";
+    }
+
+    private function generateGoogleMapsLink($routeName, $destination)
+    {
+        return "https://www.google.com/maps/dir/?api=1&origin=" . urlencode($routeName) . "&destination=" . urlencode($destination) . "&travelmode=driving";
+    }
 }
-?>

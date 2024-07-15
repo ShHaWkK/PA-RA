@@ -36,8 +36,8 @@ use Controller\ServiceProposalController;
 use Controller\TicketController;
 use Service\PDFService;
 use Service\JWTService;
+use Service\EmailService;
 use Middleware\JWTMiddleware;
-
 
 error_log("Traitement de la requête: " . $_SERVER['REQUEST_METHOD'] . " " . $_SERVER['REQUEST_URI']);
 
@@ -59,8 +59,11 @@ if ($uriParts[0] === '') {
     exit;
 }
 
+// Google Maps API Key
+$googleMapsApiKey = 'AIzaSyA0nZoj1xey1WSaaA_BdLH5CRca48aYQC0';
+
 // Instancie le service PDF
-$pdfService = new PDFService();
+$pdfService = new PDFService($googleMapsApiKey);
 
 // Mappe les contrôleurs aux chemins d'URI
 $controllerMap = [
