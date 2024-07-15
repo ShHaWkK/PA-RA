@@ -9,15 +9,15 @@ export async function populateVolunteerTable() {
     }
 
     const table = document.createElement('table');
-    table.border = '1';
+    table.classList.add('volunteer-table'); // Ajout de la classe volunteer-table pour le style
 
     const thead = document.createElement('thead');
     const headerRow = document.createElement('tr');
 
-    const headers = ['ID', 'First Name', 'Last Name', 'Email', 'Phone Number', 'Role', 'Status', 'Created At', 'Updated At'];
+    const headers = ['', 'First Name', 'Last Name', 'Email', 'Phone Number', 'Role', 'Status', 'Created At', 'Updated At'];
     headers.forEach(headerText => {
         const th = document.createElement('th');
-        th.appendChild(document.createTextNode(headerText));
+        th.textContent = headerText;
         headerRow.appendChild(th);
     });
 
@@ -29,8 +29,16 @@ export async function populateVolunteerTable() {
     users.forEach(user => {
         const row = document.createElement('tr');
 
+        // Ajout de la checkbox dans la première cellule
+        const checkboxCell = document.createElement('td');
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.value = user.id; // Utilisation de l'id de l'utilisateur comme value de la checkbox
+        checkboxCell.appendChild(checkbox);
+        row.appendChild(checkboxCell);
+
+        // Ajout des autres cellules avec les données de l'utilisateur
         const cells = [
-            user.id,
             user.first_name,
             user.last_name,
             user.email,
@@ -43,7 +51,7 @@ export async function populateVolunteerTable() {
 
         cells.forEach(cellText => {
             const td = document.createElement('td');
-            td.appendChild(document.createTextNode(cellText));
+            td.textContent = cellText;
             row.appendChild(td);
         });
 
@@ -51,5 +59,13 @@ export async function populateVolunteerTable() {
     });
 
     table.appendChild(tbody);
-    document.body.appendChild(table);
+
+    // Sélectionner le conteneur back-office-content et y attacher le tableau
+    const backOfficeContent = document.querySelector('.volunteer-table');
+    if (backOfficeContent) {
+        backOfficeContent.innerHTML = ''; // Effacer le contenu existant si nécessaire
+        backOfficeContent.appendChild(table);
+    } else {
+        console.error('Back office content container not found.');
+    }
 }

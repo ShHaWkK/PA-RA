@@ -1,0 +1,12 @@
+.back-office-container {
+    display: flex;
+    height: 100vh; /* Hauteur de l'écran complet */
+}
+
+.back-office-content {
+    flex: 1; /* Le contenu principal prend tout l'espace restant */
+    padding: 20px;
+    margin-left: 250px; /* Marge à gauche pour le dashboard */
+    background-color: #f0f0f0; /* Couleur de fond du contenu */
+    overflow-y: auto; /* Activation du défilement vertical si nécessaire */
+}
