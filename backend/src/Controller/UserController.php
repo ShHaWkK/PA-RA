@@ -58,19 +58,15 @@ class UserController
 
             case 'GET':
                 if (isset($uriParts[1])) {
-                    switch ($uriParts[1]) {
-                        case 'generatePlanning':
-                            return $this->generatePlanning();
-                        case 'role':
-                            return $this->getByRole($input);
-                        case 'status':
-                            return $this->getByStatus($input);
-                        default:
-                            return $this->getUser($uriParts[1]);
-                    }
+                    return match ($uriParts[1]) {
+                        'generatePlanning' => $this->generatePlanning(),
+                        default => $this->getUser($uriParts[1]),
+                    };
                 } else {
-                    return $this->getAllUsers();
-                } // Break for GET case
+                    error_log("On est ici ");
+                    error_log(print_r($_GET,true));
+                    return $this->getUsersByCriteria($_GET);
+                }
 
             case 'PUT':
                 if (isset($uriParts[2])) {
@@ -232,7 +228,6 @@ class UserController
     }
 
 
-
     private function getUser($id)
     {
         $user = $this->entityManager->getRepository(UserModel::class)->find($id);
@@ -244,21 +239,20 @@ class UserController
         return json_decode($data, true);
     }
 
-    private function getByStatus($data)
+    private function getUsersByCriteria($data)
     {
         $userRepository = $this->entityManager->getRepository(UserModel::class);
         $criteria = [];
 
-        if (isset($data['role'])){
+        if (isset($data['role'])) {
             $criteria['role'] = $data['role'];
-
         }
+        if (isset($data['status'])) {
             $criteria['status'] = $data['status'];
+        }
 
         $users = $userRepository->findBy($criteria);
 
-
-        // Prepare data using jsonSerialize() method
         $serializedUsers = [];
         foreach ($users as $user) {
             $serializedUsers[] = $user->jsonSerialize();
@@ -267,19 +261,5 @@ class UserController
         return $serializedUsers;
     }
 
-    private function getByRole($data)
-    {
-        $userRepository = $this->entityManager->getRepository(UserModel::class);
-
-        $users = $userRepository->findBy(['role' => $data['role']]);
-
-        // Prepare data using jsonSerialize() method
-        $serializedUsers = [];
-        foreach ($users as $user) {
-            $serializedUsers[] = $user->jsonSerialize();
-        }
-
-        return $serializedUsers;
-    }
 }
 ?>

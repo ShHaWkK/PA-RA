@@ -49,6 +49,9 @@ $jwtMiddleware = new JWTMiddleware($jwtService);
 $requestUri = $_SERVER['REQUEST_URI'];
 error_log("Requête URI: " . $requestUri);
 
+// On ignore les paramètres de l'URI
+$requestUri = parse_url($requestUri, PHP_URL_PATH);
+
 // Diviser l'URI en parties en utilisant '/' comme délimiteur
 $uriParts = explode('/', trim($requestUri, '/'));
 if ($uriParts[0] === '') {
