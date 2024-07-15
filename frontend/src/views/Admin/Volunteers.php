@@ -14,15 +14,33 @@
 
     <div class="back-office-content">
         <h1>Bénévoles</h1>
-        <input type="text" id="searchInput" placeholder="Rechercher...">
-        <button>Ajouter un bénévole</button>
-        <div class="volunteer-table"></div>
-        <script type="module">
-            import { populateVolunteerTable } from '/assets/js/pages/VolunteerTable.js';
 
-            populateVolunteerTable();
-        </script>
+        <div class="row">
+            <input type="text" id="searchInput" placeholder="Rechercher...">
+            <select name="status" id="volunteer-status-select">
+                <option value=""> Tous </option>
+                <option value="approved"> Approuvé </option>
+                <option value="rejected"> Rejeté </option>
+                <option value="pending"> En attente  </option>
+            </select>
+        </div>
+
+        <div class="row">
+            <button class="add-button"> Ajouter </button>
+            <button class="delete-button"> Supprimer </button>
+            <button class="neutral-button"> Modifier </button>
+        </div>
+
+        <div class="row">
+            <button class="add-button"> Approuver </button>
+            <button class="delete-button"> Refuser </button>
+            <button class="neutral-button"> Mettre en attente </button>
+        </div>
+
+        <div class="volunteer-table"></div>
+        <script type="module" src="/assets/js/pages/AdminVolunteerPage.js"></script>
     </div>
+
 </div>
 </body>
 </html>

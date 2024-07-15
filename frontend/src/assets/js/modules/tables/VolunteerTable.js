@@ -1,8 +1,8 @@
 import { getAllUsers } from '/assets/js/api/Users.js';
 import { setupSearch } from '/assets/js/modules/SearchBar.js';
 
-export async function populateVolunteerTable() {
-    const users = await getAllUsers('volunteer', null);
+export async function populateVolunteerTable(status) {
+    const users = await getAllUsers('volunteer', status);
 
     if (!users || users.length === 0) {
         console.log('No volunteers found');

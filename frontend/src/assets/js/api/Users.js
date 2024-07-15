@@ -58,11 +58,15 @@ async function getAllUsers(role, status) {
     // Construction de l'URL avec les query parameters
     const queryParams = new URLSearchParams();
     if (role) {
+        console.log("role",role);
         queryParams.append('role', role);
     }
     if (status) {
+        console.log("status",status);
         queryParams.append('status', status);
     }
+
+    console.log(`${apiEndpoint}/users?${queryParams.toString()}`);
 
     const response = await fetch(`${apiEndpoint}/users?${queryParams.toString()}`, {
         method: 'GET',
