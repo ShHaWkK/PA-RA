@@ -30,6 +30,7 @@ use Controller\CollectionController;
 use Controller\DeliveryController;
 use Controller\ServiceController;
 use Controller\ProductController;
+use Controller\PlannedRouteController;
 use Controller\LoginController;
 use Controller\PrivateAreaController;
 use Controller\ServiceProposalController;
@@ -54,10 +55,6 @@ $requestUri = parse_url($requestUri, PHP_URL_PATH);
 
 // Diviser l'URI en parties en utilisant '/' comme délimiteur
 $uriParts = explode('/', trim($requestUri, '/'));
-if ($uriParts[0] === '') {
-    echo 'Welcome to No More Waste API';
-    exit;
-}
 
 // Google Maps API Key
 $googleMapsApiKey = 'AIzaSyA0nZoj1xey1WSaaA_BdLH5CRca48aYQC0';
@@ -75,6 +72,7 @@ $controllerMap = [
     'collections' => CollectionController::class,
     'deliveries' => DeliveryController::class,
     'products' => ProductController::class,
+    'planned_routes' => PlannedRouteController::class,
     'reminders' => ReminderController::class,
     'login' => LoginController::class,
     'checkSession' => LoginController::class,
@@ -89,7 +87,7 @@ $controllerMap = [
 $route = $uriParts[0];
 
 // A retirer par la suite, permet de générer le token à mettre dans la table admin
-if($route == 'generate_token'){
+if ($route == 'generate_token') {
     echo json_encode(['token' => password_hash($uriParts[1], PASSWORD_BCRYPT)]);
     password_hash($uriParts[1], PASSWORD_BCRYPT);
 }
@@ -103,7 +101,7 @@ if (!array_key_exists($route, $controllerMap)) {
 // Instancie le contrôleur approprié
 $controllerClass = $controllerMap[$route];
 try {
-    if ($controllerClass === DeliveryController::class) {
+    if ($controllerClass === DeliveryController::class || $controllerClass === PlannedRouteController::class) {
         $controller = new $controllerClass($entityManager, $pdfService);
     } elseif ($controllerClass === LoginController::class) {
         $controller = new $controllerClass($entityManager, $jwtService);
@@ -131,7 +129,6 @@ try {
     } else {
         $response = $controller->processRequest($_SERVER['REQUEST_METHOD'], $uriParts, $input);
     }
-
 } catch (EntityNotFoundException $e) {
     http_response_code(404);
     $response = ['error' => $e->getMessage()];
