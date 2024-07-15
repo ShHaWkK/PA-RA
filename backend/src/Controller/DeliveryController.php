@@ -3,7 +3,6 @@ namespace Controller;
 
 use Entity\DeliveryModel;
 use Entity\CompanyModel;
-use Entity\PlannedRouteModel;
 use Doctrine\ORM\EntityManager;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
@@ -239,7 +238,7 @@ class DeliveryController
         try {
             // Configuration du serveur SMTP
             $mail->isSMTP();
-            $mail->Host = 'smtp.gmail.com'; 
+            $mail->Host = 'smtp.gmail.com';
             $mail->SMTPAuth = true;
             $mail->Username = 'morewaste1@gmail.com';
             $mail->Password = 'vhpewmlkxxrpnioj';
@@ -273,7 +272,7 @@ class DeliveryController
     private function generateEmailBody($delivery, $volunteerName)
     {
         $googleMapsLink = $this->generateGoogleMapsLink($delivery->getRouteName(), $delivery->getDestination());
-        
+
         return "
             <html>
             <body>
@@ -298,7 +297,7 @@ class DeliveryController
     private function generateEmailAltBody($delivery, $volunteerName)
     {
         $googleMapsLink = $this->generateGoogleMapsLink($delivery->getRouteName(), $delivery->getDestination());
-        
+
         return "
             Dear {$volunteerName},\n
             A new delivery has been assigned to you. Please find the details below:\n
@@ -318,7 +317,6 @@ class DeliveryController
 
     private function generateGoogleMapsLink($routeName, $destination)
     {
-        return "https://www.google.com/maps/dir/?api=1&origin={$routeName}&destination={$destination}&travelmode=driving";
+        return "https://www.google.com/maps/dir/?api=1&origin=" . urlencode($routeName) . "&destination=" . urlencode($destination) . "&travelmode=driving";
     }
 }
-?>
