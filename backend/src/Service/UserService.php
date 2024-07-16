@@ -31,8 +31,13 @@ class UserService
 
         $user->setRole($role);
         $user->setStatus('pending');
-        $user->setVerificationCode($data['verification_code']); 
-        $user->setIsVerified($data['is_verified']); 
+        
+        // Vérification des clés et valeurs par défaut
+        $verificationCode = $data['verification_code'] ?? rand(100000, 999999);
+        $isVerified = $data['is_verified'] ?? false;
+
+        $user->setVerificationCode($verificationCode);
+        $user->setIsVerified($isVerified);
         $user->setCreatedAt(new \DateTime("now"));
         $user->setUpdatedAt(new \DateTime("now"));
 
@@ -71,4 +76,3 @@ class UserService
         return $user;
     }
 }
-?>
