@@ -36,6 +36,12 @@ class UserModel implements \JsonSerializable
     #[ORM\Column(type: "string", columnDefinition: "ENUM('pending', 'approved', 'rejected')", options: ["default" => "pending"])]
     private $status;
 
+    #[ORM\Column(type: "string", length: 6, nullable: true)]
+    private $verification_code;
+
+    #[ORM\Column(type: "boolean", options: ["default" => false])]
+    private $is_verified;
+
     #[ORM\Column(type: "datetime", options: ["default" => "CURRENT_TIMESTAMP"])]
     private $created_at;
 
@@ -142,6 +148,28 @@ class UserModel implements \JsonSerializable
         return $this;
     }
 
+    public function getVerificationCode(): ?string
+    {
+        return $this->verification_code;
+    }
+
+    public function setVerificationCode(?string $verificationCode): self
+    {
+        $this->verification_code = $verificationCode;
+        return $this;
+    }
+
+    public function isVerified(): ?bool
+    {
+        return $this->is_verified;
+    }
+
+    public function setIsVerified(bool $isVerified): self
+    {
+        $this->is_verified = $isVerified;
+        return $this;
+    }
+
     public function getCreatedAt(): ?\DateTimeInterface
     {
         return $this->created_at;
@@ -212,6 +240,7 @@ class UserModel implements \JsonSerializable
 
         return $this;
     }
+
     public function jsonSerialize(): array
     {
         return [
@@ -227,4 +256,3 @@ class UserModel implements \JsonSerializable
         ];
     }
 }
-?>

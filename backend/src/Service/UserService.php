@@ -31,6 +31,8 @@ class UserService
 
         $user->setRole($role);
         $user->setStatus('pending');
+        $user->setVerificationCode($data['verification_code']); 
+        $user->setIsVerified($data['is_verified']); 
         $user->setCreatedAt(new \DateTime("now"));
         $user->setUpdatedAt(new \DateTime("now"));
 

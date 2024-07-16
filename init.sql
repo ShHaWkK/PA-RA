@@ -12,7 +12,9 @@ CREATE TABLE IF NOT EXISTS users (
     role ENUM('admin', 'volunteer', 'employee', 'manager', 'merchant') NOT NULL,
     status ENUM('pending', 'approved', 'rejected') NOT NULL DEFAULT 'pending',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    verification_code VARCHAR(6),
+    is_verified BOOLEAN DEFAULT FALSE
 );
 
 -- Table des entreprises (companies)
