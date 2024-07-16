@@ -24,7 +24,7 @@
                 <option value="pending"> En attente  </option>
             </select>
         </div>
-
+        <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/includes/Loader.php'); ?>
         <div class="row">
             <button class="add-button" id="addVolunteerButton"> Ajouter </button>
             <button class="delete-button" id="deleteVolunteerButton"> Supprimer </button>
@@ -42,6 +42,7 @@
     </div>
 
     <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/includes/modals/AddVolunteerModal.php'); ?>
+    <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/includes/modals/DeleteVolunteerModal.php'); ?>
 
 </div>
 </body>

@@ -24,7 +24,9 @@ async function registerMerchant(userData) {
 
 // Fonction pour approuver un utilisateur par un administrateur
 async function handleAprovals(userId, status) {
-        const response = await fetch(`${apiEndpoint}/users/approval/${userId}`, {
+    var successMessage,errorMessage;
+
+    const response = await fetch(`${apiEndpoint}/users/approval/${userId}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json'
@@ -32,28 +34,27 @@ async function handleAprovals(userId, status) {
             body: JSON.stringify({ status: status })
         })
             .then(response => {
+                switch (status){
+                    case 'approved':
+                        successMessage = (`User ${userId} approved successfully.`);
+                        errorMessage = (`Error approving user ${userId}:` + response.statusText);
+                        break;
+                    case 'pending':
+                         successMessage = (`User ${userId} approved successfully.`);
+                         errorMessage = (`Error approving user ${userId}:` + response.statusText);
+                        break;
+                    case 'rejected':
+                         successMessage = (`User ${userId} approved successfully.`);
+                         errorMessage = (`Error approving user ${userId}:` + response.statusText);
+                        break;}
                 if (response.ok) {
-                    switch (status){
-                        case 'approved':
-                            console.log(`User ${userId} approved successfully.`);
-                            alert(`User ${userId} approved successfully.`);
-                        break;
-                        case 'pending':
-                            console.log(`User ${userId} put on hold successfully.`);
-                            alert(`User ${userId} put on hold successfully.`);
-                        break;
-                        case 'rejected':
-                            console.log(`User ${userId} rejected successfully.`);
-                            alert(`User ${userId} rejected successfully.`);
-                            break;}
+                    console.log(successMessage);
+                    alert(successMessage);
                 } else {
-                    console.error(`Error approving user ${userId}:`, response.statusText);
-                    alert(`Error approving user ${userId}:`);
+                    console.error(errorMessage);
+                    alert(errorMessage);
                 }
             })
-            .catch(error => {
-                console.error(`Error approving user ${userId}:`, error);
-            });
 
     return response;
 }
@@ -102,4 +103,20 @@ async function getAllUsers(role, status) {
     return await response.json();
 }
 
-export { registerVolunteer, registerMerchant, handleAprovals, getUser, getAllUsers };
+async function deleteUser(userId){
+    const response = await fetch(apiEndpoint+`/users/${userId}`, {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    });
+
+    if (!response.ok) {
+        console.error('Failed to delete user');
+        return null;
+    }
+
+    return await response.json();
+}
+
+export { registerVolunteer, registerMerchant, handleAprovals, getUser, getAllUsers, deleteUser};

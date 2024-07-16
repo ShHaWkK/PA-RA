@@ -122,3 +122,5 @@ async function populateSkillTable() {
 
 // Appel de la fonction au chargement de la page ou lorsque nécessaire
 document.addEventListener('DOMContentLoaded', populateSkillTable);
+
+export { populateSkillTable };

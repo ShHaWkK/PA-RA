@@ -2,7 +2,7 @@
 
 <div id="addVolunteerModal" class="modal">
     <div class="modal-content">
-        <span class="close">&times;</span>
+        <span class="close" id="closeAdd">&times;</span>
         <form id="registrationForm">
             <div>
                 <label for="first_name"><?php echo htmlspecialchars($data['first_name_label']); ?></label>
@@ -34,6 +34,7 @@
                     </tr>
                     </thead>
                     <tbody>
+                    <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/includes/Loader.php'); ?>
                     <!-- Les compétences seront ajoutées ici dynamiquement -->
                     </tbody>
                 </table>
@@ -100,7 +101,3 @@
 </div>
 
 <script src="/assets/js/VolunteerSignUp.js"></script>
-
-<?php
-ob_end_flush(); // Send the buffered output
-?>

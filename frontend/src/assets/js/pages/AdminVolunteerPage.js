@@ -1,5 +1,6 @@
 import {populateVolunteerTable} from "/assets/js/modules/tables/VolunteerTable.js";
-import {handleAprovals} from "/assets/js/api/Users.js";
+import {handleAprovals, deleteUser} from "/assets/js/api/Users.js";
+import {populateSkillTable} from "/assets/js/pages/VolunteerSignUp.js";
 
 var global_status = "";
 
@@ -44,6 +45,34 @@ function handlePending(){
     });
 }
 
+// Fonction pour supprimer les utilisateurs sélectionnés
+async function deleteUsers() {
+    const checkedCheckboxes = document.querySelectorAll('#volunteerTable input[type="checkbox"]:checked');
+    const userIds = Array.from(checkedCheckboxes).map(checkbox => checkbox.value);
+
+    if (userIds.length === 0) {
+        alert("Veuillez sélectionner au moins un utilisateur à supprimer.");
+        return;
+    }
+
+    // const confirmDelete = confirm("Êtes-vous sûr de vouloir supprimer les utilisateurs sélectionnés ?");
+    // if (!confirmDelete) {
+    //     return; // Annuler l'action si l'utilisateur ne confirme pas
+    // }
+
+    try {
+        for (const userId of userIds) {
+            await deleteUser(userId);
+        }
+        // Rafraîchir le tableau des bénévoles après la suppression
+        await populateVolunteerTable(); // Vous devez implémenter cette fonction pour rafraîchir le tableau
+        alert("Les utilisateurs sélectionnés ont été supprimés avec succès.");
+    } catch (error) {
+        console.error("Erreur lors de la suppression des utilisateurs :", error.message);
+        alert("Une erreur est survenue lors de la suppression des utilisateurs.");
+    }
+}
+
 // Appel de la fonction au chargement de la page ou lorsque nécessaire
 document.addEventListener('DOMContentLoaded',
     function (){
@@ -53,28 +82,49 @@ document.addEventListener('DOMContentLoaded',
         handlePending();
 
         //------------------- Définition des fenêtres modales: --------------------------
-        var modal = document.getElementById("addVolunteerModal");
-        var btn = document.getElementById("addVolunteerButton");
-        var span = document.getElementsByClassName("close")[0];
+        // Fenêtre modale d'ajout d'un bénévole
+        var addModal = document.getElementById("addVolunteerModal");
+        var addBtn = document.getElementById("addVolunteerButton");
+        var addSpan = document.getElementById("closeAdd");
 
-        btn.onclick = function() {
-            modal.style.display = "block";
+        //On peuple le tableau des compétences dans le tableau de skills:
+        populateSkillTable();
+
+        addBtn.onclick = function() {
+            addModal.style.display = "block";
         }
 
-        span.onclick = function() {
-            modal.style.display = "none";
+        addSpan.onclick = function() {
+            addModal.style.display = "none";
         }
 
         window.onclick = function(event) {
-            if (event.target == modal) {
-                modal.style.display = "none";
+            if (event.target == addModal) {
+                addModal.style.display = "none";
             }
         }
 
-        document.getElementById('registrationForm').onsubmit = function(event) {
-            event.preventDefault();
-            alert('Form submitted!');
-            modal.style.display = "none";
+        // Fenêtre modale de suppression d'un bénévole
+        var deleteModal = document.getElementById("deleteVolunteerModal");
+        var deleteBtn = document.getElementById("deleteVolunteerButton");
+        var deleteSpan = document.getElementById("closeDelete");
+
+        deleteBtn.onclick = function() {
+            deleteModal.style.display = "block";
         }
+
+        deleteSpan.onclick = function() {
+            deleteModal.style.display = "none";
+        }
+
+        window.onclick = function(event) {
+            if (event.target == deleteModal) {
+                deleteModal.style.display = "none";
+            }
+        }
+
+        // On affecte la fonction de suppression au bouton de la fenêtre modale
+        document.getElementById('confirmDelete').addEventListener('click', deleteUsers);
+
     }
 );

@@ -40,6 +40,8 @@ async function authenticate(jwtToken, role) {
         }
     });
 
+    console.log("jwt:",jwtToken)
+
     if (!response.ok) {
         if (response.status === 401) {
             throw new Error('Expired Session');

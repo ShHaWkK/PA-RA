@@ -77,7 +77,14 @@ class UserController
                 } else {
                     http_response_code(400);
                     return ['error' => 'User ID not specified'];
-                } // Break for PUT case
+                }
+            case 'DELETE':
+                if (isset($uriParts[1])) {
+                    return $this->deleteUser($uriParts[1]);
+                } else {
+                    http_response_code(400);
+                    return ['error' => 'User ID not specified'];
+                }
 
             default:
                 http_response_code(405);
@@ -264,5 +271,25 @@ class UserController
         return $serializedUsers;
     }
 
+    public function deleteUser(int $id)
+    {
+        $user = $this->entityManager->getRepository(UserModel::class)->find($id);
+
+        if ($user === null) {
+            http_response_code(404);
+            return ['error' => 'User not found'];
+        }
+
+        try {
+            $this->entityManager->remove($user);
+            $this->entityManager->flush();
+            return ['message' => 'User deleted successfully'];
+
+        } catch (\Exception $e) {
+            // Vous pouvez ajouter un logging ici pour l'erreur
+            error_log("Erreur lors de la suppression de l'utilisateur avec l'ID $id : " . $e->getMessage());
+            return false;
+        }
+    }
 }
 ?>
