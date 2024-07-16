@@ -51,30 +51,30 @@ document.addEventListener('DOMContentLoaded',
         handleApproval();
         handleReject();
         handlePending();
+
+        //------------------- Définition des fenêtres modales: --------------------------
+        var modal = document.getElementById("addVolunteerModal");
+        var btn = document.getElementById("addVolunteerButton");
+        var span = document.getElementsByClassName("close")[0];
+
+        btn.onclick = function() {
+            modal.style.display = "block";
+        }
+
+        span.onclick = function() {
+            modal.style.display = "none";
+        }
+
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+
+        document.getElementById('registrationForm').onsubmit = function(event) {
+            event.preventDefault();
+            alert('Form submitted!');
+            modal.style.display = "none";
+        }
     }
 );
-
-//------------------- Définition des fenêtres modales: --------------------------
-// var modal = document.getElementById("myModal");
-// var btn = document.getElementById("openModalBtn");
-// var span = document.getElementsByClassName("close")[0];
-//
-// btn.onclick = function() {
-//     modal.style.display = "block";
-// }
-//
-// span.onclick = function() {
-//     modal.style.display = "none";
-// }
-//
-// window.onclick = function(event) {
-//     if (event.target == modal) {
-//         modal.style.display = "none";
-//     }
-// }
-
-// document.getElementById('modalForm').onsubmit = function(event) {
-//     event.preventDefault();
-//     alert('Form submitted!');
-//     modal.style.display = "none";
-// }

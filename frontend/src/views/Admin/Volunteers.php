@@ -26,9 +26,9 @@
         </div>
 
         <div class="row">
-            <button class="add-button" > Ajouter </button>
-            <button class="delete-button" > Supprimer </button>
-            <button class="neutral-button" id='modifyButton'> Modifier </button>
+            <button class="add-button" id="addVolunteerButton"> Ajouter </button>
+            <button class="delete-button" id="deleteVolunteerButton"> Supprimer </button>
+            <button class="neutral-button" id='modifyVolunteerButton'> Modifier </button>
         </div>
 
         <div class="row">
@@ -40,6 +40,8 @@
         <div class="volunteer-table"></div>
         <script type="module" src="/assets/js/pages/AdminVolunteerPage.js"></script>
     </div>
+
+    <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/includes/modals/AddVolunteerModal.php'); ?>
 
 </div>
 </body>
