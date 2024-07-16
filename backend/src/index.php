@@ -40,6 +40,8 @@ use Service\JWTService;
 use Service\EmailService;
 use Middleware\JWTMiddleware;
 
+use PHPMailer\PHPMailer\PHPMailer;
+
 error_log("Traitement de la requête: " . $_SERVER['REQUEST_METHOD'] . " " . $_SERVER['REQUEST_URI']);
 
 $secretKey = getenv('JWT_SECRET');
@@ -62,6 +64,19 @@ $googleMapsApiKey = 'AIzaSyA0nZoj1xey1WSaaA_BdLH5CRca48aYQC0';
 // Instancie le service PDF
 $pdfService = new PDFService($googleMapsApiKey);
 
+// Instancie PHPMailer
+$mailer = new PHPMailer(true);
+$mailer->isSMTP();
+$mailer->Host = 'smtp.gmail.com';
+$mailer->SMTPAuth = true;
+$mailer->Username = 'morewaste1@gmail.com';
+$mailer->Password = 'vhpewmlkxxrpnioj';
+$mailer->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+$mailer->Port = 587;
+
+// Instancie EmailService
+$emailService = new EmailService($mailer);
+
 // Mappe les contrôleurs aux chemins d'URI
 $controllerMap = [
     'users' => UserController::class,
@@ -82,7 +97,9 @@ $controllerMap = [
     'services' => ServiceController::class,
     'service_proposals' => ServiceProposalController::class,
     'tickets' => TicketController::class,
+    'scripts' => 'Scripts',
 ];
+
 // Vérifie si le contrôleur existe pour le premier élément de l'URI
 $route = $uriParts[0];
 
@@ -105,6 +122,13 @@ try {
         $controller = new $controllerClass($entityManager, $pdfService);
     } elseif ($controllerClass === LoginController::class) {
         $controller = new $controllerClass($entityManager, $jwtService);
+    } elseif ($controllerClass === UserController::class) {
+        $controller = new $controllerClass($entityManager, $emailService);
+    } elseif ($route === 'scripts') {
+        if (isset($uriParts[1]) && $uriParts[1] === 'remove_unverified_users') {
+            include __DIR__ . '/Scripts/remove_unverified_users.php';
+            exit;
+        }
     } else {
         $controller = new $controllerClass($entityManager);
     }
@@ -149,4 +173,3 @@ function exit_with_message($message, $code = 200) {
     echo json_encode(['message' => $message]);
     exit;
 }
-?>
