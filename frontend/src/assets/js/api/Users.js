@@ -33,8 +33,19 @@ async function handleAprovals(userId, status) {
         })
             .then(response => {
                 if (response.ok) {
-                    console.log(`User ${userId} approved successfully.`);
-                    alert(`User ${userId} approved successfully.`);
+                    switch (status){
+                        case 'approved':
+                            console.log(`User ${userId} approved successfully.`);
+                            alert(`User ${userId} approved successfully.`);
+                        break;
+                        case 'pending':
+                            console.log(`User ${userId} put on hold successfully.`);
+                            alert(`User ${userId} put on hold successfully.`);
+                        break;
+                        case 'rejected':
+                            console.log(`User ${userId} rejected successfully.`);
+                            alert(`User ${userId} rejected successfully.`);
+                            break;}
                 } else {
                     console.error(`Error approving user ${userId}:`, response.statusText);
                     alert(`Error approving user ${userId}:`);
@@ -44,7 +55,7 @@ async function handleAprovals(userId, status) {
                 console.error(`Error approving user ${userId}:`, error);
             });
 
-    return await response.json();
+    return response;
 }
 
 // Fonction pour récupérer un utilisateur par son ID

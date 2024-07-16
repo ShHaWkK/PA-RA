@@ -1,38 +1,15 @@
 import {populateVolunteerTable} from "/assets/js/modules/tables/VolunteerTable.js";
 import {handleAprovals} from "/assets/js/api/Users.js";
 
+var global_status = "";
+
 document.getElementById('volunteer-status-select').addEventListener('change', async function() {
-    const status = this.value;
-    console.log("status constructor",status);
-    await populateVolunteerTable(status);
+    global_status = this.value;
+    console.log("status constructor",global_status);
+    await populateVolunteerTable(global_status);
 });
 
-// Définition des fenêtres modales:
-// var modal = document.getElementById("myModal");
-// var btn = document.getElementById("openModalBtn");
-// var span = document.getElementsByClassName("close")[0];
-//
-// btn.onclick = function() {
-//     modal.style.display = "block";
-// }
-//
-// span.onclick = function() {
-//     modal.style.display = "none";
-// }
-//
-// window.onclick = function(event) {
-//     if (event.target == modal) {
-//         modal.style.display = "none";
-//     }
-// }
-
-// document.getElementById('modalForm').onsubmit = function(event) {
-//     event.preventDefault();
-//     alert('Form submitted!');
-//     modal.style.display = "none";
-// }
-
-// fonction pour l'approbation des utilisateurs
+//----------------fonction pour l'approbation des utilisateurs-----------------------
 async function handleStatusChange(status){
     const checkedCheckboxes = document.querySelectorAll('#volunteerTable input[type="checkbox"]:checked');
     console.log("click");
@@ -42,9 +19,11 @@ async function handleStatusChange(status){
     console.log("uri",uri);
     console.log(JSON.stringify({ status: status }));
 
-    userIds.forEach(userId => {
-        handleAprovals(userId,status);
-    });
+    for (const userId of userIds) {
+        await handleAprovals(userId,status);
+    }
+    console.log("status",global_status);
+    await populateVolunteerTable(global_status);
 }
 
 function handleApproval(){
@@ -74,3 +53,28 @@ document.addEventListener('DOMContentLoaded',
         handlePending();
     }
 );
+
+//------------------- Définition des fenêtres modales: --------------------------
+// var modal = document.getElementById("myModal");
+// var btn = document.getElementById("openModalBtn");
+// var span = document.getElementsByClassName("close")[0];
+//
+// btn.onclick = function() {
+//     modal.style.display = "block";
+// }
+//
+// span.onclick = function() {
+//     modal.style.display = "none";
+// }
+//
+// window.onclick = function(event) {
+//     if (event.target == modal) {
+//         modal.style.display = "none";
+//     }
+// }
+
+// document.getElementById('modalForm').onsubmit = function(event) {
+//     event.preventDefault();
+//     alert('Form submitted!');
+//     modal.style.display = "none";
+// }
