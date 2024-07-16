@@ -36,6 +36,12 @@ class UserModel implements \JsonSerializable
     #[ORM\Column(type: "string", columnDefinition: "ENUM('pending', 'approved', 'rejected')", options: ["default" => "pending"])]
     private $status;
 
+    #[ORM\Column(type: "string", length: 6, nullable: true)]
+    private $verification_code;
+
+    #[ORM\Column(type: "boolean", options: ["default" => false])]
+    private $is_verified;
+
     #[ORM\Column(type: "datetime", options: ["default" => "CURRENT_TIMESTAMP"])]
     private $created_at;
 
@@ -142,6 +148,28 @@ class UserModel implements \JsonSerializable
         return $this;
     }
 
+    public function getVerificationCode(): ?string
+    {
+        return $this->verification_code;
+    }
+
+    public function setVerificationCode(?string $verificationCode): self
+    {
+        $this->verification_code = $verificationCode;
+        return $this;
+    }
+
+    public function isVerified(): ?bool
+    {
+        return $this->is_verified;
+    }
+
+    public function setIsVerified(bool $isVerified): self
+    {
+        $this->is_verified = $isVerified;
+        return $this;
+    }
+
     public function getCreatedAt(): ?\DateTimeInterface
     {
         return $this->created_at;
@@ -174,7 +202,6 @@ class UserModel implements \JsonSerializable
         if (!$this->skills->contains($skill)) {
             $this->skills[] = $skill;
             $skill->addUser($this);
-            error_log("UserModel: Added skill ID " . $skill->getId() . " to user ID " . $this->getId());
         }
 
         return $this;
@@ -184,7 +211,6 @@ class UserModel implements \JsonSerializable
     {
         if ($this->skills->removeElement($skill)) {
             $skill->removeUser($this);
-            error_log("UserModel: Removed skill ID " . $skill->getId() . " from user ID " . $this->getId());
         }
 
         return $this;
@@ -195,7 +221,6 @@ class UserModel implements \JsonSerializable
         if (!$this->availabilities->contains($availability)) {
             $this->availabilities[] = $availability;
             $availability->setUser($this);
-            error_log("UserModel: Added availability ID " . $availability->getId() . " to user ID " . $this->getId());
         }
 
         return $this;
@@ -206,12 +231,12 @@ class UserModel implements \JsonSerializable
         if ($this->availabilities->removeElement($availability)) {
             if ($availability->getUser() === $this) {
                 $availability->setUser(null);
-                error_log("UserModel: Removed availability ID " . $availability->getId() . " from user ID " . $this->getId());
             }
         }
 
         return $this;
     }
+
     public function jsonSerialize(): array
     {
         return [
@@ -222,6 +247,8 @@ class UserModel implements \JsonSerializable
             'phone_number' => $this->phone_number,
             'role' => $this->role,
             'status' => $this->status,
+            'verification_code' => $this->verification_code,
+            'is_verified' => $this->is_verified,
             'created_at' => $this->created_at->format('Y-m-d H:i:s'),
             'updated_at' => $this->updated_at->format('Y-m-d H:i:s')
         ];

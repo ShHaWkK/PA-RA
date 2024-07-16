@@ -19,6 +19,10 @@ class SkillService
     {
         foreach ($skills as $skillId) {
             $skill = $this->entityManager->find(SkillModel::class, $skillId);
+            if (!$skill) {
+                throw new \Exception("Skill with ID $skillId not found");
+            }
+
             $userSkill = new UserSkillModel();
             $userSkill->setUserId($user->getId());
             $userSkill->setSkillId($skill->getId());

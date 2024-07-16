@@ -3,8 +3,8 @@
 namespace Controller;
 
 use Doctrine\ORM\EntityManager;
-use Doctrine\ORM\Exception\NotSupported;
 use Entity\UserModel;
+use Doctrine\ORM\Exception\NotSupported;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
@@ -12,6 +12,7 @@ use Service\UserService;
 use Service\CompanyService;
 use Service\SkillService;
 use Service\AvailabilityService;
+use Service\EmailService;
 
 class UserController
 {
@@ -21,8 +22,9 @@ class UserController
     private $companyService;
     private $skillService;
     private $availabilityService;
+    private $emailService;
 
-    public function __construct(EntityManager $entityManager)
+    public function __construct(EntityManager $entityManager, EmailService $emailService)
     {
         $this->entityManager = $entityManager;
         $normalizers = [new ObjectNormalizer()];
@@ -33,6 +35,7 @@ class UserController
         $this->companyService = new CompanyService($entityManager);
         $this->skillService = new SkillService($entityManager);
         $this->availabilityService = new AvailabilityService($entityManager);
+        $this->emailService = $emailService;
     }
 
     public function processRequest($method, $uriParts, $input)
@@ -47,6 +50,8 @@ class UserController
                             return $this->registerMerchant($input);
                         case 'addAvailability':
                             return $this->addAvailability($input);
+                        case 'verifyCode':
+                            return $this->verifyCode($input); 
                         default:
                             http_response_code(400);
                             return ['error' => 'Invalid endpoint'];
@@ -54,7 +59,7 @@ class UserController
                 } else {
                     http_response_code(400);
                     return ['error' => 'Invalid endpoint'];
-                } // Break for POST case
+                }
 
             case 'GET':
                 if (isset($uriParts[1])) {
@@ -88,12 +93,14 @@ class UserController
 
             default:
                 http_response_code(405);
-                return ['error' => 'Method Not Allowed']; // Break for default case
+                return ['error' => 'Method Not Allowed'];
         }
     }
 
     private function registerVolunteer($data)
     {
+        $this->entityManager->beginTransaction();
+
         try {
             if (!isset($data['first_name']) || !isset($data['last_name']) || !isset($data['email']) || !isset($data['phone_number']) || !isset($data['password'])) {
                 http_response_code(400);
@@ -108,7 +115,14 @@ class UserController
                 return ['error' => 'Email already exists'];
             }
 
+            // Generate verification code
+            $verificationCode = rand(100000, 999999);
+            $data['verification_code'] = $verificationCode;
+            $data['is_verified'] = false;
+
             $user = $this->userService->addUser($data, 'volunteer');
+            $this->entityManager->persist($user);
+            $this->entityManager->flush();
 
             // Handle skills assignment
             if (isset($data['skills'])) {
@@ -129,8 +143,12 @@ class UserController
             }
 
             $this->entityManager->flush();
+            $this->entityManager->commit();
 
-            return ['id' => $user->getId(), 'message' => 'Volunteer registered successfully. Awaiting approval.'];
+            // Send verification email
+            $this->emailService->sendVerificationEmail($data['email'], $verificationCode);
+
+            return ['id' => $user->getId(), 'message' => 'Volunteer registered successfully. Verification code sent.'];
 
         } catch (\Exception $e) {
             $this->entityManager->rollback();
@@ -138,6 +156,76 @@ class UserController
             error_log("Exception in registerVolunteer: " . $e->getMessage());
             http_response_code(500);
             return ['error' => 'Internal Server Error'];
+        }
+    }
+
+    private function registerMerchant($data)
+    {
+        $this->entityManager->beginTransaction();
+
+        try {
+            if (!isset($data['first_name']) || !isset($data['last_name']) || !isset($data['email']) || !isset($data['phone_number']) || !isset($data['password']) || !isset($data['company_name'])) {
+                http_response_code(400);
+                return ['error' => 'Missing required fields'];
+            }
+
+            // Check if the email already exists
+            $existingUser = $this->entityManager->getRepository(UserModel::class)->findOneBy(['email' => $data['email']]);
+            if ($existingUser) {
+                http_response_code(409);
+                return ['error' => 'Email already exists'];
+            }
+
+            // Generate verification code
+            $verificationCode = rand(100000, 999999);
+            $data['verification_code'] = $verificationCode;
+            $data['is_verified'] = false;
+
+            $user = $this->userService->addUser($data, 'merchant');
+            $this->entityManager->persist($user);
+            $this->entityManager->flush();
+
+            // Handle company assignment
+            $this->companyService->addCompany($data);
+
+            $this->entityManager->flush();
+            $this->entityManager->commit();
+
+            // Send verification email
+            $this->emailService->sendVerificationEmail($data['email'], $verificationCode);
+
+            return ['id' => $user->getId(), 'message' => 'Merchant registered successfully. Verification code sent.'];
+
+        } catch (\Exception $e) {
+            $this->entityManager->rollback();
+
+            error_log("Exception in registerMerchant: " . $e->getMessage());
+            http_response_code(500);
+            return ['error' => 'Internal Server Error'];
+        }
+    }
+
+    private function verifyCode($data)
+    {
+        if (!isset($data['email']) || !isset($data['verification_code'])) {
+            http_response_code(400);
+            return ['error' => 'Missing email or verification code'];
+        }
+
+        $user = $this->entityManager->getRepository(UserModel::class)->findOneBy(['email' => $data['email']]);
+        if (!$user) {
+            http_response_code(404);
+            return ['error' => 'User not found'];
+        }
+
+        if ($user->getVerificationCode() === $data['verification_code']) {
+            $user->setIsVerified(true);
+            $user->setVerificationCode(null); // Clear the verification code after successful verification
+            $this->entityManager->flush();
+            return ['message' => 'Verification successful.'];
+        } else {
+            http_response_code(400);
+            return ['error' => 'Invalid verification code'];
         }
     }
 
@@ -188,39 +276,6 @@ class UserController
         }
     }
 
-    private function registerMerchant($data)
-    {
-        $this->entityManager->beginTransaction();
-
-        try {
-            if (!isset($data['first_name']) || !isset($data['last_name']) || !isset($data['email']) || !isset($data['phone_number']) || !isset($data['password']) || !isset($data['company_name'])) {
-                http_response_code(400);
-                return ['error' => 'Missing required fields'];
-            }
-
-            // Check if the email already exists
-            $existingUser = $this->entityManager->getRepository(UserModel::class)->findOneBy(['email' => $data['email']]);
-            if ($existingUser) {
-                http_response_code(409);
-                return ['error' => 'Email already exists'];
-            }
-
-            $user = $this->userService->addUser($data, 'merchant');
-            $this->companyService->addCompany($data);
-            $this->entityManager->flush();
-            $this->entityManager->commit();
-
-            return ['id' => $user->getId(), 'message' => 'Merchant registered successfully. Awaiting approval.'];
-
-        } catch (\Exception $e) {
-            $this->entityManager->rollback();
-
-            error_log("Exception in registerMerchant: " . $e->getMessage());
-            http_response_code(500);
-            return ['error' => 'Internal Server Error'];
-        }
-    }
-
     /**
      * @throws NotSupported
      */
@@ -236,7 +291,6 @@ class UserController
 
         return $serializedUsers;
     }
-
 
     private function getUser($id)
     {
