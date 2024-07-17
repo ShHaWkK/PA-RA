@@ -1,12 +1,15 @@
 import { getAllUsers } from '/assets/js/api/Users.js';
 import { setupSearch } from '/assets/js/modules/SearchBar.js';
+import {populateModifyUserForm} from "/assets/js/modules/modals/modifyUser.js";
+
+export var selectedUserId;
 
 export async function populateVolunteerTable(status) {
-    console.log("status in populateVolunteerTable",status);
+    console.log("status in populateVolunteerTable", status);
 
     const users = await getAllUsers('volunteer', status);
 
-    console.log("users",users);
+    console.log("users", users);
 
     if (!users || users.length === 0) {
         console.log('No volunteers found');
@@ -21,7 +24,7 @@ export async function populateVolunteerTable(status) {
     const thead = document.createElement('thead');
     const headerRow = document.createElement('tr');
 
-    const headers = ['', 'First Name', 'Last Name', 'Email', 'Phone Number', 'Status', 'Created At', 'Updated At'];
+    const headers = ['', 'First Name', 'Last Name', 'Email', 'Phone Number', 'Status', 'Availabilities', 'Skills', 'Modify', 'Created At', 'Updated At'];
     headers.forEach(headerText => {
         const th = document.createElement('th');
         th.textContent = headerText;
@@ -51,9 +54,7 @@ export async function populateVolunteerTable(status) {
             user.last_name,
             user.email,
             user.phone_number,
-            user.status,
-            user.created_at,
-            user.updated_at
+            user.status
         ];
 
         cells.forEach(cellText => {
@@ -61,6 +62,41 @@ export async function populateVolunteerTable(status) {
             td.textContent = cellText;
             row.appendChild(td);
         });
+
+        // Ajout des boutons "Voir" pour "Availabilities" et "Skills"
+        const availabilitiesButtonCell = document.createElement('td');
+        const availabilitiesButton = document.createElement('button');
+        availabilitiesButton.textContent = 'Voir';
+        availabilitiesButton.onclick = () => viewAvailabilities(user);
+        availabilitiesButtonCell.appendChild(availabilitiesButton);
+        row.appendChild(availabilitiesButtonCell);
+
+        const skillsButtonCell = document.createElement('td');
+        const skillsButton = document.createElement('button');
+        skillsButton.textContent = 'Voir';
+        skillsButton.onclick = () => viewSkills(user);
+        skillsButtonCell.appendChild(skillsButton);
+        row.appendChild(skillsButtonCell);
+
+        // Ajout du bouton "Modifier"
+        const modifyButtonCell = document.createElement('td');
+        const modifyButton = document.createElement('button');
+        modifyButton.textContent = 'Modifier';
+        modifyButton.id = 'modifyUserButton_' + user.id;
+        modifyButton.className = 'modify-user-button';
+        modifyButton.value = user.id;
+        modifyButton.onclick = () => openModifyUserModal(user.id);
+        modifyButtonCell.appendChild(modifyButton);
+        row.appendChild(modifyButtonCell);
+
+        // Ajout des dates dans les bonnes colonnes avec formatage
+        const createdAtCell = document.createElement('td');
+        createdAtCell.textContent = formatDateToFrench(user.created_at);
+        row.appendChild(createdAtCell);
+
+        const updatedAtCell = document.createElement('td');
+        updatedAtCell.textContent = formatDateToFrench(user.updated_at);
+        row.appendChild(updatedAtCell);
 
         tbody.appendChild(row);
     });
@@ -77,4 +113,32 @@ export async function populateVolunteerTable(status) {
     } else {
         console.error('Back office content container not found.');
     }
+}
+
+// Fonction pour formater les dates au format francophone
+function formatDateToFrench(dateString) {
+    const date = new Date(dateString);
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+}
+
+// Fonctions pour les boutons "Voir" et "Modifier"
+function viewAvailabilities(user) {
+    console.log('Viewing availabilities for user', user);
+    // Implémentez la logique pour afficher les disponibilités de l'utilisateur
+}
+
+function viewSkills(user) {
+    console.log('Viewing skills for user', user);
+    // Implémentez la logique pour afficher les compétences de l'utilisateur
+}
+
+function openModifyUserModal(userId) {
+    selectedUserId = userId;
+    var modifyModal = document.getElementById("modifyUserModal");
+    populateModifyUserForm(userId);
+    console.log("click on modify");
+    modifyModal.style.display = "block";
 }

@@ -130,4 +130,37 @@ async function deleteUser(userId){
     return await response.json();
 }
 
-export { registerVolunteer, registerMerchant, handleAprovals, getUser, getAllUsers, deleteUser};
+async function getUserSkills(userId){
+    const response = await fetch(apiEndpoint+`/users/getSkills/${userId}`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    });
+
+    if (!response.ok) {
+        console.error('Failed to get user skills');
+        return null;
+    }
+
+    return await response.json();
+}
+
+
+async function getUserAvailabilities(userId){
+    const response = await fetch(apiEndpoint+`/users/getSkills/${userId}`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    });
+
+    if (!response.ok) {
+        console.error('Failed to get user skills');
+        return null;
+    }
+
+    return await response.json();
+}
+
+export { registerVolunteer, registerMerchant, handleAprovals, getUser, getAllUsers, deleteUser, getUserSkills, getUserAvailabilities, modifyUser};

@@ -316,8 +316,8 @@ class UserController
             http_response_code(404);
             return ['error' => 'User not found'];
         }
-        $data = $this->serializer->serialize($user, 'json');
-        return json_decode($data, true);
+        $data = $user->jsonSerialize();
+        return $data;
     }
 
     private function getUsersByCriteria($data)

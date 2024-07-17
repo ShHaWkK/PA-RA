@@ -6,5 +6,5 @@
         <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/form/VolunteerForm.php'); ?>
     </div>
 </div>
-s
-<script src="/assets/js/VolunteerSignUp.js"></script>
+
+<script src="/assets/js/pages/VolunteerSignUp.js"></script>

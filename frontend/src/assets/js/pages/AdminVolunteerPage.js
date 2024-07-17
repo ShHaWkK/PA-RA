@@ -125,8 +125,19 @@ document.addEventListener('DOMContentLoaded',
             }
         }
 
-        // On affecte la fonction de suppression au bouton de la fenêtre modale
-        document.getElementById('confirmDelete').addEventListener('click', deleteUsers);
+        // Fenêtre modale de modification d'un bénévole
+        var modifyModal = document.getElementById("modifyUserModal");
+        var modifyBtn = document.getElementsByClassName("modify-user-button");
+        var modifySpan = document.getElementById("closeModify");
 
+        modifySpan.onclick = function() {
+            modifyModal.style.display = "none";
+        }
+
+        window.onclick = function(event) {
+            if (event.target == modifyModal) {
+                modifyModal.style.display = "none";
+            }
+        }
     }
 );

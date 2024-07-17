@@ -43,6 +43,7 @@
 
     <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/AddVolunteerModal.php'); ?>
     <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/DeleteVolunteerModal.php'); ?>
+    <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/ModifyVolunteerModal.php'); ?>
 
 </div>
 </body>
