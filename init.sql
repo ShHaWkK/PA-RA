@@ -84,16 +84,30 @@ CREATE TABLE IF NOT EXISTS products (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
+-- Table des véhicules (vehicles)
+CREATE TABLE IF NOT EXISTS vehicles (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    brand VARCHAR(255),
+    model VARCHAR(255),
+    license_plate VARCHAR(50),
+    status VARCHAR(100),
+    current_location TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
 -- Table des collectes (collections)
 CREATE TABLE IF NOT EXISTS collections (
     id INT AUTO_INCREMENT PRIMARY KEY,
     company_id INT NOT NULL,
     product_id INT NOT NULL,
+    vehicle_id INT NOT NULL,
     collection_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (company_id) REFERENCES companies(id) ON DELETE CASCADE,
-    FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
+    FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE,
+    FOREIGN KEY (vehicle_id) REFERENCES vehicles(id) ON DELETE CASCADE
 );
 
 -- Table des entrepôts (warehouses)
@@ -119,9 +133,11 @@ CREATE TABLE IF NOT EXISTS deliveries (
     status VARCHAR(255) NOT NULL,
     comment TEXT,
     warehouse_id INT NOT NULL,
+    vehicle_id INT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (warehouse_id) REFERENCES warehouses(id) ON DELETE CASCADE
+    FOREIGN KEY (warehouse_id) REFERENCES warehouses(id) ON DELETE CASCADE,
+    FOREIGN KEY (vehicle_id) REFERENCES vehicles(id) ON DELETE CASCADE
 );
 
 -- Table des trajets planifiés (planned_routes)
@@ -211,16 +227,6 @@ CREATE TABLE IF NOT EXISTS tickets (
     FOREIGN KEY (assigned_to) REFERENCES users(id) ON DELETE SET NULL
 );
 
--- Table des véhicules (vehicles)
-CREATE TABLE IF NOT EXISTS vehicles (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    brand VARCHAR(255),
-    model VARCHAR(255),
-    license_plate VARCHAR(50),
-    status VARCHAR(100),
-    current_location TEXT
-);
-
 -- Insertion d'exemples d'entrepôts
 INSERT INTO warehouses (name, address, contact_info, capacity, city, country) VALUES 
 ('Paris Warehouse', '10 Rue de Paris, Paris', 'contact@pariswarehouse.com', 1000, 'Paris', 'France'),
@@ -291,6 +297,11 @@ INSERT INTO availabilities (user_id, day_of_week, start_time, end_time) VALUES
 (4, 'Friday', '08:00:00', '11:00:00'),
 (5, 'Saturday', '12:00:00', '16:00:00');
 
+-- Insertion des exemples de véhicules
+INSERT INTO vehicles (brand, model, license_plate, status, current_location) VALUES
+('Toyota', 'Hilux', 'XYZ123', 'available', 'Paris Warehouse'),
+('Ford', 'Transit', 'ABC789', 'available', 'Nantes Warehouse');
+
 -- Insertion des exemples de stock
 INSERT INTO stocks (product_id, quantity, entry_date, availability, warehouse_id) VALUES 
 (1, 100, CURRENT_TIMESTAMP, 'available', 1),
@@ -299,10 +310,15 @@ INSERT INTO stocks (product_id, quantity, entry_date, availability, warehouse_id
 (4, 400, CURRENT_TIMESTAMP, 'available', 4),
 (5, 500, CURRENT_TIMESTAMP, 'available', 5);
 
+-- Insertion des exemples de collectes
+INSERT INTO collections (company_id, product_id, vehicle_id) VALUES
+(1, 1, 1),
+(2, 2, 2);
+
 -- Insertion des exemples de livraisons
-INSERT INTO deliveries (route_name, destination, recipient_type, delivery_date, status, comment, warehouse_id) VALUES 
-('Route 1', 'Paris', 'association', CURRENT_TIMESTAMP, 'pending', 'First delivery', 1),
-('Route 2', 'Nantes', 'individual', CURRENT_TIMESTAMP, 'pending', 'Second delivery', 2),
-('Route 3', 'Marseille', 'association', CURRENT_TIMESTAMP, 'pending', 'Third delivery', 3),
-('Route 4', 'Limoges', 'individual', CURRENT_TIMESTAMP, 'pending', 'Fourth delivery', 4),
-('Route 5', 'Naples', 'association', CURRENT_TIMESTAMP, 'pending', 'Fifth delivery', 5);
+INSERT INTO deliveries (route_name, destination, recipient_type, delivery_date, status, comment, warehouse_id, vehicle_id) VALUES 
+('Route 1', 'Paris', 'association', CURRENT_TIMESTAMP, 'pending', 'First delivery', 1, 1),
+('Route 2', 'Nantes', 'individual', CURRENT_TIMESTAMP, 'pending', 'Second delivery', 2, 2),
+('Route 3', 'Marseille', 'association', CURRENT_TIMESTAMP, 'pending', 'Third delivery', 3, 1),
+('Route 4', 'Limoges', 'individual', CURRENT_TIMESTAMP, 'pending', 'Fourth delivery', 4, 2),
+('Route 5', 'Naples', 'association', CURRENT_TIMESTAMP, 'pending', 'Fifth delivery', 5, 1);
