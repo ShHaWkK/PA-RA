@@ -3,6 +3,7 @@
 namespace Controller;
 
 use Entity\CollectionModel;
+use Entity\VehicleModel;
 use Doctrine\ORM\EntityManager;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
@@ -59,15 +60,21 @@ class CollectionController
     public function createCollection($data)
     {
         try {
-            // Validate input data (add your own validation logic)
-            if (!isset($data['company_id']) || !isset($data['product_id'])) {
+            if (!isset($data['company_id']) || !isset($data['product_id']) || !isset($data['vehicle_id'])) {
                 http_response_code(400);
                 return ['error' => 'Missing required fields for new collection'];
+            }
+
+            $vehicle = $this->entityManager->find(VehicleModel::class, $data['vehicle_id']);
+            if (!$vehicle) {
+                http_response_code(404);
+                return ['error' => 'Vehicle not found'];
             }
 
             $collection = new CollectionModel();
             $collection->setCompanyId($data['company_id']);
             $collection->setProductId($data['product_id']);
+            $collection->setVehicleId($data['vehicle_id']);
             $collection->setCollectionDate(new \DateTime("now"));
             $collection->setCreatedAt(new \DateTime("now"));
             $collection->setUpdatedAt(new \DateTime("now"));
@@ -111,6 +118,9 @@ class CollectionController
             }
             if (isset($data['product_id'])) {
                 $collection->setProductId($data['product_id']);
+            }
+            if (isset($data['vehicle_id'])) {
+                $collection->setVehicleId($data['vehicle_id']);
             }
             $collection->setUpdatedAt(new \DateTime("now"));
 

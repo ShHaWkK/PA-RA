@@ -19,6 +19,9 @@ class CollectionModel
     #[ORM\Column(type: "integer")]
     private $product_id;
 
+    #[ORM\Column(type: "integer")]
+    private $vehicle_id;
+
     #[ORM\Column(type: "datetime", options: ["default" => "CURRENT_TIMESTAMP"])]
     private $collection_date;
 
@@ -27,8 +30,6 @@ class CollectionModel
 
     #[ORM\Column(type: "datetime", options: ["default" => "CURRENT_TIMESTAMP", "onUpdate" => "CURRENT_TIMESTAMP"])]
     private $updated_at;
-
-    // Getters and setters for each property
 
     public function getId(): ?int
     {
@@ -54,6 +55,17 @@ class CollectionModel
     public function setProductId(int $product_id): self
     {
         $this->product_id = $product_id;
+        return $this;
+    }
+
+    public function getVehicleId(): ?int
+    {
+        return $this->vehicle_id;
+    }
+
+    public function setVehicleId(int $vehicle_id): self
+    {
+        $this->vehicle_id = $vehicle_id;
         return $this;
     }
 
