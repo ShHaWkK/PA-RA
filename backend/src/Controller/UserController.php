@@ -63,10 +63,28 @@ class UserController
 
             case 'GET':
                 if (isset($uriParts[1])) {
-                    return match ($uriParts[1]) {
-                        'generatePlanning' => $this->generatePlanning(),
-                        default => $this->getUser($uriParts[1]),
-                    };
+                        switch ($uriParts[1]) {
+                            case 'generatePlanning':
+                                return$this->generatePlanning();
+                            case 'getSkills':
+                                if(isset($uriParts[2])){
+                                    return $this->getUserSkills($uriParts[2]);
+                                }
+                                else {
+                                    http_response_code(400);
+                                    return ["message" => "User id not set"];
+                                }
+                            case 'getAvailabilities':
+                                if(isset($uriParts[2])){
+                                    return $this->getUserAvailabilities($uriParts[2]);
+                                }
+                                else {
+                                    http_response_code(400);
+                                    return ["message" => "User id not set"];
+                                }
+                            default:
+                                return $this->getUser($uriParts[1]);
+                    }
                 } else {
                     return $this->getUsersByCriteria($_GET);
                 }
@@ -361,5 +379,47 @@ class UserController
 
     }
 
+    public function getUserSkills($userId)
+    {
+        $user = $this->entityManager->getRepository(UserModel::class)->find($userId);
+
+        if (!$user) {
+            http_response_code(404);
+            return ['message' =>"User with ID $userId not found"];
+        }
+
+        $skills = $user->getSkills();
+
+        $serializedSkills = [];
+        foreach ($skills as $skill) {
+            $serializedSkills[] = $skill->jsonSerialize();
+        }
+
+        return $serializedSkills;
+    }
+
+    private function getUserAvailabilities($userId)
+    {
+        $user = $this->entityManager->getRepository(UserModel::class)->find($userId);
+
+        if (!$user) {
+            http_response_code(404);
+            return ['message' =>"User with ID $userId not found"];
+        }
+
+        $availabilities = $user->getAvailabilities();
+
+        if (!$availabilities) {
+            http_response_code(404);
+            return ['error' => 'Skill not found'];
+        }
+
+        $serializedAvailabilities = [];
+        foreach ($availabilities as $availability) {
+            $serializedAvailabilities[] = $availability->jsonSerialize();
+        }
+
+        return $serializedAvailabilities;
+    }
 }
 ?>

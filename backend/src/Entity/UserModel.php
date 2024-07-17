@@ -237,6 +237,11 @@ class UserModel implements \JsonSerializable
         return $this;
     }
 
+    public function getAvailabilities()
+    {
+        return $this->availabilities;
+    }
+
     public function updateFields(array $fields): self
     {
         foreach ($fields as $field => $value) {
