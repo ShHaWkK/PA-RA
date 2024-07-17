@@ -237,6 +237,17 @@ class UserModel implements \JsonSerializable
         return $this;
     }
 
+    public function updateFields(array $fields): self
+    {
+        foreach ($fields as $field => $value) {
+            $method = 'set' . ucfirst($field);
+            if (method_exists($this, $method)) {
+                $this->$method($value);
+            }
+        }
+        return $this;
+    }
+
     public function jsonSerialize(): array
     {
         return [

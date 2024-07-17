@@ -22,6 +22,17 @@ async function registerMerchant(userData) {
     });
 }
 
+// Fonction pour modifier un utilisateur
+async function modifyUser(userId,userData) {
+    return await fetch(apiEndpoint + '/users/'+userId, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(userData)
+    })
+}
+
 // Fonction pour approuver un utilisateur par un administrateur
 async function handleAprovals(userId, status) {
     var successMessage,errorMessage;
@@ -40,11 +51,11 @@ async function handleAprovals(userId, status) {
                         errorMessage = (`Error approving user ${userId}:` + response.statusText);
                         break;
                     case 'pending':
-                         successMessage = (`User ${userId} approved successfully.`);
+                         successMessage = (`User ${userId} put on hold successfully.`);
                          errorMessage = (`Error approving user ${userId}:` + response.statusText);
                         break;
                     case 'rejected':
-                         successMessage = (`User ${userId} approved successfully.`);
+                         successMessage = (`User ${userId} rejected successfully.`);
                          errorMessage = (`Error approving user ${userId}:` + response.statusText);
                         break;}
                 if (response.ok) {

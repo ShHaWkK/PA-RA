@@ -68,8 +68,6 @@ class UserController
                         default => $this->getUser($uriParts[1]),
                     };
                 } else {
-                    error_log("On est ici ");
-                    error_log(print_r($_GET,true));
                     return $this->getUsersByCriteria($_GET);
                 }
 
@@ -80,8 +78,9 @@ class UserController
                             return $this->updateUserStatus($uriParts[2], $input);
                     }
                 } else {
-                    http_response_code(400);
-                    return ['error' => 'User ID not specified'];
+                    return $this->updateUser($uriParts[1],$_GET);
+//                    http_response_code(400);
+//                    return ['error' => 'User ID not specified'];
                 }
             case 'DELETE':
                 if (isset($uriParts[1])) {
@@ -345,5 +344,22 @@ class UserController
             return false;
         }
     }
+
+    public function updateUser($id, $data)
+    {
+        $user = $this->entityManager->getRepository(UserModel::class)->find($id);
+
+        if (!$user) {
+            http_response_code(404);
+            return ['error' => 'User not found'];
+        }
+
+        $user->updateFields($data);
+        $this->entityManager->flush();
+
+        return ['message' => 'User modified successfully'];
+
+    }
+
 }
 ?>

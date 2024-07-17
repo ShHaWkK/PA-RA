@@ -1,6 +1,6 @@
 import {populateVolunteerTable} from "/assets/js/modules/tables/VolunteerTable.js";
 import {handleAprovals, deleteUser} from "/assets/js/api/Users.js";
-import {populateSkillTable} from "/assets/js/pages/VolunteerSignUp.js";
+import {populateSkillTable , addVolunteerSubmitEvent} from "/assets/js/pages/VolunteerSignUp.js";
 
 var global_status = "";
 
@@ -80,6 +80,8 @@ document.addEventListener('DOMContentLoaded',
         handleApproval();
         handleReject();
         handlePending();
+        console.log("Admin");
+        // addVolunteerSubmitEvent();
 
         //------------------- Définition des fenêtres modales: --------------------------
         // Fenêtre modale d'ajout d'un bénévole
@@ -88,7 +90,7 @@ document.addEventListener('DOMContentLoaded',
         var addSpan = document.getElementById("closeAdd");
 
         //On peuple le tableau des compétences dans le tableau de skills:
-        populateSkillTable();
+        // populateSkillTable();
 
         addBtn.onclick = function() {
             addModal.style.display = "block";

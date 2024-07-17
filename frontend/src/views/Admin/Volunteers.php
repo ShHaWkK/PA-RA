@@ -41,8 +41,8 @@
         <script type="module" src="/assets/js/pages/AdminVolunteerPage.js"></script>
     </div>
 
-    <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/includes/modals/AddVolunteerModal.php'); ?>
-    <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/includes/modals/DeleteVolunteerModal.php'); ?>
+    <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/AddVolunteerModal.php'); ?>
+    <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/DeleteVolunteerModal.php'); ?>
 
 </div>
 </body>
