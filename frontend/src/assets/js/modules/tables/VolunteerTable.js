@@ -1,6 +1,6 @@
 import { getAllUsers } from '/assets/js/api/Users.js';
 import { setupSearch } from '/assets/js/modules/SearchBar.js';
-import {populateModifyUserForm} from "/assets/js/modules/modals/modifyUser.js";
+import {populateModifyUserForm,populateSkillsInModal} from "/assets/js/modules/modals/AdminVolunteerModals.js";
 
 export var selectedUserId;
 
@@ -67,14 +67,14 @@ export async function populateVolunteerTable(status) {
         const availabilitiesButtonCell = document.createElement('td');
         const availabilitiesButton = document.createElement('button');
         availabilitiesButton.textContent = 'Voir';
-        availabilitiesButton.onclick = () => viewAvailabilities(user);
+        availabilitiesButton.onclick = () => viewAvailabilities(user.id);
         availabilitiesButtonCell.appendChild(availabilitiesButton);
         row.appendChild(availabilitiesButtonCell);
 
         const skillsButtonCell = document.createElement('td');
         const skillsButton = document.createElement('button');
         skillsButton.textContent = 'Voir';
-        skillsButton.onclick = () => viewSkills(user);
+        skillsButton.onclick = () => viewSkills(user.id);
         skillsButtonCell.appendChild(skillsButton);
         row.appendChild(skillsButtonCell);
 
@@ -125,14 +125,19 @@ function formatDateToFrench(dateString) {
 }
 
 // Fonctions pour les boutons "Voir" et "Modifier"
-function viewAvailabilities(user) {
-    console.log('Viewing availabilities for user', user);
-    // Implémentez la logique pour afficher les disponibilités de l'utilisateur
+function viewAvailabilities(userId) {
+    selectedUserId = userId;
+    var availabilitiesModal = document.getElementById("volunteerSkillModal");
+    console.log("click on availabilities");
+    availabilitiesModal.style.display = "block";
 }
 
-function viewSkills(user) {
-    console.log('Viewing skills for user', user);
-    // Implémentez la logique pour afficher les compétences de l'utilisateur
+function viewSkills(userId) {
+    selectedUserId = userId;
+    populateSkillsInModal(selectedUserId);
+    var skillModal = document.getElementById("volunteerSkillModal");
+    console.log("click on skills");
+    skillModal.style.display = "block";
 }
 
 function openModifyUserModal(userId) {

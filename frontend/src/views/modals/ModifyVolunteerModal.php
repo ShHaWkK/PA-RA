@@ -30,4 +30,4 @@
     </div>
 </div>
 
-<script src="/assets/js/modules/modals/modifyUser.js"></script>
+<script src="/assets/js/modules/modals/AdminVolunteerModals.js"></script>

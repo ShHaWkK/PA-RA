@@ -28,7 +28,6 @@
         <div class="row">
             <button class="add-button" id="addVolunteerButton"> Ajouter </button>
             <button class="delete-button" id="deleteVolunteerButton"> Supprimer </button>
-            <button class="neutral-button" id='modifyVolunteerButton'> Modifier </button>
         </div>
 
         <div class="row">
@@ -41,9 +40,12 @@
         <script type="module" src="/assets/js/pages/AdminVolunteerPage.js"></script>
     </div>
 
+    <!--    Ajout des fenêtres modales-->
     <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/AddVolunteerModal.php'); ?>
     <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/DeleteVolunteerModal.php'); ?>
     <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/ModifyVolunteerModal.php'); ?>
+    <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/VolunteerSkillModal.php'); ?>
+
 
 </div>
 </body>
