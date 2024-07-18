@@ -1,6 +1,6 @@
 import { getAllUsers } from '/assets/js/api/Users.js';
 import { setupSearch } from '/assets/js/modules/SearchBar.js';
-import {populateModifyUserForm,populateSkillsInModal} from "/assets/js/modules/modals/AdminVolunteerModals.js";
+import {populateModifyUserForm,populateSkillsInModal,populateAvailabilitiesInModal} from "/assets/js/modules/modals/AdminVolunteerModals.js";
 
 export var selectedUserId;
 
@@ -127,7 +127,8 @@ function formatDateToFrench(dateString) {
 // Fonctions pour les boutons "Voir" et "Modifier"
 function viewAvailabilities(userId) {
     selectedUserId = userId;
-    var availabilitiesModal = document.getElementById("volunteerSkillModal");
+    populateAvailabilitiesInModal(selectedUserId);
+    var availabilitiesModal = document.getElementById("volunteerAvailabilitiesModal");
     console.log("click on availabilities");
     availabilitiesModal.style.display = "block";
 }

@@ -1,6 +1,6 @@
 import {modifyUser, getUser} from "/assets/js/api/Users.js";
 import {selectedUserId} from "/assets/js/modules/tables/VolunteerTable.js";
-import {getUserSkills} from "../../api/Users.js";
+import {getUserAvailabilities, getUserSkills} from "../../api/Users.js";
 
 // Fonction pour pré-remplir le formulaire avec les données de l'utilisateur
 async function populateModifyUserForm(userId) {
@@ -63,10 +63,9 @@ function openModifyUserModal(userId) {
     modifyModal.style.display = "block";
 }
 
+// Fonction pour afficher les compétences dans la fenêtre modale
 async function populateSkillsInModal(selectedUserId) {
-    const modal = document.getElementById('volunteerSkillModal');
-    const modalBody = document.getElementById('modalBody');
-    const closeModalButton = document.getElementById('closeVolunteerSkillButton');
+    const modalBody = document.getElementById('modalBodySkill');
 
     // Vider le contenu précédent du corps de la modale
     modalBody.innerHTML = '';
@@ -92,6 +91,38 @@ async function populateSkillsInModal(selectedUserId) {
     });
 }
 
+function populateAvailabilitiesInModal(selectedUserId) {
+    const modalBody = document.getElementById('modalBodyAvailabilities');
+
+    // Vider le contenu précédent du corps de la modale
+    modalBody.innerHTML = '';
+
+   var availabilities = getUserAvailabilities(selectedUserId);
+
+    // Vérifier si availabilities est un tableau
+    if (Array.isArray(availabilities) && availabilities.length > 0) {
+        // Ajouter chaque disponibilité au corps de la modale
+        availabilities.forEach(availability => {
+            const availabilityElement = document.createElement('div');
+            availabilityElement.classList.add('availability');
+
+            const day = document.createElement('h3');
+            day.textContent = `Day: ${availability.day}`;
+
+            const timeRange = document.createElement('p');
+            timeRange.textContent = `From: ${availability.startTime} - To: ${availability.endTime}`;
+
+            availabilityElement.appendChild(day);
+            availabilityElement.appendChild(timeRange);
+
+            modalBody.appendChild(availabilityElement);
+        });
+    } else {
+        const noAvailabilitiesMessage = document.createElement('p');
+        noAvailabilitiesMessage.textContent = 'No availabilities found for this user.';
+        modalBody.appendChild(noAvailabilitiesMessage);
+    }
+}
 
 document.addEventListener('DOMContentLoaded',
     function (){
@@ -156,7 +187,15 @@ document.addEventListener('DOMContentLoaded',
             skillModal.style.display = "none";
         }
 
+        // Fenêtre modale de vue des disponibilités
+        var availabilityModal = document.getElementById("volunteerAvailabilitiesModal");
+        var availabilitySpan = document.getElementById("closeVolunteerAvailabilitiesButton");
+
+        availabilitySpan.onclick = function() {
+            availabilityModal.style.display = "none";
+        }
+
     });
 
 
-export {populateModifyUserForm, populateSkillsInModal}
+export {populateModifyUserForm, populateSkillsInModal, populateAvailabilitiesInModal}

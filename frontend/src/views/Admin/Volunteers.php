@@ -45,7 +45,7 @@
     <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/DeleteVolunteerModal.php'); ?>
     <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/ModifyVolunteerModal.php'); ?>
     <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/VolunteerSkillModal.php'); ?>
-
+    <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/VolunteerAvailabilitiesModal.php'); ?>
 
 </div>
 </body>

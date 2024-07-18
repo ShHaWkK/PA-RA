@@ -148,7 +148,7 @@ async function getUserSkills(userId){
 
 
 async function getUserAvailabilities(userId){
-    const response = await fetch(apiEndpoint+`/users/getSkills/${userId}`, {
+    const response = await fetch(apiEndpoint+`/users/getAvailabilities/${userId}`, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json'
@@ -156,10 +156,10 @@ async function getUserAvailabilities(userId){
     });
 
     if (!response.ok) {
-        console.error('Failed to get user skills');
+        console.error('Failed to get user Availabilities');
         return null;
     }
-
+    console.log(response.json);
     return await response.json();
 }
 
