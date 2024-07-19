@@ -36,6 +36,7 @@ use Controller\PrivateAreaController;
 use Controller\ServiceProposalController;
 use Controller\TicketController;
 use Controller\VehicleController;
+use Controller\ScanController;
 use Service\PDFService;
 use Service\JWTService;
 use Service\EmailService;
@@ -99,7 +100,8 @@ $controllerMap = [
     'service_proposals' => ServiceProposalController::class,
     'tickets' => TicketController::class,
     'scripts' => 'Scripts',
-    'vehicles' => VehicleController::class
+    'vehicles' => VehicleController::class, 
+    'scan' => ScanController::class
 ];
 
 // Vérifie si le contrôleur existe pour le premier élément de l'URI
@@ -175,3 +177,5 @@ function exit_with_message($message, $code = 200) {
     echo json_encode(['message' => $message]);
     exit;
 }
+?>
+

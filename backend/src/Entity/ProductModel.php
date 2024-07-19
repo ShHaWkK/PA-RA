@@ -1,5 +1,4 @@
 <?php
-// Path: backend/src/Entity/ProductModel.php
 namespace Entity;
 
 use Doctrine\ORM\Mapping as ORM;
@@ -19,14 +18,14 @@ class ProductModel
     #[ORM\Column(type: "string", length: 255, unique: true)]
     private $barcode;
 
-    #[ORM\Column(type: "string", length: 255, nullable: true)]
-    private $qr_code_path;
-
     #[ORM\Column(type: "date")]
     private $expiration_date;
 
     #[ORM\Column(type: "integer")]
     private $quantity;
+
+    #[ORM\Column(type: "string", length: 255, nullable: true)]
+    private $qr_code_path;
 
     #[ORM\Column(type: "datetime", options: ["default" => "CURRENT_TIMESTAMP"])]
     private $created_at;
@@ -34,7 +33,8 @@ class ProductModel
     #[ORM\Column(type: "datetime", options: ["default" => "CURRENT_TIMESTAMP", "onUpdate" => "CURRENT_TIMESTAMP"])]
     private $updated_at;
 
-    // Getters and setters for each property
+    #[ORM\Column(type: "boolean", options: ["default" => false])]
+    private $scanned;
 
     public function getId(): ?int
     {
@@ -63,25 +63,14 @@ class ProductModel
         return $this;
     }
 
-    public function getQrCodePath(): ?string
-    {
-        return $this->qr_code_path;
-    }
-
-    public function setQrCodePath(?string $qrCodePath): self
-    {
-        $this->qr_code_path = $qrCodePath;
-        return $this;
-    }
-
     public function getExpirationDate(): ?\DateTimeInterface
     {
         return $this->expiration_date;
     }
 
-    public function setExpirationDate(\DateTimeInterface $expirationDate): self
+    public function setExpirationDate(\DateTimeInterface $expiration_date): self
     {
-        $this->expiration_date = $expirationDate;
+        $this->expiration_date = $expiration_date;
         return $this;
     }
 
@@ -96,14 +85,25 @@ class ProductModel
         return $this;
     }
 
+    public function getQrCodePath(): ?string
+    {
+        return $this->qr_code_path;
+    }
+
+    public function setQrCodePath(?string $qr_code_path): self
+    {
+        $this->qr_code_path = $qr_code_path;
+        return $this;
+    }
+
     public function getCreatedAt(): ?\DateTimeInterface
     {
         return $this->created_at;
     }
 
-    public function setCreatedAt(\DateTimeInterface $createdAt): self
+    public function setCreatedAt(\DateTimeInterface $created_at): self
     {
-        $this->created_at = $createdAt;
+        $this->created_at = $created_at;
         return $this;
     }
 
@@ -112,9 +112,21 @@ class ProductModel
         return $this->updated_at;
     }
 
-    public function setUpdatedAt(\DateTimeInterface $updatedAt): self
+    public function setUpdatedAt(\DateTimeInterface $updated_at): self
     {
-        $this->updated_at = $updatedAt;
+        $this->updated_at = $updated_at;
+        return $this;
+    }
+
+    public function getScanned(): ?bool
+    {
+        return $this->scanned;
+    }
+
+    public function setScanned(bool $scanned): self
+    {
+        $this->scanned = $scanned;
         return $this;
     }
 }
+?>

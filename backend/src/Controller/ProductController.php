@@ -1,5 +1,4 @@
 <?php
-// Path: backend/src/Controller/ProductController.php
 namespace Controller;
 
 use Entity\ProductModel;
@@ -62,10 +61,35 @@ class ProductController
     public function createProduct($data)
     {
         try {
-            // Validate input data
-            if (!isset($data['name']) || !isset($data['barcode']) || !isset($data['expiration_date']) || !isset($data['quantity'])) {
+            if (!isset($data['name']) || !isset($data['barcode']) || !isset($data['expiration_date']) || !isset($data['quantity']) || !isset($data['warehouse_id'])) {
                 http_response_code(400);
                 return ['error' => 'Missing required fields for new product'];
+            }
+
+            $existingProduct = $this->entityManager->getRepository(ProductModel::class)->findOneBy(['barcode' => $data['barcode']]);
+            if ($existingProduct) {
+                http_response_code(400);
+                return ['error' => 'Product with this barcode already exists'];
+            }
+
+            if (!preg_match('/^[0-9]{13}$/', $data['barcode'])) {
+                http_response_code(400);
+                return ['error' => 'Barcode must be a 13-digit number'];
+            }
+
+            if (!preg_match('/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/', $data['expiration_date'])) {
+                http_response_code(400);
+                return ['error' => 'Expiration date must be in the format YYYY-MM-DD'];
+            }
+
+            if (!is_numeric($data['quantity']) || $data['quantity'] < 0) {
+                http_response_code(400);
+                return ['error' => 'Quantity must be a non-negative integer'];
+            }
+
+            if (!is_numeric($data['warehouse_id']) || $data['warehouse_id'] < 0) {
+                http_response_code(400);
+                return ['error' => 'Warehouse ID must be a non-negative integer'];
             }
 
             $product = new ProductModel();
@@ -76,7 +100,6 @@ class ProductController
             $product->setCreatedAt(new \DateTime("now"));
             $product->setUpdatedAt(new \DateTime("now"));
 
-            // Generate QR code
             $qrCode = new QrCode(json_encode([
                 'name' => $data['name'],
                 'barcode' => $data['barcode'],
@@ -106,11 +129,12 @@ class ProductController
             $this->entityManager->persist($product);
             $this->entityManager->flush();
 
-            // Add to stocks
             $stock = new StockModel();
             $stock->setProductId($product->getId());
             $stock->setQuantity($data['quantity']);
             $stock->setEntryDate(new \DateTime("now"));
+            $stock->setAvailability('available');
+            $stock->setWarehouseId($data['warehouse_id']);
             $stock->setCreatedAt(new \DateTime("now"));
             $stock->setUpdatedAt(new \DateTime("now"));
 
