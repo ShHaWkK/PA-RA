@@ -81,7 +81,8 @@ CREATE TABLE IF NOT EXISTS products (
     expiration_date DATE NOT NULL,
     quantity INT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    scanned BOOLEAN DEFAULT FALSE
 );
 
 -- Table des véhicules (vehicles)
@@ -130,7 +131,7 @@ CREATE TABLE IF NOT EXISTS deliveries (
     destination VARCHAR(255) NOT NULL,
     recipient_type ENUM('association', 'individual') NOT NULL,
     delivery_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    status VARCHAR(255) NOT NULL,
+    status ENUM('pending', 'in_route', 'delivered') NOT NULL DEFAULT 'pending',
     comment TEXT,
     warehouse_id INT NOT NULL,
     vehicle_id INT NOT NULL,
