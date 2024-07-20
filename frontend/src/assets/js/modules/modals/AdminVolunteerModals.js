@@ -1,6 +1,5 @@
-import {modifyUser, getUser} from "/assets/js/api/Users.js";
-import {selectedUserId} from "/assets/js/modules/tables/VolunteerTable.js";
-import {getUserAvailabilities, getUserSkills} from "../../api/Users.js";
+import {modifyUser, getUser, deleteUser, getUserAvailabilities, getUserSkills} from "/assets/js/api/Users.js";
+import {selectedUserId,populateVolunteerTable} from "/assets/js/modules/tables/VolunteerTable.js";
 
 // Fonction pour pré-remplir le formulaire avec les données de l'utilisateur
 async function populateModifyUserForm(userId) {
@@ -40,27 +39,27 @@ document.getElementById('modificationForm').addEventListener('submit', async fun
     }
 });
 
-// Fonctions pour les boutons "Voir" et "Modifier"
-function viewAvailabilities(userId) {
-    selectedUserId = userId;
-    var availabilitiesModal = document.getElementById("volunteerSkillModal");
-    console.log("click on availabilities");
-    modifyModal.style.display = "block";
-}
+// Fonction pour supprimer les utilisateurs sélectionnés
+async function deleteUsers() {
+    const checkedCheckboxes = document.querySelectorAll('#volunteerTable input[type="checkbox"]:checked');
+    const userIds = Array.from(checkedCheckboxes).map(checkbox => checkbox.value);
 
-function viewSkills(userId) {
-    selectedUserId = userId;
-    var modifyModal = document.getElementById("volunteerSkillModal");
-    console.log("click on skills");
-    modifyModal.style.display = "block";
-}
+    if (userIds.length === 0) {
+        alert("Select at least one user to delete.");
+        return;
+    }
 
-function openModifyUserModal(userId) {
-    selectedUserId = userId;
-    var modifyModal = document.getElementById("modifyUserModal");
-    populateModifyUserForm(userId);
-    console.log("click on modify");
-    modifyModal.style.display = "block";
+    try {
+        for (const userId of userIds) {
+            await deleteUser(userId);
+        }
+        // Rafraîchir le tableau des bénévoles après la suppression
+        await populateVolunteerTable();
+        alert("The selected users have been successfully deleted.\n");
+    } catch (error) {
+        console.error("Error deleting users:", error.message);
+        alert("An error occurred while deleting users.");
+    }
 }
 
 // Fonction pour afficher les compétences dans la fenêtre modale
@@ -161,13 +160,27 @@ document.addEventListener('DOMContentLoaded',
         var deleteModal = document.getElementById("deleteVolunteerModal");
         var deleteBtn = document.getElementById("deleteVolunteerButton");
         var deleteSpan = document.getElementById("closeDelete");
+        var confirmDelete = document.getElementById("confirmDelete");
 
         deleteBtn.onclick = function() {
-            deleteModal.style.display = "block";
+            const checkedCheckboxes = document.querySelectorAll('#volunteerTable input[type="checkbox"]:checked');
+            const userIds = Array.from(checkedCheckboxes).map(checkbox => checkbox.value);
+
+            if (userIds.length === 0) {
+                alert("Select at least one user to delete.");
+                return;
+            }
+            else {
+                deleteModal.style.display = "block";
+            }
         }
 
         deleteSpan.onclick = function() {
             deleteModal.style.display = "none";
+        }
+
+        confirmDelete.onclick = function (){
+            deleteUsers();
         }
 
         window.onclick = function(event) {

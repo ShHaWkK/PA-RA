@@ -13,18 +13,23 @@ document.getElementById('volunteer-status-select').addEventListener('change', as
 //----------------fonction pour l'approbation des utilisateurs-----------------------
 async function handleStatusChange(status){
     const checkedCheckboxes = document.querySelectorAll('#volunteerTable input[type="checkbox"]:checked');
-    console.log("click");
     const userIds = Array.from(checkedCheckboxes).map(checkbox => checkbox.value);
-    var uri=`${apiEndpoint}/users/approval/1}`;
 
-    console.log("uri",uri);
-    console.log(JSON.stringify({ status: status }));
-
-    for (const userId of userIds) {
-        await handleAprovals(userId,status);
+    if (userIds.length === 0) {
+        alert("Select at least one user to do this action.");
     }
-    console.log("status",global_status);
-    await populateVolunteerTable(global_status);
+    else {
+        var uri = `${apiEndpoint}/users/approval/1}`;
+
+        console.log("uri", uri);
+        console.log(JSON.stringify({status: status}));
+
+        for (const userId of userIds) {
+            await handleAprovals(userId, status);
+        }
+        console.log("status", global_status);
+        await populateVolunteerTable(global_status);
+    }
 }
 
 function handleApproval(){
@@ -46,6 +51,7 @@ function handlePending(){
 }
 
 // Fonction pour supprimer les utilisateurs sélectionnés
+// Fonction pour supprimer les utilisateurs sélectionnés
 async function deleteUsers() {
     const checkedCheckboxes = document.querySelectorAll('#volunteerTable input[type="checkbox"]:checked');
     const userIds = Array.from(checkedCheckboxes).map(checkbox => checkbox.value);
@@ -55,21 +61,16 @@ async function deleteUsers() {
         return;
     }
 
-    // const confirmDelete = confirm("Êtes-vous sûr de vouloir supprimer les utilisateurs sélectionnés ?");
-    // if (!confirmDelete) {
-    //     return; // Annuler l'action si l'utilisateur ne confirme pas
-    // }
-
     try {
         for (const userId of userIds) {
             await deleteUser(userId);
         }
         // Rafraîchir le tableau des bénévoles après la suppression
-        await populateVolunteerTable(); // Vous devez implémenter cette fonction pour rafraîchir le tableau
-        alert("Les utilisateurs sélectionnés ont été supprimés avec succès.");
+        await populateVolunteerTable();
+        alert("The selected users have been successfully deleted.\n");
     } catch (error) {
-        console.error("Erreur lors de la suppression des utilisateurs :", error.message);
-        alert("Une erreur est survenue lors de la suppression des utilisateurs.");
+        console.error("Error deleting users:", error.message);
+        alert("An error occurred while deleting users.");
     }
 }
 
@@ -80,7 +81,5 @@ document.addEventListener('DOMContentLoaded',
         handleApproval();
         handleReject();
         handlePending();
-        console.log("Admin");
-        // addVolunteerSubmitEvent();
     }
 );
