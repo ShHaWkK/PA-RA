@@ -61,7 +61,7 @@ class ProductController
     public function createProduct($data)
     {
         try {
-            if (!isset($data['name']) || !isset($data['barcode']) || !isset($data['expiration_date']) || !isset($data['quantity']) || !isset($data['warehouse_id'])) {
+            if (!isset($data['name']) || !isset($data['barcode']) || !isset($data['expiration_date']) || !isset($data['quantity']) || !isset($data['warehouse_id']) || !isset($data['volume'])) {
                 http_response_code(400);
                 return ['error' => 'Missing required fields for new product'];
             }
@@ -97,6 +97,7 @@ class ProductController
             $product->setBarcode($data['barcode']);
             $product->setExpirationDate(new \DateTime($data['expiration_date']));
             $product->setQuantity($data['quantity']);
+            $product->setVolume($data['volume']);
             $product->setCreatedAt(new \DateTime("now"));
             $product->setUpdatedAt(new \DateTime("now"));
 
@@ -181,6 +182,9 @@ class ProductController
             }
             if (isset($data['quantity'])) {
                 $product->setQuantity($data['quantity']);
+            }
+            if (isset($data['volume'])) {
+                $product->setVolume($data['volume']);
             }
             $product->setUpdatedAt(new \DateTime("now"));
 

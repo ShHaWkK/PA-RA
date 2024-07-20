@@ -21,6 +21,9 @@ class ProductModel
     #[ORM\Column(type: "date")]
     private $expiration_date;
 
+    #[ORM\Column(type: "float")]
+    private $volume;
+
     #[ORM\Column(type: "integer")]
     private $quantity;
 
@@ -71,6 +74,17 @@ class ProductModel
     public function setExpirationDate(\DateTimeInterface $expiration_date): self
     {
         $this->expiration_date = $expiration_date;
+        return $this;
+    }
+
+    public function getVolume(): ?float
+    {
+        return $this->volume;
+    }
+
+    public function setVolume(float $volume): self
+    {
+        $this->volume = $volume;
         return $this;
     }
 

@@ -239,7 +239,7 @@ INSERT INTO warehouses (name, address, contact_info, capacity, city, country) VA
 ('Dublin Warehouse', '30 Dublin Road, Dublin', 'contact@dublinwarehouse.com', 750, 'Dublin', 'Ireland');
 
 -- Insertion des exemples de produits
-INSERT INTO products (name, barcode, expiration_date, quantity) VALUES 
+INSERT INTO products (name, barcode, expiration_date, volume) VALUES 
 ('Product 1', '1234567890123', '2025-12-31', 100),
 ('Product 2', '1234567890124', '2025-12-31', 200),
 ('Product 3', '1234567890125', '2026-01-01', 300),
