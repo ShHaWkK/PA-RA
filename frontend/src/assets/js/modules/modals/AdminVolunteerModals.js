@@ -69,35 +69,46 @@ async function populateSkillsInModal(selectedUserId) {
 
     // Vider le contenu précédent du corps de la modale
     modalBody.innerHTML = '';
-    console.log("selected User ID",selectedUserId);
+    console.log("selected User ID", selectedUserId);
+
+    // Obtenir les compétences de l'utilisateur
     var skills = await getUserSkills(selectedUserId);
     console.log(skills);
 
-    // Ajouter chaque compétence au corps de la modale
-    skills.forEach(skill => {
-        const skillElement = document.createElement('div');
-        skillElement.classList.add('skill');
+    // Vérifier si skills est un tableau
+    if (Array.isArray(skills) && skills.length > 0) {
+        // Ajouter chaque compétence au corps de la modale
+        skills.forEach(skill => {
+            const skillElement = document.createElement('div');
+            skillElement.classList.add('skill');
 
-        const skillName = document.createElement('h3');
-        skillName.textContent = skill.name;
+            const skillName = document.createElement('h3');
+            skillName.textContent = skill.name;
 
-        const skillDescription = document.createElement('p');
-        skillDescription.textContent = skill.description;
+            const skillDescription = document.createElement('p');
+            skillDescription.textContent = skill.description;
 
-        skillElement.appendChild(skillName);
-        skillElement.appendChild(skillDescription);
+            skillElement.appendChild(skillName);
+            skillElement.appendChild(skillDescription);
 
-        modalBody.appendChild(skillElement);
-    });
+            modalBody.appendChild(skillElement);
+        });
+    } else {
+        // Afficher le message "No skills found"
+        const noSkillsMessage = document.createElement('p');
+        noSkillsMessage.textContent = 'No skills found for this user.';
+        modalBody.appendChild(noSkillsMessage);
+    }
 }
 
-function populateAvailabilitiesInModal(selectedUserId) {
+async function populateAvailabilitiesInModal(selectedUserId) {
     const modalBody = document.getElementById('modalBodyAvailabilities');
 
     // Vider le contenu précédent du corps de la modale
     modalBody.innerHTML = '';
 
-   var availabilities = getUserAvailabilities(selectedUserId);
+    var availabilities = await getUserAvailabilities(selectedUserId);
+    console.log(availabilities);
 
     // Vérifier si availabilities est un tableau
     if (Array.isArray(availabilities) && availabilities.length > 0) {
@@ -107,10 +118,10 @@ function populateAvailabilitiesInModal(selectedUserId) {
             availabilityElement.classList.add('availability');
 
             const day = document.createElement('h3');
-            day.textContent = `Day: ${availability.day}`;
+            day.textContent = `Day: ${availability.day_of_week}`;
 
             const timeRange = document.createElement('p');
-            timeRange.textContent = `From: ${availability.startTime} - To: ${availability.endTime}`;
+            timeRange.textContent = `From: ${availability.start_time} - To: ${availability.end_time}`;
 
             availabilityElement.appendChild(day);
             availabilityElement.appendChild(timeRange);

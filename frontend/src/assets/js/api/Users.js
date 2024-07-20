@@ -159,7 +159,7 @@ async function getUserAvailabilities(userId){
         console.error('Failed to get user Availabilities');
         return null;
     }
-    console.log(response.json);
+
     return await response.json();
 }
 
