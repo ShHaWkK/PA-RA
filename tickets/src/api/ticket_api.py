@@ -128,3 +128,13 @@ class TicketAPI:
         except requests.exceptions.RequestException as e:
             logging.error(f"Failed to login: {e}")
             return {"error": str(e)}
+    
+    @staticmethod
+    def get_all_admins():
+        try:
+            response = requests.get(f"{TicketAPI.BASE_URL}/admins")
+            response.raise_for_status()
+            return response.json()
+        except requests.exceptions.RequestException as e:
+            logging.error(f"Failed to get all admins: {e}")
+            return {"error": str(e)}
