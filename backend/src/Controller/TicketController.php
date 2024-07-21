@@ -8,15 +8,18 @@ use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
+use Service\EmailService;
 
 class TicketController
 {
     private $entityManager;
     private $serializer;
+    private $emailService;
 
-    public function __construct(EntityManager $entityManager)
+    public function __construct(EntityManager $entityManager, EmailService $emailService)
     {
         $this->entityManager = $entityManager;
+        $this->emailService = $emailService;
         $normalizers = [new ObjectNormalizer(null, null, null, null, null, null, [
             AbstractNormalizer::CIRCULAR_REFERENCE_HANDLER => function ($object) {
                 return $object->getId();
@@ -93,11 +96,22 @@ class TicketController
             $this->entityManager->persist($ticket);
             $this->entityManager->flush();
 
+            // Envoyer un email de confirmation
+            $user = $ticket->getCreatedBy();
+            $this->sendConfirmationEmail($user->getEmail(), $ticket);
+
             return ['id' => $ticket->getId(), 'message' => 'Ticket created successfully'];
         } catch (\Exception $e) {
             error_log("Exception in createTicket: " . $e->getMessage());
             throw $e;
         }
+    }
+
+    private function sendConfirmationEmail($email, $ticket)
+    {
+        $subject = "Confirmation de création de ticket";
+        $body = "Votre ticket a bien été pris en compte. Un administrateur va traiter votre demande sous peu.\n\nDétails du ticket:\n\nID: {$ticket->getId()}\nType: {$ticket->getType()}\nDescription: {$ticket->getDescription()}";
+        $this->emailService->sendEmail($email, $subject, $body);
     }
 
     public function getTicket($id)
@@ -210,5 +224,4 @@ class TicketController
         }
     }
 }
-
 ?>

@@ -80,6 +80,7 @@ $mailer->Port = 587;
 // Instancie EmailService
 $emailService = new EmailService($mailer);
 
+$controller = new TicketController($entityManager, $emailService);
 // Mappe les contrôleurs aux chemins d'URI
 $controllerMap = [
     'users' => UserController::class,
