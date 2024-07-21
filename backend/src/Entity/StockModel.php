@@ -1,5 +1,4 @@
 <?php
-// Path: backend/src/Entity/StockModel.php
 namespace Entity;
 
 use Doctrine\ORM\Mapping as ORM;
@@ -37,7 +36,7 @@ class StockModel
     #[ORM\Column(type: "integer")]
     private $warehouse_id;
 
-    // Getters and setters for each property...
+    // Getters and setters...
 
     public function getId(): ?int
     {

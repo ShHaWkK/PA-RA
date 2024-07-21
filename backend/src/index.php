@@ -37,6 +37,7 @@ use Controller\ServiceProposalController;
 use Controller\TicketController;
 use Controller\VehicleController;
 use Controller\ScanController;
+use Controller\WarehouseController;
 use Service\PDFService;
 use Service\JWTService;
 use Service\EmailService;
@@ -101,7 +102,8 @@ $controllerMap = [
     'tickets' => TicketController::class,
     'scripts' => 'Scripts',
     'vehicles' => VehicleController::class, 
-    'scan' => ScanController::class
+    'scan' => ScanController::class, 
+    'warehouses' => WarehouseController::class
 ];
 
 // Vérifie si le contrôleur existe pour le premier élément de l'URI

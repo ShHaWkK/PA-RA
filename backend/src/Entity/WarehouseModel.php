@@ -4,8 +4,8 @@ namespace Entity;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity]
-#[ORM\Table(name: "products")]
-class ProductModel
+#[ORM\Table(name: "warehouses")]
+class WarehouseModel
 {
     #[ORM\Id]
     #[ORM\GeneratedValue(strategy: "AUTO")]
@@ -15,28 +15,26 @@ class ProductModel
     #[ORM\Column(type: "string", length: 255)]
     private $name;
 
-    #[ORM\Column(type: "string", length: 255, unique: true)]
-    private $barcode;
-
-    #[ORM\Column(type: "date")]
-    private $expiration_date;
-
-    #[ORM\Column(type: "float")]
-    private $volume;
+    #[ORM\Column(type: "string", length: 255)]
+    private $address;
 
     #[ORM\Column(type: "string", length: 255, nullable: true)]
-    private $qr_code_path;
+    private $contact_info;
+
+    #[ORM\Column(type: "integer")]
+    private $capacity;
+
+    #[ORM\Column(type: "string", length: 255)]
+    private $city;
+
+    #[ORM\Column(type: "string", length: 255)]
+    private $country;
 
     #[ORM\Column(type: "datetime", options: ["default" => "CURRENT_TIMESTAMP"])]
     private $created_at;
 
     #[ORM\Column(type: "datetime", options: ["default" => "CURRENT_TIMESTAMP", "onUpdate" => "CURRENT_TIMESTAMP"])]
     private $updated_at;
-
-    #[ORM\Column(type: "boolean", options: ["default" => false])]
-    private $scanned;
-
-    // Getters and setters...
 
     public function getId(): ?int
     {
@@ -54,47 +52,58 @@ class ProductModel
         return $this;
     }
 
-    public function getBarcode(): ?string
+    public function getAddress(): ?string
     {
-        return $this->barcode;
+        return $this->address;
     }
 
-    public function setBarcode(string $barcode): self
+    public function setAddress(string $address): self
     {
-        $this->barcode = $barcode;
+        $this->address = $address;
         return $this;
     }
 
-    public function getExpirationDate(): ?\DateTimeInterface
+    public function getContactInfo(): ?string
     {
-        return $this->expiration_date;
+        return $this->contact_info;
     }
 
-    public function setExpirationDate(\DateTimeInterface $expiration_date): self
+    public function setContactInfo(?string $contact_info): self
     {
-        $this->expiration_date = $expiration_date;
+        $this->contact_info = $contact_info;
         return $this;
     }
 
-    public function getVolume(): ?float
+    public function getCapacity(): ?int
     {
-        return $this->volume;
+        return $this->capacity;
     }
 
-    public function setVolume(float $volume): self
+    public function setCapacity(int $capacity): self
     {
-        $this->volume = $volume;
+        $this->capacity = $capacity;
         return $this;
     }
 
-    public function getQrCodePath(): ?string
+    public function getCity(): ?string
     {
-        return $this->qr_code_path;
+        return $this->city;
     }
 
-    public function setQrCodePath(?string $qr_code_path): self
+    public function setCity(string $city): self
     {
-        $this->qr_code_path = $qr_code_path;
+        $this->city = $city;
+        return $this;
+    }
+
+    public function getCountry(): ?string
+    {
+        return $this->country;
+    }
+
+    public function setCountry(string $country): self
+    {
+        $this->country = $country;
         return $this;
     }
 
@@ -117,17 +126,6 @@ class ProductModel
     public function setUpdatedAt(\DateTimeInterface $updated_at): self
     {
         $this->updated_at = $updated_at;
-        return $this;
-    }
-
-    public function getScanned(): ?bool
-    {
-        return $this->scanned;
-    }
-
-    public function setScanned(bool $scanned): self
-    {
-        $this->scanned = $scanned;
         return $this;
     }
 }
