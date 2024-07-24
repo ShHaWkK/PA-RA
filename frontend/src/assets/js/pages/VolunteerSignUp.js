@@ -79,9 +79,12 @@ function addVolunteerSubmitEvent(){
 
 //-------------Récupérer les compétences depuis la BDD et les placer dans le select -------------
 // Fonction pour mettre à jour le sélecteur HTML avec les compétences récupérées
-async function populateSkillTable() {
+async function populateSkillTable(loaderID) {
     try {
-        document.getElementById('loading-body').classList.remove('hidden');
+        if(loaderID == null)
+            loaderID = 'loading-body';
+
+        document.getElementById(loaderID).classList.remove('hidden');
         const response = await getAllSkills();
         const skills = await response.json();
         const skillsTable = document.getElementById('skillsTable').querySelector('tbody');
@@ -114,8 +117,7 @@ async function populateSkillTable() {
 
             // Après avoir peuplé le tableau, afficher le contenu
             document.getElementById('registrationForm').classList.remove('hidden');
-            document.getElementById('loading-body').classList.add('hidden');
-
+            document.getElementById(loaderID).classList.add('hidden');
         });
     } catch (error) {
         console.error('Error fetching skills:', error.message);

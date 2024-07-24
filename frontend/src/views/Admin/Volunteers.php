@@ -15,6 +15,11 @@
     <div class="back-office-content">
         <h1>Bénévoles</h1>
 
+        <?php
+        $loaderId = 'loadingBodyGeneral';
+        include($_SERVER['DOCUMENT_ROOT'] . '/views/includes/Loader.php');
+        ?>
+
         <div class="row">
             <input type="text" id="searchInput" placeholder="Rechercher...">
             <select name="status" id="volunteer-status-select">
@@ -24,7 +29,6 @@
                 <option value="pending"> En attente  </option>
             </select>
         </div>
-        <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/includes/Loader.php'); ?>
         <div class="row">
             <button class="add-button" id="addVolunteerButton"> Ajouter </button>
             <button class="delete-button" id="deleteVolunteerButton"> Supprimer </button>

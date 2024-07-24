@@ -5,17 +5,21 @@ import {populateModifyUserForm,populateSkillsInModal,populateAvailabilitiesInMod
 export var selectedUserId;
 
 export async function populateVolunteerTable(status) {
-    console.log("status in populateVolunteerTable", status);
+
+    // On affiche le Loader
+    document.getElementById('loadingBodyGeneral').classList.remove('hidden');
 
     const users = await getAllUsers('volunteer', status);
-
-    console.log("users", users);
 
     if (!users || users.length === 0) {
         console.log('No volunteers found');
         document.querySelector('.volunteer-table').innerHTML = '';
+        document.getElementById('loadingBodyGeneral').classList.add('hidden');
         return;
     }
+
+    // On enlève le Loader
+    document.getElementById('loadingBodyGeneral').classList.add('hidden');
 
     const table = document.createElement('table');
     table.classList.add('volunteer-table'); // Ajout de la classe volunteer-table pour le style

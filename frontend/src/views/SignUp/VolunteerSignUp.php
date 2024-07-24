@@ -10,7 +10,10 @@
 </head>
 <body>
 
-<?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/includes/Loader.php'); ?>
+<?php
+    $loaderId = 'loading-body';
+    include ($_SERVER['DOCUMENT_ROOT'] . '/views/includes/Loader.php');
+    ?>
 
 <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/form/VolunteerForm.php'); ?>
 
@@ -20,9 +23,3 @@
 
 </body>
 </html>
-
-<script>
-function changeLanguage(lang) {
-    window.location.href = window.location.pathname + "?lang=" + lang;
-}
-</script>

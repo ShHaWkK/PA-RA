@@ -1,6 +1,5 @@
 import {populateVolunteerTable} from "/assets/js/modules/tables/VolunteerTable.js";
 import {handleAprovals, deleteUser} from "/assets/js/api/Users.js";
-import {populateSkillTable , addVolunteerSubmitEvent} from "/assets/js/pages/VolunteerSignUp.js";
 
 var global_status = "";
 

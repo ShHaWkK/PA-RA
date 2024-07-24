@@ -1,16 +1,23 @@
 import {modifyUser, getUser, deleteUser, getUserAvailabilities, getUserSkills} from "/assets/js/api/Users.js";
 import {selectedUserId,populateVolunteerTable} from "/assets/js/modules/tables/VolunteerTable.js";
+import {populateSkillTable} from "/assets/js/pages/VolunteerSignUp.js";
 
 // Fonction pour pré-remplir le formulaire avec les données de l'utilisateur
 async function populateModifyUserForm(userId) {
     try {
-        console.log("populateForm");
+        console.log("we are in populate modify");
+        document.getElementById('modificationForm').classList.add('hidden');
+        document.getElementById('loadingModification').classList.remove('hidden');
+
         const userData = await getUser(userId);
         document.getElementById('first_name_modify').value = userData.first_name;
         document.getElementById('last_name_modify').value = userData.last_name;
         document.getElementById('email_modify').value = userData.email;
         document.getElementById('phone_number_modify').value = userData.phone_number;
         document.getElementById('password_modify').value = userData.password;
+
+        document.getElementById('loadingModification').classList.add('hidden');
+        document.getElementById('modificationForm').classList.remove('hidden');
     } catch (error) {
         console.error('Erreur lors du pré-remplissage du formulaire:', error);
     }
@@ -70,7 +77,9 @@ async function populateSkillsInModal(selectedUserId) {
     modalBody.innerHTML = '';
     console.log("selected User ID", selectedUserId);
 
-    // Obtenir les compétences de l'utilisateur
+    document.getElementById('loadingSkills').classList.remove('hidden');
+
+    // Obtenir les compétences de l'utilisasteur
     var skills = await getUserSkills(selectedUserId);
     console.log(skills);
 
@@ -92,6 +101,8 @@ async function populateSkillsInModal(selectedUserId) {
 
             modalBody.appendChild(skillElement);
         });
+
+        document.getElementById('loadingSkills').classList.add('hidden');
     } else {
         // Afficher le message "No skills found"
         const noSkillsMessage = document.createElement('p');
@@ -105,6 +116,9 @@ async function populateAvailabilitiesInModal(selectedUserId) {
 
     // Vider le contenu précédent du corps de la modale
     modalBody.innerHTML = '';
+
+    // On affiche le loader
+    document.getElementById('loadingAvailabilities').classList.remove('hidden');
 
     var availabilities = await getUserAvailabilities(selectedUserId);
     console.log(availabilities);
@@ -127,6 +141,9 @@ async function populateAvailabilitiesInModal(selectedUserId) {
 
             modalBody.appendChild(availabilityElement);
         });
+        // On retire le loader
+        document.getElementById('loadingAvailabilities').classList.add('hidden');
+
     } else {
         const noAvailabilitiesMessage = document.createElement('p');
         noAvailabilitiesMessage.textContent = 'No availabilities found for this user.';
@@ -143,6 +160,7 @@ document.addEventListener('DOMContentLoaded',
         var addSpan = document.getElementById("closeAdd");
 
         addBtn.onclick = function() {
+            document.getElementById('registrationForm').classList.remove('hidden');
             addModal.style.display = "block";
         }
 

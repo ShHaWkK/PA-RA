@@ -26,7 +26,11 @@
             </div>
 
             <button type="submit"><?php echo htmlspecialchars($data['submit_button2']); ?></button>
+
         </form>
+        <?php
+        $loaderId = 'loadingModification';
+        include ($_SERVER['DOCUMENT_ROOT'] . '/views/includes/Loader.php'); ?>
     </div>
 </div>
 

@@ -1,4 +1,4 @@
-<form id="registrationForm">
+<form id="registrationForm" class="hidden">
     <div>
         <label for="first_name"><?php echo htmlspecialchars($data['first_name_label']); ?></label>
         <input type="text" id="first_name" name="first_name" required>
@@ -29,7 +29,9 @@
             </tr>
             </thead>
             <tbody>
-            <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/includes/Loader.php'); ?>
+            <?php
+            $loaderId = 'loading-body';
+            include ($_SERVER['DOCUMENT_ROOT'] . '/views/includes/Loader.php'); ?>
             <!-- Les compétences seront ajoutées ici dynamiquement -->
             </tbody>
         </table>
