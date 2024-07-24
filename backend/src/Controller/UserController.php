@@ -4,10 +4,12 @@ namespace Controller;
 
 use Doctrine\ORM\EntityManager;
 use Entity\UserModel;
+use Entity\TicketModel;
 use Doctrine\ORM\Exception\NotSupported;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
+use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Service\UserService;
 use Service\CompanyService;
 use Service\SkillService;
@@ -27,7 +29,11 @@ class UserController
     public function __construct(EntityManager $entityManager, EmailService $emailService)
     {
         $this->entityManager = $entityManager;
-        $normalizers = [new ObjectNormalizer()];
+        $normalizers = [new ObjectNormalizer(null, null, null, null, null, null, [
+            AbstractNormalizer::CIRCULAR_REFERENCE_HANDLER => function ($object) {
+                return $object->getId();
+            }
+        ])];
         $encoders = [new JsonEncoder()];
         $this->serializer = new Serializer($normalizers, $encoders);
 
@@ -65,11 +71,10 @@ class UserController
                 if (isset($uriParts[1])) {
                     return match ($uriParts[1]) {
                         'generatePlanning' => $this->generatePlanning(),
+                        'tickets' => $this->getTicketsByUser((int)$uriParts[1]),
                         default => $this->getUser($uriParts[1]),
                     };
                 } else {
-                    error_log("On est ici ");
-                    error_log(print_r($_GET,true));
                     return $this->getUsersByCriteria($_GET);
                 }
 
@@ -89,7 +94,6 @@ class UserController
                 return ['error' => 'Method Not Allowed'];
         }
     }
-
     private function registerVolunteer($data)
     {
         $this->entityManager->beginTransaction();
@@ -317,5 +321,47 @@ class UserController
 
         return $serializedUsers;
     }
+    public function getTicketsByUser($userId)
+{
+    try {
+        // Assurez-vous que vous avez bien un utilisateur valide
+        $user = $this->entityManager->find(UserModel::class, $userId);
+        if (!$user) {
+            http_response_code(404);
+            return json_encode(['error' => 'User not found']);
+        }
+
+        // Récupérez les tickets créés par cet utilisateur
+        $tickets = $this->entityManager->getRepository(TicketModel::class)->findBy(['created_by' => $user]);
+
+        // Préparez une réponse simplifiée ne contenant que les informations de tickets
+        $ticketData = [];
+        foreach ($tickets as $ticket) {
+            $ticketData[] = [
+                'id' => $ticket->getId(),
+                'type' => $ticket->getType(),
+                'description' => $ticket->getDescription(),
+                'status' => $ticket->getStatus(),
+                'createdAt' => $ticket->getCreatedAt(),
+                'updatedAt' => $ticket->getUpdatedAt(),
+                'assignedTo' => $ticket->getAssignedTo() ? $ticket->getAssignedTo()->getId() : null,
+                'attachments' => $ticket->getAttachments()
+            ];
+        }
+
+        // Sérialisez les données des tickets pour les renvoyer au client
+        $response = json_encode($ticketData);
+        error_log("Tickets retrieved for user {$userId}: " . $response); // Log tickets retrieved
+        return $response;
+    } catch (\Exception $e) {
+        error_log("Exception in getTicketsByUser: " . $e->getMessage());
+        http_response_code(500);
+        return json_encode(['error' => 'Internal Server Error']);
+    }
 }
+
+    
+    
+}
+
 ?>

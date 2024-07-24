@@ -35,7 +35,7 @@ class TicketModel
     #[ORM\Column(type: "datetime")]
     private $updated_at;
 
-    #[ORM\Column(type: "array", nullable: true)]
+    #[ORM\Column(type: "json", nullable: true)]
     private $attachments;
 
     // Getters and setters for each property...
@@ -133,5 +133,4 @@ class TicketModel
         return $this;
     }
 }
-
 ?>

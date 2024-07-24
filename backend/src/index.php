@@ -79,8 +79,7 @@ $mailer->Port = 587;
 
 // Instancie EmailService
 $emailService = new EmailService($mailer);
-
-$controller = new TicketController($entityManager, $emailService);
+//$controller = new TicketController($entityManager, $emailService);
 // Mappe les contrôleurs aux chemins d'URI
 $controllerMap = [
     'users' => UserController::class,
@@ -131,6 +130,8 @@ try {
         $controller = new $controllerClass($entityManager, $jwtService);
     } elseif ($controllerClass === UserController::class) {
         $controller = new $controllerClass($entityManager, $emailService);
+    } elseif ($controllerClass === TicketController::class) {
+        $controller = new $controllerClass($entityManager, $emailService);
     } elseif ($route === 'scripts') {
         if (isset($uriParts[1]) && $uriParts[1] === 'remove_unverified_users') {
             include __DIR__ . '/Scripts/remove_unverified_users.php';
@@ -158,7 +159,13 @@ try {
         $decodedToken = $jwtMiddleware->verifyToken();
         $response = $controller->processRequest($_SERVER['REQUEST_METHOD'], $uriParts, $input, $decodedToken);
     } else {
-        $response = $controller->processRequest($_SERVER['REQUEST_METHOD'], $uriParts, $input);
+        // Ajout de la vérification des tickets d'un utilisateur spécifique
+        if ($route === 'users' && isset($uriParts[2]) && $uriParts[2] === 'tickets') {
+            $userId = (int) $uriParts[1];
+            $response = $controller->getTicketsByUser($userId);
+        } else {
+            $response = $controller->processRequest($_SERVER['REQUEST_METHOD'], $uriParts, $input);
+        }
     }
 } catch (EntityNotFoundException $e) {
     http_response_code(404);
@@ -181,4 +188,3 @@ function exit_with_message($message, $code = 200) {
     exit;
 }
 ?>
-
