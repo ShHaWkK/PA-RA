@@ -96,7 +96,7 @@ class UserController
                             return $this->updateUserStatus($uriParts[2], $input);
                     }
                 } else {
-                    return $this->updateUser($uriParts[1],$_GET);
+                    return $this->updateUser($uriParts[1],$input);
 //                    http_response_code(400);
 //                    return ['error' => 'User ID not specified'];
                 }
@@ -285,8 +285,7 @@ class UserController
                 return ['error' => 'Missing status field'];
             }
 
-            $user = $this->userService->updateUserStatus($id, $data['status']);
-            return ['message' => 'User status updated successfully'];
+                return ['message' => 'User status updated successfully'];
         } catch (\Exception $e) {
             http_response_code(500);
             return ['error' => 'Internal Server Error'];
@@ -365,6 +364,7 @@ class UserController
 
     public function updateUser($id, $data)
     {
+        error_log("we are here");
         $user = $this->entityManager->getRepository(UserModel::class)->find($id);
 
         if (!$user) {
@@ -372,7 +372,9 @@ class UserController
             return ['error' => 'User not found'];
         }
 
+        error_log(print_r($data,true));
         $user->updateFields($data);
+        error_log("we updated the user");
         $this->entityManager->flush();
 
         return ['message' => 'User modified successfully'];

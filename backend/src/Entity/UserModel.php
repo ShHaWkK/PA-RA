@@ -244,12 +244,51 @@ class UserModel implements \JsonSerializable
 
     public function updateFields(array $fields): self
     {
+        error_log(print_r($fields, true));
+
         foreach ($fields as $field => $value) {
-            $method = 'set' . ucfirst($field);
-            if (method_exists($this, $method)) {
-                $this->$method($value);
+            error_log(print_r($field, true));
+
+            switch ($field) {
+                case 'first_name':
+                    $this->setFirstName($value);
+                    break;
+                case 'last_name':
+                    $this->setLastName($value);
+                    break;
+                case 'email':
+                    $this->setEmail($value);
+                    break;
+                case 'phone_number':
+                    $this->setPhoneNumber($value);
+                    break;
+                case 'password':
+
+                    $this->setPassword(password_hash($value, PASSWORD_BCRYPT));
+                    break;
+                case 'role':
+                    $this->setRole($value);
+                    break;
+                case 'status':
+                    $this->setStatus($value);
+                    break;
+                case 'verification_code':
+                    $this->setVerificationCode($value);
+                    break;
+                case 'is_verified':
+                    $this->setIsVerified($value);
+                    break;
+                case 'created_at':
+                    $this->setCreatedAt(new \DateTime($value));
+                    break;
+                case 'updated_at':
+                    $this->setUpdatedAt(new \DateTime($value));
+                    break;
+                default:
+                    error_log("Unknown field: " . $field);
             }
         }
+
         return $this;
     }
 
