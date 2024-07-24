@@ -37,6 +37,9 @@ async function modifyUser(userId,userData) {
 async function handleAprovals(userId, status) {
     var successMessage,errorMessage;
 
+    console.log("uri",`${apiEndpoint}/users/approval/${userId}`);
+    console.log("status",status);
+
     const response = await fetch(`${apiEndpoint}/users/approval/${userId}`, {
             method: 'PUT',
             headers: {

@@ -10,8 +10,8 @@
 <div class="dashboard-sidebar">
     <h2>Dashboard</h2>
     <ul>
-        <li><a href="#volunteers">Volunteers</a></li>
-        <li><a href="#merchants">Merchants</a></li>
+        <li><a href="/Admin/Volunteers">Volunteers</a></li>
+        <li><a href="/Admin/Merchants">Merchants</a></li>
         <li><a href="#companies">Companies</a></li>
         <li><a href="#collections">Collections</a></li>
     </ul>

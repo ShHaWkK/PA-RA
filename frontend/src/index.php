@@ -55,8 +55,7 @@ switch ($request) {
     case '/Login':
         require __DIR__ . '/views/Login/Login.php';
         break;
-    case '/Admin':
-        // Exemple de route protégée
+    case '/Admin/Volunteers':
         if ($jwtToken) {
             requireAuth($jwtToken, 'admin');
             require __DIR__ . '/views/Admin/Volunteers.php';
@@ -64,9 +63,16 @@ switch ($request) {
             require __DIR__ . '/views/Login/Login.php';
             exit;
         }
+    case '/Admin/Merchants':
+        if ($jwtToken) {
+            requireAuth($jwtToken, 'admin');
+            require __DIR__ . '/views/Admin/Merchants.php';
+        } else {
+            require __DIR__ . '/views/Login/Login.php';
+            exit;
+        }
         break;
     case '/Volunteer':
-        // Exemple de route protégée
         if ($jwtToken) {
             requireAuth($jwtToken, 'volunteer');
             require __DIR__ . '/views/Volunteer/Volunteer.php';
@@ -76,7 +82,6 @@ switch ($request) {
         }
         break;
     case '/Merchant':
-        // Exemple de route protégée
         if ($jwtToken) {
             requireAuth($jwtToken, 'merchant');
             require __DIR__ . '/views/Merchant/Merchant.php';

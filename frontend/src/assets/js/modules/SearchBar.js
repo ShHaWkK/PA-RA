@@ -1,6 +1,6 @@
-export function setupSearch(users) {
+export function setupSearch(users,tableName) {
     const searchInput = document.getElementById('searchInput');
-    const table = document.getElementById('volunteerTable');
+    const table = document.getElementById(tableName);
     const rows = table.getElementsByTagName('tr');
 
     searchInput.addEventListener('input', function() {

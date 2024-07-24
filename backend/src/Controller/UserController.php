@@ -285,12 +285,25 @@ class UserController
                 return ['error' => 'Missing status field'];
             }
 
-                return ['message' => 'User status updated successfully'];
+            // Assuming $entityManager is available to interact with the database
+            $user = $this->entityManager->getRepository(UserModel::class)->find($id);
+
+            if (!$user) {
+                http_response_code(404);
+                return ['error' => 'User not found'];
+            }
+
+            $user->setStatus($data['status']);
+            $this->entityManager->persist($user);
+            $this->entityManager->flush();
+
+            return ['message' => 'User status updated successfully'];
         } catch (\Exception $e) {
             http_response_code(500);
             return ['error' => 'Internal Server Error'];
         }
     }
+
 
     /**
      * @throws NotSupported

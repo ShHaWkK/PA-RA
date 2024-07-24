@@ -1,6 +1,7 @@
 import {modifyUser, getUser, deleteUser, getUserAvailabilities, getUserSkills} from "/assets/js/api/Users.js";
 import {selectedUserId,populateVolunteerTable} from "/assets/js/modules/tables/VolunteerTable.js";
 import {populateSkillTable} from "/assets/js/pages/VolunteerSignUp.js";
+import {populateMerchantTable} from "/assets/js/modules/tables/MerchantTable.js";
 
 // Fonction pour pré-remplir le formulaire avec les données de l'utilisateur
 async function populateModifyUserForm(userId) {
@@ -36,10 +37,17 @@ document.getElementById('modificationForm').addEventListener('submit', async fun
         password: document.getElementById('password_modify').value
     };
 
+    console.log("formData",formData);
+
     try {
         const result = await modifyUser(userId, formData);
         console.log('Modification succeeded:', result);
         alert('Modification succeeded:');
+        populateVolunteerTable("");
+        populateMerchantTable("");
+
+        document.getElementById("modifyUserModal").style.display = "none";
+
     } catch (error) {
         console.error('Erreur lors de la modification de l\'utilisateur:', error);
         alert('Modification failed');

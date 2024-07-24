@@ -1,26 +1,52 @@
 import {populateVolunteerTable} from "/assets/js/modules/tables/VolunteerTable.js";
 import {handleAprovals, deleteUser} from "/assets/js/api/Users.js";
+import {populateMerchantTable} from "../modules/tables/MerchantTable.js";
 
 var global_status = "";
 
-document.getElementById('volunteer-status-select').addEventListener('change', async function() {
-    global_status = this.value;
-    console.log("status constructor",global_status);
-    await populateVolunteerTable(global_status);
-});
+const volunteerStatusSelect = document.getElementById('volunteer-status-select');
+
+if (volunteerStatusSelect) {
+    volunteerStatusSelect.addEventListener('change', async function() {
+        global_status = this.value;
+        console.log("status constructor", global_status);
+        await populateVolunteerTable(global_status);
+    });
+}
+
+const merchantStatusSelect = document.getElementById('merchant-status-select');
+
+if(merchantStatusSelect) {
+    document.getElementById('merchant-status-select').addEventListener('change', async function () {
+        global_status = this.value;
+        console.log("status constructor", global_status);
+        await populateVolunteerTable(global_status);
+    });
+}
 
 //----------------fonction pour l'approbation des utilisateurs-----------------------
 async function handleStatusChange(status){
-    const checkedCheckboxes = document.querySelectorAll('#volunteerTable input[type="checkbox"]:checked');
+    console.log("status in handle",status);
+    let checkedCheckboxes= "";
+
+    const merchantTable = document.getElementById('merchantTable');
+    if (merchantTable){
+        console.log("merchantTable");
+        checkedCheckboxes = document.querySelectorAll('#merchantTable input[type="checkbox"]:checked');
+    }
+
+    const volunteerTable = document.getElementById('volunteerTable');
+    if (volunteerTable){
+        console.log("volunteerTable");
+        checkedCheckboxes = document.querySelectorAll('#volunteerTable input[type="checkbox"]:checked');
+    }
+
     const userIds = Array.from(checkedCheckboxes).map(checkbox => checkbox.value);
 
     if (userIds.length === 0) {
         alert("Select at least one user to do this action.");
     }
     else {
-        var uri = `${apiEndpoint}/users/approval/1}`;
-
-        console.log("uri", uri);
         console.log(JSON.stringify({status: status}));
 
         for (const userId of userIds) {
@@ -28,6 +54,7 @@ async function handleStatusChange(status){
         }
         console.log("status", global_status);
         await populateVolunteerTable(global_status);
+        await populateMerchantTable(global_status);
     }
 }
 
@@ -50,7 +77,6 @@ function handlePending(){
 }
 
 // Fonction pour supprimer les utilisateurs sélectionnés
-// Fonction pour supprimer les utilisateurs sélectionnés
 async function deleteUsers() {
     const checkedCheckboxes = document.querySelectorAll('#volunteerTable input[type="checkbox"]:checked');
     const userIds = Array.from(checkedCheckboxes).map(checkbox => checkbox.value);
@@ -65,7 +91,8 @@ async function deleteUsers() {
             await deleteUser(userId);
         }
         // Rafraîchir le tableau des bénévoles après la suppression
-        await populateVolunteerTable();
+        populateVolunteerTable();
+        populateMerchantTable();
         alert("The selected users have been successfully deleted.\n");
     } catch (error) {
         console.error("Error deleting users:", error.message);
@@ -77,6 +104,7 @@ async function deleteUsers() {
 document.addEventListener('DOMContentLoaded',
     function (){
         populateVolunteerTable("");
+        populateMerchantTable("");
         handleApproval();
         handleReject();
         handlePending();

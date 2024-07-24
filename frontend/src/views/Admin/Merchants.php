@@ -1,4 +1,6 @@
 <!DOCTYPE html>
+<?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/includes/lang.php'); ?>
+
 <html lang="<?php echo strtolower($userLanguage); ?>">
 <head>
     <meta charset="UTF-8">
@@ -13,7 +15,7 @@
     <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/includes/AdminDashboard.php'); ?>
 
     <div class="back-office-content">
-        <h1>Bénévoles</h1>
+        <h1>Commerçants</h1>
 
         <?php
         $loaderId = 'loadingBodyGeneral';
@@ -22,7 +24,7 @@
 
         <div class="row">
             <input type="text" id="searchInput" placeholder="Rechercher...">
-            <select name="status" id="volunteer-status-select">
+            <select name="status" id="merchant-status-select">
                 <option value=""> Tous </option>
                 <option value="approved"> Approuvé </option>
                 <option value="rejected"> Rejeté </option>
@@ -40,7 +42,7 @@
             <button class="neutral-button" id='putOnHoldButton'> Mettre en attente </button>
         </div>
 
-        <div class="volunteer-table"></div>
+        <div class="merchant-table"></div>
         <script type="module" src="/assets/js/pages/AdminUserPages.js"></script>
     </div>
 
