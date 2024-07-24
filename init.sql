@@ -221,7 +221,7 @@ CREATE TABLE IF NOT EXISTS tickets (
     status ENUM('open', 'in_progress', 'closed') NOT NULL DEFAULT 'open',
     created_by INT NOT NULL,
     assigned_to INT,
-    attachments JSON NULL, 
+    attachments JSON,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE,

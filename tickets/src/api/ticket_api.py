@@ -14,7 +14,15 @@ class TicketAPI:
         try:
             response = requests.post(f"{TicketAPI.BASE_URL}/tickets", json=data)
             response.raise_for_status()
-            return response.json()
+            if response.content:
+                try:
+                    return response.json()
+                except ValueError:
+                    logging.error(f"Non-JSON response received: {response.text}")
+                    return {"error": "Non-JSON response from server"}
+            else:
+                logging.error(f"Empty response received: {response.text}")
+                return {"error": "Empty response from server"}
         except requests.exceptions.RequestException as e:
             logging.error(f"Failed to create ticket: {e}")
             return {"error": str(e)}
@@ -62,9 +70,12 @@ class TicketAPI:
     @staticmethod
     def get_tickets_by_user(user_id):
         try:
+            logging.debug(f"Requesting tickets for user ID: {user_id}")
             response = requests.get(f"{TicketAPI.BASE_URL}/users/{user_id}/tickets")
             response.raise_for_status()
-            return response.json()
+            tickets = response.json()
+            # logging.debug(f"Response: {tickets}")
+            return tickets
         except requests.exceptions.RequestException as e:
             logging.error(f"Failed to get tickets by user: {e}")
             return {"error": str(e)}
@@ -128,7 +139,7 @@ class TicketAPI:
         except requests.exceptions.RequestException as e:
             logging.error(f"Failed to login: {e}")
             return {"error": str(e)}
-    
+
     @staticmethod
     def get_all_admins():
         try:
