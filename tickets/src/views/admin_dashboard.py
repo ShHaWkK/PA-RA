@@ -1,204 +1,174 @@
-# Patch: tickets/src/views/admin_dashboard.py
+import os
+import requests
+import logging
+from dotenv import load_dotenv
+import json
 import tkinter as tk
-from tkinter import ttk, messagebox, simpledialog
+from tkinter import ttk, messagebox, simpledialog, filedialog
 from src.api.ticket_api import TicketAPI
-from src.views.ticket_details import open_ticket_details
+from src.views.chat_view import ChatView
+from logging.handlers import RotatingFileHandler
 
-class AdminDashboard:
-    def __init__(self, root, user_data):
-        self.root = root
+load_dotenv()
+
+# Setting up logging
+logging.basicConfig(level=logging.DEBUG)
+handler = RotatingFileHandler('ticket_system.log', maxBytes=2000, backupCount=5)
+logging.getLogger().addHandler(handler)
+
+class AdminView:
+    def __init__(self, master, user_data):
+        self.master = master
         self.user_data = user_data
-        self.root.title("Admin Dashboard")
-        self.root.geometry("1000x700")
+        self.ticket_system = TicketAPI()
+        
+        # Setup the UI components
+        self.setup_ui()
 
-        self.create_widgets()
-        self.load_tickets()
+    def setup_ui(self):
+        self.master.title("Espace Administrateur")
+        self.master.geometry("800x600")
 
-    def create_widgets(self):
-        self.header_frame = tk.Frame(self.root, bg="#4CAF50")
+        self.main_frame = tk.Frame(self.master)
+        self.main_frame.pack(fill=tk.BOTH, expand=True)
+
+        self.header_frame = tk.Frame(self.main_frame)
         self.header_frame.pack(fill=tk.X)
-        self.header_label = tk.Label(self.header_frame, text="Admin Dashboard", font=("Arial", 18), fg="white", bg="#4CAF50")
+        self.header_label = tk.Label(self.header_frame, text="Admin Dashboard", font=("Arial", 18))
         self.header_label.pack(pady=10)
 
-        self.tabs = tk.Frame(self.root)
-        self.tabs.pack(pady=10)
+        self.tickets_frame = tk.Frame(self.main_frame)
+        self.tickets_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
+        self.tickets_treeview = ttk.Treeview(self.tickets_frame, columns=("ID", "Type", "Description", "Status", "Created By", "Admin ID", "Created At", "Updated At"), show="headings")
+        self.tickets_treeview.pack(fill=tk.BOTH, expand=True)
+        self.tickets_treeview.heading("ID", text="ID du Ticket")
+        self.tickets_treeview.heading("Type", text="Type de Ticket")
+        self.tickets_treeview.heading("Description", text="Description du Ticket")
+        self.tickets_treeview.heading("Status", text="Statut")
+        self.tickets_treeview.heading("Created By", text="Créé par")
+        self.tickets_treeview.heading("Admin ID", text="ID de l'Admin")
+        self.tickets_treeview.heading("Created At", text="Créé le")
+        self.tickets_treeview.heading("Updated At", text="Mis à jour le")
+        self.tickets_treeview.bind("<ButtonRelease-1>", self.open_chat_on_ticket_click)
+        self.populate_tickets()
 
-        self.open_tickets_btn = ttk.Button(self.tabs, text="Open Tickets", command=lambda: self.load_tickets("open"))
-        self.open_tickets_btn.grid(row=0, column=0, padx=5)
-        self.closed_tickets_btn = ttk.Button(self.tabs, text="Closed Tickets", command=lambda: self.load_tickets("closed"))
-        self.closed_tickets_btn.grid(row=0, column=1, padx=5)
-        self.processed_tickets_btn = ttk.Button(self.tabs, text="Processed Tickets", command=lambda: self.load_tickets("processed"))
-        self.processed_tickets_btn.grid(row=0, column=2, padx=5)
+        self.button_frame = tk.Frame(self.main_frame)
+        self.button_frame.pack(fill=tk.X, pady=10)
 
-        self.search_frame = tk.Frame(self.root)
-        self.search_frame.pack(pady=10)
+        self.create_ticket_button = tk.Button(self.button_frame, text="Créer un Ticket", command=self.create_ticket)
+        self.create_ticket_button.pack(side=tk.LEFT, padx=5)
 
-        self.search_label = tk.Label(self.search_frame, text="Search:")
-        self.search_label.grid(row=0, column=0, padx=5)
-        self.search_entry = tk.Entry(self.search_frame)
-        self.search_entry.grid(row=0, column=1, padx=5)
-        self.search_button = ttk.Button(self.search_frame, text="Search", command=self.search_tickets)
-        self.search_button.grid(row=0, column=2, padx=5)
+        self.close_ticket_button = tk.Button(self.button_frame, text="Fermer le Ticket", command=self.close_ticket)
+        self.close_ticket_button.pack(side=tk.LEFT, padx=5)
 
-        self.ticket_list = tk.Listbox(self.root, height=20, width=120)
-        self.ticket_list.pack(padx=10, pady=10)
-        self.ticket_list.bind('<Double-1>', self.open_ticket)
+        self.reassign_ticket_button = tk.Button(self.button_frame, text="Réassigner le Ticket", command=self.reassign_ticket)
+        self.reassign_ticket_button.pack(side=tk.LEFT, padx=5)
 
-        self.buttons_frame = tk.Frame(self.root)
-        self.buttons_frame.pack(pady=10)
+    def reassign_ticket(self):
+        selected = self.tickets_treeview.selection()
+        if selected:
+            ticket_info = self.tickets_treeview.item(selected[0], 'values')
+            ticket_id = int(ticket_info[0])
+            new_admin_id = simpledialog.askinteger("Réassigner le Ticket", "Entrez l'ID du nouvel administrateur :")
+            if new_admin_id:
+                update_data = {'new_admin_id': new_admin_id}
+                response = self.ticket_system.reassign_ticket(ticket_id, update_data)
+                logging.debug(f"Reassign Ticket Response: {response}")
+                if response and 'id' in response:
+                    messagebox.showinfo("Succès", "Ticket réassigné avec succès!")
+                    self.populate_tickets()
+                else:
+                    messagebox.showerror("Erreur", "Échec de la réassignation du ticket.")
+        else:
+            messagebox.showwarning("Attention", "Veuillez sélectionner un ticket.")
 
-        self.assign_button = ttk.Button(self.buttons_frame, text="Assign to Me", command=self.assign_ticket)
-        self.assign_button.grid(row=0, column=0, padx=5)
+    def open_chat_on_ticket_click(self, event):
+        item = self.tickets_treeview.selection()[0]
+        ticket_info = self.tickets_treeview.item(item, "values")
+        if ticket_info:
+            try:
+                ticket_id = int(ticket_info[0])
+                created_by = int(ticket_info[4]) if ticket_info[4] else None
+                self.open_chat_with_user(ticket_id, created_by)
+            except ValueError:
+                messagebox.showerror("Erreur", "ID invalide. L'ID doit être un entier.")
 
-        self.close_ticket_button = ttk.Button(self.buttons_frame, text="Close Ticket", command=self.close_ticket)
-        self.close_ticket_button.grid(row=0, column=1, padx=5)
-
-        self.validate_ticket_button = ttk.Button(self.buttons_frame, text="Validate Ticket", command=self.validate_ticket)
-        self.validate_ticket_button.grid(row=0, column=2, padx=5)
-
-        self.assign_admin_button = ttk.Button(self.buttons_frame, text="Assign to Another Admin", command=self.assign_admin)
-        self.assign_admin_button.grid(row=0, column=3, padx=5)
-
-        self.show_messages_button = ttk.Button(self.buttons_frame, text="Show Messages", command=self.show_ticket_messages)
-        self.show_messages_button.grid(row=0, column=4, padx=5)
-
-    def load_tickets(self, status=None):
-        self.ticket_list.delete(0, tk.END)
-        tickets = TicketAPI.get_all_tickets()
-        if status:
-            tickets = [ticket for ticket in tickets if ticket['status'] == status]
-        for ticket in tickets:
-            self.ticket_list.insert(tk.END, f"ID: {ticket['id']} - {ticket['description']} - Status: {ticket['status']}")
-
-    def search_tickets(self):
-        search_term = self.search_entry.get()
-        self.ticket_list.delete(0, tk.END)
-        criteria = {
-            'keyword': search_term,
-        }
-        tickets = TicketAPI.search_tickets(criteria)
-        for ticket in tickets:
-            self.ticket_list.insert(tk.END, f"ID: {ticket['id']} - {ticket['description']} - Status: {ticket['status']}")
-
-    def open_ticket(self, event):
-        selected_ticket_index = self.ticket_list.curselection()[0]
-        selected_ticket = self.ticket_list.get(selected_ticket_index).split(" - ")[0].split(": ")[1]
-        ticket = TicketAPI.get_ticket(selected_ticket)
-        open_ticket_details(self.root, ticket, self.user_data)
-
-    def assign_ticket(self):
+    def open_chat_with_user(self, ticket_id, created_by):
         try:
-            selected_ticket_index = self.ticket_list.curselection()[0]
-            selected_ticket_id = self.ticket_list.get(selected_ticket_index).split(" - ")[0].split(": ")[1]
-            data = {"assigned_to": self.user_data["id"]}
-            if TicketAPI.update_ticket(selected_ticket_id, data):
-                messagebox.showinfo("Success", "Ticket assigned to you successfully!")
-                self.load_tickets()
+            self.ticket_id = int(ticket_id)
+            self.created_by = int(created_by) if created_by is not None else 0
+            chat_window = tk.Toplevel(self.master)
+            chat_view = ChatView(chat_window, self.created_by, self.user_data['id'], self.ticket_id)
+        except ValueError:
+            messagebox.showerror("Erreur", "L'ID doit être un entier.")
+
+    def populate_tickets(self):
+        for item in self.tickets_treeview.get_children():
+            self.tickets_treeview.delete(item)
+        tickets = self.ticket_system.get_all_tickets()
+        logging.debug(f"Tickets fetched from API: {json.dumps(tickets, indent=2)}")
+        try:
+            tickets = json.loads(tickets) if isinstance(tickets, str) else tickets
+        except json.JSONDecodeError as e:
+            logging.error(f"Failed to decode JSON response: {e}")
+            messagebox.showerror("Erreur", "Erreur de format de réponse JSON.")
+            return
+
+        if isinstance(tickets, dict) and 'error' in tickets:
+            messagebox.showerror("Erreur", tickets['error'])
+        else:
+            for ticket in tickets:
+                logging.debug(f"Processing ticket: {ticket.get('id')}, {ticket.get('description')}")
+                if isinstance(ticket, dict):
+                    ticket_id = ticket.get('id', '')
+                    ticket_type = ticket.get('type', '')
+                    description = ticket.get('description', '')
+                    status = ticket.get('status', '')
+                    created_by = ticket.get('createdBy', '')
+                    admin_id = ticket.get('assignedTo', '') if ticket.get('assignedTo') is not None else ''
+                    created_at = ticket.get('createdAt', '').get('date', '') if isinstance(ticket.get('createdAt'), dict) else ticket.get('createdAt')
+                    updated_at = ticket.get('updatedAt', '').get('date', '') if isinstance(ticket.get('updatedAt'), dict) else ticket.get('updatedAt')
+                    self.tickets_treeview.insert("", tk.END, values=(ticket_id, ticket_type, description, status, created_by, admin_id, created_at, updated_at))
+                    logging.debug(f"Inserted ticket into Treeview: ID={ticket_id}, Type={ticket_type}, Description={description}, Status={status}, Created By={created_by}, Admin ID={admin_id}, Created At={created_at}, Updated At={updated_at}")
+
+    def create_ticket(self):
+        title = simpledialog.askstring("Créer un Ticket", "Entrez le titre du ticket :")
+        description = simpledialog.askstring("Créer un Ticket", "Entrez la description du ticket :")
+        if title and description:
+            ticket_data = {
+                'type': 'admin',
+                'description': description,
+                'status': 'open',
+                'created_by': self.user_data['id'],
+                'attachments': []
+            }
+            response = self.ticket_system.create_ticket(ticket_data)
+            logging.debug(f"Create Ticket Response: {response}")
+            if response and 'id' in response:
+                messagebox.showinfo("Succès", "Ticket créé avec succès !")
+                self.populate_tickets()
             else:
-                messagebox.showerror("Error", "Failed to assign the ticket.")
-        except IndexError:
-            messagebox.showwarning("Warning", "Please select a ticket to assign.")
+                messagebox.showerror("Erreur", "Échec de la création du ticket.")
+        else:
+            messagebox.showwarning("Attention", "Le titre et la description ne doivent pas être vides.")
 
     def close_ticket(self):
-        try:
-            selected_ticket_index = self.ticket_list.curselection()[0]
-            selected_ticket_id = self.ticket_list.get(selected_ticket_index).split(" - ")[0].split(": ")[1]
-            if TicketAPI.update_ticket(selected_ticket_id, {'status': 'closed'}):
-                messagebox.showinfo("Success", "Ticket closed successfully!")
-                self.load_tickets()
+        selected = self.tickets_treeview.selection()
+        if selected:
+            ticket_info = self.tickets_treeview.item(selected[0], 'values')
+            ticket_id = int(ticket_info[0])
+            update_data = {'status': 'closed', 'user_id': self.user_data['id'], 'is_admin': True}
+            response = self.ticket_system.update_ticket(ticket_id, update_data)
+            logging.debug(f"Close Ticket Response: {response}")
+            if response and 'id' in response:
+                messagebox.showinfo("Succès", "Ticket fermé avec succès!")
+                self.populate_tickets()
             else:
-                messagebox.showerror("Error", "Failed to close the ticket.")
-        except IndexError:
-            messagebox.showwarning("Warning", "Please select a ticket to close.")
+                messagebox.showerror("Erreur", "Échec de la fermeture du ticket.")
+        else:
+            messagebox.showwarning("Attention", "Veuillez sélectionner un ticket.")
 
-    def validate_ticket(self):
-        try:
-            selected_ticket_index = self.ticket_list.curselection()[0]
-            selected_ticket_id = self.ticket_list.get(selected_ticket_index).split(" - ")[0].split(": ")[1]
-            if TicketAPI.update_ticket(selected_ticket_id, {'status': 'validated'}):
-                messagebox.showinfo("Success", "Ticket validated successfully!")
-                self.load_tickets()
-            else:
-                messagebox.showerror("Error", "Failed to validate the ticket.")
-        except IndexError:
-            messagebox.showwarning("Warning", "Please select a ticket to validate.")
-
-    def assign_admin(self):
-        try:
-            selected_ticket_index = self.ticket_list.curselection()[0]
-            selected_ticket_id = self.ticket_list.get(selected_ticket_index).split(" - ")[0].split(": ")[1]
-            admin_id = self.select_admin()
-            if admin_id:
-                if TicketAPI.update_ticket(selected_ticket_id, {'assigned_to': admin_id}):
-                    messagebox.showinfo("Success", "Ticket assigned to another admin successfully!")
-                    self.load_tickets()
-                else:
-                    messagebox.showerror("Error", "Failed to assign the ticket.")
-        except IndexError:
-            messagebox.showwarning("Warning", "Please select a ticket to assign.")
-
-    def select_admin(self):
-        admins = self.get_all_admins()
-
-        window = tk.Toplevel(self.root)
-        window.title("Select Admin")
-        window.geometry("300x150")
-
-        tk.Label(window, text="Choose an admin:").pack(pady=10)
-
-        selected_admin = tk.StringVar()
-        admin_menu = ttk.Combobox(window, textvariable=selected_admin, values=admins)
-        admin_menu.pack(pady=10)
-        admin_menu.current(0)
-
-        def assign():
-            window.destroy()
-
-        assign_button = tk.Button(window, text="Assign", command=assign)
-        assign_button.pack(pady=10)
-
-        window.wait_window()
-        return selected_admin.get().split(":")[0]
-
-    def get_all_admins(self):
-        try:
-            admins = TicketAPI.get_all_admins()
-            return [f"{admin['id']}: {admin['name']}" for admin in admins]
-        except Exception as e:
-            print(f"Error: {e}")
-            return []
-
-    def show_ticket_messages(self):
-        try:
-            selected_ticket_index = self.ticket_list.curselection()[0]
-            selected_ticket_id = self.ticket_list.get(selected_ticket_index).split(" - ")[0].split(": ")[1]
-            messages = TicketAPI.get_ticket_messages(selected_ticket_id)
-            window = tk.Toplevel(self.root)
-            window.title("Messages")
-            tk.Label(window, text="Messages:", font=("Arial", 12)).pack(pady=10)
-            messages_text = tk.Text(window, height=20, width=80)
-            messages_text.pack(padx=10, pady=10)
-            for message in messages:
-                messages_text.insert(tk.END, f"{message['author']}: {message['content']}\n")
-            messages_text.config(state=tk.DISABLED)
-        except IndexError:
-            messagebox.showwarning("Warning", "Please select a ticket to view messages.")
-
-    def send_message(self):
-        try:
-            selected_ticket_index = self.ticket_list.curselection()[0]
-            selected_ticket_id = self.ticket_list.get(selected_ticket_index).split(" - ")[0].split(": ")[1]
-            message = simpledialog.askstring("Send Message", "Enter your message:")
-            if message and TicketAPI.add_message(selected_ticket_id, {'content': message, 'author': self.user_data['name']}):
-                messagebox.showinfo("Success", "Message sent successfully!")
-                self.show_ticket_messages()
-            else:
-                messagebox.showerror("Error", "Failed to send the message.")
-        except IndexError:
-            messagebox.showwarning("Warning", "Please select a ticket to send a message.")
-
-def open_admin_dashboard(parent, user_data):
-    parent.withdraw()
-    dashboard = tk.Toplevel(parent)
-    AdminDashboard(dashboard, user_data)
-
+def open_admin_dashboard(root, user_data):
+    root.withdraw()
+    dashboard = tk.Toplevel(root)
+    AdminView(dashboard, user_data)

@@ -228,6 +228,18 @@ CREATE TABLE IF NOT EXISTS tickets (
     FOREIGN KEY (assigned_to) REFERENCES users(id) ON DELETE SET NULL
 );
 
+CREATE TABLE IF NOT EXISTS messages (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    ticket_id INT NOT NULL,
+    author_id INT NOT NULL,
+    recipient_id INT NOT NULL,
+    content TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (ticket_id) REFERENCES tickets(id) ON DELETE CASCADE,
+    FOREIGN KEY (author_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (recipient_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
 -- Insertion d'exemples d'entrepôts
 INSERT INTO warehouses (name, address, contact_info, capacity, city, country) VALUES 
 ('Paris Warehouse', '10 Rue de Paris, Paris', 'contact@pariswarehouse.com', 1000, 'Paris', 'France'),

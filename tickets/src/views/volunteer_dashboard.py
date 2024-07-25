@@ -128,7 +128,7 @@ class VolunteerView:
         if selected:
             ticket_info = self.tickets_treeview.item(selected[0], 'values')
             ticket_id = int(ticket_info[0])
-            update_data = {'status': 'closed'}
+            update_data = {'status': 'closed', 'user_id': self.user_data['id'], 'is_admin': self.user_data.get('role') == 'admin'}
             response = self.ticket_system.update_ticket(ticket_id, update_data)
             logging.debug(f"Close Ticket Response: {response}")
             if response and 'id' in response:
@@ -138,6 +138,7 @@ class VolunteerView:
                 messagebox.showerror("Erreur", "Échec de la fermeture du ticket.")
         else:
             messagebox.showwarning("Attention", "Veuillez sélectionner un ticket.")
+
 
 def open_volunteer_dashboard(root, user_data):
     root.withdraw()

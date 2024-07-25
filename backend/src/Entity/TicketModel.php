@@ -2,6 +2,8 @@
 namespace Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 
 #[ORM\Entity]
 #[ORM\Table(name: "tickets")]
@@ -37,6 +39,16 @@ class TicketModel
 
     #[ORM\Column(type: "json", nullable: true)]
     private $attachments;
+
+    #[ORM\OneToMany(targetEntity: MessageModel::class, mappedBy: "ticket")]
+    private $messages;
+
+    public function __construct()
+    {
+        $this->messages = new ArrayCollection();
+        $this->created_at = new \DateTime();
+        $this->updated_at = new \DateTime();
+    }
 
     // Getters and setters for each property...
 
@@ -130,6 +142,33 @@ class TicketModel
     public function setAttachments(?array $attachments): self
     {
         $this->attachments = $attachments;
+        return $this;
+    }
+
+    public function getMessages(): Collection
+    {
+        return $this->messages;
+    }
+
+    public function addMessage(MessageModel $message): self
+    {
+        if (!$this->messages->contains($message)) {
+            $this->messages[] = $message;
+            $message->setTicket($this);
+        }
+
+        return $this;
+    }
+
+    public function removeMessage(MessageModel $message): self
+    {
+        if ($this->messages->removeElement($message)) {
+            // set the owning side to null (unless already changed)
+            if ($message->getTicket() === $this) {
+                $message->setTicket(null);
+            }
+        }
+
         return $this;
     }
 }

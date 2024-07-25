@@ -59,14 +59,15 @@ class TicketAPI:
 
     @staticmethod
     def get_all_tickets():
+        url = f"{TicketAPI.BASE_URL}/tickets"
         try:
-            response = requests.get(f"{TicketAPI.BASE_URL}/tickets")
+            response = requests.get(url)
             response.raise_for_status()
             return response.json()
-        except requests.exceptions.RequestException as e:
+        except requests.RequestException as e:
             logging.error(f"Failed to get all tickets: {e}")
-            return {"error": str(e)}
-
+            return {'error': 'Failed to get all tickets'}
+            
     @staticmethod
     def get_tickets_by_user(user_id):
         try:
@@ -148,4 +149,13 @@ class TicketAPI:
             return response.json()
         except requests.exceptions.RequestException as e:
             logging.error(f"Failed to get all admins: {e}")
+            return {"error": str(e)}
+    @staticmethod
+    def reassign_ticket(ticket_id, data):
+        try:
+            response = requests.put(f"{TicketAPI.BASE_URL}/tickets/{ticket_id}/reassign", json=data)
+            response.raise_for_status()
+            return response.json()
+        except requests.exceptions.RequestException as e:
+            logging.error(f"Failed to reassign ticket: {e}")
             return {"error": str(e)}
