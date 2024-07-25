@@ -150,6 +150,7 @@ class TicketAPI:
         except requests.exceptions.RequestException as e:
             logging.error(f"Failed to get all admins: {e}")
             return {"error": str(e)}
+    
     @staticmethod
     def reassign_ticket(ticket_id, data):
         try:
@@ -158,4 +159,23 @@ class TicketAPI:
             return response.json()
         except requests.exceptions.RequestException as e:
             logging.error(f"Failed to reassign ticket: {e}")
+            return {"error": str(e)}
+    @staticmethod
+    def search_admin_by_name(name):
+        try:
+            response = requests.get(f"{TicketAPI.BASE_URL}/admins/search", params={'name': name})
+            response.raise_for_status()
+            return response.json()
+        except requests.exceptions.RequestException as e:
+            logging.error(f"Failed to get admin by name: {e}")
+            return {"error": str(e)}
+
+    @staticmethod
+    def assign_admin_to_ticket(ticket_id, admin_id):
+        try:
+            response = requests.put(f"{TicketAPI.BASE_URL}/tickets/assign/{ticket_id}", json={'admin_id': admin_id})
+            response.raise_for_status()
+            return response.json()
+        except requests.exceptions.RequestException as e:
+            logging.error(f"Failed to assign admin to ticket: {e}")
             return {"error": str(e)}
