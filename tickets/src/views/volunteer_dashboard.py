@@ -12,9 +12,9 @@ from logging.handlers import RotatingFileHandler
 load_dotenv()
 
 # Setting up logging
-logging.basicConfig(level=logging.DEBUG)
-handler = RotatingFileHandler('ticket_system.log', maxBytes=2000, backupCount=5)
-logging.getLogger().addHandler(handler)
+logging.basicConfig(level=logging.DEBUG, handlers=[
+    RotatingFileHandler('ticket_system.log', maxBytes=2000, backupCount=5, delay=True)
+])
 
 class VolunteerView:
     def __init__(self, master, user_data):
@@ -138,7 +138,6 @@ class VolunteerView:
                 messagebox.showerror("Erreur", "Échec de la fermeture du ticket.")
         else:
             messagebox.showwarning("Attention", "Veuillez sélectionner un ticket.")
-
 
 def open_volunteer_dashboard(root, user_data):
     root.withdraw()

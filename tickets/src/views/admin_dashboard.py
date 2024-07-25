@@ -1,3 +1,4 @@
+# path: src/views/admin_dashboard.py
 import os
 import requests
 import logging
@@ -21,9 +22,13 @@ class AdminView:
         self.master = master
         self.user_data = user_data
         self.ticket_system = TicketAPI()
+        self.admins = self.fetch_admins()
         
         # Setup the UI components
         self.setup_ui()
+
+    def fetch_admins(self):
+        return self.ticket_system.get_all_admins()
 
     def setup_ui(self):
         self.master.title("Espace Administrateur")
@@ -61,26 +66,34 @@ class AdminView:
         self.close_ticket_button = tk.Button(self.button_frame, text="Fermer le Ticket", command=self.close_ticket)
         self.close_ticket_button.pack(side=tk.LEFT, padx=5)
 
-        self.reassign_ticket_button = tk.Button(self.button_frame, text="Réassigner le Ticket", command=self.reassign_ticket)
-        self.reassign_ticket_button.pack(side=tk.LEFT, padx=5)
+        self.assign_ticket_button = tk.Button(self.button_frame, text="Assigner un Admin", command=self.assign_ticket)
+        self.assign_ticket_button.pack(side=tk.LEFT, padx=5)
 
-    def reassign_ticket(self):
+    def assign_ticket(self):
         selected = self.tickets_treeview.selection()
         if selected:
             ticket_info = self.tickets_treeview.item(selected[0], 'values')
             ticket_id = int(ticket_info[0])
-            new_admin_id = simpledialog.askinteger("Réassigner le Ticket", "Entrez l'ID du nouvel administrateur :")
-            if new_admin_id:
-                update_data = {'new_admin_id': new_admin_id}
-                response = self.ticket_system.reassign_ticket(ticket_id, update_data)
-                logging.debug(f"Reassign Ticket Response: {response}")
+            admin_id = self.select_admin()
+            if admin_id:
+                update_data = {'admin_id': admin_id}
+                response = self.ticket_system.assign_admin_to_ticket(ticket_id, update_data)
+                logging.debug(f"Assign Admin to Ticket Response: {response}")
                 if response and 'id' in response:
-                    messagebox.showinfo("Succès", "Ticket réassigné avec succès!")
+                    messagebox.showinfo("Succès", "Admin assigné avec succès au ticket!")
                     self.populate_tickets()
                 else:
-                    messagebox.showerror("Erreur", "Échec de la réassignation du ticket.")
+                    messagebox.showerror("Erreur", "Échec de l'assignation de l'admin au ticket.")
         else:
             messagebox.showwarning("Attention", "Veuillez sélectionner un ticket.")
+
+    def select_admin(self):
+        admin_names = [f"{admin['firstName']} {admin['lastName']}" for admin in self.admins]
+        selected_admin = simpledialog.askstring("Sélectionner un Admin", "Choisissez un admin:", initialvalue=admin_names[0])
+        for admin in self.admins:
+            if f"{admin['firstName']} {admin['lastName']}" == selected_admin:
+                return admin['id']
+        return None
 
     def open_chat_on_ticket_click(self, event):
         item = self.tickets_treeview.selection()[0]
