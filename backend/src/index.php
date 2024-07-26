@@ -113,12 +113,20 @@ $route = $uriParts[0];
 if ($route == 'generate_token') {
     echo json_encode(['token' => password_hash($uriParts[1], PASSWORD_BCRYPT)]);
     password_hash($uriParts[1], PASSWORD_BCRYPT);
+    exit();
+}
+
+// Ensure this route is included
+if ($route === 'admins') {
+    $controller = new TicketController($entityManager, $emailService);
+    echo $controller->getAllAdmins();
+    exit();
 }
 
 if (!array_key_exists($route, $controllerMap)) {
     http_response_code(404);
     echo json_encode(['error' => 'Endpoint not found']);
-    exit;
+    exit();
 }
 
 // Instancie le contrôleur approprié
@@ -135,7 +143,7 @@ try {
     } elseif ($route === 'scripts') {
         if (isset($uriParts[1]) && $uriParts[1] === 'remove_unverified_users') {
             include __DIR__ . '/Scripts/remove_unverified_users.php';
-            exit;
+            exit();
         }
     } else {
         $controller = new $controllerClass($entityManager);
@@ -145,7 +153,7 @@ try {
     error_log("Erreur lors de l'instanciation de $controllerClass: " . $e->getMessage());
     http_response_code(500);
     echo json_encode(['error' => 'Internal Server Error']);
-    exit;
+    exit();
 }
 
 // Obtenir les données d'entrée
@@ -185,6 +193,6 @@ echo json_encode($response);
 function exit_with_message($message, $code = 200) {
     http_response_code($code);
     echo json_encode(['message' => $message]);
-    exit;
+    exit();
 }
 ?>

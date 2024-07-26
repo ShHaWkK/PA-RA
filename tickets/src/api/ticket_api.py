@@ -171,11 +171,12 @@ class TicketAPI:
             return {"error": str(e)}
 
     @staticmethod
-    def assign_admin_to_ticket(ticket_id, admin_id):
+    def assign_admin_to_ticket(ticket_id, data):
         try:
-            response = requests.put(f"{TicketAPI.BASE_URL}/tickets/assign/{ticket_id}", json={'admin_id': admin_id})
+            response = requests.put(f"{TicketAPI.BASE_URL}/tickets/assign/{ticket_id}", json=data)
             response.raise_for_status()
             return response.json()
         except requests.exceptions.RequestException as e:
             logging.error(f"Failed to assign admin to ticket: {e}")
             return {"error": str(e)}
+

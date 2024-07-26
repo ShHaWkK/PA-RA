@@ -1,11 +1,10 @@
-# path: src/views/admin_dashboard.py
 import os
 import requests
 import logging
 from dotenv import load_dotenv
 import json
 import tkinter as tk
-from tkinter import ttk, messagebox, simpledialog, filedialog
+from tkinter import ttk, messagebox, simpledialog, filedialog, StringVar
 from src.api.ticket_api import TicketAPI
 from src.views.chat_view import ChatView
 from logging.handlers import RotatingFileHandler
@@ -14,7 +13,7 @@ load_dotenv()
 
 # Setting up logging
 logging.basicConfig(level=logging.DEBUG)
-handler = RotatingFileHandler('ticket_system.log', maxBytes=2000, backupCount=5)
+handler = RotatingFileHandler('admin.log', maxBytes=2000, backupCount=5)
 logging.getLogger().addHandler(handler)
 
 class AdminView:
@@ -23,12 +22,17 @@ class AdminView:
         self.user_data = user_data
         self.ticket_system = TicketAPI()
         self.admins = self.fetch_admins()
+        self.selected_admin_id = None  # Added to store selected admin ID
         
         # Setup the UI components
         self.setup_ui()
 
     def fetch_admins(self):
-        return self.ticket_system.get_all_admins()
+        admins = self.ticket_system.get_all_admins()
+        if 'error' in admins:
+            logging.error(f"Failed to fetch admins: {admins['error']}")
+            return []
+        return admins
 
     def setup_ui(self):
         self.master.title("Espace Administrateur")
@@ -54,7 +58,6 @@ class AdminView:
         self.tickets_treeview.heading("Admin ID", text="ID de l'Admin")
         self.tickets_treeview.heading("Created At", text="Créé le")
         self.tickets_treeview.heading("Updated At", text="Mis à jour le")
-        self.tickets_treeview.bind("<ButtonRelease-1>", self.open_chat_on_ticket_click)
         self.populate_tickets()
 
         self.button_frame = tk.Frame(self.main_frame)
@@ -69,14 +72,18 @@ class AdminView:
         self.assign_ticket_button = tk.Button(self.button_frame, text="Assigner un Admin", command=self.assign_ticket)
         self.assign_ticket_button.pack(side=tk.LEFT, padx=5)
 
+        self.open_chat_button = tk.Button(self.button_frame, text="Ouvrir Chat", command=self.open_chat_on_ticket_click)
+        self.open_chat_button.pack(side=tk.LEFT, padx=5)
+
     def assign_ticket(self):
         selected = self.tickets_treeview.selection()
         if selected:
             ticket_info = self.tickets_treeview.item(selected[0], 'values')
             ticket_id = int(ticket_info[0])
-            admin_id = self.select_admin()
-            if admin_id:
-                update_data = {'admin_id': admin_id}
+            self.select_admin()
+            if self.selected_admin_id:
+                update_data = {'admin_id': self.selected_admin_id}
+                logging.debug(f"Assigning admin with ID {self.selected_admin_id} to ticket ID {ticket_id}")
                 response = self.ticket_system.assign_admin_to_ticket(ticket_id, update_data)
                 logging.debug(f"Assign Admin to Ticket Response: {response}")
                 if response and 'id' in response:
@@ -84,27 +91,53 @@ class AdminView:
                     self.populate_tickets()
                 else:
                     messagebox.showerror("Erreur", "Échec de l'assignation de l'admin au ticket.")
+            else:
+                messagebox.showwarning("Attention", "Aucun administrateur sélectionné.")
         else:
             messagebox.showwarning("Attention", "Veuillez sélectionner un ticket.")
 
     def select_admin(self):
-        admin_names = [f"{admin['firstName']} {admin['lastName']}" for admin in self.admins]
-        selected_admin = simpledialog.askstring("Sélectionner un Admin", "Choisissez un admin:", initialvalue=admin_names[0])
-        for admin in self.admins:
-            if f"{admin['firstName']} {admin['lastName']}" == selected_admin:
-                return admin['id']
-        return None
+        if not self.admins:
+            messagebox.showwarning("Attention", "Aucun administrateur disponible.")
+            return None
 
-    def open_chat_on_ticket_click(self, event):
-        item = self.tickets_treeview.selection()[0]
-        ticket_info = self.tickets_treeview.item(item, "values")
-        if ticket_info:
-            try:
-                ticket_id = int(ticket_info[0])
-                created_by = int(ticket_info[4]) if ticket_info[4] else None
-                self.open_chat_with_user(ticket_id, created_by)
-            except ValueError:
-                messagebox.showerror("Erreur", "ID invalide. L'ID doit être un entier.")
+        self.admin_selection_window = tk.Toplevel(self.master)
+        self.admin_selection_window.title("Sélectionner un Admin")
+
+        tk.Label(self.admin_selection_window, text="Sélectionnez un administrateur:").pack(pady=10)
+
+        self.selected_admin = StringVar(self.admin_selection_window)
+        self.selected_admin.set(f"{self.admins[0]['firstName']} {self.admins[0]['lastName']}")
+
+        admin_names = [f"{admin['firstName']} {admin['lastName']}" for admin in self.admins]
+        admin_menu = tk.OptionMenu(self.admin_selection_window, self.selected_admin, *admin_names)
+        admin_menu.pack(pady=10)
+
+        tk.Button(self.admin_selection_window, text="Assigner", command=self.confirm_admin_selection).pack(pady=10)
+
+    def confirm_admin_selection(self):
+        selected_name = self.selected_admin.get()
+        for admin in self.admins:
+            if f"{admin['firstName']} {admin['lastName']}" == selected_name:
+                self.selected_admin_id = admin['id']
+                self.admin_selection_window.destroy()
+                logging.debug(f"Selected Admin ID: {self.selected_admin_id}")
+                return
+        messagebox.showwarning("Attention", "Aucun administrateur sélectionné.")
+        self.admin_selection_window.destroy()
+
+    def open_chat_on_ticket_click(self):
+        selected_items = self.tickets_treeview.selection()
+        if selected_items:
+            item = selected_items[0]
+            ticket_info = self.tickets_treeview.item(item, "values")
+            if ticket_info:
+                try:
+                    ticket_id = int(ticket_info[0])
+                    created_by = int(ticket_info[4]) if ticket_info[4] else None
+                    self.open_chat_with_user(ticket_id, created_by)
+                except ValueError:
+                    messagebox.showerror("Erreur", "ID invalide. L'ID doit être un entier.")
 
     def open_chat_with_user(self, ticket_id, created_by):
         try:

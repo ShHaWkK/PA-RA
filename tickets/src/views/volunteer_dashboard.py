@@ -13,7 +13,7 @@ load_dotenv()
 
 # Setting up logging
 logging.basicConfig(level=logging.DEBUG, handlers=[
-    RotatingFileHandler('ticket_system.log', maxBytes=2000, backupCount=5, delay=True)
+    RotatingFileHandler('volunteer.log', maxBytes=2000, backupCount=5, delay=True)
 ])
 
 class VolunteerView:

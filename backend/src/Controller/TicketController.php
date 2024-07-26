@@ -81,6 +81,7 @@ class TicketController
         }
     }
     
+    
 
     public function createTicket($data)
     {
@@ -144,6 +145,7 @@ class TicketController
         $this->emailService->sendEmail($email, $subject, $body);
     }
 
+    //------------------------ Obtenir un ticket ------------------------//
     public function getTicket($id)
     {
         try {
@@ -159,6 +161,8 @@ class TicketController
             return json_encode(['error' => 'Internal Server Error']);
         }
     }
+
+    //------------------------ Mettre à jour un ticket ------------------------//
 
     public function updateTicket($id, $data)
     {
@@ -204,7 +208,7 @@ class TicketController
             return json_encode(['error' => 'Internal Server Error']);
         }
     }
-
+    //------------------------ Supprimer un ticket ------------------------//
     public function deleteTicket($id)
     {
         try {
@@ -225,35 +229,36 @@ class TicketController
         }
     }
 
-    public function getAllAdmins()
-{
-    try {
-        $repository = $this->entityManager->getRepository(UserModel::class);
-        $admins = $repository->findBy(['role' => 'admin']);
+    //------------------------ Voir tous les admins ------------------------//
+        public function getAllAdmins()
+    {
+        try {
+            $repository = $this->entityManager->getRepository(UserModel::class);
+            $admins = $repository->findBy(['role' => 'admin']);
 
-        if (!$admins) {
-            http_response_code(404);
-            return json_encode(['error' => 'No admins found']);
+            if (!$admins) {
+                http_response_code(404);
+                return json_encode(['error' => 'No admins found']);
+            }
+
+            $result = [];
+            foreach ($admins as $admin) {
+                $result[] = [
+                    'id' => $admin->getId(),
+                    'firstName' => $admin->getFirstName(),
+                    'lastName' => $admin->getLastName()
+                ];
+            }
+
+            return json_encode($result);
+        } catch (\Exception $e) {
+            error_log("Exception in getAllAdmins: " . $e->getMessage());
+            http_response_code(500);
+            return json_encode(['error' => 'Internal Server Error']);
         }
-
-        $result = [];
-        foreach ($admins as $admin) {
-            $result[] = [
-                'id' => $admin->getId(),
-                'firstName' => $admin->getFirstName(),
-                'lastName' => $admin->getLastName()
-            ];
-        }
-
-        return json_encode($result);
-    } catch (\Exception $e) {
-        error_log("Exception in getAllAdmins: " . $e->getMessage());
-        http_response_code(500);
-        return json_encode(['error' => 'Internal Server Error']);
     }
-}
 
-
+    //------------------------ Voir tous les tickets ------------------------//
     public function getAllTickets()
     {
         try {
@@ -324,7 +329,7 @@ class TicketController
             return json_encode(['error' => 'Internal Server Error']);
         }
     }
-
+    
     public function searchAdminByName($name)
     {
         try {
