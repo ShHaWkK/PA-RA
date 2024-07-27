@@ -19,7 +19,7 @@ class DeliveryModel
     #[ORM\Column(type: "string", length: 255)]
     private $destination;
 
-    #[ORM\Column(type: "string", length: 255)]
+    #[ORM\Column(type: "string", columnDefinition: "ENUM('association', 'individual')")]
     private $recipient_type;
 
     #[ORM\Column(type: "datetime", options: ["default" => "CURRENT_TIMESTAMP"])]
@@ -31,14 +31,17 @@ class DeliveryModel
     #[ORM\Column(type: "text", nullable: true)]
     private $comment;
 
+    #[ORM\Column(type: "integer")]
+    private $warehouse_id;
+
+    #[ORM\Column(type: "integer")]
+    private $vehicle_id;
+
     #[ORM\Column(type: "datetime", options: ["default" => "CURRENT_TIMESTAMP"])]
     private $created_at;
 
     #[ORM\Column(type: "datetime", options: ["default" => "CURRENT_TIMESTAMP", "onUpdate" => "CURRENT_TIMESTAMP"])]
     private $updated_at;
-
-    #[ORM\Column(type: "integer")]
-    private $warehouse_id;
 
     // Getters and setters for each property
 
@@ -113,6 +116,28 @@ class DeliveryModel
         return $this;
     }
 
+    public function getWarehouseId(): ?int
+    {
+        return $this->warehouse_id;
+    }
+
+    public function setWarehouseId(int $warehouse_id): self
+    {
+        $this->warehouse_id = $warehouse_id;
+        return $this;
+    }
+
+    public function getVehicleId(): ?int
+    {
+        return $this->vehicle_id;
+    }
+
+    public function setVehicleId(int $vehicle_id): self
+    {
+        $this->vehicle_id = $vehicle_id;
+        return $this;
+    }
+
     public function getCreatedAt(): ?\DateTimeInterface
     {
         return $this->created_at;
@@ -132,17 +157,6 @@ class DeliveryModel
     public function setUpdatedAt(\DateTimeInterface $updated_at): self
     {
         $this->updated_at = $updated_at;
-        return $this;
-    }
-
-    public function getWarehouseId(): ?int
-    {
-        return $this->warehouse_id;
-    }
-
-    public function setWarehouseId(int $warehouse_id): self
-    {
-        $this->warehouse_id = $warehouse_id;
         return $this;
     }
 }

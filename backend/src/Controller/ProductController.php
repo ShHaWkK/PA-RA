@@ -1,9 +1,9 @@
 <?php
-// Path: backend/src/Controller/ProductController.php
 namespace Controller;
 
 use Entity\ProductModel;
 use Entity\StockModel;
+use Entity\WarehouseModel; // Corrigez l'espace de noms ici
 use Doctrine\ORM\EntityManager;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
@@ -62,26 +62,63 @@ class ProductController
     public function createProduct($data)
     {
         try {
-            // Validate input data
-            if (!isset($data['name']) || !isset($data['barcode']) || !isset($data['expiration_date']) || !isset($data['quantity'])) {
+            if (!isset($data['name']) || !isset($data['barcode']) || !isset($data['expiration_date']) || !isset($data['volume']) || !isset($data['warehouse_id'])) {
                 http_response_code(400);
                 return ['error' => 'Missing required fields for new product'];
+            }
+
+            $existingProduct = $this->entityManager->getRepository(ProductModel::class)->findOneBy(['barcode' => $data['barcode']]);
+            if ($existingProduct) {
+                http_response_code(400);
+                return ['error' => 'Product with this barcode already exists'];
+            }
+
+            if (!preg_match('/^[0-9]{13}$/', $data['barcode'])) {
+                http_response_code(400);
+                return ['error' => 'Barcode must be a 13-digit number'];
+            }
+
+            if (!preg_match('/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/', $data['expiration_date'])) {
+                http_response_code(400);
+                return ['error' => 'Expiration date must be in the format YYYY-MM-DD'];
+            }
+
+            if (!is_numeric($data['volume']) || $data['volume'] < 0) {
+                http_response_code(400);
+                return ['error' => 'Volume must be a non-negative float'];
+            }
+
+            if (!is_numeric($data['warehouse_id']) || $data['warehouse_id'] < 0) {
+                http_response_code(400);
+                return ['error' => 'Warehouse ID must be a non-negative integer'];
+            }
+
+            // Verify warehouse capacity
+            $warehouse = $this->entityManager->getRepository(WarehouseModel::class)->find($data['warehouse_id']);
+            if (!$warehouse) {
+                http_response_code(400);
+                return ['error' => 'Warehouse not found'];
+            }
+
+            $availableCapacity = $warehouse->getCapacity() - $this->getCurrentWarehouseStockVolume($data['warehouse_id']);
+            if ($availableCapacity < $data['volume']) {
+                http_response_code(400);
+                return ['error' => 'Not enough capacity in the warehouse'];
             }
 
             $product = new ProductModel();
             $product->setName($data['name']);
             $product->setBarcode($data['barcode']);
             $product->setExpirationDate(new \DateTime($data['expiration_date']));
-            $product->setQuantity($data['quantity']);
+            $product->setVolume($data['volume']);
             $product->setCreatedAt(new \DateTime("now"));
             $product->setUpdatedAt(new \DateTime("now"));
 
-            // Generate QR code
             $qrCode = new QrCode(json_encode([
                 'name' => $data['name'],
                 'barcode' => $data['barcode'],
                 'expiration_date' => $data['expiration_date'],
-                'quantity' => $data['quantity']
+                'volume' => $data['volume']
             ]));
             $qrCode->setSize(300);
             $qrCode->setMargin(10);
@@ -106,10 +143,11 @@ class ProductController
             $this->entityManager->persist($product);
             $this->entityManager->flush();
 
-            // Add to stocks
             $stock = new StockModel();
             $stock->setProductId($product->getId());
-            $stock->setQuantity($data['quantity']);
+            $stock->setQuantity(1); 
+            $stock->setAvailability('available');
+            $stock->setWarehouseId($data['warehouse_id']);
             $stock->setEntryDate(new \DateTime("now"));
             $stock->setCreatedAt(new \DateTime("now"));
             $stock->setUpdatedAt(new \DateTime("now"));
@@ -123,6 +161,17 @@ class ProductController
             error_log("Stack trace: " . $e->getTraceAsString());
             throw $e;
         }
+    }
+
+    private function getCurrentWarehouseStockVolume($warehouseId)
+    {
+        $stocks = $this->entityManager->getRepository(StockModel::class)->findBy(['warehouse_id' => $warehouseId]);
+        $currentVolume = 0;
+        foreach ($stocks as $stock) {
+            $product = $this->entityManager->getRepository(ProductModel::class)->find($stock->getProductId());
+            $currentVolume += $product->getVolume() * $stock->getQuantity();
+        }
+        return $currentVolume;
     }
 
     public function getProductByBarcode($barcode)
@@ -155,8 +204,8 @@ class ProductController
             if (isset($data['expiration_date'])) {
                 $product->setExpirationDate(new \DateTime($data['expiration_date']));
             }
-            if (isset($data['quantity'])) {
-                $product->setQuantity($data['quantity']);
+            if (isset($data['volume'])) {
+                $product->setVolume($data['volume']);
             }
             $product->setUpdatedAt(new \DateTime("now"));
 
@@ -200,4 +249,3 @@ class ProductController
         }
     }
 }
-?>

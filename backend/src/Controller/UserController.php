@@ -4,10 +4,12 @@ namespace Controller;
 
 use Doctrine\ORM\EntityManager;
 use Entity\UserModel;
+use Entity\TicketModel;
 use Doctrine\ORM\Exception\NotSupported;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
+use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Service\UserService;
 use Service\CompanyService;
 use Service\SkillService;
@@ -27,7 +29,11 @@ class UserController
     public function __construct(EntityManager $entityManager, EmailService $emailService)
     {
         $this->entityManager = $entityManager;
-        $normalizers = [new ObjectNormalizer()];
+        $normalizers = [new ObjectNormalizer(null, null, null, null, null, null, [
+            AbstractNormalizer::CIRCULAR_REFERENCE_HANDLER => function ($object) {
+                return $object->getId();
+            }
+        ])];
         $encoders = [new JsonEncoder()];
         $this->serializer = new Serializer($normalizers, $encoders);
 
@@ -66,8 +72,8 @@ class UserController
                         switch ($uriParts[1]) {
                             case 'generatePlanning':
                                 return$this->generatePlanning();
-                            case 'getSkills':
                                 if(isset($uriParts[2])){
+                            case 'getSkills':
                                     return $this->getUserSkills($uriParts[2]);
                                 }
                                 else {
@@ -79,12 +85,17 @@ class UserController
                                     return $this->getUserAvailabilities($uriParts[2]);
                                 }
                                 else {
-                                    http_response_code(400);
                                     return ["message" => "User id not set"];
+                                    http_response_code(400);
                                 }
                             default:
                                 return $this->getUser($uriParts[1]);
                     }
+                    return match ($uriParts[1]) {
+                        'generatePlanning' => $this->generatePlanning(),
+                        'tickets' => $this->getTicketsByUser((int)$uriParts[1]),
+                        default => $this->getUser($uriParts[1]),
+                    };
                 } else {
                     return $this->getUsersByCriteria($_GET);
                 }
@@ -113,7 +124,6 @@ class UserController
                 return ['error' => 'Method Not Allowed'];
         }
     }
-
     private function registerVolunteer($data)
     {
         $this->entityManager->beginTransaction();
@@ -353,88 +363,10 @@ class UserController
 
         return $serializedUsers;
     }
-
-    public function deleteUser(int $id)
-    {
-        $user = $this->entityManager->getRepository(UserModel::class)->find($id);
-
-        if ($user === null) {
-            http_response_code(404);
-            return ['error' => 'User not found'];
-        }
-
-        try {
-            $this->entityManager->remove($user);
-            $this->entityManager->flush();
-            return ['message' => 'User deleted successfully'];
-
-        } catch (\Exception $e) {
-            // Vous pouvez ajouter un logging ici pour l'erreur
-            error_log("Erreur lors de la suppression de l'utilisateur avec l'ID $id : " . $e->getMessage());
-            return false;
-        }
-    }
-
-    public function updateUser($id, $data)
-    {
-        error_log("we are here");
-        $user = $this->entityManager->getRepository(UserModel::class)->find($id);
-
-        if (!$user) {
-            http_response_code(404);
-            return ['error' => 'User not found'];
-        }
-
-        error_log(print_r($data,true));
-        $user->updateFields($data);
-        error_log("we updated the user");
-        $this->entityManager->flush();
-
-        return ['message' => 'User modified successfully'];
-
-    }
-
-    public function getUserSkills($userId)
-    {
-        $user = $this->entityManager->getRepository(UserModel::class)->find($userId);
-
-        if (!$user) {
-            http_response_code(404);
-            return ['message' =>"User with ID $userId not found"];
-        }
-
-        $skills = $user->getSkills();
-
-        $serializedSkills = [];
-        foreach ($skills as $skill) {
-            $serializedSkills[] = $skill->jsonSerialize();
-        }
-
-        return $serializedSkills;
-    }
-
-    private function getUserAvailabilities($userId)
-    {
-        $user = $this->entityManager->getRepository(UserModel::class)->find($userId);
-
-        if (!$user) {
-            http_response_code(404);
-            return ['message' =>"User with ID $userId not found"];
-        }
-
-        $availabilities = $user->getAvailabilities();
-
-        if (!$availabilities) {
-            http_response_code(404);
-            return ['error' => 'Skill not found'];
-        }
-
-        $serializedAvailabilities = [];
-        foreach ($availabilities as $availability) {
-            $serializedAvailabilities[] = $availability->jsonSerialize();
-        }
-
-        return $serializedAvailabilities;
-    }
 }
+
+    
+    
+}
+
 ?>

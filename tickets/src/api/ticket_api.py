@@ -1,3 +1,4 @@
+# path : tickets/src/api/ticket_api.py
 import os
 import requests
 import logging
@@ -14,7 +15,15 @@ class TicketAPI:
         try:
             response = requests.post(f"{TicketAPI.BASE_URL}/tickets", json=data)
             response.raise_for_status()
-            return response.json()
+            if response.content:
+                try:
+                    return response.json()
+                except ValueError:
+                    logging.error(f"Non-JSON response received: {response.text}")
+                    return {"error": "Non-JSON response from server"}
+            else:
+                logging.error(f"Empty response received: {response.text}")
+                return {"error": "Empty response from server"}
         except requests.exceptions.RequestException as e:
             logging.error(f"Failed to create ticket: {e}")
             return {"error": str(e)}
@@ -51,20 +60,24 @@ class TicketAPI:
 
     @staticmethod
     def get_all_tickets():
+        url = f"{TicketAPI.BASE_URL}/tickets"
         try:
-            response = requests.get(f"{TicketAPI.BASE_URL}/tickets")
+            response = requests.get(url)
             response.raise_for_status()
             return response.json()
-        except requests.exceptions.RequestException as e:
+        except requests.RequestException as e:
             logging.error(f"Failed to get all tickets: {e}")
-            return {"error": str(e)}
-
+            return {'error': 'Failed to get all tickets'}
+            
     @staticmethod
     def get_tickets_by_user(user_id):
         try:
+            logging.debug(f"Requesting tickets for user ID: {user_id}")
             response = requests.get(f"{TicketAPI.BASE_URL}/users/{user_id}/tickets")
             response.raise_for_status()
-            return response.json()
+            tickets = response.json()
+            # logging.debug(f"Response: {tickets}")
+            return tickets
         except requests.exceptions.RequestException as e:
             logging.error(f"Failed to get tickets by user: {e}")
             return {"error": str(e)}
@@ -128,3 +141,43 @@ class TicketAPI:
         except requests.exceptions.RequestException as e:
             logging.error(f"Failed to login: {e}")
             return {"error": str(e)}
+
+    @staticmethod
+    def get_all_admins():
+        try:
+            response = requests.get(f"{TicketAPI.BASE_URL}/admins")
+            response.raise_for_status()
+            return response.json()
+        except requests.exceptions.RequestException as e:
+            logging.error(f"Failed to get all admins: {e}")
+            return {"error": str(e)}
+    
+    @staticmethod
+    def reassign_ticket(ticket_id, data):
+        try:
+            response = requests.put(f"{TicketAPI.BASE_URL}/tickets/{ticket_id}/reassign", json=data)
+            response.raise_for_status()
+            return response.json()
+        except requests.exceptions.RequestException as e:
+            logging.error(f"Failed to reassign ticket: {e}")
+            return {"error": str(e)}
+    @staticmethod
+    def search_admin_by_name(name):
+        try:
+            response = requests.get(f"{TicketAPI.BASE_URL}/admins/search", params={'name': name})
+            response.raise_for_status()
+            return response.json()
+        except requests.exceptions.RequestException as e:
+            logging.error(f"Failed to get admin by name: {e}")
+            return {"error": str(e)}
+
+    @staticmethod
+    def assign_admin_to_ticket(ticket_id, data):
+        try:
+            response = requests.put(f"{TicketAPI.BASE_URL}/tickets/assign/{ticket_id}", json=data)
+            response.raise_for_status()
+            return response.json()
+        except requests.exceptions.RequestException as e:
+            logging.error(f"Failed to assign admin to ticket: {e}")
+            return {"error": str(e)}
+

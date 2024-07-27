@@ -35,6 +35,9 @@ use Controller\LoginController;
 use Controller\PrivateAreaController;
 use Controller\ServiceProposalController;
 use Controller\TicketController;
+use Controller\VehicleController;
+use Controller\ScanController;
+use Controller\WarehouseController;
 use Service\PDFService;
 use Service\JWTService;
 use Service\EmailService;
@@ -76,7 +79,7 @@ $mailer->Port = 587;
 
 // Instancie EmailService
 $emailService = new EmailService($mailer);
-
+//$controller = new TicketController($entityManager, $emailService);
 // Mappe les contrôleurs aux chemins d'URI
 $controllerMap = [
     'users' => UserController::class,
@@ -98,6 +101,9 @@ $controllerMap = [
     'service_proposals' => ServiceProposalController::class,
     'tickets' => TicketController::class,
     'scripts' => 'Scripts',
+    'vehicles' => VehicleController::class, 
+    'scan' => ScanController::class, 
+    'warehouses' => WarehouseController::class
 ];
 
 // Vérifie si le contrôleur existe pour le premier élément de l'URI
@@ -107,12 +113,20 @@ $route = $uriParts[0];
 if ($route == 'generate_token') {
     echo json_encode(['token' => password_hash($uriParts[1], PASSWORD_BCRYPT)]);
     password_hash($uriParts[1], PASSWORD_BCRYPT);
+    exit();
+}
+
+// Ensure this route is included
+if ($route === 'admins') {
+    $controller = new TicketController($entityManager, $emailService);
+    echo $controller->getAllAdmins();
+    exit();
 }
 
 if (!array_key_exists($route, $controllerMap)) {
     http_response_code(404);
     echo json_encode(['error' => 'Endpoint not found']);
-    exit;
+    exit();
 }
 
 // Instancie le contrôleur approprié
@@ -124,10 +138,12 @@ try {
         $controller = new $controllerClass($entityManager, $jwtService);
     } elseif ($controllerClass === UserController::class) {
         $controller = new $controllerClass($entityManager, $emailService);
+    } elseif ($controllerClass === TicketController::class) {
+        $controller = new $controllerClass($entityManager, $emailService);
     } elseif ($route === 'scripts') {
         if (isset($uriParts[1]) && $uriParts[1] === 'remove_unverified_users') {
             include __DIR__ . '/Scripts/remove_unverified_users.php';
-            exit;
+            exit();
         }
     } else {
         $controller = new $controllerClass($entityManager);
@@ -137,7 +153,7 @@ try {
     error_log("Erreur lors de l'instanciation de $controllerClass: " . $e->getMessage());
     http_response_code(500);
     echo json_encode(['error' => 'Internal Server Error']);
-    exit;
+    exit();
 }
 
 // Obtenir les données d'entrée
@@ -151,7 +167,13 @@ try {
         $decodedToken = $jwtMiddleware->verifyToken();
         $response = $controller->processRequest($_SERVER['REQUEST_METHOD'], $uriParts, $input, $decodedToken);
     } else {
-        $response = $controller->processRequest($_SERVER['REQUEST_METHOD'], $uriParts, $input);
+        // Ajout de la vérification des tickets d'un utilisateur spécifique
+        if ($route === 'users' && isset($uriParts[2]) && $uriParts[2] === 'tickets') {
+            $userId = (int) $uriParts[1];
+            $response = $controller->getTicketsByUser($userId);
+        } else {
+            $response = $controller->processRequest($_SERVER['REQUEST_METHOD'], $uriParts, $input);
+        }
     }
 } catch (EntityNotFoundException $e) {
     http_response_code(404);
@@ -171,5 +193,6 @@ echo json_encode($response);
 function exit_with_message($message, $code = 200) {
     http_response_code($code);
     echo json_encode(['message' => $message]);
-    exit;
+    exit();
 }
+?>

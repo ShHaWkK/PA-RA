@@ -28,4 +28,19 @@ class EmailService
             error_log("Message could not be sent. Mailer Error: {$this->mailer->ErrorInfo}");
         }
     }
+
+    public function sendEmail($to, $subject, $body)
+    {
+        try {
+            $this->mailer->setFrom('morewaste1@gmail.com', 'No More Waste');
+            $this->mailer->addAddress($to);
+            $this->mailer->isHTML(true); 
+            $this->mailer->Subject = $subject;
+            $this->mailer->Body    = $body;
+
+            $this->mailer->send();
+        } catch (Exception $e) {
+            error_log("Message could not be sent. Mailer Error: {$this->mailer->ErrorInfo}");
+        }
+    }
 }

@@ -1,8 +1,9 @@
 <?php
-// Path: backend/src/Controller/StockController.php
 namespace Controller;
 
 use Entity\StockModel;
+use Entity\ProductModel;
+use Entity\WarehouseModel;
 use Doctrine\ORM\EntityManager;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
@@ -57,6 +58,35 @@ class StockController
             return ['error' => 'Missing required fields for new stock'];
         }
 
+        $warehouse = $this->entityManager->find(WarehouseModel::class, $data['warehouse_id']);
+        if (!$warehouse) {
+            http_response_code(400);
+            return ['error' => 'Warehouse not found'];
+        }
+
+        $product = $this->entityManager->find(ProductModel::class, $data['product_id']);
+        if (!$product) {
+            http_response_code(400);
+            return ['error' => 'Product not found'];
+        }
+
+        $currentStockVolume = $this->getCurrentWarehouseStockVolume($data['warehouse_id']);
+        $availableCapacity = $warehouse->getCapacity() - $currentStockVolume;
+        $requiredCapacity = $product->getVolume() * $data['quantity'];
+
+        // Debugging output
+        error_log("Warehouse ID: " . $warehouse->getId());
+        error_log("Warehouse Capacity: " . $warehouse->getCapacity());
+        error_log("Current Warehouse Stock Volume: " . $currentStockVolume);
+        error_log("Product Volume: " . $product->getVolume());
+        error_log("Required Capacity for New Stock: " . $requiredCapacity);
+        error_log("Available Capacity: " . $availableCapacity);
+
+        if ($availableCapacity < $requiredCapacity) {
+            http_response_code(400);
+            return ['error' => 'Not enough capacity in the warehouse'];
+        }
+
         $stock = new StockModel();
         $stock->setProductId($data['product_id']);
         $stock->setQuantity($data['quantity']);
@@ -70,6 +100,17 @@ class StockController
         $this->entityManager->flush();
 
         return ['id' => $stock->getId(), 'message' => 'Stock created successfully'];
+    }
+
+    private function getCurrentWarehouseStockVolume($warehouseId)
+    {
+        $stocks = $this->entityManager->getRepository(StockModel::class)->findBy(['warehouse_id' => $warehouseId]);
+        $currentVolume = 0;
+        foreach ($stocks as $stock) {
+            $product = $this->entityManager->getRepository(ProductModel::class)->find($stock->getProductId());
+            $currentVolume += $product->getVolume() * $stock->getQuantity();
+        }
+        return $currentVolume;
     }
 
     public function getStock($id)
@@ -142,4 +183,3 @@ class StockController
         return json_decode($this->serializer->serialize($stocks, 'json'), true);
     }
 }
-?>
