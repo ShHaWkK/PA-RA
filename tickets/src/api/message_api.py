@@ -2,6 +2,8 @@ import requests
 import os
 import logging
 
+# path : tickets/src/api/message_api.py
+
 class MessageAPI:
     BASE_URL = os.getenv("API_ENDPOINT")
 

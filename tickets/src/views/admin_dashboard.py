@@ -8,6 +8,7 @@ from tkinter import ttk, messagebox, simpledialog, filedialog, StringVar
 from src.api.ticket_api import TicketAPI
 from src.views.chat_view import ChatView
 from logging.handlers import RotatingFileHandler
+from datetime import datetime
 
 load_dotenv()
 
@@ -23,6 +24,7 @@ class AdminView:
         self.ticket_system = TicketAPI()
         self.admins = self.fetch_admins()
         self.selected_admin_id = None  # Added to store selected admin ID
+        self.admin_id_to_name = {admin['id']: f"{admin['firstName']} {admin['lastName']}" for admin in self.admins}
         
         # Setup the UI components
         self.setup_ui()
@@ -48,14 +50,14 @@ class AdminView:
 
         self.tickets_frame = tk.Frame(self.main_frame)
         self.tickets_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
-        self.tickets_treeview = ttk.Treeview(self.tickets_frame, columns=("ID", "Type", "Description", "Status", "Created By", "Admin ID", "Created At", "Updated At"), show="headings")
+        self.tickets_treeview = ttk.Treeview(self.tickets_frame, columns=("ID", "Type", "Description", "Status", "Created By", "Admin Name", "Created At", "Updated At"), show="headings")
         self.tickets_treeview.pack(fill=tk.BOTH, expand=True)
         self.tickets_treeview.heading("ID", text="ID du Ticket")
         self.tickets_treeview.heading("Type", text="Type de Ticket")
         self.tickets_treeview.heading("Description", text="Description du Ticket")
         self.tickets_treeview.heading("Status", text="Statut")
         self.tickets_treeview.heading("Created By", text="Créé par")
-        self.tickets_treeview.heading("Admin ID", text="ID de l'Admin")
+        self.tickets_treeview.heading("Admin Name", text="Admin Assigné")
         self.tickets_treeview.heading("Created At", text="Créé le")
         self.tickets_treeview.heading("Updated At", text="Mis à jour le")
         self.populate_tickets()
@@ -75,31 +77,28 @@ class AdminView:
         self.open_chat_button = tk.Button(self.button_frame, text="Ouvrir Chat", command=self.open_chat_on_ticket_click)
         self.open_chat_button.pack(side=tk.LEFT, padx=5)
 
+    def format_date(self, date_str):
+        if date_str:
+            try:
+                return datetime.strptime(date_str, "%Y-%m-%d %H:%M:%S").strftime("%Y-%m-%d %H:%M:%S")
+            except ValueError as e:
+                logging.error(f"Date format error: {e}")
+                return "Invalid date"
+        return "No date"
+
     def assign_ticket(self):
         selected = self.tickets_treeview.selection()
         if selected:
             ticket_info = self.tickets_treeview.item(selected[0], 'values')
             ticket_id = int(ticket_info[0])
-            self.select_admin()
-            if self.selected_admin_id:
-                update_data = {'admin_id': self.selected_admin_id}
-                logging.debug(f"Assigning admin with ID {self.selected_admin_id} to ticket ID {ticket_id}")
-                response = self.ticket_system.assign_admin_to_ticket(ticket_id, update_data)
-                logging.debug(f"Assign Admin to Ticket Response: {response}")
-                if response and 'id' in response:
-                    messagebox.showinfo("Succès", "Admin assigné avec succès au ticket!")
-                    self.populate_tickets()
-                else:
-                    messagebox.showerror("Erreur", "Échec de l'assignation de l'admin au ticket.")
-            else:
-                messagebox.showwarning("Attention", "Aucun administrateur sélectionné.")
+            self.select_admin(lambda: self.assign_ticket_to_admin(ticket_id))
         else:
             messagebox.showwarning("Attention", "Veuillez sélectionner un ticket.")
 
-    def select_admin(self):
+    def select_admin(self, callback):
         if not self.admins:
             messagebox.showwarning("Attention", "Aucun administrateur disponible.")
-            return None
+            return
 
         self.admin_selection_window = tk.Toplevel(self.master)
         self.admin_selection_window.title("Sélectionner un Admin")
@@ -113,18 +112,33 @@ class AdminView:
         admin_menu = tk.OptionMenu(self.admin_selection_window, self.selected_admin, *admin_names)
         admin_menu.pack(pady=10)
 
-        tk.Button(self.admin_selection_window, text="Assigner", command=self.confirm_admin_selection).pack(pady=10)
+        tk.Button(self.admin_selection_window, text="Assigner", command=lambda: self.confirm_admin_selection(callback)).pack(pady=10)
 
-    def confirm_admin_selection(self):
+    def confirm_admin_selection(self, callback):
         selected_name = self.selected_admin.get()
         for admin in self.admins:
             if f"{admin['firstName']} {admin['lastName']}" == selected_name:
                 self.selected_admin_id = admin['id']
                 self.admin_selection_window.destroy()
                 logging.debug(f"Selected Admin ID: {self.selected_admin_id}")
+                callback()  # Call the provided callback function
                 return
         messagebox.showwarning("Attention", "Aucun administrateur sélectionné.")
         self.admin_selection_window.destroy()
+
+    def assign_ticket_to_admin(self, ticket_id):
+        if self.selected_admin_id:
+            update_data = {'admin_id': self.selected_admin_id}
+            logging.debug(f"Assigning admin with ID {self.selected_admin_id} to ticket ID {ticket_id}")
+            response = self.ticket_system.assign_admin_to_ticket(ticket_id, update_data)
+            logging.debug(f"Assign Admin to Ticket Response: {response}")
+            if response and 'id' in response:
+                messagebox.showinfo("Succès", "Admin assigné avec succès au ticket!")
+                self.populate_tickets()
+            else:
+                messagebox.showerror("Erreur", "Échec de l'assignation de l'admin au ticket.")
+        else:
+            messagebox.showwarning("Attention", "Aucun administrateur sélectionné.")
 
     def open_chat_on_ticket_click(self):
         selected_items = self.tickets_treeview.selection()
@@ -172,10 +186,11 @@ class AdminView:
                     status = ticket.get('status', '')
                     created_by = ticket.get('createdBy', '')
                     admin_id = ticket.get('assignedTo', '') if ticket.get('assignedTo') is not None else ''
-                    created_at = ticket.get('createdAt', '').get('date', '') if isinstance(ticket.get('createdAt'), dict) else ticket.get('createdAt')
-                    updated_at = ticket.get('updatedAt', '').get('date', '') if isinstance(ticket.get('updatedAt'), dict) else ticket.get('updatedAt')
-                    self.tickets_treeview.insert("", tk.END, values=(ticket_id, ticket_type, description, status, created_by, admin_id, created_at, updated_at))
-                    logging.debug(f"Inserted ticket into Treeview: ID={ticket_id}, Type={ticket_type}, Description={description}, Status={status}, Created By={created_by}, Admin ID={admin_id}, Created At={created_at}, Updated At={updated_at}")
+                    admin_name = self.admin_id_to_name.get(admin_id, '')
+                    created_at = self.format_date(ticket.get('createdAt', ''))
+                    updated_at = self.format_date(ticket.get('updatedAt', ''))
+                    self.tickets_treeview.insert("", tk.END, values=(ticket_id, ticket_type, description, status, created_by, admin_name, created_at, updated_at))
+                    logging.debug(f"Inserted ticket into Treeview: ID={ticket_id}, Type={ticket_type}, Description={description}, Status={status}, Created By={created_by}, Admin Name={admin_name}, Created At={created_at}, Updated At={updated_at}")
 
     def create_ticket(self):
         title = simpledialog.askstring("Créer un Ticket", "Entrez le titre du ticket :")
