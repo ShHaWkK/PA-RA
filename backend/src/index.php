@@ -38,6 +38,7 @@ use Controller\TicketController;
 use Controller\VehicleController;
 use Controller\ScanController;
 use Controller\WarehouseController;
+use Controller\MessageController;
 use Service\PDFService;
 use Service\JWTService;
 use Service\EmailService;
@@ -79,8 +80,7 @@ $mailer->Port = 587;
 
 // Instancie EmailService
 $emailService = new EmailService($mailer);
-//$controller = new TicketController($entityManager, $emailService);
-// Mappe les contrôleurs aux chemins d'URI
+
 $controllerMap = [
     'users' => UserController::class,
     'companies' => CompanyController::class,
@@ -100,6 +100,7 @@ $controllerMap = [
     'services' => ServiceController::class,
     'service_proposals' => ServiceProposalController::class,
     'tickets' => TicketController::class,
+    'messages' => MessageController::class, // Assurez-vous que 'messages' pointe vers MessageController
     'scripts' => 'Scripts',
     'vehicles' => VehicleController::class, 
     'scan' => ScanController::class, 
@@ -108,6 +109,7 @@ $controllerMap = [
 
 // Vérifie si le contrôleur existe pour le premier élément de l'URI
 $route = $uriParts[0];
+error_log("Route: " . $route);
 
 // A retirer par la suite, permet de générer le token à mettre dans la table admin
 if ($route == 'generate_token') {
@@ -140,6 +142,8 @@ try {
         $controller = new $controllerClass($entityManager, $emailService);
     } elseif ($controllerClass === TicketController::class) {
         $controller = new $controllerClass($entityManager, $emailService);
+    } elseif ($controllerClass === MessageController::class) { 
+        $controller = new $controllerClass($entityManager); 
     } elseif ($route === 'scripts') {
         if (isset($uriParts[1]) && $uriParts[1] === 'remove_unverified_users') {
             include __DIR__ . '/Scripts/remove_unverified_users.php';
@@ -171,6 +175,11 @@ try {
         if ($route === 'users' && isset($uriParts[2]) && $uriParts[2] === 'tickets') {
             $userId = (int) $uriParts[1];
             $response = $controller->getTicketsByUser($userId);
+        } else if ($route === 'tickets' && isset($uriParts[2]) && $uriParts[2] === 'messages') {
+            $ticketId = (int) $uriParts[1];
+            error_log("Redirection vers MessageController pour ticketId: $ticketId");
+            $controller = new MessageController($entityManager);
+            $response = $controller->processRequest($_SERVER['REQUEST_METHOD'], $uriParts, $input); // Redirige vers MessageController
         } else {
             $response = $controller->processRequest($_SERVER['REQUEST_METHOD'], $uriParts, $input);
         }
@@ -187,7 +196,11 @@ try {
 
 // Définit le type de contenu à JSON et encode le tableau de réponse en JSON
 header('Content-Type: application/json');
-echo json_encode($response);
+if ($response instanceof JsonResponse) {
+    echo $response->getContent();
+} else {
+    echo json_encode($response);
+}
 
 // Fonction pour afficher un message et quitter
 function exit_with_message($message, $code = 200) {

@@ -1,5 +1,5 @@
 <?php
-// Path: backend/src/Controller/UserController.php
+
 namespace Controller;
 
 use Doctrine\ORM\EntityManager;
@@ -322,46 +322,42 @@ class UserController
         return $serializedUsers;
     }
     public function getTicketsByUser($userId)
-{
-    try {
-        // Assurez-vous que vous avez bien un utilisateur valide
-        $user = $this->entityManager->find(UserModel::class, $userId);
-        if (!$user) {
-            http_response_code(404);
-            return json_encode(['error' => 'User not found']);
+    {
+        try {
+            // Assurez-vous que vous avez bien un utilisateur valide
+            $user = $this->entityManager->find(UserModel::class, $userId);
+            if (!$user) {
+                http_response_code(404);
+                return json_encode(['error' => 'User not found']);
+            }
+
+            // Récupérez les tickets créés par cet utilisateur
+            $tickets = $this->entityManager->getRepository(TicketModel::class)->findBy(['created_by' => $user]);
+
+            // Préparez une réponse simplifiée ne contenant que les informations de tickets
+            $ticketData = [];
+            foreach ($tickets as $ticket) {
+                $ticketData[] = [
+                    'id' => $ticket->getId(),
+                    'type' => $ticket->getType(),
+                    'description' => $ticket->getDescription(),
+                    'status' => $ticket->getStatus(),
+                    'createdAt' => $ticket->getCreatedAt(),
+                    'updatedAt' => $ticket->getUpdatedAt(),
+                    'assignedTo' => $ticket->getAssignedTo() ? $ticket->getAssignedTo()->getId() : null,
+                    'attachments' => $ticket->getAttachments()
+                ];
+            }
+
+            // Sérialisez les données des tickets pour les renvoyer au client
+            $response = json_encode($ticketData);
+            error_log("Tickets retrieved for user {$userId}: " . $response); // Log tickets retrieved
+            return $response;
+        } catch (\Exception $e) {
+            error_log("Exception in getTicketsByUser: " . $e->getMessage());
+            http_response_code(500);
+            return json_encode(['error' => 'Internal Server Error']);
         }
-
-        // Récupérez les tickets créés par cet utilisateur
-        $tickets = $this->entityManager->getRepository(TicketModel::class)->findBy(['created_by' => $user]);
-
-        // Préparez une réponse simplifiée ne contenant que les informations de tickets
-        $ticketData = [];
-        foreach ($tickets as $ticket) {
-            $ticketData[] = [
-                'id' => $ticket->getId(),
-                'type' => $ticket->getType(),
-                'description' => $ticket->getDescription(),
-                'status' => $ticket->getStatus(),
-                'createdAt' => $ticket->getCreatedAt(),
-                'updatedAt' => $ticket->getUpdatedAt(),
-                'assignedTo' => $ticket->getAssignedTo() ? $ticket->getAssignedTo()->getId() : null,
-                'attachments' => $ticket->getAttachments()
-            ];
-        }
-
-        // Sérialisez les données des tickets pour les renvoyer au client
-        $response = json_encode($ticketData);
-        error_log("Tickets retrieved for user {$userId}: " . $response); // Log tickets retrieved
-        return $response;
-    } catch (\Exception $e) {
-        error_log("Exception in getTicketsByUser: " . $e->getMessage());
-        http_response_code(500);
-        return json_encode(['error' => 'Internal Server Error']);
     }
 }
-
-    
-    
-}
-
 ?>
