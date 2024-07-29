@@ -26,22 +26,18 @@ class MessageController
                     if (isset($uriParts[1]) && is_numeric($uriParts[1])) {
                         return $this->addMessage((int)$uriParts[1], $input);
                     }
-                    http_response_code(400);
-                    return new JsonResponse(['error' => 'Ticket ID not specified']);
+                    return new JsonResponse(['error' => 'Ticket ID not specified'], 400);
                 case 'GET':
                     if (isset($uriParts[1]) && is_numeric($uriParts[1])) {
                         return $this->getTicketMessages((int)$uriParts[1]);
                     }
-                    http_response_code(400);
-                    return new JsonResponse(['error' => 'Ticket ID not specified']);
+                    return new JsonResponse(['error' => 'Ticket ID not specified'], 400);
                 default:
-                    http_response_code(405);
-                    return new JsonResponse(['error' => 'Method Not Allowed']);
+                    return new JsonResponse(['error' => 'Method Not Allowed'], 405);
             }
         } catch (\Exception $e) {
             error_log("Exception in processRequest: " . $e->getMessage());
-            http_response_code(500);
-            return new JsonResponse(['error' => 'Internal Server Error']);
+            return new JsonResponse(['error' => 'Internal Server Error'], 500);
         }
     }
 
@@ -79,24 +75,37 @@ class MessageController
             $this->entityManager->persist($message);
             $this->entityManager->flush();
 
-            return new JsonResponse(['message' => 'Message added successfully', 'message_id' => $message->getId()]);
+            return new JsonResponse([
+                'message' => 'Message added successfully',
+                'message_id' => $message->getId(),
+                'ticket_id' => $ticket->getId(),
+                'author_id' => $author->getId(),
+                'recipient_id' => $recipient->getId(),
+                'content' => $message->getContent(),
+                'created_at' => $message->getCreatedAt()->format('Y-m-d H:i:s')
+            ], 200);
         } catch (\Exception $e) {
             error_log("Exception in addMessage: " . $e->getMessage());
             return new JsonResponse(['error' => 'Internal Server Error'], 500);
         }
     }
 
+
     public function getTicketMessages($ticketId)
     {
         try {
-            error_log("MessageController - getTicketMessages called with ticketId: $ticketId");
-
             $ticket = $this->entityManager->find(TicketModel::class, $ticketId);
             if (!$ticket) {
-                return new JsonResponse(['error' => 'Ticket not found'], 404);
+                http_response_code(404);
+                return json_encode(['error' => 'Ticket not found']);
             }
-
+    
             $messages = $ticket->getMessages();
+            if (!$messages || $messages->isEmpty()) {
+                http_response_code(404);
+                return json_encode(['error' => 'No messages found']);
+            }
+    
             $messageData = [];
             foreach ($messages as $message) {
                 $messageData[] = [
@@ -107,12 +116,14 @@ class MessageController
                     'createdAt' => $message->getCreatedAt()->format('Y-m-d H:i:s')
                 ];
             }
-
-            return new JsonResponse($messageData);
+    
+            return json_encode($messageData);
         } catch (\Exception $e) {
             error_log("Exception in getTicketMessages: " . $e->getMessage());
-            return new JsonResponse(['error' => 'Internal Server Error'], 500);
+            http_response_code(500);
+            return json_encode(['error' => 'Internal Server Error']);
         }
     }
+    
 }
 ?>

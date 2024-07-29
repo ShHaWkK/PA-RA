@@ -1,6 +1,5 @@
 <?php
 // Path: backend/src/Entity/MessageModel.php
-
 namespace Entity;
 
 use Doctrine\ORM\Mapping as ORM;
@@ -31,7 +30,7 @@ class MessageModel
 
     #[ORM\Column(type: "datetime")]
     private $created_at;
-    
+
     public function __construct()
     {
         $this->created_at = new \DateTime();
@@ -99,3 +98,4 @@ class MessageModel
         return $this;
     }
 }
+?>

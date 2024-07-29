@@ -16,13 +16,22 @@ class MessageAPI:
         except requests.RequestException as e:
             logging.error(f"Failed to get messages: {e}")
             return {'error': 'Failed to get messages'}
-
-    def send_message(self, data):
-        url = f"{self.BASE_URL}/messages"
+    @staticmethod
+    def get_ticket_messages(ticket_id):
         try:
-            response = requests.post(url, json=data)
+            response = requests.get(f"{MessageAPI.BASE_URL}/tickets/{ticket_id}/messages")
             response.raise_for_status()
             return response.json()
-        except requests.RequestException as e:
-            logging.error(f"Failed to send message: {e}")
-            return {'error': 'Failed to send message'}
+        except requests.exceptions.RequestException as e:
+            logging.error(f"Failed to get ticket messages: {e}")
+            return {"error": str(e)}
+
+    @staticmethod
+    def add_message(ticket_id, message_data):
+        try:
+            response = requests.post(f"{MessageAPI.BASE_URL}/tickets/{ticket_id}/messages", json=message_data)
+            response.raise_for_status()
+            return response.json()
+        except requests.exceptions.RequestException as e:
+            logging.error(f"Failed to add message to ticket: {e}")
+            return {"error": str(e)}

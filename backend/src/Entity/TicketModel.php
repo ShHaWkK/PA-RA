@@ -40,7 +40,7 @@ class TicketModel
     #[ORM\Column(type: "json", nullable: true)]
     private $attachments;
 
-    #[ORM\OneToMany(targetEntity: MessageModel::class, mappedBy: "ticket", cascade: ["persist", "remove"])]
+    #[ORM\OneToMany(mappedBy: "ticket", targetEntity: MessageModel::class, cascade: ["persist", "remove"], orphanRemoval: true)]
     private $messages;
     
     public function __construct()

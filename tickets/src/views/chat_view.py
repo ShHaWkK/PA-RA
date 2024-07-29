@@ -1,7 +1,6 @@
 import tkinter as tk
-from tkinter import scrolledtext, messagebox, ttk
+from tkinter import messagebox
 from src.api.ticket_api import TicketAPI
-from src.api.message_api import MessageAPI
 import json
 import logging
 
@@ -11,19 +10,23 @@ class ChatView:
         self.author_id = author_id
         self.recipient_id = recipient_id
         self.ticket_id = ticket_id
-        self.ticket_system = TicketAPI()
 
+        self.message_system = TicketAPI()  # Use TicketAPI instead of MessageAPI
+
+        self.setup_ui()
+
+    def setup_ui(self):
         self.master.title("Chat")
         self.master.geometry("600x400")
 
-        self.main_frame = tk.Frame(self.master)
-        self.main_frame.pack(fill=tk.BOTH, expand=True)
+        self.chat_frame = tk.Frame(self.master)
+        self.chat_frame.pack(fill=tk.BOTH, expand=True)
 
-        self.text_area = tk.Text(self.main_frame)
-        self.text_area.pack(fill=tk.BOTH, expand=True)
+        self.chat_text = tk.Text(self.chat_frame, state=tk.DISABLED)
+        self.chat_text.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
 
         self.entry_frame = tk.Frame(self.master)
-        self.entry_frame.pack(fill=tk.X)
+        self.entry_frame.pack(fill=tk.X, padx=10, pady=10)
 
         self.message_entry = tk.Entry(self.entry_frame)
         self.message_entry.pack(side=tk.LEFT, fill=tk.X, expand=True)
@@ -31,21 +34,32 @@ class ChatView:
         self.send_button = tk.Button(self.entry_frame, text="Envoyer", command=self.send_message)
         self.send_button.pack(side=tk.RIGHT)
 
-        self.populate_chat()
+        self.populate_messages()
 
-    def populate_chat(self):
-        messages = self.ticket_system.get_ticket_messages(self.ticket_id)
-        logging.debug(f"Messages fetched from API: {messages}")
-        if isinstance(messages, dict) and 'error' in messages:
-            logging.error(messages['error'])
+    def populate_messages(self):
+        response = self.message_system.get_ticket_messages(self.ticket_id)
+        logging.debug(f"Raw messages fetched: {response}")
+
+        if 'error' in response:
+            messagebox.showerror("Erreur", response['error'])
+            return
+
+        try:
+            messages = json.loads(response) if isinstance(response, str) else response
+        except json.JSONDecodeError as e:
+            logging.error(f"Failed to decode JSON response: {e}")
+            messagebox.showerror("Erreur", "Erreur de format de réponse JSON.")
+            return
+
+        if isinstance(messages, list):
+            self.chat_text.config(state=tk.NORMAL)
+            self.chat_text.delete(1.0, tk.END)
+            for msg in messages:
+                self.chat_text.insert(tk.END, f"{msg['author']}: {msg['content']}\n")
+            self.chat_text.config(state=tk.DISABLED)
         else:
-            self.text_area.delete('1.0', tk.END)
-            for message in messages:
-                if isinstance(message, dict):
-                    author = message.get('author', 'Unknown')
-                    recipient = message.get('recipient', 'Unknown')
-                    content = message.get('content', '')
-                    self.text_area.insert(tk.END, f"{author} à {recipient}: {content}\n")
+            logging.error(f"Unexpected response format: {messages}")
+            messagebox.showerror("Erreur", "Format de réponse inattendu.")
 
     def send_message(self):
         content = self.message_entry.get()
@@ -55,9 +69,16 @@ class ChatView:
                 'recipient_id': self.recipient_id,
                 'content': content
             }
-            success = self.ticket_system.add_message(self.ticket_id, message_data)
-            if success:
-                self.message_entry.delete(0, tk.END)
-                self.populate_chat()
-            else:
+            logging.debug(f"Sending message data: {message_data}")
+            response = self.message_system.add_message(self.ticket_id, message_data)
+            logging.debug(f"Send message response: {response}")
+
+            if 'error' in response:
                 logging.error("Failed to send message")
+                messagebox.showerror("Erreur", "Échec de l'envoi du message.")
+            else:
+                messagebox.showinfo("Succès", "Message envoyé avec succès !")
+                self.populate_messages()
+                self.message_entry.delete(0, tk.END)
+        else:
+            messagebox.showwarning("Attention", "Le message ne peut pas être vide.")
