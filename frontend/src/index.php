@@ -63,6 +63,7 @@ switch ($request) {
             require __DIR__ . '/views/Login/Login.php';
             exit;
         }
+        break;
     case '/Admin/Merchants':
         if ($jwtToken) {
             requireAuth($jwtToken, 'admin');

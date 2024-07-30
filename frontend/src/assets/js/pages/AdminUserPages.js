@@ -1,6 +1,6 @@
 import {populateVolunteerTable} from "/assets/js/modules/tables/VolunteerTable.js";
 import {handleAprovals, deleteUser} from "/assets/js/api/Users.js";
-import {populateMerchantTable} from "../modules/tables/MerchantTable.js";
+import {populateMerchantTable} from "/assets/js/modules/tables/MerchantTable.js";
 
 var global_status = "";
 
@@ -54,6 +54,7 @@ async function handleStatusChange(status){
         }
         console.log("status", global_status);
         await populateVolunteerTable(global_status);
+        console.log("we are here");
         await populateMerchantTable(global_status);
     }
 }
