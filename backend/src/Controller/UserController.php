@@ -89,6 +89,14 @@ class UserController
                                 return ["message" => "User id not set"];
                             }
 
+                        case 'getUserCompanies':
+                            if (isset($uriParts)){
+                                return $this->getUserCompanies($uriParts[2]);
+                            }else{
+                                http_response_code(400);
+                                return ["message" => "User id not set"];
+                            }
+
                         case 'tickets':
                             return $this->getTicketsByUser((int)$uriParts[1]);
 
@@ -373,6 +381,11 @@ class UserController
 
         $skills = $user->getSkills();
 
+        if (!$skills) {
+            http_response_code(404);
+            return ['error' => 'Skill not found'];
+        }
+
         $serializedSkills = [];
         foreach ($skills as $skill) {
             $serializedSkills[] = $skill->jsonSerialize();
@@ -394,7 +407,7 @@ class UserController
 
         if (!$availabilities) {
             http_response_code(404);
-            return ['error' => 'Skill not found'];
+            return ['error' => 'Availability not found'];
         }
 
         $serializedAvailabilities = [];
@@ -403,6 +416,29 @@ class UserController
         }
 
         return $serializedAvailabilities;
+    }
+
+    public function getUserCompanies($userId)
+    {
+        $user = $this->entityManager->getRepository(UserModel::class)->find($userId);
+
+        if (!$user) {
+            http_response_code(404);
+            return ['message' => "User with ID $userId not found"];
+        }
+
+        $companies = $user->getCompanies();
+        if ($companies->isEmpty()) { // Vérifie si la collection est vide
+            http_response_code(404);
+            return ['error' => 'No companies found for this user'];
+        }
+
+        $serializedCompanies = [];
+        foreach ($companies as $company) { // Correction de la syntaxe
+            $serializedCompanies[] = $company->jsonSerialize();
+        }
+
+        return $serializedCompanies;
     }
 
     private function updateUser($id, $input)

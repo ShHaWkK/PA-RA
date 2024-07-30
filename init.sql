@@ -3,43 +3,43 @@ USE no_more_waste;
 
 -- Table des utilisateurs
 CREATE TABLE IF NOT EXISTS users (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    first_name VARCHAR(255) NOT NULL,
-    last_name VARCHAR(255) NOT NULL,
-    email VARCHAR(255) UNIQUE NOT NULL,
-    phone_number VARCHAR(20),
-    password VARCHAR(255) NOT NULL,
-    role ENUM('admin', 'volunteer', 'employee', 'manager', 'merchant') NOT NULL,
-    status ENUM('pending', 'approved', 'rejected') NOT NULL DEFAULT 'pending',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    verification_code VARCHAR(6),
-    is_verified BOOLEAN DEFAULT FALSE
+                                     id INT AUTO_INCREMENT PRIMARY KEY,
+                                     first_name VARCHAR(255) NOT NULL,
+                                     last_name VARCHAR(255) NOT NULL,
+                                     email VARCHAR(255) UNIQUE NOT NULL,
+                                     phone_number VARCHAR(20),
+                                     password VARCHAR(255) NOT NULL,
+                                     role ENUM('admin', 'volunteer', 'employee', 'manager', 'merchant') NOT NULL,
+                                     status ENUM('pending', 'approved', 'rejected') NOT NULL DEFAULT 'pending',
+                                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                                     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                                     verification_code VARCHAR(6),
+                                     is_verified BOOLEAN DEFAULT FALSE
 );
 
 -- Table des entreprises (companies)
 CREATE TABLE IF NOT EXISTS companies (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    address VARCHAR(255) NOT NULL,
-    contact_info VARCHAR(255) NOT NULL,
-    siret VARCHAR(14) NOT NULL,
-    renewal_date DATE NOT NULL,
-    renewal_status ENUM('pending', 'notified', 'renewed') NOT NULL DEFAULT 'pending',
-    has_stock BOOLEAN DEFAULT FALSE,
-    last_notified TIMESTAMP NULL DEFAULT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+                                         id INT AUTO_INCREMENT PRIMARY KEY,
+                                         name VARCHAR(255) NOT NULL,
+                                         address VARCHAR(255) NOT NULL,
+                                         contact_info VARCHAR(255) NOT NULL,
+                                         siret VARCHAR(14) NOT NULL,
+                                         renewal_date DATE NOT NULL,
+                                         renewal_status ENUM('pending', 'notified', 'renewed') NOT NULL DEFAULT 'pending',
+                                         has_stock BOOLEAN DEFAULT FALSE,
+                                         last_notified TIMESTAMP NULL DEFAULT NULL,
+                                         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                                         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
 -- Table de liaison entre utilisateurs et entreprises (user_companies)
 CREATE TABLE IF NOT EXISTS user_companies (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT NOT NULL,
-    company_id INT NOT NULL,
-    role ENUM('employee', 'manager', 'merchant') NOT NULL,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (company_id) REFERENCES companies(id) ON DELETE CASCADE
+                                              id INT AUTO_INCREMENT PRIMARY KEY,
+                                              user_id INT NOT NULL,
+                                              company_id INT NOT NULL,
+                                              role ENUM('employee', 'manager', 'merchant') NOT NULL,
+                                              FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+                                              FOREIGN KEY (company_id) REFERENCES companies(id) ON DELETE CASCADE
 );
 
 -- Table des disponibilités des bénévoles (availabilities)

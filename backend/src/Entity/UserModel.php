@@ -58,10 +58,24 @@ class UserModel implements \JsonSerializable
     #[ORM\OneToMany(targetEntity: AvailabilityModel::class, mappedBy: "user")]
     private $availabilities;
 
+    #[ORM\ManyToMany(targetEntity: CompanyModel::class, inversedBy: "users")]
+    #[ORM\JoinTable(name: "user_companies",
+        joinColumns: [new ORM\JoinColumn(name: "user_id", referencedColumnName: "id")],
+        inverseJoinColumns: [new ORM\JoinColumn(name: "company_id", referencedColumnName: "id")]
+    )]
+    private $companies;
+
     public function __construct()
     {
         $this->skills = new ArrayCollection();
         $this->availabilities = new ArrayCollection();
+        $this->companies = new ArrayCollection(); // Ajout de l'initialisation des entreprises
+    }
+
+    // Ajout de la méthode getCompanies
+    public function getCompanies(): Collection
+    {
+        return $this->companies;
     }
 
     // Getters and setters for each property
