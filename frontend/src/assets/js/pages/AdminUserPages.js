@@ -20,7 +20,17 @@ if(merchantStatusSelect) {
     document.getElementById('merchant-status-select').addEventListener('change', async function () {
         global_status = this.value;
         console.log("status constructor", global_status);
-        await populateVolunteerTable(global_status);
+
+        const merchantTable = document.getElementById('merchantTable');
+        if (merchantTable){
+            await populateMerchantTable(global_status);
+        }
+
+        const volunteerTable = document.getElementById('volunteerTable');
+        if(volunteerTable){
+            await populateVolunteerTable(global_status);
+        }
+
     });
 }
 

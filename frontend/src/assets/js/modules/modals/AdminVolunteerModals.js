@@ -1,7 +1,7 @@
 import {modifyUser, getUser, deleteUser, getUserAvailabilities, getUserSkills} from "/assets/js/api/Users.js";
 import {selectedUserId,populateVolunteerTable} from "/assets/js/modules/tables/VolunteerTable.js";
-import {populateSkillTable} from "/assets/js/pages/VolunteerSignUp.js";
-import {populateMerchantTable} from "/assets/js/modules/tables/MerchantTable.js";
+// import {populateSkillTable} from "/assets/js/pages/VolunteerSignUp.js";
+import {selectedUserIdMerchant,populateMerchantTable} from "/assets/js/modules/tables/MerchantTable.js";
 
 // Fonction pour pré-remplir le formulaire avec les données de l'utilisateur
 async function populateModifyUserForm(userId) {
@@ -28,7 +28,14 @@ async function populateModifyUserForm(userId) {
 document.getElementById('modificationForm').addEventListener('submit', async function(event) {
     event.preventDefault();
 
-    const userId = selectedUserId;
+    let userId;
+
+    if (selectedUserIdMerchant === undefined ){
+        userId = selectedUserId;
+    }
+    else {
+        userId = selectedUserIdMerchant;
+    }
     const formData = {
         first_name: document.getElementById('first_name_modify').value,
         last_name: document.getElementById('last_name_modify').value,
@@ -149,14 +156,14 @@ async function populateAvailabilitiesInModal(selectedUserId) {
 
             modalBody.appendChild(availabilityElement);
         });
-        // On retire le loader
-        document.getElementById('loadingAvailabilities').classList.add('hidden');
 
     } else {
         const noAvailabilitiesMessage = document.createElement('p');
         noAvailabilitiesMessage.textContent = 'No availabilities found for this user.';
         modalBody.appendChild(noAvailabilitiesMessage);
     }
+    // On retire le loader
+    document.getElementById('loadingAvailabilities').classList.add('hidden');
 }
 
 document.addEventListener('DOMContentLoaded',

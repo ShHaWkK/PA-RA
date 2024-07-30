@@ -32,7 +32,7 @@
             </select>
         </div>
         <div class="row">
-            <button class="add-button" id="addVolunteerButton"> Ajouter </button>
+            <button class="add-button" id="addMerchantButton"> Ajouter </button>
             <button class="delete-button" id="deleteVolunteerButton"> Supprimer </button>
         </div>
 

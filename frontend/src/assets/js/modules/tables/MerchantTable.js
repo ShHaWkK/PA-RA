@@ -2,7 +2,7 @@ import { getAllUsers } from '/assets/js/api/Users.js';
 import { setupSearch } from '/assets/js/modules/SearchBar.js';
 import {populateModifyUserForm} from "/assets/js/modules/modals/AdminVolunteerModals.js";
 
-export var selectedUserId;
+export var selectedUserIdMerchant;
 
 export async function populateMerchantTable(status) {
 
@@ -124,15 +124,15 @@ function formatDateToFrench(dateString) {
 // Fonctions pour les boutons "Voir" et "Modifier"
 
 function viewSkills(userId) {
-    selectedUserId = userId;
-    populateSkillsInModal(selectedUserId);
+    selectedUserIdMerchant = userId;
+    populateSkillsInModal(selectedUserIdMerchant);
     var skillModal = document.getElementById("volunteerSkillModal");
     console.log("click on skills");
     skillModal.style.display = "block";
 }
 
 function openModifyUserModal(userId) {
-    selectedUserId = userId;
+    selectedUserIdMerchant = userId;
     var modifyModal = document.getElementById("modifyUserModal");
     populateModifyUserForm(userId);
     console.log("click on modify");
