@@ -331,6 +331,9 @@ class TicketController
             $ticket->setUpdatedAt(new \DateTime("now"));
             $this->entityManager->flush();
     
+            // Envoyer un courriel à l'administrateur
+            $this->sendAssignmentEmail($admin->getEmail(), $ticket);
+    
             return json_encode(['id' => $ticket->getId(), 'message' => 'Admin assigned to ticket successfully']);
         } catch (\Exception $e) {
             error_log("Exception in assignAdminToTicket: " . $e->getMessage());
@@ -371,6 +374,13 @@ class TicketController
             http_response_code(500);
             return json_encode(['error' => 'Internal Server Error']);
         }
+    }
+
+    private function sendAssignmentEmail($email, $ticket)
+    {
+        $subject = "Nouveau ticket assigné";
+        $body = "Vous avez été assigné à un nouveau ticket.\n\nDétails du ticket:\n\nID: {$ticket->getId()}\nType: {$ticket->getType()}\nDescription: {$ticket->getDescription()}";
+        $this->emailService->sendEmail($email, $subject, $body);
     }
 
     public function getTicketsByUser($userId)
@@ -457,6 +467,9 @@ class TicketController
             $ticket->setAssignedTo($newAdmin);
             $ticket->setUpdatedAt(new \DateTime("now"));
             $this->entityManager->flush();
+
+            // Envoyer un courriel à l'administrateur
+            $this->sendAssignmentEmail($newAdmin->getEmail(), $ticket);
 
             return json_encode(['id' => $ticket->getId(), 'message' => 'Ticket reassigned successfully']);
         } catch (\Exception $e) {

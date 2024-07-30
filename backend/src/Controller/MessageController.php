@@ -6,14 +6,17 @@ use Entity\TicketModel;
 use Entity\UserModel;
 use Doctrine\ORM\EntityManager;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Service\EmailService;
 
 class MessageController
 {
     private $entityManager;
+    private $emailService;
 
-    public function __construct(EntityManager $entityManager)
+    public function __construct(EntityManager $entityManager, EmailService $emailService)
     {
         $this->entityManager = $entityManager;
+        $this->emailService = $emailService;
         error_log("MessageController instancié avec succès.");
     }
 
@@ -75,6 +78,9 @@ class MessageController
             $this->entityManager->persist($message);
             $this->entityManager->flush();
 
+            // Envoyer un courriel au destinataire
+            $this->sendEmailNotification($recipient->getEmail(), $message);
+
             return new JsonResponse([
                 'message' => 'Message added successfully',
                 'message_id' => $message->getId(),
@@ -90,6 +96,12 @@ class MessageController
         }
     }
 
+    private function sendEmailNotification($email, $message)
+    {
+        $subject = "Nouveau message reçu";
+        $body = "Vous avez reçu un nouveau message de " . $message->getAuthor()->getFirstName() . " " . $message->getAuthor()->getLastName() . ".\n\nContenu du message:\n\n" . $message->getContent();
+        $this->emailService->sendEmail($email, $subject, $body);
+    }
 
     public function getTicketMessages($ticketId)
     {
@@ -124,6 +136,5 @@ class MessageController
             return json_encode(['error' => 'Internal Server Error']);
         }
     }
-    
 }
 ?>
