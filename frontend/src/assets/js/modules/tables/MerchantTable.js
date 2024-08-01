@@ -1,6 +1,6 @@
 import { getAllUsers } from '/assets/js/api/Users.js';
 import { setupSearch } from '/assets/js/modules/SearchBar.js';
-import {populateModifyUserForm} from "/assets/js/modules/modals/AdminVolunteerModals.js";
+import {populateModifyUserForm,populateCompaniesInModal,populateSkillsInModal} from "/assets/js/modules/modals/AdminUserModals.js";
 
 export var selectedUserIdMerchant;
 
@@ -129,6 +129,14 @@ function viewSkills(userId) {
     var skillModal = document.getElementById("volunteerSkillModal");
     console.log("click on skills");
     skillModal.style.display = "block";
+}
+
+function viewCompany(userId){
+    selectedUserIdMerchant = userId;
+    populateCompaniesInModal(selectedUserIdMerchant);
+    var companyModal = document.getElementById("modalBodyCompany");
+    console.log("click on companies");
+    companyModal.style.display = "block";
 }
 
 function openModifyUserModal(userId) {

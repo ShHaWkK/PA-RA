@@ -1,6 +1,5 @@
 import {modifyUser, getUser, deleteUser, getUserAvailabilities, getUserSkills} from "/assets/js/api/Users.js";
 import {selectedUserId,populateVolunteerTable} from "/assets/js/modules/tables/VolunteerTable.js";
-// import {populateSkillTable} from "/assets/js/pages/VolunteerSignUp.js";
 import {selectedUserIdMerchant,populateMerchantTable} from "/assets/js/modules/tables/MerchantTable.js";
 
 // Fonction pour pré-remplir le formulaire avec les données de l'utilisateur
@@ -117,12 +116,63 @@ async function populateSkillsInModal(selectedUserId) {
             modalBody.appendChild(skillElement);
         });
 
-        document.getElementById('loadingSkills').classList.add('hidden');
+
     } else {
         // Afficher le message "No skills found"
         const noSkillsMessage = document.createElement('p');
         noSkillsMessage.textContent = 'No skills found for this user.';
         modalBody.appendChild(noSkillsMessage);
+    }
+
+    document.getElementById('loadingSkills').classList.add('hidden');
+}
+
+async function populateCompaniesInModal(selectedUserId) {
+    const modalBody = document.getElementById('modalBodyCompany');
+
+    // Vider le contenu précédent du corps de la modale
+    modalBody.innerHTML = '';
+    console.log("selected User ID", selectedUserId);
+
+    document.getElementById('loadingCompanies').classList.remove('hidden');
+
+    // Obtenir les entreprises de l'utilisateur
+    var companies = await getUserCompanies(selectedUserId);
+    console.log(companies);
+
+    // Vérifier si companies est un tableau
+    if (Array.isArray(companies) && companies.length > 0) {
+        // Ajouter chaque entreprise au corps de la modale
+        companies.forEach(company => {
+            const companyElement = document.createElement('div');
+            companyElement.classList.add('company');
+
+            const companyName = document.createElement('h3');
+            companyName.textContent = company.name;
+
+            const companyAddress = document.createElement('p');
+            companyAddress.textContent = 'Address: ' + company.address;
+
+            const companyContact = document.createElement('p');
+            companyContact.textContent = 'Contact Info: ' + company.contact_info;
+
+            const companySiret = document.createElement('p');
+            companySiret.textContent = 'SIRET: ' + company.siret;
+
+            companyElement.appendChild(companyName);
+            companyElement.appendChild(companyAddress);
+            companyElement.appendChild(companyContact);
+            companyElement.appendChild(companySiret);
+
+            modalBody.appendChild(companyElement);
+        });
+
+        document.getElementById('loadingCompanies').classList.add('hidden');
+    } else {
+        // Afficher le message "No companies found"
+        const noCompaniesMessage = document.createElement('p');
+        noCompaniesMessage.textContent = 'No companies found for this user.';
+        modalBody.appendChild(noCompaniesMessage);
     }
 }
 
@@ -170,59 +220,132 @@ document.addEventListener('DOMContentLoaded',
     function (){
         //------------------- Définition des fenêtres modales: --------------------------
         // Fenêtre modale d'ajout d'un bénévole
-        var addModal = document.getElementById("addVolunteerModal");
         var addBtn = document.getElementById("addVolunteerButton");
-        var addSpan = document.getElementById("closeAdd");
+        if(addBtn){
+            var addModal = document.getElementById("addVolunteerModal");
+            var addSpan = document.getElementById("closeAdd");
 
-        addBtn.onclick = function() {
-            document.getElementById('registrationForm').classList.remove('hidden');
-            addModal.style.display = "block";
-        }
+            addBtn.onclick = function() {
+                document.getElementById('registrationForm').classList.remove('hidden');
+                addModal.style.display = "block";
+            }
 
-        addSpan.onclick = function() {
-            addModal.style.display = "none";
-        }
-
-        window.onclick = function(event) {
-            if (event.target == addModal) {
+            addSpan.onclick = function() {
                 addModal.style.display = "none";
             }
-        }
 
-        // Fenêtre modale de suppression d'un bénévole
-        var deleteModal = document.getElementById("deleteVolunteerModal");
-        var deleteBtn = document.getElementById("deleteVolunteerButton");
-        var deleteSpan = document.getElementById("closeDelete");
-        var confirmDelete = document.getElementById("confirmDelete");
-
-        deleteBtn.onclick = function() {
-            const checkedCheckboxes = document.querySelectorAll('#volunteerTable input[type="checkbox"]:checked');
-            const userIds = Array.from(checkedCheckboxes).map(checkbox => checkbox.value);
-
-            if (userIds.length === 0) {
-                alert("Select at least one user to delete.");
-                return;
+            window.onclick = function(event) {
+                if (event.target == addModal) {
+                    addModal.style.display = "none";
+                }
             }
-            else {
-                deleteModal.style.display = "block";
+
+            // Fenêtre modale de suppression d'un bénévole
+            var deleteModal = document.getElementById("deleteVolunteerModal");
+            var deleteBtn = document.getElementById("deleteVolunteerButton");
+            var deleteSpan = document.getElementById("closeDelete");
+            var confirmDelete = document.getElementById("confirmDelete");
+
+            deleteBtn.onclick = function() {
+                const checkedCheckboxes = document.querySelectorAll('#volunteerTable input[type="checkbox"]:checked');
+                const userIds = Array.from(checkedCheckboxes).map(checkbox => checkbox.value);
+
+                if (userIds.length === 0) {
+                    alert("Select at least one user to delete.");
+                    return;
+                }
+                else {
+                    deleteModal.style.display = "block";
+                }
             }
-        }
 
-        deleteSpan.onclick = function() {
-            deleteModal.style.display = "none";
-        }
-
-        confirmDelete.onclick = function (){
-            deleteUsers();
-        }
-
-        window.onclick = function(event) {
-            if (event.target == deleteModal) {
+            deleteSpan.onclick = function() {
                 deleteModal.style.display = "none";
             }
+
+            confirmDelete.onclick = function (){
+                deleteUsers();
+            }
+
+            window.onclick = function(event) {
+                if (event.target == deleteModal) {
+                    deleteModal.style.display = "none";
+                }
+            }
+
+            // Fenêtre modale de vue des compétences
+            var skillModal = document.getElementById("volunteerSkillModal");
+            var skillSpan = document.getElementById("closeVolunteerSkillButton");
+
+            skillSpan.onclick = function() {
+                skillModal.style.display = "none";
+            }
+
+            // Fenêtre modale de vue des disponibilités
+            var availabilityModal = document.getElementById("volunteerAvailabilitiesModal");
+            var availabilitySpan = document.getElementById("closeVolunteerAvailabilitiesButton");
+
+            availabilitySpan.onclick = function() {
+                availabilityModal.style.display = "none";
+            }
         }
 
-        // Fenêtre modale de modification d'un bénévole
+        // Fenêtre modale d'ajout d'un commerçant
+        var addMerchantBtn = document.getElementById("addMerchantButton");
+        if(addMerchantBtn){
+            var addMerchantModal = document.getElementById("addMerchantModal");
+            var addMerchantSpan = document.getElementById("closeMerchantAdd");
+
+            addMerchantBtn.onclick = function() {
+                document.getElementById('merchantForm').classList.remove('hidden');
+                addMerchantModal.style.display = "block";
+            }
+
+            addMerchantSpan.onclick = function() {
+                addMerchantModal.style.display = "none";
+            }
+
+            window.onclick = function(event) {
+                if (event.target == addModal) {
+                    addMerchantModal.style.display = "none";
+                }
+            }
+
+            // Fenêtre modale de suppression d'un bénévole
+            var deleteModal = document.getElementById("deleteVolunteerModal");
+            var deleteBtn = document.getElementById("deleteVolunteerButton");
+            var deleteSpan = document.getElementById("closeDelete");
+            var confirmDelete = document.getElementById("confirmDelete");
+
+            deleteBtn.onclick = function() {
+                const checkedCheckboxes = document.querySelectorAll('#volunteerTable input[type="checkbox"]:checked');
+                const userIds = Array.from(checkedCheckboxes).map(checkbox => checkbox.value);
+
+                if (userIds.length === 0) {
+                    alert("Select at least one user to delete.");
+                    return;
+                }
+                else {
+                    deleteModal.style.display = "block";
+                }
+            }
+
+            deleteSpan.onclick = function() {
+                deleteModal.style.display = "none";
+            }
+
+            confirmDelete.onclick = function (){
+                deleteUsers();
+            }
+
+            window.onclick = function(event) {
+                if (event.target == deleteModal) {
+                    deleteModal.style.display = "none";
+                }
+            }
+        }
+
+        // Fenêtre modale de modification d'un utilisateur
         var modifyModal = document.getElementById("modifyUserModal");
         var modifySpan = document.getElementById("closeModify");
 
@@ -236,23 +359,7 @@ document.addEventListener('DOMContentLoaded',
             }
         }
 
-        // Fenêtre modale de vue des compétences
-        var skillModal = document.getElementById("volunteerSkillModal");
-        var skillSpan = document.getElementById("closeVolunteerSkillButton");
-
-        skillSpan.onclick = function() {
-            skillModal.style.display = "none";
-        }
-
-        // Fenêtre modale de vue des disponibilités
-        var availabilityModal = document.getElementById("volunteerAvailabilitiesModal");
-        var availabilitySpan = document.getElementById("closeVolunteerAvailabilitiesButton");
-
-        availabilitySpan.onclick = function() {
-            availabilityModal.style.display = "none";
-        }
-
     });
 
 
-export {populateModifyUserForm, populateSkillsInModal, populateAvailabilitiesInModal}
+export {populateModifyUserForm, populateSkillsInModal, populateAvailabilitiesInModal, populateCompaniesInModal}

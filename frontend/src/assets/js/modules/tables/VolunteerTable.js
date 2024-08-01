@@ -1,6 +1,6 @@
 import { getAllUsers } from '/assets/js/api/Users.js';
 import { setupSearch } from '/assets/js/modules/SearchBar.js';
-import {populateModifyUserForm,populateSkillsInModal,populateAvailabilitiesInModal} from "/assets/js/modules/modals/AdminVolunteerModals.js";
+import {populateModifyUserForm,populateSkillsInModal,populateAvailabilitiesInModal} from "/assets/js/modules/modals/AdminUserModals.js";
 
 export var selectedUserId;
 

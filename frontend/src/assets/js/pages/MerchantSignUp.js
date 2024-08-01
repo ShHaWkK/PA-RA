@@ -1,7 +1,7 @@
 import {registerMerchant} from "../api/Users.js";
 
 function addMerchantSubmitEvent(){
-    document.getElementById('registrationForm').addEventListener('submit', async function(event) {
+    document.getElementById('merchantForm').addEventListener('submit', async function(event) {
         event.preventDefault();
 
         const formData = new FormData(event.target);

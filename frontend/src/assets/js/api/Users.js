@@ -166,4 +166,20 @@ async function getUserAvailabilities(userId){
     return await response.json();
 }
 
+async function getUserCompanies(userId) {
+        const response = await fetch(apiEndpoint+`/user/${userId}/companies`, {
+        method: 'GET',
+            headers: {
+            'Content-Type': 'application/json'
+        }
+        });
+
+        if (response.ok) {
+            return await response.json();
+        } else {
+            console.error('Failed to fetch companies:', response.statusText);
+            return null;
+        }
+}
+
 export { registerVolunteer, registerMerchant, handleAprovals, getUser, getAllUsers, deleteUser, getUserSkills, getUserAvailabilities, modifyUser};

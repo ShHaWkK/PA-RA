@@ -63,9 +63,13 @@ async function handleStatusChange(status){
             await handleAprovals(userId, status);
         }
         console.log("status", global_status);
-        await populateVolunteerTable(global_status);
+        if (volunteerStatusSelect) {
+            await populateVolunteerTable(global_status);
+        }
         console.log("we are here");
-        await populateMerchantTable(global_status);
+        if (merchantStatusSelect) {
+            await populateMerchantTable(global_status);
+        }
     }
 }
 
@@ -102,8 +106,12 @@ async function deleteUsers() {
             await deleteUser(userId);
         }
         // Rafraîchir le tableau des bénévoles après la suppression
-        populateVolunteerTable();
-        populateMerchantTable();
+        if (volunteerStatusSelect) {
+            populateVolunteerTable();
+        }
+        if (merchantStatusSelect) {
+            populateMerchantTable();
+        }
         alert("The selected users have been successfully deleted.\n");
     } catch (error) {
         console.error("Error deleting users:", error.message);
@@ -114,8 +122,12 @@ async function deleteUsers() {
 // Appel de la fonction au chargement de la page ou lorsque nécessaire
 document.addEventListener('DOMContentLoaded',
     function (){
-        populateVolunteerTable("");
-        populateMerchantTable("");
+        if (volunteerStatusSelect) {
+            populateVolunteerTable("");
+        }
+        if (merchantStatusSelect) {
+            populateMerchantTable("");
+        }
         handleApproval();
         handleReject();
         handlePending();

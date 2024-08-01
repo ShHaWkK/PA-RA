@@ -1,5 +1,4 @@
-<form id="registrationForm">
-    <h2><?php echo htmlspecialchars($data['signup_heading']); ?></h2>
+<form id="merchantForm">
     <div>
         <label for="first_name"><?php echo htmlspecialchars($data['first_name_label']); ?></label>
         <input type="text" id="first_name" name="first_name" required>
@@ -26,7 +25,7 @@
     </div>
     <div>
         <label for="siret"><?php echo htmlspecialchars($data['siret_label']); ?></label>
-        <input type="text" id="siret" name="siret" required>
+        <input type="text" id="siret" name="siret" maxlength="14" required>
     </div>
     <div>
         <label for="address"><?php echo htmlspecialchars($data['address_label']); ?></label>
