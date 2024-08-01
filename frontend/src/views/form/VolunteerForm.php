@@ -1,3 +1,13 @@
+<!DOCTYPE html>
+<html lang="<?php echo strtolower($userLanguage); ?>">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><?php echo htmlspecialchars($data['signup_title']); ?></title>
+    <link rel="stylesheet" href="/assets/css/formvolunteer.css">
+</head>
+<body>
+
 <form id="registrationForm" class="hidden">
     <div>
         <label for="first_name"><?php echo htmlspecialchars($data['first_name_label']); ?></label>
