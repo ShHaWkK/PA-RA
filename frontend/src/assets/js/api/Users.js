@@ -167,7 +167,7 @@ async function getUserAvailabilities(userId){
 }
 
 async function getUserCompanies(userId) {
-        const response = await fetch(apiEndpoint+`/user/${userId}/companies`, {
+        const response = await fetch(apiEndpoint+`/users/getUserCompanies/${userId}`, {
         method: 'GET',
             headers: {
             'Content-Type': 'application/json'
@@ -182,4 +182,4 @@ async function getUserCompanies(userId) {
         }
 }
 
-export { registerVolunteer, registerMerchant, handleAprovals, getUser, getAllUsers, deleteUser, getUserSkills, getUserAvailabilities, modifyUser};
+export { registerVolunteer, registerMerchant, handleAprovals, getUser, getAllUsers, deleteUser, getUserSkills, getUserAvailabilities, getUserCompanies, modifyUser};

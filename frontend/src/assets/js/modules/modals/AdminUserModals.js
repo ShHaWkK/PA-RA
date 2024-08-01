@@ -1,4 +1,4 @@
-import {modifyUser, getUser, deleteUser, getUserAvailabilities, getUserSkills} from "/assets/js/api/Users.js";
+import {modifyUser, getUser, deleteUser, getUserAvailabilities, getUserSkills, getUserCompanies} from "/assets/js/api/Users.js";
 import {selectedUserId,populateVolunteerTable} from "/assets/js/modules/tables/VolunteerTable.js";
 import {selectedUserIdMerchant,populateMerchantTable} from "/assets/js/modules/tables/MerchantTable.js";
 
@@ -167,13 +167,13 @@ async function populateCompaniesInModal(selectedUserId) {
             modalBody.appendChild(companyElement);
         });
 
-        document.getElementById('loadingCompanies').classList.add('hidden');
     } else {
         // Afficher le message "No companies found"
         const noCompaniesMessage = document.createElement('p');
         noCompaniesMessage.textContent = 'No companies found for this user.';
         modalBody.appendChild(noCompaniesMessage);
     }
+    document.getElementById('loadingCompanies').classList.add('hidden');
 }
 
 async function populateAvailabilitiesInModal(selectedUserId) {
@@ -342,6 +342,14 @@ document.addEventListener('DOMContentLoaded',
                 if (event.target == deleteModal) {
                     deleteModal.style.display = "none";
                 }
+            }
+
+            // Fenêtre modale de vue des entreprises du commerçant
+            var companyModal = document.getElementById("userCompaniesModal");
+            var companySpan = document.getElementById("closeUserCompaniesButton");
+
+            companySpan.onclick = function() {
+                companyModal.style.display = "none";
             }
         }
 

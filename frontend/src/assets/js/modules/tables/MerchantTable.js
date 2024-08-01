@@ -134,7 +134,7 @@ function viewSkills(userId) {
 function viewCompany(userId){
     selectedUserIdMerchant = userId;
     populateCompaniesInModal(selectedUserIdMerchant);
-    var companyModal = document.getElementById("modalBodyCompany");
+    var companyModal = document.getElementById("userCompaniesModal");
     console.log("click on companies");
     companyModal.style.display = "block";
 }
