@@ -80,7 +80,7 @@ class WarehouseController
             http_response_code(400);
             return ['error' => 'Name, address, city, and country must be less than 255 characters'];
         }
-        
+
         $warehouse = new WarehouseModel();
         $warehouse->setName($data['name']);
         $warehouse->setAddress($data['address']);
