@@ -26,14 +26,19 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com.example.nomoreswaste.RegisterActivity"
-            android:exported="false"
-            android:label="@string/title_register"
-            android:theme="@style/Theme.Nomorewaste" />
-        <activity
             android:name="com.example.nomoreswaste.LoginActivity"
             android:exported="false"
             android:label="@string/title_login"
+            android:theme="@style/Theme.Nomorewaste" />
+        <activity
+            android:name="com.example.nomorewaste.RegisterVolunteerActivity"
+            android:exported="false"
+            android:label="Volunteer Registration"
+            android:theme="@style/Theme.Nomorewaste" />
+        <activity
+            android:name="com.example.nomorewaste.RegisterMerchantActivity"
+            android:exported="false"
+            android:label="Merchant Registration"
             android:theme="@style/Theme.Nomorewaste" />
         <activity
             android:name="com.example.nomorewaste.espace.MerchantActivity"
