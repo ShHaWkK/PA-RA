@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="button_save_name" type="id" />
+    <item name="edit_last_name" type="id" />
+    <item name="edit_first_name" type="id" />
+</resources>

@@ -39,4 +39,7 @@
     <string name="volunteer_email">Email: %1$s</string>
     <string name="volunteer_phone">Phone: %1$s</string>
     <string name="title_login">Login</string>
+    <string name="edit_first_name">Prénom</string>
+    <string name="edit_last_name">Nom</string>
+    <string name="button_save_name">Enregistrer les modifications</string>
 </resources>
