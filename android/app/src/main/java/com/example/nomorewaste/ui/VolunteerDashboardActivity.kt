@@ -1,4 +1,6 @@
-package com.example.nomorewaste.espace
+package com.example.nomorewaste.ui
+
+
 
 import android.content.Context
 import android.content.Intent
@@ -17,14 +19,14 @@ import com.example.nomorewaste.R
 import com.example.nomorewaste.UserManagementActivity
 import com.example.nomorewaste.api.ApiService
 import com.example.nomorewaste.api.Availability
-import com.example.nomorewaste.api.AvailabilityAdapter
 import com.example.nomorewaste.api.RetrofitClient
 import com.example.nomorewaste.api.User
+import com.example.nomorewaste.api.AvailabilityAdapter
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
-class VolunteerActivity : AppCompatActivity() {
+class VolunteerDashboardActivity : AppCompatActivity() {
 
     private lateinit var nameTextView: TextView
     private lateinit var emailTextView: TextView
@@ -66,7 +68,7 @@ class VolunteerActivity : AppCompatActivity() {
         }
 
         buttonViewAvailabilities.setOnClickListener {
-            Log.d("VolunteerActivity", "buttonViewAvailabilities clicked")
+            Log.d("VolunteerDashboard", "buttonViewAvailabilities clicked")
             if (volunteerId != -1) {
                 val intent = Intent(this, AvailabilitiesActivity::class.java)
                 startActivity(intent)
@@ -74,13 +76,13 @@ class VolunteerActivity : AppCompatActivity() {
         }
 
         buttonManageUser.setOnClickListener {
-            Log.d("VolunteerActivity", "buttonManageUser clicked")
+            Log.d("VolunteerDashboard", "buttonManageUser clicked")
             val intent = Intent(this, UserManagementActivity::class.java)
             startActivity(intent)
         }
 
         buttonViewPlannings.setOnClickListener {
-            Log.d("VolunteerActivity", "buttonViewPlannings clicked")
+            Log.d("VolunteerDashboard", "buttonViewPlannings clicked")
             val intent = Intent(this, PlanningsActivity::class.java)
             startActivity(intent)
         }
@@ -97,12 +99,12 @@ class VolunteerActivity : AppCompatActivity() {
                         phoneTextView.text = getString(R.string.volunteer_phone, it.phone_number)
                     }
                 } else {
-                    Toast.makeText(this@VolunteerActivity, "Erreur de récupération des détails du bénévole", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@VolunteerDashboardActivity, "Erreur de récupération des détails du bénévole", Toast.LENGTH_SHORT).show()
                 }
             }
 
             override fun onFailure(call: Call<User>, t: Throwable) {
-                Toast.makeText(this@VolunteerActivity, "Échec de la connexion : ${t.message}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@VolunteerDashboardActivity, "Échec de la connexion : ${t.message}", Toast.LENGTH_SHORT).show()
             }
         })
     }
@@ -114,12 +116,12 @@ class VolunteerActivity : AppCompatActivity() {
                     val availabilities = response.body() ?: emptyList()
                     recyclerView.adapter = AvailabilityAdapter(availabilities)
                 } else {
-                    Toast.makeText(this@VolunteerActivity, "Erreur de récupération des disponibilités", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@VolunteerDashboardActivity, "Erreur de récupération des disponibilités", Toast.LENGTH_SHORT).show()
                 }
             }
 
             override fun onFailure(call: Call<List<Availability>>, t: Throwable) {
-                Toast.makeText(this@VolunteerActivity, "Échec de la connexion : ${t.message}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@VolunteerDashboardActivity, "Échec de la connexion : ${t.message}", Toast.LENGTH_SHORT).show()
             }
         })
     }

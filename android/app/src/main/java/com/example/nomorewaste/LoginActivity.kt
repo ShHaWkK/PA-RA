@@ -1,4 +1,3 @@
-// Path: com.example.nomoreswaste/LoginActivity.java
 package com.example.nomoreswaste
 
 import android.content.Intent
@@ -18,7 +17,6 @@ import com.example.nomorewaste.espace.VolunteerActivity
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-
 
 class LoginActivity : AppCompatActivity() {
     private lateinit var emailEditText: EditText
@@ -49,40 +47,49 @@ class LoginActivity : AppCompatActivity() {
         }
         val request = LoginRequest(email, password)
         apiService?.login(request)?.enqueue(object : Callback<LoginResponse?> {
-            override fun onResponse(
-                call: Call<LoginResponse?>,
-                response: Response<LoginResponse?>
-            ) {
+            override fun onResponse(call: Call<LoginResponse?>, response: Response<LoginResponse?>) {
                 if (response.isSuccessful) {
                     val loginResponse = response.body()
                     if (loginResponse != null) {
                         val token = loginResponse.token
                         val role = loginResponse.role
+                        val userId = loginResponse.userId
+
+                        Log.d("LoginActivity", "Login successful. User ID: $userId, Role: $role")
+
+                        val sharedPreferences = getSharedPreferences("NoMoreWastePrefs", MODE_PRIVATE)
+                        val editor = sharedPreferences.edit()
+                        editor.putInt("USER_ID", userId)
+                        editor.apply()
+
                         when (role) {
                             "merchant" -> {
                                 val intent = Intent(this@LoginActivity, MerchantActivity::class.java)
                                 startActivity(intent)
+                                finish()
                             }
                             "volunteer" -> {
                                 val intent = Intent(this@LoginActivity, VolunteerActivity::class.java)
                                 startActivity(intent)
+                                finish()
                             }
                             else -> {
                                 Toast.makeText(this@LoginActivity, "Role not supported", Toast.LENGTH_SHORT).show()
                             }
                         }
+                    } else {
+                        Toast.makeText(this@LoginActivity, "Login failed: Empty response", Toast.LENGTH_SHORT).show()
                     }
                 } else {
                     Log.e("LoginActivity", "Login failed with response code: ${response.code()} and message: ${response.message()}")
-                    Toast.makeText(this@LoginActivity, "Login failed", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@LoginActivity, "Login failed: ${response.message()}", Toast.LENGTH_SHORT).show()
                 }
             }
 
             override fun onFailure(call: Call<LoginResponse?>, t: Throwable) {
                 Log.e("LoginActivity", "onFailure: ", t)
-                Toast.makeText(this@LoginActivity, "An error occurred", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@LoginActivity, "An error occurred: ${t.message}", Toast.LENGTH_SHORT).show()
             }
         })
-
     }
 }

@@ -6,8 +6,8 @@
         android:title="Profile"
         app:showAsAction="never" />
     <item
-        android:id="@+id/action_tasks"
-        android:title="Tasks"
+        android:id="@+id/action_inventory"
+        android:title="Inventory"
         app:showAsAction="never" />
     <item
         android:id="@+id/action_logout"
