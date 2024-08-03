@@ -291,14 +291,17 @@ class UserController
 
     private function getUser($id)
     {
+        error_log("Attempting to retrieve user with ID: $id");
         $user = $this->entityManager->getRepository(UserModel::class)->find($id);
         if (!$user) {
+            error_log("User not found for ID: $id");
             http_response_code(404);
             return ['error' => 'User not found'];
         }
         $data = $this->serializer->serialize($user, 'json');
         return json_decode($data, true);
     }
+
 
     private function getUsersByCriteria($data)
     {

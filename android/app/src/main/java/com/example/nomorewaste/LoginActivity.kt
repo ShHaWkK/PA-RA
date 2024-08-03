@@ -51,16 +51,20 @@ class LoginActivity : AppCompatActivity() {
                 if (response.isSuccessful) {
                     val loginResponse = response.body()
                     if (loginResponse != null) {
-                        val token = loginResponse.token
+                        val userId = loginResponse.id
                         val role = loginResponse.role
-                        val userId = loginResponse.userId
 
-                        Log.d("LoginActivity", "Login successful. User ID: $userId, Role: $role")
+                        // Log the user ID received from the server
+                        Log.d("LoginActivity", "Login successful. Received User ID: $userId")
 
                         val sharedPreferences = getSharedPreferences("NoMoreWastePrefs", MODE_PRIVATE)
                         val editor = sharedPreferences.edit()
                         editor.putInt("USER_ID", userId)
                         editor.apply()
+
+                        // Verify the stored ID
+                        val storedUserId = sharedPreferences.getInt("USER_ID", -1)
+                        Log.d("LoginActivity", "Stored User ID in SharedPreferences: $storedUserId")
 
                         when (role) {
                             "merchant" -> {

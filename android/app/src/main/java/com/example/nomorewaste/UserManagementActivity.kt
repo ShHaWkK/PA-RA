@@ -13,7 +13,6 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
-
 class UserManagementActivity : AppCompatActivity() {
 
     private lateinit var editFirstName: EditText
@@ -58,10 +57,10 @@ class UserManagementActivity : AppCompatActivity() {
                 if (response.isSuccessful) {
                     val user = response.body()
                     user?.let {
-                        editFirstName.setText(it.first_name)
-                        editLastName.setText(it.last_name)
+                        editFirstName.setText(it.firstName)
+                        editLastName.setText(it.lastName)
                         editEmail.setText(it.email)
-                        editPhone.setText(it.phone_number)
+                        editPhone.setText(it.phoneNumber)
                     }
                 } else {
                     Toast.makeText(this@UserManagementActivity, "Erreur de récupération des détails de l'utilisateur", Toast.LENGTH_SHORT).show()
@@ -85,7 +84,7 @@ class UserManagementActivity : AppCompatActivity() {
             return
         }
 
-        val updatedUser = User(id = userId, first_name = firstName, last_name = lastName, email = email, phone_number = phone)
+        val updatedUser = User(id = userId, firstName = firstName, lastName = lastName, email = email, phoneNumber = phone)
 
         apiService.updateUser(userId, updatedUser).enqueue(object : Callback<Void> {
             override fun onResponse(call: Call<Void>, response: Response<Void>) {

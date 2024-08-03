@@ -1,10 +1,12 @@
 package com.example.nomorewaste.api
 
+import com.google.gson.annotations.SerializedName
+
 data class User(
     val id: Int,
-    val first_name: String,
-    val last_name: String,
+    @SerializedName("firstName") val firstName: String,
+    @SerializedName("lastName") val lastName: String,
     val email: String,
-    val phone_number: String? = null,
+    @SerializedName("phoneNumber") val phoneNumber: String? = null,
     val password: String? = null
 )

@@ -55,9 +55,9 @@ class VolunteerActivity : AppCompatActivity() {
 
         val sharedPreferences = getSharedPreferences("NoMoreWastePrefs", Context.MODE_PRIVATE)
         val volunteerId = sharedPreferences.getInt("USER_ID", -1)
+        Log.d("VolunteerActivity", "Stored Volunteer ID: $volunteerId")
 
         if (volunteerId != -1) {
-            Log.d("VolunteerActivity", "Volunteer ID: $volunteerId")
             getVolunteerDetails(volunteerId)
         } else {
             Toast.makeText(this, "Erreur de récupération de l'ID du bénévole", Toast.LENGTH_SHORT).show()
@@ -93,9 +93,9 @@ class VolunteerActivity : AppCompatActivity() {
                 if (response.isSuccessful) {
                     val volunteer = response.body()
                     volunteer?.let {
-                        nameTextView.text = getString(R.string.volunteer_name, it.first_name, it.last_name)
+                        nameTextView.text = getString(R.string.volunteer_name, it.firstName, it.lastName)
                         emailTextView.text = getString(R.string.volunteer_email, it.email)
-                        phoneTextView.text = getString(R.string.volunteer_phone, it.phone_number)
+                        phoneTextView.text = getString(R.string.volunteer_phone, it.phoneNumber)
                     }
                 } else {
                     val errorBody = response.errorBody()?.string()
@@ -119,7 +119,7 @@ class VolunteerActivity : AppCompatActivity() {
                     recyclerView.adapter = AvailabilityAdapter(availabilities)
                 } else {
                     val errorBody = response.errorBody()?.string()
-                    Log.e("VolunteerDashboard", "Error: $errorBody, Code: ${response.code()}")
+                    Log.e("VolunteerDashboard", "Error: $errorBody")
                     Toast.makeText(this@VolunteerActivity, "Erreur de récupération des disponibilités: $errorBody", Toast.LENGTH_SHORT).show()
                 }
             }
