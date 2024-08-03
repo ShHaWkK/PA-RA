@@ -17,9 +17,9 @@ import com.example.nomorewaste.R
 import com.example.nomorewaste.UserManagementActivity
 import com.example.nomorewaste.api.ApiService
 import com.example.nomorewaste.api.Availability
-import com.example.nomorewaste.api.AvailabilityAdapter
 import com.example.nomorewaste.api.RetrofitClient
 import com.example.nomorewaste.api.User
+import com.example.nomorewaste.api.AvailabilityAdapter
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -50,13 +50,14 @@ class VolunteerActivity : AppCompatActivity() {
 
         recyclerView.layoutManager = LinearLayoutManager(this)
 
-        val retrofit = RetrofitClient.getClient("http://10.0.2.2/")
+        val retrofit = RetrofitClient.getClient()
         apiService = retrofit.create(ApiService::class.java)
 
         val sharedPreferences = getSharedPreferences("NoMoreWastePrefs", Context.MODE_PRIVATE)
         val volunteerId = sharedPreferences.getInt("USER_ID", -1)
 
         if (volunteerId != -1) {
+            Log.d("VolunteerActivity", "Volunteer ID: $volunteerId")
             getVolunteerDetails(volunteerId)
         } else {
             Toast.makeText(this, "Erreur de récupération de l'ID du bénévole", Toast.LENGTH_SHORT).show()
@@ -66,7 +67,7 @@ class VolunteerActivity : AppCompatActivity() {
         }
 
         buttonViewAvailabilities.setOnClickListener {
-            Log.d("VolunteerActivity", "buttonViewAvailabilities clicked")
+            Log.d("VolunteerDashboard", "buttonViewAvailabilities clicked")
             if (volunteerId != -1) {
                 val intent = Intent(this, AvailabilitiesActivity::class.java)
                 startActivity(intent)
@@ -74,13 +75,13 @@ class VolunteerActivity : AppCompatActivity() {
         }
 
         buttonManageUser.setOnClickListener {
-            Log.d("VolunteerActivity", "buttonManageUser clicked")
+            Log.d("VolunteerDashboard", "buttonManageUser clicked")
             val intent = Intent(this, UserManagementActivity::class.java)
             startActivity(intent)
         }
 
         buttonViewPlannings.setOnClickListener {
-            Log.d("VolunteerActivity", "buttonViewPlannings clicked")
+            Log.d("VolunteerDashboard", "buttonViewPlannings clicked")
             val intent = Intent(this, PlanningsActivity::class.java)
             startActivity(intent)
         }
@@ -97,11 +98,14 @@ class VolunteerActivity : AppCompatActivity() {
                         phoneTextView.text = getString(R.string.volunteer_phone, it.phone_number)
                     }
                 } else {
-                    Toast.makeText(this@VolunteerActivity, "Erreur de récupération des détails du bénévole", Toast.LENGTH_SHORT).show()
+                    val errorBody = response.errorBody()?.string()
+                    Log.e("VolunteerDashboard", "Error: $errorBody, Code: ${response.code()}")
+                    Toast.makeText(this@VolunteerActivity, "Erreur de récupération des détails du bénévole: $errorBody", Toast.LENGTH_SHORT).show()
                 }
             }
 
             override fun onFailure(call: Call<User>, t: Throwable) {
+                Log.e("VolunteerDashboard", "Failure: ${t.message}", t)
                 Toast.makeText(this@VolunteerActivity, "Échec de la connexion : ${t.message}", Toast.LENGTH_SHORT).show()
             }
         })
@@ -114,11 +118,14 @@ class VolunteerActivity : AppCompatActivity() {
                     val availabilities = response.body() ?: emptyList()
                     recyclerView.adapter = AvailabilityAdapter(availabilities)
                 } else {
-                    Toast.makeText(this@VolunteerActivity, "Erreur de récupération des disponibilités", Toast.LENGTH_SHORT).show()
+                    val errorBody = response.errorBody()?.string()
+                    Log.e("VolunteerDashboard", "Error: $errorBody, Code: ${response.code()}")
+                    Toast.makeText(this@VolunteerActivity, "Erreur de récupération des disponibilités: $errorBody", Toast.LENGTH_SHORT).show()
                 }
             }
 
             override fun onFailure(call: Call<List<Availability>>, t: Throwable) {
+                Log.e("VolunteerDashboard", "Failure: ${t.message}", t)
                 Toast.makeText(this@VolunteerActivity, "Échec de la connexion : ${t.message}", Toast.LENGTH_SHORT).show()
             }
         })

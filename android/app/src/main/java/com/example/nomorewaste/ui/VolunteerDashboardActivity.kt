@@ -52,7 +52,7 @@ class VolunteerDashboardActivity : AppCompatActivity() {
 
         recyclerView.layoutManager = LinearLayoutManager(this)
 
-        val retrofit = RetrofitClient.getClient("http://10.0.2.2/")
+        val retrofit = RetrofitClient.getClient()
         apiService = retrofit.create(ApiService::class.java)
 
         val sharedPreferences = getSharedPreferences("NoMoreWastePrefs", Context.MODE_PRIVATE)

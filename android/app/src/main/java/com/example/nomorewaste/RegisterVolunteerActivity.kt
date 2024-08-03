@@ -34,7 +34,7 @@ class RegisterVolunteerActivity : AppCompatActivity() {
         passwordEditText = findViewById(R.id.password)
         registerButton = findViewById(R.id.register_button)
 
-        val retrofit = RetrofitClient.getClient("http://10.0.2.2/")
+        val retrofit = RetrofitClient.getClient()
         apiService = retrofit.create(ApiService::class.java)
 
         registerButton.setOnClickListener { register() }

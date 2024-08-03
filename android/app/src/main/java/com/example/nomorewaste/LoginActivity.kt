@@ -32,7 +32,7 @@ class LoginActivity : AppCompatActivity() {
         passwordEditText = findViewById(R.id.password)
         loginButton = findViewById(R.id.login_button)
 
-        val retrofit = RetrofitClient.getClient("http://10.0.2.2/")
+        val retrofit = RetrofitClient.getClient()
         apiService = retrofit.create(ApiService::class.java)
 
         loginButton.setOnClickListener { login() }

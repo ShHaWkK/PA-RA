@@ -25,7 +25,7 @@ class AvailabilitiesActivity : AppCompatActivity() {
         recyclerView = findViewById(R.id.recycler_view)
         recyclerView.layoutManager = LinearLayoutManager(this)
 
-        val retrofit = RetrofitClient.getClient("http://10.0.2.2/")
+        val retrofit = RetrofitClient.getClient()
         apiService = retrofit.create(ApiService::class.java)
 
         // Récupérer l'ID de l'utilisateur depuis SharedPreferences

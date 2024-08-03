@@ -26,5 +26,4 @@ interface ApiService {
 
     @PUT("users/{id}")
     fun updateUser(@Path("id") id: Int, @Body user: User): Call<Void>
-
 }

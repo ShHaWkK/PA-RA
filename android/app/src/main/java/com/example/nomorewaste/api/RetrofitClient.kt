@@ -1,20 +1,24 @@
-package com.example.nomorewaste.api;
+package com.example.nomorewaste.api
 
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
-
+import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 
 object RetrofitClient {
+        private const val BASE_URL = "http://10.0.2.2/"
 
-private var retrofit: Retrofit? = null
+        fun getClient(): Retrofit {
+                val logging = HttpLoggingInterceptor()
+                logging.setLevel(HttpLoggingInterceptor.Level.BODY)
 
-        fun getClient(baseUrl: String): Retrofit {
-        if (retrofit == null) {
-        retrofit = Retrofit.Builder()
-        .baseUrl(baseUrl)
-        .addConverterFactory(GsonConverterFactory.create())
-        .build()
+                val httpClient = OkHttpClient.Builder()
+                httpClient.addInterceptor(logging)
+
+                return Retrofit.Builder()
+                        .baseUrl(BASE_URL)
+                        .addConverterFactory(GsonConverterFactory.create())
+                        .client(httpClient.build())
+                        .build()
         }
-        return retrofit!!
-        }
-        }
+}
