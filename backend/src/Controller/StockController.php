@@ -29,7 +29,19 @@ class StockController
                 return $this->createStock($input);
             case 'GET':
                 if (isset($uriParts[1])) {
-                    return $this->getStock((int) $uriParts[1]);
+                    switch ($uriParts[1]){
+                        case 'getStocksByWarehouse':
+                            if (isset($uriParts[2])) {
+                                return $this->getStockByWarehouse($uriParts[2]);
+                            }else{
+                                http_response_code(400);
+                                return ['error' => 'Stock ID not specified'];
+                            }
+                            break;
+                        default:
+                            return $this->getStock((int) $uriParts[1]);
+                    }
+
                 } else {
                     return $this->getAllStocks();
                 }
@@ -182,4 +194,18 @@ class StockController
         $stocks = $stockRepository->findAll();
         return json_decode($this->serializer->serialize($stocks, 'json'), true);
     }
+
+    private function getStockByWarehouse($warehouse_id)
+    {
+        $stockRepository = $this->entityManager->getRepository(StockModel::class);
+        $stocks = $stockRepository->findBy(['warehouse_id' => $warehouse_id]);
+
+        if (!$stocks) {
+            http_response_code(404);
+            return ['error' => 'No stock found for the specified warehouse'];
+        }
+
+        return json_decode($this->serializer->serialize($stocks, 'json'), true);
+    }
+
 }

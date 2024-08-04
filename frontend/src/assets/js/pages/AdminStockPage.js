@@ -1,4 +1,5 @@
 import { getAllWarehouses } from '/assets/js/api/Warehouse.js';
+import {populateStockTable} from '/assets/js/modules/tables/StockTable.js';
 
 async function populateWarehouseSelector() {
     try {
@@ -26,7 +27,16 @@ async function populateWarehouseSelector() {
     }
 }
 
+// Fonction pour gérer le changement dans le menu déroulant
+function handleWarehouseChange(event) {
+    const selectedWarehouseId = event.target.value;
+    populateStockTable(selectedWarehouseId);
+}
+
 document.addEventListener('DOMContentLoaded',
     function (){
         populateWarehouseSelector();
+        const warehouseSelect = document.getElementById('warehouseSelect');
+        warehouseSelect.addEventListener('change', handleWarehouseChange);
+        populateStockTable();
     })

@@ -10,16 +10,23 @@
     <link rel="stylesheet" href="/assets/css/table.css">
     <link rel="stylesheet" href="/assets/css/backoffice.css">
 </head>
-    <body>
-        <div class="back-office-container">
-            <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/includes/AdminDashboard.php'); ?>
-            <div class="back-office-content">
-                <h1>Stocks</h1>
+<body>
+<div class="back-office-container">
+    <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/includes/AdminDashboard.php'); ?>
+    <div class="back-office-content">
+        <h1>Stocks</h1>
 
-                <label for="warehouseSelect">Warehouse:</label>
-                <select name="warehouse" id="warehouseSelect"></select>
-            </div>
-        </div>
+        <label for="warehouseSelect">Warehouse:</label>
+        <select name="warehouse" id="warehouseSelect"></select>
+
+        <?php
+        $loaderId = 'loadingBodyGeneral';
+        include($_SERVER['DOCUMENT_ROOT'] . '/views/includes/Loader.php');
+        ?>
+
+        <div class="stock-table"></div>
         <script type="module" src="/assets/js/pages/AdminStockPage.js"></script>
-    </body>
+    </div>
+</div>
+</body>
 </html>

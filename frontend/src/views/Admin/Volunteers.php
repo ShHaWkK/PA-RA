@@ -15,11 +15,6 @@
     <div class="back-office-content">
         <h1>Bénévoles</h1>
 
-        <?php
-        $loaderId = 'loadingBodyGeneral';
-        include($_SERVER['DOCUMENT_ROOT'] . '/views/includes/Loader.php');
-        ?>
-
         <div class="row">
             <input type="text" id="searchInput" placeholder="Rechercher...">
             <select name="status" id="volunteer-status-select">
@@ -39,6 +34,11 @@
             <button class="delete-button" id='rejectButton'> Refuser </button>
             <button class="neutral-button" id='putOnHoldButton'> Mettre en attente </button>
         </div>
+
+        <?php
+        $loaderId = 'loadingBodyGeneral';
+        include($_SERVER['DOCUMENT_ROOT'] . '/views/includes/Loader.php');
+        ?>
 
         <div class="volunteer-table"></div>
         <script type="module" src="/assets/js/pages/AdminUserPages.js"></script>
