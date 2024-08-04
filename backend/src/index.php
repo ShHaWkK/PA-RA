@@ -39,6 +39,8 @@ use Controller\VehicleController;
 use Controller\ScanController;
 use Controller\WarehouseController;
 use Controller\MessageController;
+use Controller\RecipeController;
+use Controller\RecipeIngredientController;
 use Service\PDFService;
 use Service\JWTService;
 use Service\EmailService;
@@ -100,11 +102,13 @@ $controllerMap = [
     'services' => ServiceController::class,
     'service_proposals' => ServiceProposalController::class,
     'tickets' => TicketController::class,
-    'messages' => MessageController::class, // Assurez-vous que 'messages' pointe vers MessageController
+    'messages' => MessageController::class,
     'scripts' => 'Scripts',
-    'vehicles' => VehicleController::class, 
-    'scan' => ScanController::class, 
-    'warehouses' => WarehouseController::class
+    'vehicles' => VehicleController::class,
+    'scan' => ScanController::class,
+    'warehouses' => WarehouseController::class,
+    'recipe' => RecipeController::class, 
+    'recipe_ingredients' => RecipeIngredientController::class,
 ];
 
 // Vérifie si le contrôleur existe pour le premier élément de l'URI
@@ -114,7 +118,6 @@ error_log("Route: " . $route);
 // A retirer par la suite, permet de générer le token à mettre dans la table admin
 if ($route == 'generate_token') {
     echo json_encode(['token' => password_hash($uriParts[1], PASSWORD_BCRYPT)]);
-    password_hash($uriParts[1], PASSWORD_BCRYPT);
     exit();
 }
 
@@ -142,8 +145,8 @@ try {
         $controller = new $controllerClass($entityManager, $emailService);
     } elseif ($controllerClass === TicketController::class) {
         $controller = new $controllerClass($entityManager, $emailService);
-    } elseif ($controllerClass === MessageController::class) { 
-        $controller = new $controllerClass($entityManager); 
+    } elseif ($controllerClass === MessageController::class) {
+        $controller = new $controllerClass($entityManager);
     } elseif ($route === 'scripts') {
         if (isset($uriParts[1]) && $uriParts[1] === 'remove_unverified_users') {
             include __DIR__ . '/Scripts/remove_unverified_users.php';

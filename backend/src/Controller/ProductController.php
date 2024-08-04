@@ -3,12 +3,11 @@ namespace Controller;
 
 use Entity\ProductModel;
 use Entity\StockModel;
-use Entity\WarehouseModel; // Corrigez l'espace de noms ici
+use Entity\WarehouseModel; 
 use Doctrine\ORM\EntityManager;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
-use Doctrine\ORM\EntityNotFoundException;
 use Endroid\QrCode\QrCode;
 use Endroid\QrCode\Writer\PngWriter;
 
@@ -93,7 +92,6 @@ class ProductController
                 return ['error' => 'Warehouse ID must be a non-negative integer'];
             }
 
-            // Verify warehouse capacity
             $warehouse = $this->entityManager->getRepository(WarehouseModel::class)->find($data['warehouse_id']);
             if (!$warehouse) {
                 http_response_code(400);
@@ -249,3 +247,4 @@ class ProductController
         }
     }
 }
+?>

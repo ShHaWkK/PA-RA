@@ -85,6 +85,25 @@ CREATE TABLE IF NOT EXISTS products (
     scanned BOOLEAN DEFAULT FALSE
 );
 
+-- Table des recettes (recipes)
+CREATE TABLE IF NOT EXISTS recipes (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    instructions TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- Table des ingrédients de recettes (recipe_ingredients)
+CREATE TABLE IF NOT EXISTS recipe_ingredients (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    recipe_id INT NOT NULL,
+    product_id INT NOT NULL,
+    quantity_needed INT NOT NULL,
+    FOREIGN KEY (recipe_id) REFERENCES recipes(id) ON DELETE CASCADE,
+    FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
+);
+
 -- Table des véhicules (vehicles)
 CREATE TABLE IF NOT EXISTS vehicles (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -203,16 +222,6 @@ CREATE TABLE IF NOT EXISTS stocks (
     FOREIGN KEY (warehouse_id) REFERENCES warehouses(id) ON DELETE CASCADE
 );
 
--- Table des jetons utilisateurs (user_tokens)
--- CREATE TABLE IF NOT EXISTS user_tokens (
---     id INT AUTO_INCREMENT PRIMARY KEY,
---     user_id INT NOT NULL,
---     token VARCHAR(255) NOT NULL,
---     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
---     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
---     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
--- );
-
 -- Table des tickets (tickets)
 CREATE TABLE IF NOT EXISTS tickets (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -228,6 +237,7 @@ CREATE TABLE IF NOT EXISTS tickets (
     FOREIGN KEY (assigned_to) REFERENCES users(id) ON DELETE SET NULL
 );
 
+-- Table des messages (messages)
 CREATE TABLE IF NOT EXISTS messages (
     id INT AUTO_INCREMENT PRIMARY KEY,
     ticket_id INT NOT NULL,
@@ -251,12 +261,12 @@ INSERT INTO warehouses (name, address, contact_info, capacity, city, country) VA
 ('Dublin Warehouse', '30 Dublin Road, Dublin', 'contact@dublinwarehouse.com', 750, 'Dublin', 'Ireland');
 
 -- Insertion des exemples de produits
-INSERT INTO products (name, barcode, expiration_date, volume) VALUES 
-('Product 1', '1234567890123', '2025-12-31', 100),
-('Product 2', '1234567890124', '2025-12-31', 200),
-('Product 3', '1234567890125', '2026-01-01', 300),
-('Product 4', '1234567890126', '2026-06-01', 400),
-('Product 5', '1234567890127', '2026-12-31', 500);
+INSERT INTO products (name, barcode, expiration_date, volume) VALUES
+('Rice', '1234567890123', '2025-12-31', 1.5),
+('Beans', '1234567890124', '2025-12-31', 2.5),
+('Pasta', '1234567890125', '2026-01-01', 3.5),
+('Tomatoes', '1234567890126', '2026-06-01', 4.5),
+('Potatoes', '1234567890127', '2026-12-31', 5.5);
 
 -- Insertion des utilisateurs
 -- password1423
@@ -335,3 +345,20 @@ INSERT INTO deliveries (route_name, destination, recipient_type, delivery_date, 
 ('Route 3', 'Marseille', 'association', CURRENT_TIMESTAMP, 'pending', 'Third delivery', 3, 1),
 ('Route 4', 'Limoges', 'individual', CURRENT_TIMESTAMP, 'pending', 'Fourth delivery', 4, 2),
 ('Route 5', 'Naples', 'association', CURRENT_TIMESTAMP, 'pending', 'Fifth delivery', 5, 1);
+
+-- Insertion des exemples de services
+INSERT INTO services (name, description, schedule, capacity, status, location) VALUES 
+('Food Distribution', 'Distribution of food to those in need.', CURRENT_TIMESTAMP, 100, 'open', 'Paris Warehouse'),
+('Clothing Distribution', 'Distribution of clothes to those in need.', CURRENT_TIMESTAMP, 50, 'open', 'Nantes Warehouse');
+
+-- Insertion des recettes
+INSERT INTO recipes (name, instructions) VALUES
+('Pasta', 'Boil pasta. Add sauce.'),
+('Salad', 'Chop veggies. Add dressing.'),
+('Sandwich', 'Put ingredients between bread slices.');
+
+-- Insertion des ingrédients de recettes
+INSERT INTO recipe_ingredients (recipe_id, product_id, quantity_needed) VALUES
+(1, 1, 100),
+(2, 2, 50),
+(3, 3, 150);
