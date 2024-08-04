@@ -421,13 +421,25 @@ class UserController
                 return ['error' => 'User not found'];
             }
 
+            $originalEmail = $user->getEmail();
+            $originalFirstName = $user->getFirstName();
+            $originalLastName = $user->getLastName();
+            $originalPassword = $user->getPassword();
+
             $user->updateFields($input);
 
             $this->entityManager->persist($user);
             $this->entityManager->flush();
 
-            if (isset($input['email'])) {
+            // Check for changes and send corresponding emails
+            if (isset($input['email']) && $input['email'] !== $originalEmail) {
                 $this->emailService->sendEmailChangeConfirmation($user->getEmail());
+            }
+            if (isset($input['first_name']) && $input['first_name'] !== $originalFirstName || isset($input['last_name']) && $input['last_name'] !== $originalLastName) {
+                $this->emailService->sendNameChangeNotification($user->getEmail(), $user->getFirstName(), $user->getLastName());
+            }
+            if (isset($input['password']) && $input['password'] !== $originalPassword) {
+                $this->emailService->sendPasswordChangeNotification($user->getEmail());
             }
 
             return ['message' => 'User updated successfully'];

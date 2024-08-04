@@ -12,6 +12,7 @@ class EmailService
     public function __construct(PHPMailer $mailer)
     {
         $this->mailer = $mailer;
+        $this->mailer->CharSet = 'UTF-8';
     }
 
     public function sendVerificationEmail($email, $verificationCode)
@@ -44,16 +45,16 @@ class EmailService
         }
     }
 
-
     public function sendEmailChangeConfirmation($email) {
         try {
             $this->mailer->setFrom('morewaste1@gmail.com', 'No More Waste');
             $this->mailer->addAddress($email);
+            $this->mailer->isHTML(true);
             $this->mailer->Subject = 'Changement d\'email confirmé';
             $this->mailer->Body = 'Votre adresse email a été changée avec succès.';
             $this->mailer->send();
         } catch (Exception $e) {
-            echo "Message could not be sent. Mailer Error: {$this->mailer->ErrorInfo}";
+            error_log("Message could not be sent. Mailer Error: {$this->mailer->ErrorInfo}");
         }
     }
 
@@ -61,17 +62,20 @@ class EmailService
         try {
             $this->mailer->setFrom('morewaste1@gmail.com', 'No More Waste');
             $this->mailer->addAddress($email);
+            $this->mailer->isHTML(true);
             $this->mailer->Subject = 'Votre inscription a été approuvée';
             $this->mailer->Body = 'Votre inscription a été approuvée. Bienvenue !';
             $this->mailer->send();
         } catch (Exception $e) {
-            echo "Message could not be sent. Mailer Error: {$this->mailer->ErrorInfo}";
+            error_log("Message could not be sent. Mailer Error: {$this->mailer->ErrorInfo}");
         }
     }
+
     public function sendRejectionEmail($email) {
         try {
             $this->mailer->setFrom('morewaste1@gmail.com', 'No More Waste');
             $this->mailer->addAddress($email);
+            $this->mailer->isHTML(true);
             $this->mailer->Subject = 'Votre inscription a été refusée';
             $this->mailer->Body = "Votre inscription a été refusée. Merci de votre compréhension.\n\n" .
                                   "Nous avons détecté une activité suspecte liée à des bots ou une tentative d'usurpation d'identité.\n\n" .
@@ -79,7 +83,36 @@ class EmailService
                                   "Si vous pensez qu'il s'agit d'une erreur, veuillez nous contacter immédiatement.";
             $this->mailer->send();
         } catch (Exception $e) {
-            echo "Message could not be sent. Mailer Error: {$this->mailer->ErrorInfo}";
+            error_log("Message could not be sent. Mailer Error: {$this->mailer->ErrorInfo}");
+        }
+    }
+
+    public function sendPasswordChangeNotification($email)
+    {
+        try {
+            $this->mailer->setFrom('morewaste1@gmail.com', 'No More Waste');
+            $this->mailer->addAddress($email);
+            $this->mailer->isHTML(true);
+            $this->mailer->Subject = 'Changement de mot de passe';
+            $this->mailer->Body = 'Votre mot de passe a été modifié avec succès.';
+            $this->mailer->send();
+        } catch (Exception $e) {
+            error_log("Message could not be sent. Mailer Error: {$this->mailer->ErrorInfo}");
+        }
+    }
+
+    public function sendNameChangeNotification($email, $firstName, $lastName)
+    {
+        try {
+            $this->mailer->setFrom('morewaste1@gmail.com', 'No More Waste');
+            $this->mailer->addAddress($email);
+            $this->mailer->isHTML(true);
+            $this->mailer->Subject = 'Changement de nom';
+            $this->mailer->Body = "Votre nom a été modifié avec succès. Nouveau nom : $firstName $lastName.";
+            $this->mailer->send();
+        } catch (Exception $e) {
+            error_log("Message could not be sent. Mailer Error: {$this->mailer->ErrorInfo}");
         }
     }
 }
+?>

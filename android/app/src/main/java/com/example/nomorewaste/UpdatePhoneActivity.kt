@@ -1,5 +1,6 @@
 package com.example.nomorewaste
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
@@ -8,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.example.nomorewaste.api.ApiService
 import com.example.nomorewaste.api.RetrofitClient
 import com.example.nomorewaste.api.User
+import com.example.nomorewaste.espace.VolunteerActivity
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -39,21 +41,52 @@ class UpdatePhoneActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            val updatedUser = User(id = userId, firstName = "", lastName = "", email = "", phoneNumber = phone)
-            apiService.updateUser(userId, updatedUser).enqueue(object : Callback<Void> {
-                override fun onResponse(call: Call<Void>, response: Response<Void>) {
+            // Retrieve the existing user details
+            apiService.getUser(userId).enqueue(object : Callback<User> {
+                override fun onResponse(call: Call<User>, response: Response<User>) {
                     if (response.isSuccessful) {
-                        Toast.makeText(this@UpdatePhoneActivity, "Téléphone modifié avec succès", Toast.LENGTH_SHORT).show()
-                        finish()
+                        val user = response.body()
+                        if (user != null) {
+                            val updatedUser = User(
+                                id = userId,
+                                firstName = user.firstName,
+                                lastName = user.lastName,
+                                email = user.email,
+                                phoneNumber = phone,
+                                password = user.password
+                            )
+                            updateUser(updatedUser)
+                        }
                     } else {
-                        Toast.makeText(this@UpdatePhoneActivity, "Erreur lors de la modification du téléphone", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this@UpdatePhoneActivity, "Erreur lors de la récupération des détails de l'utilisateur", Toast.LENGTH_SHORT).show()
                     }
                 }
 
-                override fun onFailure(call: Call<Void>, t: Throwable) {
+                override fun onFailure(call: Call<User>, t: Throwable) {
                     Toast.makeText(this@UpdatePhoneActivity, "Échec de la connexion : ${t.message}", Toast.LENGTH_SHORT).show()
                 }
             })
         }
+    }
+
+    private fun updateUser(user: User) {
+        apiService.updateUser(user.id, user).enqueue(object : Callback<Void> {
+            override fun onResponse(call: Call<Void>, response: Response<Void>) {
+                if (response.isSuccessful) {
+                    Toast.makeText(this@UpdatePhoneActivity, "Téléphone modifié avec succès", Toast.LENGTH_SHORT).show()
+                    // Return to VolunteerActivity
+                    val intent = Intent(this@UpdatePhoneActivity, VolunteerActivity::class.java)
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
+                    startActivity(intent)
+                    finish()
+                } else {
+                    Toast.makeText(this@UpdatePhoneActivity, "Erreur lors de la modification du téléphone", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onFailure(call: Call<Void>, t: Throwable) {
+                Toast.makeText(this@UpdatePhoneActivity, "Échec de la connexion : ${t.message}", Toast.LENGTH_SHORT).show()
+            }
+        })
     }
 }

@@ -1,5 +1,6 @@
 package com.example.nomorewaste
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
@@ -8,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.example.nomorewaste.api.ApiService
 import com.example.nomorewaste.api.RetrofitClient
 import com.example.nomorewaste.api.User
+import com.example.nomorewaste.espace.VolunteerActivity
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -83,6 +85,10 @@ class UpdateNameActivity : AppCompatActivity() {
             override fun onResponse(call: Call<Void>, response: Response<Void>) {
                 if (response.isSuccessful) {
                     Toast.makeText(this@UpdateNameActivity, "Nom modifié avec succès", Toast.LENGTH_SHORT).show()
+                    // Return to VolunteerActivity
+                    val intent = Intent(this@UpdateNameActivity, VolunteerActivity::class.java)
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
+                    startActivity(intent)
                     finish()
                 } else {
                     Toast.makeText(this@UpdateNameActivity, "Erreur lors de la modification du nom", Toast.LENGTH_SHORT).show()
