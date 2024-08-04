@@ -24,9 +24,9 @@ class AvailabilityAdapter(private val availabilities: List<Availability>) :
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val availability = availabilities[position]
-        holder.dayOfWeekTextView.text = availability.dayOfWeek
-        holder.startTimeTextView.text = availability.startTime
-        holder.endTimeTextView.text = availability.endTime
+        holder.dayOfWeekTextView.text = availability.day_of_week
+        holder.startTimeTextView.text = availability.start_time
+        holder.endTimeTextView.text = availability.end_time
     }
 
     override fun getItemCount() = availabilities.size

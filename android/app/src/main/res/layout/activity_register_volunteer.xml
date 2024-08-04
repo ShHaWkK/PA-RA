@@ -131,153 +131,189 @@
             android:paddingTop="16dp"
             android:paddingBottom="8dp" />
 
-        <TableLayout
-            android:id="@+id/availabilities"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:stretchColumns="1,2"
+            android:orientation="vertical"
             android:padding="8dp">
 
-            <TableRow>
-                <TextView android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Lundi" />
-                <EditText
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:hint="Début"
-                    android:inputType="time"
-                    android:padding="8dp" />
-                <EditText
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:hint="Fin"
-                    android:inputType="time"
-                    android:padding="8dp" />
-            </TableRow>
+            <!-- Lundi -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingTop="8dp">
 
-            <TableRow>
-                <TextView android:layout_width="wrap_content"
+                <TextView
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Mardi" />
-                <EditText
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:hint="Début"
-                    android:inputType="time"
-                    android:padding="8dp" />
-                <EditText
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:hint="Fin"
-                    android:inputType="time"
-                    android:padding="8dp" />
-            </TableRow>
+                    android:text="Lundi"
+                    android:layout_weight="1" />
 
-            <TableRow>
-                <TextView android:layout_width="wrap_content"
+                <Button
+                    android:id="@+id/monday_start_button"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Mercredi" />
-                <EditText
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:hint="Début"
-                    android:inputType="time"
-                    android:padding="8dp" />
-                <EditText
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:hint="Fin"
-                    android:inputType="time"
-                    android:padding="8dp" />
-            </TableRow>
+                    android:text="Début" />
 
-            <TableRow>
-                <TextView android:layout_width="wrap_content"
+                <Button
+                    android:id="@+id/monday_end_button"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Jeudi" />
-                <EditText
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:hint="Début"
-                    android:inputType="time"
-                    android:padding="8dp" />
-                <EditText
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:hint="Fin"
-                    android:inputType="time"
-                    android:padding="8dp" />
-            </TableRow>
+                    android:text="Fin" />
+            </LinearLayout>
 
-            <TableRow>
-                <TextView android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Vendredi" />
-                <EditText
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:hint="Début"
-                    android:inputType="time"
-                    android:padding="8dp" />
-                <EditText
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:hint="Fin"
-                    android:inputType="time"
-                    android:padding="8dp" />
-            </TableRow>
+            <!-- Répétez cette section pour chaque jour de la semaine -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingTop="8dp">
 
-            <TableRow>
-                <TextView android:layout_width="wrap_content"
+                <TextView
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Samedi" />
-                <EditText
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:hint="Début"
-                    android:inputType="time"
-                    android:padding="8dp" />
-                <EditText
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:hint="Fin"
-                    android:inputType="time"
-                    android:padding="8dp" />
-            </TableRow>
+                    android:text="Mardi"
+                    android:layout_weight="1" />
 
-            <TableRow>
-                <TextView android:layout_width="wrap_content"
+                <Button
+                    android:id="@+id/tuesday_start_button"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Dimanche" />
-                <EditText
-                    android:layout_width="0dp"
+                    android:text="Début" />
+
+                <Button
+                    android:id="@+id/tuesday_end_button"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:hint="Début"
-                    android:inputType="time"
-                    android:padding="8dp" />
-                <EditText
-                    android:layout_width="0dp"
+                    android:text="Fin" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingTop="8dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:hint="Fin"
-                    android:inputType="time"
-                    android:padding="8dp" />
-            </TableRow>
-        </TableLayout>
+                    android:text="Mercredi"
+                    android:layout_weight="1" />
+
+                <Button
+                    android:id="@+id/wednesday_start_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Début" />
+
+                <Button
+                    android:id="@+id/wednesday_end_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Fin" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingTop="8dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Jeudi"
+                    android:layout_weight="1" />
+
+                <Button
+                    android:id="@+id/thursday_start_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Début" />
+
+                <Button
+                    android:id="@+id/thursday_end_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Fin" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingTop="8dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Vendredi"
+                    android:layout_weight="1" />
+
+                <Button
+                    android:id="@+id/friday_start_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Début" />
+
+                <Button
+                    android:id="@+id/friday_end_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Fin" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingTop="8dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Samedi"
+                    android:layout_weight="1" />
+
+                <Button
+                    android:id="@+id/saturday_start_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Début" />
+
+                <Button
+                    android:id="@+id/saturday_end_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Fin" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingTop="8dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Dimanche"
+                    android:layout_weight="1" />
+
+                <Button
+                    android:id="@+id/sunday_start_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Début" />
+
+                <Button
+                    android:id="@+id/sunday_end_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Fin" />
+            </LinearLayout>
+        </LinearLayout>
 
         <Button
             android:id="@+id/register_button"

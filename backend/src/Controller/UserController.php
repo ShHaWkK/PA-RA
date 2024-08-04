@@ -44,6 +44,7 @@ class UserController
         $this->emailService = $emailService;
     }
 
+
     public function processRequest($method, $uriParts, $input)
     {
         switch ($method) {
@@ -72,7 +73,6 @@ class UserController
                     switch ($uriParts[1]) {
                         case 'generatePlanning':
                             return $this->generatePlanning();
-
                         case 'getSkills':
                             if (isset($uriParts[2])) {
                                 return $this->getUserSkills($uriParts[2]);
@@ -80,7 +80,6 @@ class UserController
                                 http_response_code(400);
                                 return ["message" => "User id not set"];
                             }
-
                         case 'getAvailabilities':
                             if (isset($uriParts[2])) {
                                 return $this->getUserAvailabilities($uriParts[2]);
@@ -88,10 +87,8 @@ class UserController
                                 http_response_code(400);
                                 return ["message" => "User id not set"];
                             }
-
                         case 'tickets':
                             return $this->getTicketsByUser((int)$uriParts[1]);
-
                         default:
                             return $this->getUser($uriParts[1]);
                     }
@@ -126,64 +123,63 @@ class UserController
     private function registerVolunteer($data)
     {
         $this->entityManager->beginTransaction();
-
+    
         try {
             if (!isset($data['first_name']) || !isset($data['last_name']) || !isset($data['email']) || !isset($data['phone_number']) || !isset($data['password'])) {
                 http_response_code(400);
                 return ['error' => 'Missing required fields'];
             }
-
+    
             // Check if the email already exists
             $existingUser = $this->entityManager->getRepository(UserModel::class)->findOneBy(['email' => $data['email']]);
-
             if ($existingUser) {
                 http_response_code(409);
                 return ['error' => 'Email already exists'];
             }
-
+    
             // Generate verification code
             $verificationCode = rand(100000, 999999);
             $data['verification_code'] = $verificationCode;
             $data['is_verified'] = false;
-
+    
             $user = $this->userService->addUser($data, 'volunteer');
             $this->entityManager->persist($user);
             $this->entityManager->flush();
-
-            // Handle skills assignment
+    
+            // Handle skills assignment (if any)
             if (isset($data['skills'])) {
                 $this->skillService->addSkills($user, $data['skills']);
             }
-
+    
             // Handle availabilities assignment
             if (isset($data['availabilities'])) {
-                foreach ($data['availabilities'] as $index => $availabilityData) {
+                foreach ($data['availabilities'] as $availabilityData) {
                     if (!isset($availabilityData['day_of_week']) || !isset($availabilityData['start_time']) || !isset($availabilityData['end_time'])) {
                         http_response_code(400);
-                        return ['error' => "Missing required fields for availability at index $index"];
+                        return ['error' => 'Missing required fields for availability'];
                     }
-                    // Add user_id to availability data
                     $availabilityData['user_id'] = $user->getId();
                     $this->availabilityService->addAvailability($availabilityData);
                 }
             }
-
+    
             $this->entityManager->flush();
             $this->entityManager->commit();
-
+    
             // Send verification email
             $this->emailService->sendVerificationEmail($data['email'], $verificationCode);
-
+    
             return ['id' => $user->getId(), 'message' => 'Volunteer registered successfully. Verification code sent.'];
-
+    
         } catch (\Exception $e) {
             $this->entityManager->rollback();
-
             error_log("Exception in registerVolunteer: " . $e->getMessage());
             http_response_code(500);
             return ['error' => 'Internal Server Error'];
         }
     }
+    
+    
 
     private function registerMerchant($data)
     {
@@ -286,37 +282,40 @@ class UserController
         return $planning;
     }
 
-    private function updateUserStatus($id, $data)
-    {
+    private function updateUserStatus($id, $data) {
         try {
             if (!isset($data['status'])) {
                 http_response_code(400);
                 return ['error' => 'Missing status field'];
             }
-
+    
             $user = $this->entityManager->getRepository(UserModel::class)->find($id);
-
+    
             if (!$user) {
                 http_response_code(404);
                 return ['error' => 'User not found'];
             }
-
+    
             $user->setStatus($data['status']);
             $this->entityManager->persist($user);
             $this->entityManager->flush();
-
+    
             if ($data['status'] === 'approved') {
                 $this->emailService->sendApprovalEmail($user->getEmail());
-            } else {
+            } elseif ($data['status'] === 'rejected') {
+                error_log("Sending rejection email to: " . $user->getEmail());
                 $this->emailService->sendRejectionEmail($user->getEmail());
             }
-
+    
             return ['message' => 'User status updated successfully'];
         } catch (\Exception $e) {
+            error_log("Exception in updateUserStatus: " . $e->getMessage());
             http_response_code(500);
             return ['error' => 'Internal Server Error'];
         }
     }
+    
+
 
     private function getAllUsers()
     {

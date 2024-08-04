@@ -8,5 +8,6 @@ data class User(
     @SerializedName("last_name") val lastName: String,
     val email: String,
     @SerializedName("phone_number") val phoneNumber: String? = null,
-    val password: String? = null
+    val password: String? = null,
+    val availabilities: List<Availability>? = null
 )

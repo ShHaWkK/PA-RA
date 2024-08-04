@@ -1,8 +1,7 @@
 package com.example.nomorewaste.api
 
 data class Availability(
-    val id: Int,
-    val dayOfWeek: String,
-    val startTime: String,
-    val endTime: String
+    val day_of_week: String,
+    val start_time: String,
+    val end_time: String
 )
