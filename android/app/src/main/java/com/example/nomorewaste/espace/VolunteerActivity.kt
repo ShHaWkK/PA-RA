@@ -17,9 +17,9 @@ import com.example.nomorewaste.R
 import com.example.nomorewaste.UserManagementActivity
 import com.example.nomorewaste.api.ApiService
 import com.example.nomorewaste.api.Availability
+import com.example.nomorewaste.api.AvailabilityAdapter
 import com.example.nomorewaste.api.RetrofitClient
 import com.example.nomorewaste.api.User
-import com.example.nomorewaste.api.AvailabilityAdapter
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -93,9 +93,12 @@ class VolunteerActivity : AppCompatActivity() {
                 if (response.isSuccessful) {
                     val volunteer = response.body()
                     volunteer?.let {
-                        nameTextView.text = getString(R.string.volunteer_name, it.firstName, it.lastName)
-                        emailTextView.text = getString(R.string.volunteer_email, it.email)
-                        phoneTextView.text = getString(R.string.volunteer_phone, it.phoneNumber)
+                        Log.d("VolunteerDetails", "User Details: $it")
+                        nameTextView.text = getString(R.string.volunteer_name, it.firstName ?: "N/A", it.lastName ?: "N/A")
+                        emailTextView.text = getString(R.string.volunteer_email, it.email ?: "N/A")
+                        phoneTextView.text = getString(R.string.volunteer_phone, it.phoneNumber ?: "N/A")
+                    } ?: run {
+                        Log.e("VolunteerDetails", "Volunteer data is null")
                     }
                 } else {
                     val errorBody = response.errorBody()?.string()

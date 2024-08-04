@@ -42,4 +42,5 @@
     <string name="edit_first_name">Prénom</string>
     <string name="edit_last_name">Nom</string>
     <string name="button_save_name">Enregistrer les modifications</string>
+
 </resources>

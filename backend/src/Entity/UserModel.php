@@ -237,6 +237,15 @@ class UserModel implements \JsonSerializable
         return $this;
     }
 
+    public function updateFields(array $fields): void
+    {
+        foreach ($fields as $key => $value) {
+            if (property_exists($this, $key)) {
+                $this->$key = $value;
+            }
+        }
+    }
+    
     public function jsonSerialize(): array
     {
         return [

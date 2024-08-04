@@ -1,5 +1,5 @@
 <?php
-
+// Path: backend/src/Controller/UserController.php
 namespace Controller;
 
 use Doctrine\ORM\EntityManager;
@@ -44,7 +44,6 @@ class UserController
         $this->emailService = $emailService;
     }
 
-
     public function processRequest($method, $uriParts, $input)
     {
         switch ($method) {
@@ -58,7 +57,7 @@ class UserController
                         case 'addAvailability':
                             return $this->addAvailability($input);
                         case 'verifyCode':
-                            return $this->verifyCode($input); 
+                            return $this->verifyCode($input);
                         default:
                             http_response_code(400);
                             return ['error' => 'Invalid endpoint'];
@@ -70,11 +69,32 @@ class UserController
 
             case 'GET':
                 if (isset($uriParts[1])) {
-                    return match ($uriParts[1]) {
-                        'generatePlanning' => $this->generatePlanning(),
-                        'tickets' => $this->getTicketsByUser((int)$uriParts[1]),
-                        default => $this->getUser((int)$uriParts[1]),
-                    };
+                    switch ($uriParts[1]) {
+                        case 'generatePlanning':
+                            return $this->generatePlanning();
+
+                        case 'getSkills':
+                            if (isset($uriParts[2])) {
+                                return $this->getUserSkills($uriParts[2]);
+                            } else {
+                                http_response_code(400);
+                                return ["message" => "User id not set"];
+                            }
+
+                        case 'getAvailabilities':
+                            if (isset($uriParts[2])) {
+                                return $this->getUserAvailabilities($uriParts[2]);
+                            } else {
+                                http_response_code(400);
+                                return ["message" => "User id not set"];
+                            }
+
+                        case 'tickets':
+                            return $this->getTicketsByUser((int)$uriParts[1]);
+
+                        default:
+                            return $this->getUser($uriParts[1]);
+                    }
                 } else {
                     return $this->getUsersByCriteria($_GET);
                 }
@@ -83,13 +103,15 @@ class UserController
                 if (isset($uriParts[2])) {
                     switch ($uriParts[1]) {
                         case 'approval':
-                            return $this->updateUserStatus((int)$uriParts[2], $input);
-                        default:
-                            http_response_code(400);
-                            return ['error' => 'Invalid endpoint'];
+                            return $this->updateUserStatus($uriParts[2], $input);
                     }
-                } elseif (isset($uriParts[1])) {
-                    return $this->updateUser((int)$uriParts[1], $input);
+                } else {
+                    return $this->updateUser($uriParts[1], $input);
+                }
+
+            case 'DELETE':
+                if (isset($uriParts[1])) {
+                    return $this->deleteUser($uriParts[1]);
                 } else {
                     http_response_code(400);
                     return ['error' => 'User ID not specified'];
@@ -100,6 +122,7 @@ class UserController
                 return ['error' => 'Method Not Allowed'];
         }
     }
+
     private function registerVolunteer($data)
     {
         $this->entityManager->beginTransaction();
@@ -242,42 +265,6 @@ class UserController
         }
     }
 
-    private function updateUser($id, $data)
-    {
-        try {
-            $user = $this->entityManager->getRepository(UserModel::class)->find($id);
-
-            if (!$user) {
-                http_response_code(404);
-                return ['error' => 'User not found'];
-            }
-
-            if (isset($data['email'])) {
-                $user->setEmail($data['email']);
-            }
-            if (isset($data['firstName'])) {
-                $user->setFirstName($data['firstName']);
-            }
-            if (isset($data['lastName'])) {
-                $user->setLastName($data['lastName']);
-            }
-            if (isset($data['phoneNumber'])) {
-                $user->setPhoneNumber($data['phoneNumber']);
-            }
-            if (isset($data['password'])) {
-                $user->setPassword($data['password']);
-            }
-
-            $this->entityManager->flush();
-
-            return ['message' => 'User updated successfully'];
-        } catch (\Exception $e) {
-            error_log("Exception in updateUser: " . $e->getMessage());
-            http_response_code(500);
-            return ['error' => 'Internal Server Error'];
-        }
-    }
-
     private function generatePlanning()
     {
         $volunteers = $this->entityManager->getRepository(UserModel::class)->findBy(['role' => 'volunteer', 'status' => 'approved']);
@@ -307,7 +294,23 @@ class UserController
                 return ['error' => 'Missing status field'];
             }
 
-            $user = $this->userService->updateUserStatus($id, $data['status']);
+            $user = $this->entityManager->getRepository(UserModel::class)->find($id);
+
+            if (!$user) {
+                http_response_code(404);
+                return ['error' => 'User not found'];
+            }
+
+            $user->setStatus($data['status']);
+            $this->entityManager->persist($user);
+            $this->entityManager->flush();
+
+            if ($data['status'] === 'approved') {
+                $this->emailService->sendApprovalEmail($user->getEmail());
+            } else {
+                $this->emailService->sendRejectionEmail($user->getEmail());
+            }
+
             return ['message' => 'User status updated successfully'];
         } catch (\Exception $e) {
             http_response_code(500);
@@ -315,14 +318,10 @@ class UserController
         }
     }
 
-    /**
-     * @throws NotSupported
-     */
     private function getAllUsers()
     {
         $users = $this->entityManager->getRepository(UserModel::class)->findAll();
 
-        // Prepare data using jsonSerialize() method
         $serializedUsers = [];
         foreach ($users as $user) {
             $serializedUsers[] = $user->jsonSerialize();
@@ -333,17 +332,14 @@ class UserController
 
     private function getUser($id)
     {
-        error_log("Attempting to retrieve user with ID: $id");
         $user = $this->entityManager->getRepository(UserModel::class)->find($id);
         if (!$user) {
-            error_log("User not found for ID: $id");
             http_response_code(404);
             return ['error' => 'User not found'];
         }
-        $data = $this->serializer->serialize($user, 'json');
-        return json_decode($data, true);
+        $data = $user->jsonSerialize();
+        return $data;
     }
-
 
     private function getUsersByCriteria($data)
     {
@@ -366,42 +362,100 @@ class UserController
 
         return $serializedUsers;
     }
-    public function getTicketsByUser($userId)
+
+    public function getUserSkills($userId)
+    {
+        $user = $this->entityManager->getRepository(UserModel::class)->find($userId);
+
+        if (!$user) {
+            http_response_code(404);
+            return ['message' =>"User with ID $userId not found"];
+        }
+
+        $skills = $user->getSkills();
+
+        $serializedSkills = [];
+        foreach ($skills as $skill) {
+            $serializedSkills[] = $skill->jsonSerialize();
+        }
+
+        return $serializedSkills;
+    }
+
+    private function getUserAvailabilities($userId)
+    {
+        $user = $this->entityManager->getRepository(UserModel::class)->find($userId);
+
+        if (!$user) {
+            http_response_code(404);
+            return ['message' =>"User with ID $userId not found"];
+        }
+
+        $availabilities = $user->getAvailabilities();
+
+        if (!$availabilities) {
+            http_response_code(404);
+            return ['error' => 'Skill not found'];
+        }
+
+        $serializedAvailabilities = [];
+        foreach ($availabilities as $availability) {
+            $serializedAvailabilities[] = $availability->jsonSerialize();
+        }
+
+        return $serializedAvailabilities;
+    }
+
+    private function updateUser($id, $input)
     {
         try {
-            // Assurez-vous que vous avez bien un utilisateur valide
-            $user = $this->entityManager->find(UserModel::class, $userId);
+            if (!is_array($input)) {
+                http_response_code(400);
+                return ['error' => 'Invalid input format'];
+            }
+
+            $user = $this->entityManager->getRepository(UserModel::class)->find($id);
+
             if (!$user) {
                 http_response_code(404);
-                return json_encode(['error' => 'User not found']);
+                return ['error' => 'User not found'];
             }
 
-            // Récupérez les tickets créés par cet utilisateur
-            $tickets = $this->entityManager->getRepository(TicketModel::class)->findBy(['created_by' => $user]);
+            $user->updateFields($input);
 
-            // Préparez une réponse simplifiée ne contenant que les informations de tickets
-            $ticketData = [];
-            foreach ($tickets as $ticket) {
-                $ticketData[] = [
-                    'id' => $ticket->getId(),
-                    'type' => $ticket->getType(),
-                    'description' => $ticket->getDescription(),
-                    'status' => $ticket->getStatus(),
-                    'createdAt' => $ticket->getCreatedAt(),
-                    'updatedAt' => $ticket->getUpdatedAt(),
-                    'assignedTo' => $ticket->getAssignedTo() ? $ticket->getAssignedTo()->getId() : null,
-                    'attachments' => $ticket->getAttachments()
-                ];
+            $this->entityManager->persist($user);
+            $this->entityManager->flush();
+
+            if (isset($input['email'])) {
+                $this->emailService->sendEmailChangeConfirmation($user->getEmail());
             }
 
-            // Sérialisez les données des tickets pour les renvoyer au client
-            $response = json_encode($ticketData);
-            error_log("Tickets retrieved for user {$userId}: " . $response); // Log tickets retrieved
-            return $response;
+            return ['message' => 'User updated successfully'];
         } catch (\Exception $e) {
-            error_log("Exception in getTicketsByUser: " . $e->getMessage());
+            error_log($e->getMessage());
+
             http_response_code(500);
-            return json_encode(['error' => 'Internal Server Error']);
+            return ['error' => 'Internal Server Error'];
+        }
+    }
+
+    public function deleteUser(int $id)
+    {
+        $user = $this->entityManager->getRepository(UserModel::class)->find($id);
+
+        if ($user === null) {
+            http_response_code(404);
+            return ['error' => 'User not found'];
+        }
+
+        try {
+            $this->entityManager->remove($user);
+            $this->entityManager->flush();
+            return ['message' => 'User deleted successfully'];
+
+        } catch (\Exception $e) {
+            error_log("Erreur lors de la suppression de l'utilisateur avec l'ID $id : " . $e->getMessage());
+            return false;
         }
     }
 }
