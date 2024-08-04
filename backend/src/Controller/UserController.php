@@ -182,50 +182,51 @@ class UserController
     
 
     private function registerMerchant($data)
-    {
-        $this->entityManager->beginTransaction();
+{
+    $this->entityManager->beginTransaction();
 
-        try {
-            if (!isset($data['first_name']) || !isset($data['last_name']) || !isset($data['email']) || !isset($data['phone_number']) || !isset($data['password']) || !isset($data['company_name'])) {
-                http_response_code(400);
-                return ['error' => 'Missing required fields'];
-            }
-
-            // Check if the email already exists
-            $existingUser = $this->entityManager->getRepository(UserModel::class)->findOneBy(['email' => $data['email']]);
-            if ($existingUser) {
-                http_response_code(409);
-                return ['error' => 'Email already exists'];
-            }
-
-            // Generate verification code
-            $verificationCode = rand(100000, 999999);
-            $data['verification_code'] = $verificationCode;
-            $data['is_verified'] = false;
-
-            $user = $this->userService->addUser($data, 'merchant');
-            $this->entityManager->persist($user);
-            $this->entityManager->flush();
-
-            // Handle company assignment
-            $this->companyService->addCompany($data);
-
-            $this->entityManager->flush();
-            $this->entityManager->commit();
-
-            // Send verification email
-            $this->emailService->sendVerificationEmail($data['email'], $verificationCode);
-
-            return ['id' => $user->getId(), 'message' => 'Merchant registered successfully. Verification code sent.'];
-
-        } catch (\Exception $e) {
-            $this->entityManager->rollback();
-
-            error_log("Exception in registerMerchant: " . $e->getMessage());
-            http_response_code(500);
-            return ['error' => 'Internal Server Error'];
+    try {
+        if (!isset($data['first_name']) || !isset($data['last_name']) || !isset($data['email']) || !isset($data['phone_number']) || !isset($data['password']) || !isset($data['company_name'])) {
+            http_response_code(400);
+            return ['error' => 'Missing required fields'];
         }
+
+        // Check if the email already exists
+        $existingUser = $this->entityManager->getRepository(UserModel::class)->findOneBy(['email' => $data['email']]);
+        if ($existingUser) {
+            http_response_code(409);
+            return ['error' => 'Email already exists'];
+        }
+
+        // Generate verification code
+        $verificationCode = rand(100000, 999999);
+        $data['verification_code'] = $verificationCode;
+        $data['is_verified'] = false;
+
+        $user = $this->userService->addUser($data, 'merchant');
+        $this->entityManager->persist($user);
+        $this->entityManager->flush();
+
+        // Handle company assignment
+        $this->companyService->addCompany($data);
+
+        $this->entityManager->flush();
+        $this->entityManager->commit();
+
+        // Send verification email
+        $this->emailService->sendVerificationEmail($data['email'], $verificationCode);
+
+        return ['id' => $user->getId(), 'message' => 'Merchant registered successfully. Verification code sent.'];
+
+    } catch (\Exception $e) {
+        $this->entityManager->rollback();
+
+        error_log("Exception in registerMerchant: " . $e->getMessage());
+        http_response_code(500);
+        return ['error' => 'Internal Server Error'];
     }
+}
+
 
     private function verifyCode($data)
     {
@@ -315,7 +316,7 @@ class UserController
         }
     }
     
-
+    
 
     private function getAllUsers()
     {

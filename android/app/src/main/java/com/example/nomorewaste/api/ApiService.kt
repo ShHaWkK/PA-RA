@@ -14,8 +14,9 @@ interface ApiService {
 
     @POST("users/registerVolunteer")
     fun registerVolunteer(@Body request: RegisterVolunteerRequest): Call<Void>
-    @POST("registerMerchant")
+    @POST("users/registerMerchant")
     fun registerMerchant(@Body request: RegisterMerchantRequest): Call<Void>
+
 
     @GET("users/{id}")
     fun getUser(@Path("id") id: Int): Call<User>

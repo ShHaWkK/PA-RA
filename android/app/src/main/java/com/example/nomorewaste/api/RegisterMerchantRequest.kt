@@ -1,13 +1,13 @@
 package com.example.nomorewaste.api
 
 data class RegisterMerchantRequest(
-    val firstName: String,
-    val lastName: String,
+    val first_name: String,
+    val last_name: String,
     val email: String,
-    val phoneNumber: String,
+    val phone_number: String,
     val password: String,
-    val role: String,
-    val companyName: String? = null,
+    val company_name: String? = null,
     val siret: String? = null,
-    val address: String? = null
+    val address: String? = null,
+    val contact_info: String? = null
 )

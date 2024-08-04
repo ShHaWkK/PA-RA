@@ -81,15 +81,17 @@ class EmailService
                                   "Nous avons détecté une activité suspecte liée à des bots ou une tentative d'usurpation d'identité.\n\n" .
                                   "Conformément à l'article 226-4-1 du Code pénal français, l'usurpation d'identité est punie d'un an d'emprisonnement et de 15 000 euros d'amende.\n\n" .
                                   "Si vous pensez qu'il s'agit d'une erreur, veuillez nous contacter immédiatement.";
-            if($this->mailer->send()) {
+            if ($this->mailer->send()) {
                 error_log("Rejection email sent successfully to: {$email}");
             } else {
                 error_log("Failed to send rejection email to: {$email}. Mailer Error: {$this->mailer->ErrorInfo}");
             }
         } catch (Exception $e) {
+            error_log("Exception in sendRejectionEmail: " . $e->getMessage());
             error_log("Message could not be sent. Mailer Error: {$this->mailer->ErrorInfo}");
         }
     }
+    
     
 
     public function sendPasswordChangeNotification($email)

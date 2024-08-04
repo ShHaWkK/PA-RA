@@ -13,7 +13,6 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
-
 class RegisterMerchantActivity : AppCompatActivity() {
     private lateinit var firstNameEditText: EditText
     private lateinit var lastNameEditText: EditText
@@ -23,6 +22,7 @@ class RegisterMerchantActivity : AppCompatActivity() {
     private lateinit var companyNameEditText: EditText
     private lateinit var siretEditText: EditText
     private lateinit var addressEditText: EditText
+    private lateinit var contactInfoEditText: EditText
     private lateinit var registerButton: Button
     private var apiService: ApiService? = null
 
@@ -38,6 +38,7 @@ class RegisterMerchantActivity : AppCompatActivity() {
         companyNameEditText = findViewById(R.id.company_name)
         siretEditText = findViewById(R.id.siret)
         addressEditText = findViewById(R.id.address)
+        contactInfoEditText = findViewById(R.id.contact_info)
         registerButton = findViewById(R.id.register_button)
 
         val retrofit = RetrofitClient.getClient()
@@ -55,13 +56,25 @@ class RegisterMerchantActivity : AppCompatActivity() {
         val companyName = companyNameEditText.text.toString()
         val siret = siretEditText.text.toString()
         val address = addressEditText.text.toString()
+        val contactInfo = contactInfoEditText.text.toString()
 
-        if (firstName.isEmpty() || lastName.isEmpty() || email.isEmpty() || phoneNumber.isEmpty() || password.isEmpty() || companyName.isEmpty() || siret.isEmpty() || address.isEmpty()) {
+        if (firstName.isEmpty() || lastName.isEmpty() || email.isEmpty() || phoneNumber.isEmpty() || password.isEmpty() || companyName.isEmpty() || siret.isEmpty() || address.isEmpty() || contactInfo.isEmpty()) {
             Toast.makeText(this, "Tous les champs sont obligatoires", Toast.LENGTH_SHORT).show()
             return
         }
 
-        val request = RegisterMerchantRequest(firstName, lastName, email, phoneNumber, password, companyName, siret, address)
+        val request = RegisterMerchantRequest(
+            first_name = firstName,
+            last_name = lastName,
+            email = email,
+            phone_number = phoneNumber,
+            password = password,
+            company_name = companyName,
+            siret = siret,
+            address = address,
+            contact_info = contactInfo
+        )
+
         apiService?.registerMerchant(request)?.enqueue(object : Callback<Void?> {
             override fun onResponse(call: Call<Void?>, response: Response<Void?>) {
                 if (response.isSuccessful) {
