@@ -44,6 +44,7 @@ class UserController
         $this->emailService = $emailService;
     }
 
+
     public function processRequest($method, $uriParts, $input)
     {
         switch ($method) {
@@ -72,7 +73,7 @@ class UserController
                     return match ($uriParts[1]) {
                         'generatePlanning' => $this->generatePlanning(),
                         'tickets' => $this->getTicketsByUser((int)$uriParts[1]),
-                        default => $this->getUser($uriParts[1]),
+                        default => $this->getUser((int)$uriParts[1]),
                     };
                 } else {
                     return $this->getUsersByCriteria($_GET);
@@ -82,8 +83,13 @@ class UserController
                 if (isset($uriParts[2])) {
                     switch ($uriParts[1]) {
                         case 'approval':
-                            return $this->updateUserStatus($uriParts[2], $input);
+                            return $this->updateUserStatus((int)$uriParts[2], $input);
+                        default:
+                            http_response_code(400);
+                            return ['error' => 'Invalid endpoint'];
                     }
+                } elseif (isset($uriParts[1])) {
+                    return $this->updateUser((int)$uriParts[1], $input);
                 } else {
                     http_response_code(400);
                     return ['error' => 'User ID not specified'];
@@ -231,6 +237,42 @@ class UserController
         try {
             return $this->availabilityService->addAvailability($data);
         } catch (\Exception $e) {
+            http_response_code(500);
+            return ['error' => 'Internal Server Error'];
+        }
+    }
+
+    private function updateUser($id, $data)
+    {
+        try {
+            $user = $this->entityManager->getRepository(UserModel::class)->find($id);
+
+            if (!$user) {
+                http_response_code(404);
+                return ['error' => 'User not found'];
+            }
+
+            if (isset($data['email'])) {
+                $user->setEmail($data['email']);
+            }
+            if (isset($data['firstName'])) {
+                $user->setFirstName($data['firstName']);
+            }
+            if (isset($data['lastName'])) {
+                $user->setLastName($data['lastName']);
+            }
+            if (isset($data['phoneNumber'])) {
+                $user->setPhoneNumber($data['phoneNumber']);
+            }
+            if (isset($data['password'])) {
+                $user->setPassword($data['password']);
+            }
+
+            $this->entityManager->flush();
+
+            return ['message' => 'User updated successfully'];
+        } catch (\Exception $e) {
+            error_log("Exception in updateUser: " . $e->getMessage());
             http_response_code(500);
             return ['error' => 'Internal Server Error'];
         }
