@@ -32,6 +32,9 @@ class ProductController
                     return $this->createProduct($input);
                 case 'GET':
                     if (isset($uriParts[1])) {
+                        if(isset($uriParts[2])){
+                            return $this->getProductByID($uriParts[2]);
+                        }
                         return $this->getProductByBarcode($uriParts[1]);
                     } else {
                         return $this->getAllProducts();
@@ -179,6 +182,22 @@ class ProductController
     {
         try {
             $product = $this->entityManager->getRepository(ProductModel::class)->findOneBy(['barcode' => $barcode]);
+            if (!$product) {
+                http_response_code(404);
+                return ['error' => 'Product not found'];
+            }
+            return $product->jsonSerialize();
+        } catch (\Exception $e) {
+            error_log("Exception in getProductByBarcode: " . $e->getMessage());
+            throw $e;
+        }
+    }
+
+
+    public function getProductByID($id)
+    {
+        try {
+            $product = $this->entityManager->getRepository(ProductModel::class)->findOneBy(['id' => $id]);
             if (!$product) {
                 http_response_code(404);
                 return ['error' => 'Product not found'];

@@ -26,7 +26,12 @@
 
         <div class="stock-table"></div>
         <script type="module" src="/assets/js/pages/AdminStockPage.js"></script>
+        <script src="/assets/js/modules/modals/StockModals.js"></script>
     </div>
+
+    <!--    Ajout des fenêtres modales-->
+    <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/ProductDetailModal.php'); ?>
+
 </div>
 </body>
 </html>

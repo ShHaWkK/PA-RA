@@ -1,4 +1,5 @@
 import { getStockByWarehouse } from '/assets/js/api/Stocks.js'; // Assurez-vous que le chemin vers votre fichier Stock.js est correct
+import {populateProductDetailsInModal} from "/assets/js/modules/modals/StockModals.js";
 
 export var selectedWarehouseId;
 
@@ -43,7 +44,8 @@ export async function populateStockTable(warehouseId) {
     const thead = document.createElement('thead');
     const headerRow = document.createElement('tr');
 
-    const headers = ['ID', 'Product ID', 'Quantity', 'Entry Date', 'Exit Date', 'Availability', 'Created At', 'Updated At'];
+    const headers = ['', 'Product', 'Total volume', 'Entry Date', 'Availability', 'Created At', 'Updated At'];
+    // 'Exit Date'
     headers.forEach(headerText => {
         const th = document.createElement('th');
         th.textContent = headerText;
@@ -70,19 +72,39 @@ export async function populateStockTable(warehouseId) {
 
         const tbody = document.createElement('tbody');
 
+        console.log("stocks",stocks);
+
         stocks.forEach(stock => {
             const row = document.createElement('tr');
             row.dataset.stockId = stock.id; // Ajout de l'id du stock en tant que dataset
 
+            // Ajout de la checkbox dans la première cellule
+            const checkboxCell = document.createElement('td');
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.value = stock.id;
+            checkboxCell.appendChild(checkbox);
+            row.appendChild(checkboxCell);
+
+            const productCell = document.createElement('td');
+            const productLink = document.createElement('a');
+            productLink.href = "#";
+            productLink.textContent = stock.product_name;
+            productLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                populateProductDetailsInModal(stock.product_id);
+                document.getElementById('productDetailModal').style.display = 'block';
+            });
+            productCell.appendChild(productLink);
+            row.appendChild(productCell);
+
             const cells = [
-                stock.id,
-                stock.productId,
-                stock.quantity,
-                formatDateToFrench(stock.entryDate.timestamp * 1000), // Convertir le timestamp en date
-                stock.exitDate ? formatDateToFrench(stock.exitDate.timestamp * 1000) : 'N/A', // Vérifier si exitDate est null
+                stock.volume + ' m3',
+                formatDateToFrench(new Date(stock.entry_date)), // Convertir la chaîne de date en objet Date
+                // stock.exit_date ? formatDateToFrench(new Date(stock.exit_date)) : 'N/A', // Vérifier si exit_date est null
                 stock.availability,
-                formatDateToFrench(stock.createdAt.timestamp * 1000),
-                formatDateToFrench(stock.updatedAt.timestamp * 1000)
+                formatDateToFrench(new Date(stock.created_at)),
+                formatDateToFrench(new Date(stock.updated_at))
             ];
 
             cells.forEach(cellText => {
@@ -107,8 +129,7 @@ export async function populateStockTable(warehouseId) {
     }
 }
 
-
-// Fonction de formatage de date (exemple simple)
+// Fonction de formatage de date
 function formatDateToFrench(timestamp) {
     const date = new Date(timestamp);
     return date.toLocaleDateString('fr-FR') + ' ' + date.toLocaleTimeString('fr-FR');

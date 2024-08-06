@@ -144,8 +144,27 @@ class StockController
             http_response_code(404);
             return ['error' => 'Stock not found'];
         }
-        return $this->serializer->normalize($stock);
+
+        $product = $this->entityManager->find(ProductModel::class, $stock->getProductId());
+        $productName = $product ? $product->getName() : null;
+
+        $normalizedStock = [
+            'id' => $stock->getId(),
+            'product_id' => $stock->getProductId(),
+            'product_name' => $productName,
+            'quantity' => $stock->getQuantity(),
+            'volume' => $stock->getQuantity() * $product->getVolume(),
+            'entry_date' => $stock->getEntryDate()->format(\DateTime::ISO8601),
+            'exit_date' => $stock->getExitDate() ? $stock->getExitDate()->format(\DateTime::ISO8601) : null,
+            'availability' => $stock->getAvailability(),
+            'created_at' => $stock->getCreatedAt()->format(\DateTime::ISO8601),
+            'updated_at' => $stock->getUpdatedAt()->format(\DateTime::ISO8601),
+            'warehouse_id' => $stock->getWarehouseId(),
+        ];
+
+        return $normalizedStock;
     }
+
 
     public function getStockByWarehouse(int $warehouseId)
     {
@@ -154,10 +173,27 @@ class StockController
             http_response_code(404);
             return ['error' => 'No stocks found for this warehouse'];
         }
+
         $data = [];
         foreach ($stocks as $stock) {
-            $data[] = $this->serializer->normalize($stock);
+            $product = $this->entityManager->find(ProductModel::class, $stock->getProductId());
+            $productName = $product ? $product->getName() : null;
+
+            $data[] = [
+                'id' => $stock->getId(),
+                'product_id' => $stock->getProductId(),
+                'product_name' => $productName,
+                'quantity' => $stock->getQuantity(),
+                'volume' => $stock->getQuantity() * $product->getVolume(),
+                'entry_date' => $stock->getEntryDate()->format(\DateTime::ISO8601),
+                'exit_date' => $stock->getExitDate() ? $stock->getExitDate()->format(\DateTime::ISO8601) : null,
+                'availability' => $stock->getAvailability(),
+                'created_at' => $stock->getCreatedAt()->format(\DateTime::ISO8601),
+                'updated_at' => $stock->getUpdatedAt()->format(\DateTime::ISO8601),
+                'warehouse_id' => $stock->getWarehouseId(),
+            ];
         }
+
         return $data;
     }
 
