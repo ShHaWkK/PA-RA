@@ -2,10 +2,11 @@
 namespace Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use JsonSerializable;
 
 #[ORM\Entity]
 #[ORM\Table(name: "products")]
-class ProductModel
+class ProductModel implements JsonSerializable
 {
     #[ORM\Id]
     #[ORM\GeneratedValue(strategy: "AUTO")]
@@ -129,6 +130,26 @@ class ProductModel
     {
         $this->scanned = $scanned;
         return $this;
+    }
+
+    /**
+     * Implement the jsonSerialize method from JsonSerializable interface
+     *
+     * @return array
+     */
+    public function jsonSerialize(): array
+    {
+        return [
+            'id' => $this->getId(),
+            'name' => $this->getName(),
+            'barcode' => $this->getBarcode(),
+            'expiration_date' => $this->getExpirationDate()->format('Y-m-d'),
+            'volume' => $this->getVolume(),
+            'qr_code_path' => $this->getQrCodePath(),
+            'created_at' => $this->getCreatedAt()->format('Y-m-d H:i:s'),
+            'updated_at' => $this->getUpdatedAt()->format('Y-m-d H:i:s'),
+            'scanned' => $this->getScanned(),
+        ];
     }
 }
 ?>

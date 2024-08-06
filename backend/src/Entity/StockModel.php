@@ -2,10 +2,11 @@
 namespace Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use JsonSerializable;
 
 #[ORM\Entity]
 #[ORM\Table(name: "stocks")]
-class StockModel
+class StockModel implements JsonSerializable
 {
     #[ORM\Id]
     #[ORM\GeneratedValue(strategy: "AUTO")]
@@ -35,6 +36,14 @@ class StockModel
 
     #[ORM\Column(type: "integer")]
     private $warehouse_id;
+
+    #[ORM\ManyToOne(targetEntity: WarehouseModel::class, inversedBy: "stocks")]
+    #[ORM\JoinColumn(name: "warehouse_id", referencedColumnName: "id")]
+    private $warehouse;
+
+    #[ORM\ManyToOne(targetEntity: ProductModel::class)]
+    #[ORM\JoinColumn(name: "product_id", referencedColumnName: "id")]
+    private $product;
 
     // Getters and setters...
 
@@ -129,6 +138,42 @@ class StockModel
     {
         $this->warehouse_id = $warehouse_id;
         return $this;
+    }
+
+    public function getWarehouse(): ?WarehouseModel {
+        return $this->warehouse;
+    }
+
+    public function setWarehouse(?WarehouseModel $warehouse): self {
+        $this->warehouse = $warehouse;
+        return $this;
+    }
+
+    public function getProduct(): ?ProductModel {
+        return $this->product;
+    }
+
+    public function setProduct(?ProductModel $product): self {
+        $this->product = $product;
+        return $this;
+    }
+
+    // Implementation of JsonSerializable
+    public function jsonSerialize(): array
+    {
+        return [
+            'id' => $this->id,
+            'product_id' => $this->product_id,
+            'quantity' => $this->quantity,
+            'entry_date' => $this->entry_date->format(\DateTime::ISO8601),
+            'exit_date' => $this->exit_date ? $this->exit_date->format(\DateTime::ISO8601) : null,
+            'availability' => $this->availability,
+            'created_at' => $this->created_at->format(\DateTime::ISO8601),
+            'updated_at' => $this->updated_at->format(\DateTime::ISO8601),
+            'warehouse_id' => $this->warehouse_id,
+//            'warehouse' => $this->warehouse ? $this->warehouse->jsonSerialize() : null,
+//            'product' => $this->product ? $this->product->jsonSerialize() : null,
+        ];
     }
 }
 ?>

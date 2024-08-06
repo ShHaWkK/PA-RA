@@ -6,18 +6,15 @@ use Doctrine\ORM\EntityManager;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
+use Symfony\Component\HttpFoundation\Response;
 
 class WarehouseController
 {
     private $entityManager;
-    private $serializer;
 
     public function __construct(EntityManager $entityManager)
     {
         $this->entityManager = $entityManager;
-        $normalizers = [new ObjectNormalizer()];
-        $encoders = [new JsonEncoder()];
-        $this->serializer = new Serializer($normalizers, $encoders);
     }
 
     public function processRequest($method, $uriParts, $input)
@@ -27,7 +24,11 @@ class WarehouseController
                 return $this->createWarehouse($input);
             case 'GET':
                 if (isset($uriParts[1])) {
-                    return $this->getWarehouse((int) $uriParts[1]);
+                    if (isset($uriParts[2])) {
+                        return $this->getWarehouseCapacity($uriParts[1]);
+                    } else {
+                        return $this->getWarehouse((int) $uriParts[1]);
+                    }
                 } else {
                     return $this->getAllWarehouses();
                 }
@@ -104,7 +105,9 @@ class WarehouseController
             http_response_code(404);
             return ['error' => 'Warehouse not found'];
         }
-        return json_decode($this->serializer->serialize($warehouse, 'json'), true);
+
+        $data = $warehouse->jsonSerialize();
+        return $data;
     }
 
     public function updateWarehouse($id, $data)
@@ -158,6 +161,41 @@ class WarehouseController
     {
         $warehouseRepository = $this->entityManager->getRepository(WarehouseModel::class);
         $warehouses = $warehouseRepository->findAll();
-        return json_decode($this->serializer->serialize($warehouses, 'json'), true);
+
+        // Préparer les données en utilisant jsonSerialize()
+        $serializedWarehouses = [];
+        foreach ($warehouses as $warehouse) {
+            $serializedWarehouses[] = $warehouse->jsonSerialize();
+        }
+
+        return $serializedWarehouses;
+    }
+
+    public function getWarehouseCapacity($id)
+    {
+        $warehouse = $this->entityManager->find(WarehouseModel::class, $id);
+        if (!$warehouse) {
+            http_response_code(404);
+            return ['error' => 'Warehouse not found'];
+        }
+
+        $stocks = $warehouse->getStocks();
+
+        // Calculer la capacité occupée
+        $occupiedCapacity = 0;
+        foreach ($stocks as $stock) {
+            $product = $stock->getProduct();
+            if ($product) {
+                $occupiedCapacity += $stock->getQuantity() * $product->getVolume();
+            }
+        }
+
+        $totalCapacity = $warehouse->getCapacity();
+
+        return [
+            'total_capacity' => $totalCapacity,
+            'occupied_capacity' => $occupiedCapacity,
+            'available_capacity' => $totalCapacity - $occupiedCapacity
+        ];
     }
 }
