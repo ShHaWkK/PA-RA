@@ -1,4 +1,3 @@
-// ApiService.kt
 package com.example.nomorewaste.api
 
 import retrofit2.Call
@@ -51,5 +50,6 @@ interface ApiService {
     fun getRecipeById(@Path("id") id: Int): Call<Recipe>
 
     @POST("recipe/suggest")
-    fun getSuggestedRecipes(@Body productsInStock: Map<String, Int>): Call<List<Recipe>>
+    fun suggestRecipes(@Body productsInStock: Map<String, Int>): Call<List<Recipe>>
 }
+

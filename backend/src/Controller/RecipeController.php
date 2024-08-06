@@ -31,7 +31,11 @@ class RecipeController
         try {
             switch ($method) {
                 case 'POST':
-                    return $this->createRecipe($input);
+                    if (isset($uriParts[1]) && $uriParts[1] === 'suggest') {
+                        return $this->suggestRecipes($input);
+                    } else {
+                        return $this->createRecipe($input);
+                    }
                 case 'GET':
                     if (isset($uriParts[1])) {
                         if ($uriParts[1] === 'suggest') {
@@ -112,6 +116,18 @@ class RecipeController
         }
     }
 
+    public function getAllRecipes()
+    {
+        try {
+            $recipeRepository = $this->entityManager->getRepository(RecipeModel::class);
+            $recipes = $recipeRepository->findAll();
+            return json_decode($this->serializer->serialize($recipes, 'json'), true);
+        } catch (\Exception $e) {
+            error_log("Exception in getAllRecipes: " . $e->getMessage());
+            throw $e;
+        }
+    }
+
     public function updateRecipe($id, $data)
     {
         try {
@@ -156,53 +172,42 @@ class RecipeController
         }
     }
 
-    public function getAllRecipes()
-    {
-        try {
-            $recipeRepository = $this->entityManager->getRepository(RecipeModel::class);
-            $recipes = $recipeRepository->findAll();
-            return json_decode($this->serializer->serialize($recipes, 'json'), true);
-        } catch (\Exception $e) {
-            error_log("Exception in getAllRecipes: " . $e->getMessage());
-            throw $e;
-        }
-    }
-
     public function suggestRecipes($input)
-    {
-        try {
-            if (is_null($input)) {
-                http_response_code(400);
-                return ['error' => 'Input data is null'];
-            }
-
-            error_log("Starting suggestRecipes with input: " . json_encode($input));
-            $productsInStock = $input['products_in_stock'];
-            $recipes = $this->entityManager->getRepository(RecipeModel::class)->findAll();
-
-            $suggestedRecipes = [];
-            foreach ($recipes as $recipe) {
-                $ingredients = $recipe->getIngredients();
-                $canMakeRecipe = true;
-                foreach ($ingredients as $ingredient) {
-                    if (!isset($productsInStock[$ingredient->getProduct()->getId()]) ||
-                        $productsInStock[$ingredient->getProduct()->getId()] < $ingredient->getQuantityNeeded()) {
-                        $canMakeRecipe = false;
-                        break;
-                    }
-                }
-                if ($canMakeRecipe) {
-                    $suggestedRecipes[] = $recipe;
-                }
-            }
-
-            $response = json_decode($this->serializer->serialize($suggestedRecipes, 'json'), true);
-            error_log("suggestRecipes response: " . json_encode($response));
-            return $response;
-        } catch (\Exception $e) {
-            error_log("Exception in suggestRecipes: " . $e->getMessage());
-            throw $e;
+{
+    try {
+        if (is_null($input) || !isset($input['products_in_stock'])) {
+            http_response_code(400);
+            return ['error' => 'Input data is null or products_in_stock key is missing'];
         }
-    }
 
+        error_log("Starting suggestRecipes with input: " . json_encode($input));
+        $productsInStock = $input['products_in_stock'];
+        $recipes = $this->entityManager->getRepository(RecipeModel::class)->findAll();
+
+        $suggestedRecipes = [];
+        foreach ($recipes as $recipe) {
+            $ingredients = $recipe->getIngredients();
+            $canMakeRecipe = true;
+            foreach ($ingredients as $ingredient) {
+                if (!isset($productsInStock[$ingredient->getProduct()->getId()]) ||
+                    $productsInStock[$ingredient->getProduct()->getId()] < $ingredient->getQuantityNeeded()) {
+                    $canMakeRecipe = false;
+                    break;
+                }
+            }
+            if ($canMakeRecipe) {
+                $suggestedRecipes[] = $recipe;
+            }
+        }
+
+        $response = json_decode($this->serializer->serialize($suggestedRecipes, 'json'), true);
+        error_log("suggestRecipes response: " . json_encode($response));
+        return $response;
+    } catch (\Exception $e) {
+        error_log("Exception in suggestRecipes: " . $e->getMessage());
+        throw $e;
+    }
+}
+
+}
 ?>

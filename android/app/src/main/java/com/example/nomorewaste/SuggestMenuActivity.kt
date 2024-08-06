@@ -1,4 +1,3 @@
-// SuggestMenuActivity.kt
 package com.example.nomorewaste
 
 import android.os.Bundle
@@ -8,12 +7,14 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.nomorewaste.api.ApiService
+import com.example.nomorewaste.api.ProductStock
 import com.example.nomorewaste.api.Recipe
 import com.example.nomorewaste.api.RecipeAdapter
 import com.example.nomorewaste.api.RetrofitClient
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import android.util.Log
 
 class SuggestMenuActivity : AppCompatActivity() {
 
@@ -38,8 +39,8 @@ class SuggestMenuActivity : AppCompatActivity() {
     }
 
     private fun suggestMenu() {
-        val productsInStock = emptyMap<String, Int>()
-        apiService.suggestRecipes(mapOf("products_in_stock" to productsInStock)).enqueue(object : Callback<List<Recipe>> {
+        val productsInStock = mapOf<String, Int>() // Ajoutez les données des produits en stock ici
+        apiService.suggestRecipes(productsInStock).enqueue(object : Callback<List<Recipe>> {
             override fun onResponse(call: Call<List<Recipe>>, response: Response<List<Recipe>>) {
                 if (response.isSuccessful) {
                     recyclerViewSuggestedRecipes.adapter = RecipeAdapter(response.body() ?: listOf())
@@ -53,4 +54,5 @@ class SuggestMenuActivity : AppCompatActivity() {
             }
         })
     }
+
 }
