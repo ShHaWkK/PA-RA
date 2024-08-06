@@ -1,0 +1,36 @@
+package com.example.nomorewaste.api
+
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.TextView
+import androidx.recyclerview.widget.RecyclerView
+import com.example.nomorewaste.R
+import com.example.nomorewaste.api.Product
+
+class ProductAdapter(private val productList: List<Product>) : RecyclerView.Adapter<ProductAdapter.ProductViewHolder>() {
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ProductViewHolder {
+        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_product, parent, false)
+        return ProductViewHolder(view)
+    }
+
+    override fun onBindViewHolder(holder: ProductViewHolder, position: Int) {
+        val product = productList[position]
+        holder.productName.text = product.name
+        holder.productBarcode.text = product.barcode
+        holder.productExpirationDate.text = product.expirationDate
+        holder.productQuantity.text = product.volume.toString()
+    }
+
+    override fun getItemCount(): Int {
+        return productList.size
+    }
+
+    class ProductViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        val productName: TextView = itemView.findViewById(R.id.productName)
+        val productBarcode: TextView = itemView.findViewById(R.id.productBarcode)
+        val productExpirationDate: TextView = itemView.findViewById(R.id.productExpirationDate)
+        val productQuantity: TextView = itemView.findViewById(R.id.productQuantity)
+    }
+}

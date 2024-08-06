@@ -24,7 +24,6 @@
         android:layout_height="wrap_content"
         android:text="Phone: " />
 
-
     <Button
         android:id="@+id/button_view_availabilities"
         android:layout_width="match_parent"
@@ -42,6 +41,30 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Voir les plannings" />
+
+    <Button
+        android:id="@+id/button_manage_products"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Gérer les produits"/>
+
+    <Button
+        android:id="@+id/button_inventory"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Inventaire" />
+
+    <Button
+        android:id="@+id/button_recipes"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Recettes" />
+
+    <Button
+        android:id="@+id/button_suggest_menu"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Suggérer un menu" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_view"

@@ -1,3 +1,4 @@
+// VolunteerActivity.kt
 package com.example.nomorewaste.espace
 
 import android.content.Context
@@ -13,6 +14,10 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.nomoreswaste.LoginActivity
 import com.example.nomorewaste.AvailabilitiesActivity
 import com.example.nomorewaste.PlanningsActivity
+import com.example.nomorewaste.InventoryActivity
+import com.example.nomorewaste.ProductManagementActivity
+import com.example.nomorewaste.RecipesActivity
+import com.example.nomorewaste.SuggestMenuActivity
 import com.example.nomorewaste.R
 import com.example.nomorewaste.UserManagementActivity
 import com.example.nomorewaste.api.ApiService
@@ -35,6 +40,10 @@ class VolunteerActivity : AppCompatActivity() {
     private lateinit var buttonViewAvailabilities: Button
     private lateinit var buttonManageUser: Button
     private lateinit var buttonViewPlannings: Button
+    private lateinit var buttonManageProducts: Button
+    private lateinit var buttonInventory: Button
+    private lateinit var buttonRecipes: Button
+    private lateinit var buttonSuggestMenu: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,6 +56,10 @@ class VolunteerActivity : AppCompatActivity() {
         buttonViewAvailabilities = findViewById(R.id.button_view_availabilities)
         buttonManageUser = findViewById(R.id.button_manage_user)
         buttonViewPlannings = findViewById(R.id.button_view_plannings)
+        buttonManageProducts = findViewById(R.id.button_manage_products)
+        buttonInventory = findViewById(R.id.button_inventory)
+        buttonRecipes = findViewById(R.id.button_recipes)
+        buttonSuggestMenu = findViewById(R.id.button_suggest_menu)
 
         recyclerView.layoutManager = LinearLayoutManager(this)
 
@@ -83,6 +96,30 @@ class VolunteerActivity : AppCompatActivity() {
         buttonViewPlannings.setOnClickListener {
             Log.d("VolunteerDashboard", "buttonViewPlannings clicked")
             val intent = Intent(this, PlanningsActivity::class.java)
+            startActivity(intent)
+        }
+
+        buttonManageProducts.setOnClickListener {
+            Log.d("VolunteerDashboard", "buttonManageProducts clicked")
+            val intent = Intent(this, ProductManagementActivity::class.java)
+            startActivity(intent)
+        }
+
+        buttonInventory.setOnClickListener {
+            Log.d("VolunteerDashboard", "buttonInventory clicked")
+            val intent = Intent(this, InventoryActivity::class.java)
+            startActivity(intent)
+        }
+
+        buttonRecipes.setOnClickListener {
+            Log.d("VolunteerDashboard", "buttonRecipes clicked")
+            val intent = Intent(this, RecipesActivity::class.java)
+            startActivity(intent)
+        }
+
+        buttonSuggestMenu.setOnClickListener {
+            Log.d("VolunteerDashboard", "buttonSuggestMenu clicked")
+            val intent = Intent(this, SuggestMenuActivity::class.java)
             startActivity(intent)
         }
     }

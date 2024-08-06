@@ -97,5 +97,8 @@
             android:exported="false"
             android:label="Update Password"
             android:theme="@style/Theme.Nomorewaste" />
+
+        <activity android:name=".ProductManagementActivity"></activity>
+
     </application>
 </manifest>
