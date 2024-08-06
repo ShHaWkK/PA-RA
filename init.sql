@@ -258,6 +258,19 @@ INSERT INTO products (name, barcode, expiration_date, volume) VALUES
 ('Product 4', '1234567890126', '2026-06-01', 400),
 ('Product 5', '1234567890127', '2026-12-31', 500);
 
+-- Insertion des exemples de stock avec ajustement des quantités pour respecter les capacités des entrepôts
+INSERT INTO stocks (product_id, quantity, entry_date, availability, warehouse_id) VALUES
+(1, 5, CURRENT_TIMESTAMP, 'available', 1),  -- 5 * 100 = 500
+(2, 4, CURRENT_TIMESTAMP, 'available', 2),  -- 4 * 200 = 800
+(3, 2, CURRENT_TIMESTAMP, 'available', 3),  -- 2 * 300 = 600
+(4, 1, CURRENT_TIMESTAMP, 'available', 4),  -- 1 * 400 = 400
+(5, 1, CURRENT_TIMESTAMP, 'available', 5),  -- 1 * 500 = 500
+(1, 1, CURRENT_TIMESTAMP, 'available', 6),  -- 1 * 100 = 100
+(2, 1, CURRENT_TIMESTAMP, 'available', 6),  -- 1 * 200 = 200
+(3, 1, CURRENT_TIMESTAMP, 'available', 6),  -- 1 * 300 = 300
+(4, 1, CURRENT_TIMESTAMP, 'available', 6),  -- 1 * 400 = 400
+(5, 1, CURRENT_TIMESTAMP, 'available', 7);  -- 1 * 500 = 500
+
 -- Insertion des utilisateurs
 -- password1423
 INSERT INTO users (first_name, last_name, email, phone_number, password, role, status) VALUES
@@ -316,12 +329,12 @@ INSERT INTO vehicles (brand, model, license_plate, status, current_location) VAL
 ('Ford', 'Transit', 'ABC789', 'available', 'Nantes Warehouse');
 
 -- Insertion des exemples de stock
-INSERT INTO stocks (product_id, quantity, entry_date, availability, warehouse_id) VALUES 
-(1, 100, CURRENT_TIMESTAMP, 'available', 1),
-(2, 200, CURRENT_TIMESTAMP, 'available', 2),
-(3, 300, CURRENT_TIMESTAMP, 'available', 3),
-(4, 400, CURRENT_TIMESTAMP, 'available', 4),
-(5, 500, CURRENT_TIMESTAMP, 'available', 5);
+# INSERT INTO stocks (product_id, quantity, entry_date, availability, warehouse_id) VALUES
+# (1, 10, CURRENT_TIMESTAMP, 'available', 1),
+# (2, 20, CURRENT_TIMESTAMP, 'available', 2),
+# (3, 30, CURRENT_TIMESTAMP, 'available', 3),
+# (4, 40, CURRENT_TIMESTAMP, 'available', 4),
+# (5, 50, CURRENT_TIMESTAMP, 'available', 5);
 
 -- Insertion des exemples de collectes
 INSERT INTO collections (company_id, product_id, vehicle_id) VALUES
