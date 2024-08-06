@@ -1,6 +1,7 @@
 <?php
 namespace Controller;
 
+use Entity\ProductModel;
 use Entity\WarehouseModel;
 use Doctrine\ORM\EntityManager;
 use Symfony\Component\Serializer\Serializer;
@@ -181,21 +182,45 @@ class WarehouseController
 
         $stocks = $warehouse->getStocks();
 
-        // Calculer la capacité occupée
+        // Calculate the occupied capacity
         $occupiedCapacity = 0;
+        $totalCapacity = $warehouse->getCapacity();
+
         foreach ($stocks as $stock) {
-            $product = $stock->getProduct();
+            $productId = $stock->getProductId();
+            $product = $this->entityManager->find(ProductModel::class, $productId);
+
             if ($product) {
-                $occupiedCapacity += $stock->getQuantity() * $product->getVolume();
+                $productVolume = $product->getVolume();
+                $stockQuantity = $stock->getQuantity();
+
+                // Debugging logs
+                error_log("Product ID: " . $productId);
+                error_log("Product Volume: " . $productVolume);
+                error_log("Stock Quantity: " . $stockQuantity);
+
+                // Ensure product volume and stock quantity are positive
+                if ($productVolume > 0 && $stockQuantity > 0) {
+                    $occupiedCapacity += $stockQuantity * $productVolume;
+                }
             }
         }
 
-        $totalCapacity = $warehouse->getCapacity();
+        // Debugging logs
+        error_log("Total Capacity: " . $totalCapacity);
+        error_log("Occupied Capacity: " . $occupiedCapacity);
+
+        // Ensure occupied capacity doesn't exceed total capacity
+        $availableCapacity = $totalCapacity - $occupiedCapacity;
+        if ($availableCapacity < 0) {
+            $availableCapacity = 0;
+        }
 
         return [
             'total_capacity' => $totalCapacity,
             'occupied_capacity' => $occupiedCapacity,
-            'available_capacity' => $totalCapacity - $occupiedCapacity
+            'available_capacity' => $availableCapacity
         ];
     }
+
 }

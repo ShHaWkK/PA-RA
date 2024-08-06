@@ -140,24 +140,6 @@ class StockModel implements JsonSerializable
         return $this;
     }
 
-    public function getWarehouse(): ?WarehouseModel {
-        return $this->warehouse;
-    }
-
-    public function setWarehouse(?WarehouseModel $warehouse): self {
-        $this->warehouse = $warehouse;
-        return $this;
-    }
-
-    public function getProduct(): ?ProductModel {
-        return $this->product;
-    }
-
-    public function setProduct(?ProductModel $product): self {
-        $this->product = $product;
-        return $this;
-    }
-
     // Implementation of JsonSerializable
     public function jsonSerialize(): array
     {
@@ -171,8 +153,8 @@ class StockModel implements JsonSerializable
             'created_at' => $this->created_at->format(\DateTime::ISO8601),
             'updated_at' => $this->updated_at->format(\DateTime::ISO8601),
             'warehouse_id' => $this->warehouse_id,
-//            'warehouse' => $this->warehouse ? $this->warehouse->jsonSerialize() : null,
-//            'product' => $this->product ? $this->product->jsonSerialize() : null,
+            'warehouse_name' => $this->warehouse ? $this->warehouse->getName() : null, // Serialize warehouse name
+            'product_name' => $this->product ? $this->product->getName() : null, // Serialize product name
         ];
     }
 }
