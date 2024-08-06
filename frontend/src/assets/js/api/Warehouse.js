@@ -35,6 +35,24 @@ async function getWarehouse(warehouseId) {
     }
 }
 
+async function getWarehouseCapacity(warehouseId){
+    try {
+        const response = await fetch(apiEndpoint + '/warehouses/' + warehouseId + '/capacity', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        if (!response.ok) {
+            throw new Error('Failed to get warehouse');
+        }
+        return await response.json();
+    } catch (error) {
+        console.error('Error getting warehouse:', error.message);
+        throw error;
+    }
+}
+
 async function updateWarehouse(warehouseId, warehouseData) {
     try {
         const response = await fetch(apiEndpoint + '/warehouses/' + warehouseId, {
@@ -90,4 +108,4 @@ async function getAllWarehouses() {
     }
 }
 
-export { createWarehouse, deleteWarehouse, getAllWarehouses, getWarehouse, updateWarehouse };
+export { createWarehouse, deleteWarehouse, getAllWarehouses, getWarehouse, getWarehouseCapacity, updateWarehouse };

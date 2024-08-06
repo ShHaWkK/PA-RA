@@ -1,4 +1,4 @@
-import { getAllWarehouses } from '/assets/js/api/Warehouse.js';
+import { getAllWarehouses, getWarehouseCapacity} from '/assets/js/api/Warehouse.js';
 import {populateStockTable} from '/assets/js/modules/tables/StockTable.js';
 
 async function populateWarehouseSelector() {
@@ -31,6 +31,34 @@ async function populateWarehouseSelector() {
 function handleWarehouseChange(event) {
     const selectedWarehouseId = event.target.value;
     populateStockTable(selectedWarehouseId);
+    populateProgressBar(selectedWarehouseId);
+}
+
+// Gestion de la barre de progression de la capacité d'un entrepôt:
+function updateProgressBar(percentage) {
+    const progressBar = document.getElementById('progress-bar');
+    progressBar.style.width = percentage + '%';
+    progressBar.textContent = percentage + '%';
+
+    // Change color based on the percentage
+    if (percentage < 50) {
+        progressBar.style.backgroundColor = '#76c7c0'; // Green
+    } else if (percentage < 75) {
+        progressBar.style.backgroundColor = '#ffa500'; // Orange
+    } else {
+        progressBar.style.backgroundColor = '#ff0000'; // Red
+    }
+}
+
+async function populateProgressBar(warehouseId) {
+    try {
+        const capacityData = await getWarehouseCapacity(warehouseId);
+        const { total_capacity, occupied_capacity } = capacityData;
+        const percentage = (occupied_capacity / total_capacity) * 100;
+        updateProgressBar(percentage.toFixed(2));
+    } catch (error) {
+        console.error('Error populating progress bar:', error.message);
+    }
 }
 
 document.addEventListener('DOMContentLoaded',

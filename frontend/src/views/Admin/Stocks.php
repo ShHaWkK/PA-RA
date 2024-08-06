@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="/assets/css/global.css">
     <link rel="stylesheet" href="/assets/css/table.css">
     <link rel="stylesheet" href="/assets/css/backoffice.css">
+    <link rel="stylesheet" href="/assets/css/progressbar.css">
 </head>
 <body>
 <div class="back-office-container">
@@ -18,6 +19,11 @@
 
         <label for="warehouseSelect">Warehouse:</label>
         <select name="warehouse" id="warehouseSelect"></select>
+
+        <h2>Capacity:</h2>
+        <div class="progress-container">
+            <div class="progress-bar" id="progress-bar"></div>
+        </div>
 
         <?php
         $loaderId = 'loadingBodyGeneral';
