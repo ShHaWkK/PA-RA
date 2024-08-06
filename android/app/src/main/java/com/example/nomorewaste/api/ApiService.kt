@@ -44,12 +44,12 @@ interface ApiService {
     @GET("warehouses")
     fun getWarehouses(): Call<List<Warehouse>>
 
-    @GET("recipes")
+    @GET("recipe")
     fun getRecipes(): Call<List<Recipe>>
 
-    @GET("recipes/{id}")
+    @GET("recipe/{id}")
     fun getRecipeById(@Path("id") id: Int): Call<Recipe>
 
-    @GET("recipes/suggest")
-    fun getSuggestedRecipes(): Call<List<Recipe>>
+    @POST("recipe/suggest")
+    fun getSuggestedRecipes(@Body productsInStock: Map<String, Int>): Call<List<Recipe>>
 }

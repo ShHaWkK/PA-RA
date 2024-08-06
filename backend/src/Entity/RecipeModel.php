@@ -80,5 +80,10 @@ class RecipeModel
 
         return $this;
     }
+    
+    public function getRecipeIngredients(): Collection
+    {
+        return $this->ingredients;
+    }
 }
 ?>

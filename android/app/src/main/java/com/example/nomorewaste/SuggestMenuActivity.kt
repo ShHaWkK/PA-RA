@@ -38,7 +38,8 @@ class SuggestMenuActivity : AppCompatActivity() {
     }
 
     private fun suggestMenu() {
-        apiService.getSuggestedRecipes().enqueue(object : Callback<List<Recipe>> {
+        val productsInStock = emptyMap<String, Int>()
+        apiService.suggestRecipes(mapOf("products_in_stock" to productsInStock)).enqueue(object : Callback<List<Recipe>> {
             override fun onResponse(call: Call<List<Recipe>>, response: Response<List<Recipe>>) {
                 if (response.isSuccessful) {
                     recyclerViewSuggestedRecipes.adapter = RecipeAdapter(response.body() ?: listOf())

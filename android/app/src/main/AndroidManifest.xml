@@ -98,7 +98,29 @@
             android:label="Update Password"
             android:theme="@style/Theme.Nomorewaste" />
 
-        <activity android:name=".ProductManagementActivity"></activity>
+        <activity
+            android:name="com.example.nomorewaste.InventoryActivity"
+            android:exported="false"
+            android:label="Inventory"
+            android:theme="@style/Theme.Nomorewaste" />
+
+        <activity
+            android:name="com.example.nomorewaste.RecipesActivity"
+            android:exported="false"
+            android:label="Recipes"
+            android:theme="@style/Theme.Nomorewaste" />
+
+        <activity
+            android:name="com.example.nomorewaste.SuggestMenuActivity"
+            android:exported="false"
+            android:label="Suggest Menu"
+            android:theme="@style/Theme.Nomorewaste" />
+
+        <activity
+            android:name="com.example.nomorewaste.ProductManagementActivity"
+            android:exported="false"
+            android:label="Product Management"
+            android:theme="@style/Theme.Nomorewaste" />
 
     </application>
 </manifest>
