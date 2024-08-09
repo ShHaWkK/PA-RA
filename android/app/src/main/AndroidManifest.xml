@@ -2,8 +2,6 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.CAMERA" />
-
 
     <application
         android:networkSecurityConfig="@xml/network_security_config"
@@ -122,6 +120,12 @@
             android:name="com.example.nomorewaste.ProductManagementActivity"
             android:exported="false"
             android:label="Product Management"
+            android:theme="@style/Theme.Nomorewaste" />
+
+        <activity
+            android:name="com.example.nomorewaste.SelectProductsActivity"
+            android:exported="true"
+            android:label="Select Products"
             android:theme="@style/Theme.Nomorewaste" />
 
     </application>

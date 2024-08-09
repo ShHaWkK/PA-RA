@@ -259,7 +259,14 @@ class ProductController
             
             $productsInStock = [];
             foreach ($stocks as $stock) {
-                $productsInStock[$stock->getProductId()] = $stock->getQuantity();
+                $product = $this->entityManager->getRepository(ProductModel::class)->find($stock->getProductId());
+                if ($product) {
+                    $productsInStock[$product->getId()] = [
+                        'name' => $product->getName(),
+                        'volume' => $stock->getQuantity(),
+                        'barcode' => $product->getBarcode()
+                    ];
+                }
             }
 
             return $productsInStock;
@@ -268,5 +275,6 @@ class ProductController
             throw $e;
         }
     }
+
 }
 ?>

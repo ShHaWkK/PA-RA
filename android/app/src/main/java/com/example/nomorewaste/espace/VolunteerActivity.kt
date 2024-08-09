@@ -19,6 +19,7 @@ import com.example.nomorewaste.ProductManagementActivity
 import com.example.nomorewaste.RecipesActivity
 import com.example.nomorewaste.SuggestMenuActivity
 import com.example.nomorewaste.R
+import com.example.nomorewaste.SelectProductsActivity
 import com.example.nomorewaste.UserManagementActivity
 import com.example.nomorewaste.api.ApiService
 import com.example.nomorewaste.api.Availability
@@ -119,7 +120,7 @@ class VolunteerActivity : AppCompatActivity() {
 
         buttonSuggestMenu.setOnClickListener {
             Log.d("VolunteerDashboard", "buttonSuggestMenu clicked")
-            val intent = Intent(this, SuggestMenuActivity::class.java)
+            val intent = Intent(this, SelectProductsActivity::class.java)
             startActivity(intent)
         }
     }

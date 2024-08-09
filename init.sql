@@ -90,6 +90,7 @@ CREATE TABLE IF NOT EXISTS recipes (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     instructions TEXT NOT NULL,
+    tags JSON,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
@@ -352,13 +353,66 @@ INSERT INTO services (name, description, schedule, capacity, status, location) V
 ('Clothing Distribution', 'Distribution of clothes to those in need.', CURRENT_TIMESTAMP, 50, 'open', 'Nantes Warehouse');
 
 -- Insertion des recettes
-INSERT INTO recipes (name, instructions) VALUES
-('Pasta', 'Boil pasta. Add sauce.'),
-('Salad', 'Chop veggies. Add dressing.'),
-('Sandwich', 'Put ingredients between bread slices.');
+INSERT INTO recipes (name, instructions, tags) VALUES
+('Pasta', 'Boil pasta. Add sauce.', '["vegetarian", "gluten_free"]'),
+('Salad', 'Chop veggies. Add dressing.', '["vegetarian"]'),
+('Sandwich', 'Put ingredients between bread slices.', '["vegetarian"]');
 
 -- Insertion des ingrédients de recettes
 INSERT INTO recipe_ingredients (recipe_id, product_id, quantity_needed) VALUES
-(1, 1, 100),
+(1, 3, 100),
 (2, 2, 50),
-(3, 3, 150);
+(3, 1, 150);
+
+-- Nouveaux produits ajoutés
+INSERT INTO products (name, barcode, expiration_date, volume) VALUES
+('Chicken', '1234567890128', '2025-12-31', 2.0),
+('Lettuce', '1234567890129', '2025-12-31', 0.5),
+('Bread', '1234567890130', '2026-01-01', 1.0),
+('Cheese', '1234567890131', '2026-06-01', 0.5),
+('Butter', '1234567890132', '2026-12-31', 0.5);
+
+-- Insertion des nouvelles recettes
+INSERT INTO recipes (name, instructions, tags) VALUES
+('Chicken Salad', 'Mix chicken and lettuce together.', '["protein", "low_carb"]'),
+('Grilled Cheese Sandwich', 'Put cheese between bread slices. Grill with butter.', '["vegetarian"]'),
+('Garlic Bread', 'Spread butter on bread, add garlic, and toast.', '["vegetarian"]'),
+('Tomato Soup', 'Cook tomatoes with butter until soft. Blend into soup.', '["vegetarian", "gluten_free"]'),
+('Potato Salad', 'Mix boiled potatoes with butter and seasoning.', '["vegetarian"]');
+
+-- Insertion des ingrédients de recettes
+-- Chicken Salad
+INSERT INTO recipe_ingredients (recipe_id, product_id, quantity_needed) VALUES
+((SELECT id FROM recipes WHERE name = 'Chicken Salad'), (SELECT id FROM products WHERE name = 'Chicken'), 200),
+((SELECT id FROM recipes WHERE name = 'Chicken Salad'), (SELECT id FROM products WHERE name = 'Lettuce'), 100);
+
+-- Grilled Cheese Sandwich
+INSERT INTO recipe_ingredients (recipe_id, product_id, quantity_needed) VALUES
+((SELECT id FROM recipes WHERE name = 'Grilled Cheese Sandwich'), (SELECT id FROM products WHERE name = 'Bread'), 2),
+((SELECT id FROM recipes WHERE name = 'Grilled Cheese Sandwich'), (SELECT id FROM products WHERE name = 'Cheese'), 50),
+((SELECT id FROM recipes WHERE name = 'Grilled Cheese Sandwich'), (SELECT id FROM products WHERE name = 'Butter'), 20);
+
+-- Garlic Bread
+INSERT INTO recipe_ingredients (recipe_id, product_id, quantity_needed) VALUES
+((SELECT id FROM recipes WHERE name = 'Garlic Bread'), (SELECT id FROM products WHERE name = 'Bread'), 2),
+((SELECT id FROM recipes WHERE name = 'Garlic Bread'), (SELECT id FROM products WHERE name = 'Butter'), 30);
+
+-- Tomato Soup
+INSERT INTO recipe_ingredients (recipe_id, product_id, quantity_needed) VALUES
+((SELECT id FROM recipes WHERE name = 'Tomato Soup'), (SELECT id FROM products WHERE name = 'Tomatoes'), 300),
+((SELECT id FROM recipes WHERE name = 'Tomato Soup'), (SELECT id FROM products WHERE name = 'Butter'), 20);
+
+-- Potato Salad
+INSERT INTO recipe_ingredients (recipe_id, product_id, quantity_needed) VALUES
+((SELECT id FROM recipes WHERE name = 'Potato Salad'), (SELECT id FROM products WHERE name = 'Potatoes'), 200),
+((SELECT id FROM recipes WHERE name = 'Potato Salad'), (SELECT id FROM products WHERE name = 'Butter'), 50);
+
+-- Insertion des exemples de stock
+INSERT INTO stocks (product_id, quantity, entry_date, availability, warehouse_id) VALUES
+((SELECT id FROM products WHERE name = 'Chicken'), 150, CURRENT_TIMESTAMP, 'available', 1),
+((SELECT id FROM products WHERE name = 'Lettuce'), 300, CURRENT_TIMESTAMP, 'available', 1),
+((SELECT id FROM products WHERE name = 'Bread'), 100, CURRENT_TIMESTAMP, 'available', 2),
+((SELECT id FROM products WHERE name = 'Cheese'), 200, CURRENT_TIMESTAMP, 'available', 2),
+((SELECT id FROM products WHERE name = 'Butter'), 500, CURRENT_TIMESTAMP, 'available', 3),
+((SELECT id FROM products WHERE name = 'Tomatoes'), 600, CURRENT_TIMESTAMP, 'available', 4),
+((SELECT id FROM products WHERE name = 'Potatoes'), 400, CURRENT_TIMESTAMP, 'available', 5);

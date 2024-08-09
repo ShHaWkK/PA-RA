@@ -1,19 +1,41 @@
-<!-- activity_suggest_menu.xml -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="16dp">
+    android:padding="16dp"
+    android:background="@color/background_color">
 
     <Button
         android:id="@+id/buttonSuggestMenu"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Suggérer un menu" />
+        android:minHeight="48dp"
+        android:layout_marginBottom="16dp"
+        android:text="@string/suggest_menu"
+        android:textColor="@android:color/white"
+        android:background="@drawable/button_background"/>
+
+    <Spinner
+        android:id="@+id/spinnerFilter"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="48dp"
+        android:layout_marginBottom="16dp"
+        android:entries="@array/filter_options"
+        android:background="@drawable/spinner_background"/>
+
+    <ProgressBar
+        android:id="@+id/loadingSpinner"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:visibility="gone"/>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewSuggestedRecipes"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:paddingTop="16dp" />
+        android:layout_height="wrap_content"
+        android:paddingTop="8dp"
+        android:divider="@android:color/darker_gray"
+        android:dividerHeight="1dp"/>
 </LinearLayout>

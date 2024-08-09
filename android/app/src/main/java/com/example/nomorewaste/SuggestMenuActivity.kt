@@ -1,69 +1,52 @@
 package com.example.nomorewaste
 
 import android.os.Bundle
-import android.widget.Button
-import android.widget.Toast
+import android.view.View
+import android.widget.AdapterView
+import android.widget.Spinner
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.nomorewaste.api.ApiService
 import com.example.nomorewaste.api.Recipe
 import com.example.nomorewaste.api.RecipeAdapter
-import com.example.nomorewaste.api.RetrofitClient
-import com.example.nomorewaste.api.SuggestRecipesRequest
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 
 class SuggestMenuActivity : AppCompatActivity() {
 
-    private lateinit var buttonSuggestMenu: Button
     private lateinit var recyclerViewSuggestedRecipes: RecyclerView
-    private lateinit var apiService: ApiService
+    private lateinit var spinnerFilter: Spinner
+    private lateinit var recipeAdapter: RecipeAdapter
+    private var recipes: List<Recipe> = listOf()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_suggest_menu)
 
-        buttonSuggestMenu = findViewById(R.id.buttonSuggestMenu)
         recyclerViewSuggestedRecipes = findViewById(R.id.recyclerViewSuggestedRecipes)
+        spinnerFilter = findViewById(R.id.spinnerFilter)
         recyclerViewSuggestedRecipes.layoutManager = LinearLayoutManager(this)
 
-        val retrofit = RetrofitClient.getClient()
-        apiService = retrofit.create(ApiService::class.java)
+        recipeAdapter = RecipeAdapter(recipes)
+        recyclerViewSuggestedRecipes.adapter = recipeAdapter
 
-        buttonSuggestMenu.setOnClickListener {
-            suggestMenu()
+        // Get recipes passed from the previous activity
+        recipes = intent.getSerializableExtra("recipes") as List<Recipe> // Cast as Serializable list
+        recipeAdapter.updateData(recipes)
+
+        spinnerFilter.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                applyFilter(parent?.getItemAtPosition(position) as String)
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
         }
     }
 
-    private fun suggestMenu() {
-        apiService.getProductsInStock().enqueue(object : Callback<Map<String, Int>> {
-            override fun onResponse(call: Call<Map<String, Int>>, response: Response<Map<String, Int>>) {
-                if (response.isSuccessful) {
-                    val productsInStock = response.body() ?: emptyMap()
-                    val requestBody = SuggestRecipesRequest(productsInStock)
-                    apiService.suggestRecipes(requestBody).enqueue(object : Callback<List<Recipe>> {
-                        override fun onResponse(call: Call<List<Recipe>>, response: Response<List<Recipe>>) {
-                            if (response.isSuccessful) {
-                                recyclerViewSuggestedRecipes.adapter = RecipeAdapter(response.body() ?: listOf())
-                            } else {
-                                Toast.makeText(this@SuggestMenuActivity, "Erreur lors de la suggestion des recettes", Toast.LENGTH_SHORT).show()
-                            }
-                        }
-
-                        override fun onFailure(call: Call<List<Recipe>>, t: Throwable) {
-                            Toast.makeText(this@SuggestMenuActivity, "Échec de la connexion : ${t.message}", Toast.LENGTH_SHORT).show()
-                        }
-                    })
-                } else {
-                    Toast.makeText(this@SuggestMenuActivity, "Erreur lors de la récupération des produits en stock", Toast.LENGTH_SHORT).show()
-                }
-            }
-
-            override fun onFailure(call: Call<Map<String, Int>>, t: Throwable) {
-                Toast.makeText(this@SuggestMenuActivity, "Échec de la connexion : ${t.message}", Toast.LENGTH_SHORT).show()
-            }
-        })
+    private fun applyFilter(filter: String) {
+        val filteredRecipes = if (filter == "All") {
+            recipes
+        } else {
+            recipes.filter { it.tags?.contains(filter) == true }
+        }
+        recipeAdapter.updateData(filteredRecipes)
     }
 }

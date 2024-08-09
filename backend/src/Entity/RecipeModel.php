@@ -23,9 +23,13 @@ class RecipeModel
     #[ORM\OneToMany(targetEntity: RecipeIngredientModel::class, mappedBy: "recipe", cascade: ["persist", "remove"])]
     private $ingredients;
 
+    #[ORM\Column(type: "json", nullable: true)]
+    private $tags = [];
+
     public function __construct()
     {
         $this->ingredients = new ArrayCollection();
+        $this->tags = [];
     }
 
     public function getId(): ?int
@@ -80,10 +84,37 @@ class RecipeModel
 
         return $this;
     }
-    
-    public function getRecipeIngredients(): Collection
+
+    public function getTags(): array
     {
-        return $this->ingredients;
+        return $this->tags;
+    }
+
+    public function setTags(array $tags): self
+    {
+        $this->tags = $tags;
+        return $this;
+    }
+
+    public function addTag(string $tag): self
+    {
+        if (!in_array($tag, $this->tags)) {
+            $this->tags[] = $tag;
+        }
+
+        return $this;
+    }
+
+    public function removeTag(string $tag): self
+    {
+        $index = array_search($tag, $this->tags);
+        if ($index !== false) {
+            unset($this->tags[$index]);
+            $this->tags = array_values($this->tags); // Réindexer le tableau
+        }
+
+        return $this;
     }
 }
+
 ?>

@@ -50,5 +50,5 @@ interface ApiService {
     fun deleteProduct(@Path("barcode") barcode: String): Call<Void>
 
     @GET("products/stock")
-    fun getProductsInStock(): Call<Map<String, Int>>
+    fun getProductsInStock(): Call<Map<String, Product>>
 }

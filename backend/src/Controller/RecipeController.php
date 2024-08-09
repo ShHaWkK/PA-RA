@@ -65,7 +65,7 @@ class RecipeController
         }
     }
 
-    public function createRecipe($data)
+        public function createRecipe($data)
     {
         try {
             if (!isset($data['name']) || !isset($data['instructions']) || !isset($data['ingredients'])) {
@@ -76,6 +76,10 @@ class RecipeController
             $recipe = new RecipeModel();
             $recipe->setName($data['name']);
             $recipe->setInstructions($data['instructions']);
+
+            if (isset($data['tags']) && is_array($data['tags'])) {
+                $recipe->setTags($data['tags']);
+            }
 
             $this->entityManager->persist($recipe);
             $this->entityManager->flush();
@@ -139,16 +143,19 @@ class RecipeController
                 http_response_code(404);
                 return ['error' => 'Recipe not found'];
             }
-
+    
             if (isset($data['name'])) {
                 $recipe->setName($data['name']);
             }
             if (isset($data['instructions'])) {
                 $recipe->setInstructions($data['instructions']);
             }
-
+            if (isset($data['tags']) && is_array($data['tags'])) {
+                $recipe->setTags($data['tags']);
+            }
+    
             $this->entityManager->flush();
-
+    
             return ['id' => $recipe->getId(), 'message' => 'Recipe updated successfully'];
         } catch (\Exception $e) {
             error_log("Exception in updateRecipe: " . $e->getMessage());
@@ -177,50 +184,49 @@ class RecipeController
 
     public function suggestRecipes($input)
     {
-        try {
-            if (is_null($input) || !isset($input['products_in_stock'])) {
-                http_response_code(400);
-                return ['error' => 'Input data is null or products_in_stock key is missing'];
-            }
-
-            error_log("Starting suggestRecipes with input: " . json_encode($input));
-            $productsInStock = $input['products_in_stock'];
-            $recipes = $this->entityManager->getRepository(RecipeModel::class)->findAll();
-
-            $suggestedRecipes = [];
-            foreach ($recipes as $recipe) {
-                $ingredients = $recipe->getIngredients();
-                $canMakeRecipe = true;
-                $recipeIngredients = [];
-
-                foreach ($ingredients as $ingredient) {
-                    if (!isset($productsInStock[$ingredient->getProduct()->getId()]) ||
-                        $productsInStock[$ingredient->getProduct()->getId()] < $ingredient->getQuantityNeeded()) {
-                        $canMakeRecipe = false;
-                        break;
-                    }
-
-                    $recipeIngredients[] = [
-                        'product_name' => $ingredient->getProduct()->getName(),
+        $productsInStock = $input['products_in_stock'];
+        $recipes = $this->entityManager->getRepository(RecipeModel::class)->findAll();
+    
+        $suggestedRecipes = [];
+        foreach ($recipes as $recipe) {
+            $matchedIngredients = 0;
+            $missingIngredients = [];
+            $totalIngredients = count($recipe->getIngredients());
+    
+            foreach ($recipe->getIngredients() as $ingredient) {
+                $product = $ingredient->getProduct();
+                if (isset($productsInStock[$product->getBarcode()])) {
+                    $matchedIngredients++;
+                } else {
+                    $missingIngredients[] = [
+                        'product_name' => $product->getName(),
                         'quantity_needed' => $ingredient->getQuantityNeeded()
                     ];
                 }
-
-                if ($canMakeRecipe) {
-                    $suggestedRecipes[] = [
-                        'name' => $recipe->getName(),
-                        'instructions' => $recipe->getInstructions(),
-                        'ingredients' => $recipeIngredients,
-                    ];
-                }
             }
-
-            error_log("suggestRecipes response: " . json_encode($suggestedRecipes));
-            return $suggestedRecipes;
-        } catch (\Exception $e) {
-            error_log("Exception in suggestRecipes: " . $e->getMessage());
-            throw $e;
+    
+            if ($matchedIngredients > 0) {
+                $completionRate = ($matchedIngredients / $totalIngredients) * 100;
+                $suggestedRecipes[] = [
+                    'name' => $recipe->getName(),
+                    'instructions' => $recipe->getInstructions(),
+                    'completion_rate' => $completionRate,
+                    'missing_ingredients' => $missingIngredients,
+                    'ingredients' => array_map(function($ingredient) {
+                        return [
+                            'product_name' => $ingredient->getProduct()->getName(),
+                            'quantity_needed' => $ingredient->getQuantityNeeded()
+                        ];
+                    }, $recipe->getIngredients()->toArray())
+                ];
+            }
         }
+    
+        usort($suggestedRecipes, function($a, $b) {
+            return $b['completion_rate'] <=> $a['completion_rate'];
+        });
+    
+        return $suggestedRecipes;
     }
 
 }

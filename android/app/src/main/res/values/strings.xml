@@ -44,5 +44,24 @@
     <string name="button_save_name">Enregistrer les modifications</string>
     <string name="button_manage_products">Gérer les produits</string>
     <string name="button_delete_product">Supprimer le produit</string>
+    <string name="recipe_name_placeholder">Recette: %1$s</string>
+    <string name="recipe_instructions_placeholder">Instructions: %1$s</string>
+    <string name="missing_ingredients_placeholder">Ingrédients manquants: %1$s</string>
+    <string name="all_ingredients_available">Tous les ingrédients sont disponibles</string>
+    <string name="suggest_menu">Suggérer un menu</string>
+    <string name="favorite_button_description">Marquer comme favori</string>
+    <string-array name="filter_options">
+        <item>All</item>
+        <item>Vegetarian</item>
+        <item>Gluten Free</item>
+        <item>Favorites</item>
+    </string-array>
 
+    <string name="product_info">Produit: %1$s - Quantité: %2$.2f g</string>
+    <string name="unknown_product">Produit inconnu</string>
+    <string name="error_fetching_products">Erreur lors de la récupération des produits</string>
+    <string name="connection_failure">Échec de la connexion : %1$s</string>
+    <string name="no_recipes_found">Aucune recette trouvée</string>
+    <string name="suggestion_error">Erreur lors de la suggestion des recettes</string>
+    <string name="select_product_warning">Veuillez sélectionner au moins un produit</string>
 </resources>
