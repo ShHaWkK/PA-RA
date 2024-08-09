@@ -3,7 +3,7 @@ namespace Controller;
 
 use Entity\ProductModel;
 use Entity\StockModel;
-use Entity\WarehouseModel; 
+use Entity\WarehouseModel;
 use Doctrine\ORM\EntityManager;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
@@ -32,7 +32,11 @@ class ProductController
                     return $this->createProduct($input);
                 case 'GET':
                     if (isset($uriParts[1])) {
-                        return $this->getProductByBarcode($uriParts[1]);
+                        if ($uriParts[1] === 'stock') {
+                            return $this->getProductsInStock();
+                        } else {
+                            return $this->getProductByBarcode($uriParts[1]);
+                        }
                     } else {
                         return $this->getAllProducts();
                     }
@@ -243,6 +247,24 @@ class ProductController
             return json_decode($this->serializer->serialize($products, 'json'), true);
         } catch (\Exception $e) {
             error_log("Exception in getAllProducts: " . $e->getMessage());
+            throw $e;
+        }
+    }
+
+    public function getProductsInStock()
+    {
+        try {
+            $stockRepository = $this->entityManager->getRepository(StockModel::class);
+            $stocks = $stockRepository->findAll();
+            
+            $productsInStock = [];
+            foreach ($stocks as $stock) {
+                $productsInStock[$stock->getProductId()] = $stock->getQuantity();
+            }
+
+            return $productsInStock;
+        } catch (\Exception $e) {
+            error_log("Exception in getProductsInStock: " . $e->getMessage());
             throw $e;
         }
     }

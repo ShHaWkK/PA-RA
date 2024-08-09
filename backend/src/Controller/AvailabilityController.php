@@ -1,5 +1,4 @@
 <?php
-// Path: backend/src/Controller/AvailabilityController.php
 namespace Controller;
 
 use Entity\AvailabilityModel;
@@ -7,7 +6,7 @@ use Doctrine\ORM\EntityManager;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
-use Doctrine\ORM\EntityNotFoundException;
+use DTO\AvailabilityDTO;
 
 class AvailabilityController
 {
@@ -17,9 +16,27 @@ class AvailabilityController
     public function __construct(EntityManager $entityManager)
     {
         $this->entityManager = $entityManager;
-        $normalizers = [new ObjectNormalizer()];
+
+        $normalizer = new ObjectNormalizer(null, null, null, null, null, null, [
+            ObjectNormalizer::CIRCULAR_REFERENCE_HANDLER => function ($object) {
+                return $object->getId();
+            }
+        ]);
+        
         $encoders = [new JsonEncoder()];
-        $this->serializer = new Serializer($normalizers, $encoders);
+        $this->serializer = new Serializer([$normalizer], $encoders);
+    }
+
+    private function toDTO(AvailabilityModel $availability): AvailabilityDTO
+    {
+        return new AvailabilityDTO(
+            $availability->getId(),
+            $availability->getDayOfWeek(),
+            $availability->getStartTime()->format('H:i:s'),
+            $availability->getEndTime()->format('H:i:s'),
+            $availability->getCreatedAt()->format('Y-m-d H:i:s'),
+            $availability->getUpdatedAt()->format('Y-m-d H:i:s')
+        );
     }
 
     public function processRequest($method, $uriParts, $input)
@@ -59,7 +76,6 @@ class AvailabilityController
     public function createAvailability($data)
     {
         try {
-            // Validate input data (add your own validation logic)
             if (!isset($data['user_id']) || !isset($data['day_of_week']) || !isset($data['start_time']) || !isset($data['end_time'])) {
                 http_response_code(400);
                 return ['error' => 'Missing required fields for new availability'];
@@ -91,7 +107,8 @@ class AvailabilityController
                 http_response_code(404);
                 return ['error' => 'Availability not found'];
             }
-            return json_decode($this->serializer->serialize($availability, 'json'), true);
+            $dto = $this->toDTO($availability);
+            return json_decode($this->serializer->serialize($dto, 'json'), true);
         } catch (\Exception $e) {
             error_log("Exception in getAvailability: " . $e->getMessage());
             throw $e;
@@ -101,7 +118,6 @@ class AvailabilityController
     public function updateAvailability($id, $data)
     {
         try {
-            // Validate input data (add your own validation logic)
             if (!isset($data['day_of_week']) && !isset($data['start_time']) && !isset($data['end_time'])) {
                 http_response_code(400);
                 return ['error' => 'No fields to update'];
@@ -157,7 +173,8 @@ class AvailabilityController
         try {
             $availabilityRepository = $this->entityManager->getRepository(AvailabilityModel::class);
             $availabilities = $availabilityRepository->findAll();
-            return json_decode($this->serializer->serialize($availabilities, 'json'), true);
+            $dtos = array_map([$this, 'toDTO'], $availabilities);
+            return json_decode($this->serializer->serialize($dtos, 'json'), true);
         } catch (\Exception $e) {
             error_log("Exception in getAllAvailabilities: " . $e->getMessage());
             throw $e;

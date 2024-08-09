@@ -1,6 +1,4 @@
 <?php
-// Path: backend/src/Controller/RecipeIngredientController.php
-
 namespace Controller;
 
 use Entity\RecipeIngredientModel;

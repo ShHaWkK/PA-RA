@@ -22,17 +22,25 @@ interface ApiService {
     @GET("users/{id}")
     fun getUser(@Path("id") id: Int): Call<User>
 
-    @GET("availabilities/{userId}")
-    fun getAvailabilities(@Path("userId") userId: Int): Call<List<Availability>>
+    @GET("availabilities/{id}")
+    fun getAvailabilities(@Path("id") userId: Int): Call<Any>
 
     @PUT("users/{id}")
     fun updateUser(@Path("id") id: Int, @Body user: User): Call<Void>
 
-    @GET("products")
-    fun getProducts(): Call<List<Product>>
+    @GET("warehouses")
+    fun getWarehouses(): Call<List<Warehouse>>
 
+    @GET("recipes")
+    fun getRecipes(): Call<List<Recipe>>
+
+    @POST("recipes/suggest")
+    fun suggestRecipes(@Body requestBody: Map<String, Map<String, Int>>): Call<List<Recipe>>
     @POST("products")
     fun addProduct(@Body product: Product): Call<Void>
+
+    @GET("products")
+    fun getProducts(): Call<List<Product>>
 
     @PUT("products/{barcode}")
     fun updateProduct(@Path("barcode") barcode: String, @Body product: Product): Call<Void>
@@ -40,16 +48,9 @@ interface ApiService {
     @DELETE("products/{barcode}")
     fun deleteProduct(@Path("barcode") barcode: String): Call<Void>
 
-    @GET("warehouses")
-    fun getWarehouses(): Call<List<Warehouse>>
+    @GET("products/stock")
+    fun getProductsInStock(): Call<Map<String, Int>>
 
-    @GET("recipe")
-    fun getRecipes(): Call<List<Recipe>>
 
-    @GET("recipe/{id}")
-    fun getRecipeById(@Path("id") id: Int): Call<Recipe>
-
-    @POST("recipe/suggest")
-    fun suggestRecipes(@Body productsInStock: Map<String, Int>): Call<List<Recipe>>
 }
 

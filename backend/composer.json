@@ -19,7 +19,8 @@
             "Controller\\": "src/Controller/",
             "Service\\": "src/Service/", 
             "Middleware\\": "src/Middleware/",
-            "Scripts\\": "src/Scripts/"
+            "Scripts\\": "src/Scripts/",
+            "DTO\\": "src/DTO/"
         }
     }
 }

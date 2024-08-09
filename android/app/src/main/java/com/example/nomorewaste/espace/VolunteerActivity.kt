@@ -150,24 +150,4 @@ class VolunteerActivity : AppCompatActivity() {
             }
         })
     }
-
-    private fun getVolunteerAvailabilities(volunteerId: Int) {
-        apiService.getAvailabilities(volunteerId).enqueue(object : Callback<List<Availability>> {
-            override fun onResponse(call: Call<List<Availability>>, response: Response<List<Availability>>) {
-                if (response.isSuccessful) {
-                    val availabilities = response.body() ?: emptyList()
-                    recyclerView.adapter = AvailabilityAdapter(availabilities)
-                } else {
-                    val errorBody = response.errorBody()?.string()
-                    Log.e("VolunteerDashboard", "Error: $errorBody")
-                    Toast.makeText(this@VolunteerActivity, "Erreur de récupération des disponibilités: $errorBody", Toast.LENGTH_SHORT).show()
-                }
-            }
-
-            override fun onFailure(call: Call<List<Availability>>, t: Throwable) {
-                Log.e("VolunteerDashboard", "Failure: ${t.message}", t)
-                Toast.makeText(this@VolunteerActivity, "Échec de la connexion : ${t.message}", Toast.LENGTH_SHORT).show()
-            }
-        })
-    }
 }
