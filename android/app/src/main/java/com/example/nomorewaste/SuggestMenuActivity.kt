@@ -7,14 +7,13 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.nomorewaste.api.ApiService
-import com.example.nomorewaste.api.ProductStock
 import com.example.nomorewaste.api.Recipe
 import com.example.nomorewaste.api.RecipeAdapter
 import com.example.nomorewaste.api.RetrofitClient
+import com.example.nomorewaste.api.SuggestRecipesRequest
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import android.util.Log
 
 class SuggestMenuActivity : AppCompatActivity() {
 
@@ -39,20 +38,32 @@ class SuggestMenuActivity : AppCompatActivity() {
     }
 
     private fun suggestMenu() {
-        val productsInStock = mapOf<String, Int>() // Ajoutez les données des produits en stock ici
-        apiService.suggestRecipes(productsInStock).enqueue(object : Callback<List<Recipe>> {
-            override fun onResponse(call: Call<List<Recipe>>, response: Response<List<Recipe>>) {
+        apiService.getProductsInStock().enqueue(object : Callback<Map<String, Int>> {
+            override fun onResponse(call: Call<Map<String, Int>>, response: Response<Map<String, Int>>) {
                 if (response.isSuccessful) {
-                    recyclerViewSuggestedRecipes.adapter = RecipeAdapter(response.body() ?: listOf())
+                    val productsInStock = response.body() ?: emptyMap()
+                    val requestBody = SuggestRecipesRequest(productsInStock)
+                    apiService.suggestRecipes(requestBody).enqueue(object : Callback<List<Recipe>> {
+                        override fun onResponse(call: Call<List<Recipe>>, response: Response<List<Recipe>>) {
+                            if (response.isSuccessful) {
+                                recyclerViewSuggestedRecipes.adapter = RecipeAdapter(response.body() ?: listOf())
+                            } else {
+                                Toast.makeText(this@SuggestMenuActivity, "Erreur lors de la suggestion des recettes", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+
+                        override fun onFailure(call: Call<List<Recipe>>, t: Throwable) {
+                            Toast.makeText(this@SuggestMenuActivity, "Échec de la connexion : ${t.message}", Toast.LENGTH_SHORT).show()
+                        }
+                    })
                 } else {
-                    Toast.makeText(this@SuggestMenuActivity, "Erreur lors de la suggestion des recettes", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@SuggestMenuActivity, "Erreur lors de la récupération des produits en stock", Toast.LENGTH_SHORT).show()
                 }
             }
 
-            override fun onFailure(call: Call<List<Recipe>>, t: Throwable) {
+            override fun onFailure(call: Call<Map<String, Int>>, t: Throwable) {
                 Toast.makeText(this@SuggestMenuActivity, "Échec de la connexion : ${t.message}", Toast.LENGTH_SHORT).show()
             }
         })
     }
-
 }

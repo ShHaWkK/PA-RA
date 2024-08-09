@@ -1,3 +1,4 @@
+// ProductAdapter.kt
 package com.example.nomorewaste.api
 
 import android.view.LayoutInflater
@@ -6,7 +7,6 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.nomorewaste.R
-import com.example.nomorewaste.api.Product
 
 class ProductAdapter(private val productList: List<Product>) : RecyclerView.Adapter<ProductAdapter.ProductViewHolder>() {
 

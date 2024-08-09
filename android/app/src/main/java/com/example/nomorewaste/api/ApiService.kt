@@ -4,8 +4,8 @@ import retrofit2.Call
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
-import retrofit2.http.PUT
 import retrofit2.http.Path
+import retrofit2.http.PUT
 import retrofit2.http.DELETE
 
 interface ApiService {
@@ -34,8 +34,9 @@ interface ApiService {
     @GET("recipes")
     fun getRecipes(): Call<List<Recipe>>
 
-    @POST("recipes/suggest")
-    fun suggestRecipes(@Body requestBody: Map<String, Map<String, Int>>): Call<List<Recipe>>
+    @POST("recipe/suggest")
+    fun suggestRecipes(@Body request: SuggestRecipesRequest): Call<List<Recipe>>
+
     @POST("products")
     fun addProduct(@Body product: Product): Call<Void>
 
@@ -50,7 +51,4 @@ interface ApiService {
 
     @GET("products/stock")
     fun getProductsInStock(): Call<Map<String, Int>>
-
-
 }
-

@@ -1,8 +1,5 @@
 <?php
 
-/*
-*   gérer correctement les suggestions de recettes en fonction des produits en stock
-*/
 namespace Controller;
 
 use Entity\RecipeModel;
@@ -84,9 +81,15 @@ class RecipeController
             $this->entityManager->flush();
 
             foreach ($data['ingredients'] as $ingredient) {
+                $product = $this->entityManager->getRepository(ProductModel::class)->find($ingredient['product_id']);
+                if (!$product) {
+                    http_response_code(400);
+                    return ['error' => 'Product not found'];
+                }
+
                 $recipeIngredient = new RecipeIngredientModel();
                 $recipeIngredient->setRecipe($recipe);
-                $recipeIngredient->setProduct($this->entityManager->getRepository(ProductModel::class)->find($ingredient['product_id']));
+                $recipeIngredient->setProduct($product);
                 $recipeIngredient->setQuantityNeeded($ingredient['quantity_needed']);
 
                 $this->entityManager->persist($recipeIngredient);
@@ -179,34 +182,46 @@ class RecipeController
                 http_response_code(400);
                 return ['error' => 'Input data is null or products_in_stock key is missing'];
             }
-    
+
             error_log("Starting suggestRecipes with input: " . json_encode($input));
             $productsInStock = $input['products_in_stock'];
             $recipes = $this->entityManager->getRepository(RecipeModel::class)->findAll();
-    
+
             $suggestedRecipes = [];
             foreach ($recipes as $recipe) {
                 $ingredients = $recipe->getIngredients();
                 $canMakeRecipe = true;
+                $recipeIngredients = [];
+
                 foreach ($ingredients as $ingredient) {
                     if (!isset($productsInStock[$ingredient->getProduct()->getId()]) ||
                         $productsInStock[$ingredient->getProduct()->getId()] < $ingredient->getQuantityNeeded()) {
                         $canMakeRecipe = false;
                         break;
                     }
+
+                    $recipeIngredients[] = [
+                        'product_name' => $ingredient->getProduct()->getName(),
+                        'quantity_needed' => $ingredient->getQuantityNeeded()
+                    ];
                 }
+
                 if ($canMakeRecipe) {
-                    $suggestedRecipes[] = $recipe;
+                    $suggestedRecipes[] = [
+                        'name' => $recipe->getName(),
+                        'instructions' => $recipe->getInstructions(),
+                        'ingredients' => $recipeIngredients,
+                    ];
                 }
             }
-    
-            $response = json_decode($this->serializer->serialize($suggestedRecipes, 'json'), true);
-            error_log("suggestRecipes response: " . json_encode($response));
-            return $response;
+
+            error_log("suggestRecipes response: " . json_encode($suggestedRecipes));
+            return $suggestedRecipes;
         } catch (\Exception $e) {
             error_log("Exception in suggestRecipes: " . $e->getMessage());
             throw $e;
         }
     }
+
 }
 ?>
