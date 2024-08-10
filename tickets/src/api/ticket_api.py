@@ -65,10 +65,22 @@ class TicketAPI:
             logging.debug(f"Requesting tickets for user ID: {user_id}")
             response = requests.get(f"{TicketAPI.BASE_URL}/users/{user_id}/tickets")
             response.raise_for_status()
+            
+            logging.debug(f"Raw response content: {response.content}")  # Ajoutez cette ligne pour voir le contenu brut
+            
+            # Vérifiez si le contenu de la réponse est vide
+            if not response.content:
+                logging.error("Empty response received from the API")
+                return {"error": "Empty response from API"}
+            
             return response.json()
         except requests.exceptions.RequestException as e:
             logging.error(f"Failed to get tickets by user: {e}")
             return {"error": str(e)}
+        except ValueError as e:
+            logging.error(f"Failed to parse JSON response: {e}")
+            return {"error": "Invalid JSON format"}
+
 
     @staticmethod
     def search_tickets(criteria):

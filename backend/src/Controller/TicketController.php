@@ -35,13 +35,13 @@ class TicketController
     {
         try {
             error_log("TicketController - processRequest called with method: $method");
-
+    
             if (isset($uriParts[1]) && $uriParts[1] === 'messages') {
                 // Redirect to MessageController
                 $messageController = new MessageController($this->entityManager);
                 return $messageController->processRequest($method, array_slice($uriParts, 1), $input);
             }
-
+    
             switch ($method) {
                 case 'POST':
                     return $this->createTicket($input);
@@ -53,6 +53,8 @@ class TicketController
                             return $this->searchAdminByName($input['name']);
                         } elseif ($uriParts[1] === 'admins') {
                             return $this->getAllAdmins();
+                        } elseif ($uriParts[2] === 'tickets') {
+                            return $this->getTicketsByUser((int)$uriParts[1]);
                         } else {
                             return $this->getTicket((int)$uriParts[0]);
                         }
@@ -87,6 +89,7 @@ class TicketController
             return new JsonResponse(['error' => 'Internal Server Error']);
         }
     }
+    
 
 
     
@@ -386,17 +389,19 @@ class TicketController
     public function getTicketsByUser($userId)
     {
         try {
-            // Assurez-vous que vous avez bien un utilisateur valide
+            error_log("Fetching user by ID: " . $userId);
             $user = $this->entityManager->find(UserModel::class, $userId);
+            
             if (!$user) {
                 http_response_code(404);
-                return json_encode(['error' => 'User not found']);
+                error_log("User not found");
+                echo json_encode(['error' => 'User not found']);
+                exit();
             }
     
-            // Récupérez les tickets créés par cet utilisateur
             $tickets = $this->entityManager->getRepository(TicketModel::class)->findBy(['created_by' => $user]);
+            error_log("Tickets found: " . count($tickets));
     
-            // Préparez une réponse simplifiée ne contenant que les informations de tickets
             $ticketData = [];
             foreach ($tickets as $ticket) {
                 $ticketData[] = [
@@ -404,23 +409,30 @@ class TicketController
                     'type' => $ticket->getType(),
                     'description' => $ticket->getDescription(),
                     'status' => $ticket->getStatus(),
-                    'createdAt' => $ticket->getCreatedAt()->format('Y-m-d H:i:s'), // Ensure proper format
-                    'updatedAt' => $ticket->getUpdatedAt()->format('Y-m-d H:i:s'), // Ensure proper format
+                    'createdAt' => $ticket->getCreatedAt()->format('Y-m-d H:i:s'),
+                    'updatedAt' => $ticket->getUpdatedAt()->format('Y-m-d H:i:s'),
                     'assignedTo' => $ticket->getAssignedTo() ? $ticket->getAssignedTo()->getId() : null,
                     'attachments' => $ticket->getAttachments()
                 ];
             }
     
-            // Sérialisez les données des tickets pour les renvoyer au client
-            $response = json_encode($ticketData);
-            error_log("Tickets retrieved for user {$userId}: " . $response); // Log tickets retrieved
-            return $response;
+            if (empty($ticketData)) {
+                error_log("No tickets found for this user");
+                echo json_encode(['message' => 'No tickets found for this user']);
+                exit();
+            }
+    
+            error_log("Returning ticket data: " . json_encode($ticketData));
+            echo json_encode($ticketData);
+            exit();
         } catch (\Exception $e) {
             error_log("Exception in getTicketsByUser: " . $e->getMessage());
             http_response_code(500);
-            return json_encode(['error' => 'Internal Server Error']);
+            echo json_encode(['error' => 'Internal Server Error']);
+            exit();
         }
     }
+    
 
     public function closeTicket($ticketId, $data)
     {
