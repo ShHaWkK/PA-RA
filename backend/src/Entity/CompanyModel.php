@@ -159,5 +159,23 @@ class CompanyModel
         $this->updated_at = $updatedAt;
         return $this;
     }
+
+    // Implémentation de la méthode jsonSerialize
+    public function jsonSerialize(): array
+    {
+        return [
+            'id' => $this->getId(),
+            'name' => $this->getName(),
+            'address' => $this->getAddress(),
+            'contact_info' => $this->getContactInfo(),
+            'siret' => $this->getSiret(),
+            'renewal_date' => $this->getRenewalDate()->format('Y-m-d'),
+            'renewal_status' => $this->getRenewalStatus(),
+            'has_stock' => $this->getHasStock(),
+            'last_notified' => $this->getLastNotified()?->format('Y-m-d H:i:s'),
+            'created_at' => $this->getCreatedAt()->format('Y-m-d H:i:s'),
+            'updated_at' => $this->getUpdatedAt()->format('Y-m-d H:i:s'),
+        ];
+    }
 }
 ?>

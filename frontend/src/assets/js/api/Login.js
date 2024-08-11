@@ -25,7 +25,14 @@ async function login(email, password) {
     if (data.token) {
         setJwtCookie(data.token);
         setJwtToken(data.token);
-        window.location.href = '/Admin';
+
+        console.log(data.role);
+
+        switch (data.role){
+            case 'admin':
+                window.location.href = '/Admin/Volunteers';
+            break;
+        }
     }
 
     return await data;
@@ -39,6 +46,8 @@ async function authenticate(jwtToken, role) {
             'Content-Type': 'application/json'
         }
     });
+
+    console.log("jwt:",jwtToken)
 
     if (!response.ok) {
         if (response.status === 401) {

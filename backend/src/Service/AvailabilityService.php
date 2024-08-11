@@ -26,6 +26,8 @@ class AvailabilityService
         $availability->setStartTime(new \DateTime($data['start_time']));
         $availability->setEndTime(new \DateTime($data['end_time']));
         $availability->setUser($user);
+        $availability->setCreatedAt(new \DateTime());
+        $availability->setUpdatedAt(new \DateTime());
 
         $this->entityManager->persist($availability);
         $this->entityManager->flush();

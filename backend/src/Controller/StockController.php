@@ -29,7 +29,19 @@ class StockController
                 return $this->createStock($input);
             case 'GET':
                 if (isset($uriParts[1])) {
-                    return $this->getStock((int) $uriParts[1]);
+                    switch ($uriParts[1]){
+                        case 'getStocksByWarehouse':
+                            if (isset($uriParts[2])) {
+                                return $this->getStockByWarehouse($uriParts[2]);
+                            }else{
+                                http_response_code(400);
+                                return ['error' => 'Warehouse ID not specified'];
+                            }
+                            break;
+                        default:
+                            return $this->getStock((int) $uriParts[1]);
+                    }
+
                 } else {
                     return $this->getAllStocks();
                 }
@@ -91,7 +103,7 @@ class StockController
         $stock->setProductId($data['product_id']);
         $stock->setQuantity($data['quantity']);
         $stock->setAvailability($data['availability']);
-        $stock->setWarehouseId($data['warehouse_id']);
+        $stock->setWarehouse($warehouse); // Set the warehouse entity
         $stock->setEntryDate(new \DateTime("now"));
         $stock->setCreatedAt(new \DateTime("now"));
         $stock->setUpdatedAt(new \DateTime("now"));
@@ -107,23 +119,25 @@ class StockController
         $stocks = $this->entityManager->getRepository(StockModel::class)->findBy(['warehouse_id' => $warehouseId]);
         $currentVolume = 0;
         foreach ($stocks as $stock) {
-            $product = $this->entityManager->getRepository(ProductModel::class)->find($stock->getProductId());
-            $currentVolume += $product->getVolume() * $stock->getQuantity();
+            $product = $this->entityManager->find(ProductModel::class, $stock->getProductId());
+            if ($product) {
+                $currentVolume += $product->getVolume() * $stock->getQuantity();
+            }
         }
         return $currentVolume;
     }
 
-    public function getStock($id)
+    public function getAllStocks()
     {
-        $stock = $this->entityManager->find(StockModel::class, $id);
-        if (!$stock) {
-            http_response_code(404);
-            return ['error' => 'Stock not found'];
+        $stocks = $this->entityManager->getRepository(StockModel::class)->findAll();
+        $data = [];
+        foreach ($stocks as $stock) {
+            $data[] = $this->serializer->normalize($stock);
         }
-        return json_decode($this->serializer->serialize($stock, 'json'), true);
+        return $data;
     }
 
-    public function updateStock($id, $data)
+    public function getStock(int $id)
     {
         $stock = $this->entityManager->find(StockModel::class, $id);
         if (!$stock) {
@@ -131,38 +145,97 @@ class StockController
             return ['error' => 'Stock not found'];
         }
 
-        // Prevent updating the stock if it's already in route
-        if ($stock->getAvailability() == 'in_route' && isset($data['availability']) && $data['availability'] != 'delivered') {
-            http_response_code(400);
-            return ['error' => 'Stock is already in route'];
+        $product = $this->entityManager->find(ProductModel::class, $stock->getProductId());
+        $productName = $product ? $product->getName() : null;
+
+        $normalizedStock = [
+            'id' => $stock->getId(),
+            'product_id' => $stock->getProductId(),
+            'product_name' => $productName,
+            'quantity' => $stock->getQuantity(),
+            'volume' => $stock->getQuantity() * $product->getVolume(),
+            'entry_date' => $stock->getEntryDate()->format(\DateTime::ISO8601),
+            'exit_date' => $stock->getExitDate() ? $stock->getExitDate()->format(\DateTime::ISO8601) : null,
+            'availability' => $stock->getAvailability(),
+            'created_at' => $stock->getCreatedAt()->format(\DateTime::ISO8601),
+            'updated_at' => $stock->getUpdatedAt()->format(\DateTime::ISO8601),
+            'warehouse_id' => $stock->getWarehouseId(),
+        ];
+
+        return $normalizedStock;
+    }
+
+
+    public function getStockByWarehouse(int $warehouseId)
+    {
+        $stocks = $this->entityManager->getRepository(StockModel::class)->findBy(['warehouse_id' => $warehouseId]);
+        if (empty($stocks)) {
+            http_response_code(404);
+            return ['error' => 'No stocks found for this warehouse'];
         }
 
-        if (isset($data['product_id'])) {
-            $stock->setProductId($data['product_id']);
+        $data = [];
+        foreach ($stocks as $stock) {
+            $product = $this->entityManager->find(ProductModel::class, $stock->getProductId());
+            $productName = $product ? $product->getName() : null;
+
+            $data[] = [
+                'id' => $stock->getId(),
+                'product_id' => $stock->getProductId(),
+                'product_name' => $productName,
+                'quantity' => $stock->getQuantity(),
+                'volume' => $stock->getQuantity() * $product->getVolume(),
+                'entry_date' => $stock->getEntryDate()->format(\DateTime::ISO8601),
+                'exit_date' => $stock->getExitDate() ? $stock->getExitDate()->format(\DateTime::ISO8601) : null,
+                'availability' => $stock->getAvailability(),
+                'created_at' => $stock->getCreatedAt()->format(\DateTime::ISO8601),
+                'updated_at' => $stock->getUpdatedAt()->format(\DateTime::ISO8601),
+                'warehouse_id' => $stock->getWarehouseId(),
+            ];
         }
+
+        return $data;
+    }
+
+    public function updateStock(int $id, $data)
+    {
+        $stock = $this->entityManager->find(StockModel::class, $id);
+        if (!$stock) {
+            http_response_code(404);
+            return ['error' => 'Stock not found'];
+        }
+
         if (isset($data['quantity'])) {
             $stock->setQuantity($data['quantity']);
-        }
-        if (isset($data['entry_date'])) {
-            $stock->setEntryDate(new \DateTime($data['entry_date']));
-        }
-        if (isset($data['exit_date'])) {
-            $stock->setExitDate(new \DateTime($data['exit_date']));
         }
         if (isset($data['availability'])) {
             $stock->setAvailability($data['availability']);
         }
         if (isset($data['warehouse_id'])) {
+            $warehouse = $this->entityManager->find(WarehouseModel::class, $data['warehouse_id']);
+            if (!$warehouse) {
+                http_response_code(400);
+                return ['error' => 'Warehouse not found'];
+            }
             $stock->setWarehouseId($data['warehouse_id']);
         }
+        if (isset($data['product_id'])) {
+            $product = $this->entityManager->find(ProductModel::class, $data['product_id']);
+            if (!$product) {
+                http_response_code(400);
+                return ['error' => 'Product not found'];
+            }
+            $stock->setProductId($data['product_id']);
+        }
+
         $stock->setUpdatedAt(new \DateTime("now"));
 
         $this->entityManager->flush();
 
-        return ['id' => $stock->getId(), 'message' => 'Stock updated successfully'];
+        return ['message' => 'Stock updated successfully'];
     }
 
-    public function deleteStock($id)
+    public function deleteStock(int $id)
     {
         $stock = $this->entityManager->find(StockModel::class, $id);
         if (!$stock) {
@@ -175,11 +248,5 @@ class StockController
 
         return ['message' => 'Stock deleted successfully'];
     }
-
-    public function getAllStocks()
-    {
-        $stockRepository = $this->entityManager->getRepository(StockModel::class);
-        $stocks = $stockRepository->findAll();
-        return json_decode($this->serializer->serialize($stocks, 'json'), true);
-    }
 }
+?>

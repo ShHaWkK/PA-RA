@@ -73,6 +73,7 @@ class UserController
                     switch ($uriParts[1]) {
                         case 'generatePlanning':
                             return $this->generatePlanning();
+
                         case 'getSkills':
                             if (isset($uriParts[2])) {
                                 return $this->getUserSkills($uriParts[2]);
@@ -80,6 +81,7 @@ class UserController
                                 http_response_code(400);
                                 return ["message" => "User id not set"];
                             }
+
                         case 'getAvailabilities':
                             if (isset($uriParts[2])) {
                                 return $this->getUserAvailabilities($uriParts[2]);
@@ -87,8 +89,18 @@ class UserController
                                 http_response_code(400);
                                 return ["message" => "User id not set"];
                             }
+
+                        case 'getUserCompanies':
+                            if (isset($uriParts)){
+                                return $this->getUserCompanies($uriParts[2]);
+                            }else{
+                                http_response_code(400);
+                                return ["message" => "User id not set"];
+                            }
+
                         case 'tickets':
                             return $this->getTicketsByUser((int)$uriParts[1]);
+
                         default:
                             return $this->getUser($uriParts[1]);
                     }
@@ -103,9 +115,10 @@ class UserController
                             return $this->updateUserStatus($uriParts[2], $input);
                     }
                 } else {
-                    return $this->updateUser($uriParts[1], $input);
+                    return $this->updateUser($uriParts[1],$input);
+//                    http_response_code(400);
+//                    return ['error' => 'User ID not specified'];
                 }
-
             case 'DELETE':
                 if (isset($uriParts[1])) {
                     return $this->deleteUser($uriParts[1]);
@@ -289,25 +302,19 @@ class UserController
                 http_response_code(400);
                 return ['error' => 'Missing status field'];
             }
-    
+
+            // Assuming $entityManager is available to interact with the database
             $user = $this->entityManager->getRepository(UserModel::class)->find($id);
-    
+
             if (!$user) {
                 http_response_code(404);
                 return ['error' => 'User not found'];
             }
-    
+
             $user->setStatus($data['status']);
             $this->entityManager->persist($user);
             $this->entityManager->flush();
-    
-            if ($data['status'] === 'approved') {
-                $this->emailService->sendApprovalEmail($user->getEmail());
-            } elseif ($data['status'] === 'rejected') {
-                error_log("Sending rejection email to: " . $user->getEmail());
-                $this->emailService->sendRejectionEmail($user->getEmail());
-            }
-    
+
             return ['message' => 'User status updated successfully'];
         } catch (\Exception $e) {
             error_log("Exception in updateUserStatus: " . $e->getMessage());
@@ -374,6 +381,11 @@ class UserController
 
         $skills = $user->getSkills();
 
+        if (!$skills) {
+            http_response_code(404);
+            return ['error' => 'Skill not found'];
+        }
+
         $serializedSkills = [];
         foreach ($skills as $skill) {
             $serializedSkills[] = $skill->jsonSerialize();
@@ -395,7 +407,7 @@ class UserController
 
         if (!$availabilities) {
             http_response_code(404);
-            return ['error' => 'Skill not found'];
+            return ['error' => 'Availability not found'];
         }
 
         $serializedAvailabilities = [];
@@ -406,46 +418,61 @@ class UserController
         return $serializedAvailabilities;
     }
 
+    public function getUserCompanies($userId)
+    {
+        $user = $this->entityManager->getRepository(UserModel::class)->find($userId);
+
+        if (!$user) {
+            http_response_code(404);
+            return ['message' => "User with ID $userId not found"];
+        }
+
+        $companies = $user->getCompanies();
+        if ($companies->isEmpty()) { // Vérifie si la collection est vide
+            http_response_code(404);
+            return ['error' => 'No companies found for this user'];
+        }
+
+        $serializedCompanies = [];
+        foreach ($companies as $company) { // Correction de la syntaxe
+            $serializedCompanies[] = $company->jsonSerialize();
+        }
+
+        return $serializedCompanies;
+    }
+
     private function updateUser($id, $input)
     {
         try {
+            // Verify if the input is an array
             if (!is_array($input)) {
                 http_response_code(400);
                 return ['error' => 'Invalid input format'];
             }
 
+            // Fetch the user from the database
             $user = $this->entityManager->getRepository(UserModel::class)->find($id);
 
+            // If the user is not found, return a 404 error
             if (!$user) {
                 http_response_code(404);
                 return ['error' => 'User not found'];
             }
 
-            $originalEmail = $user->getEmail();
-            $originalFirstName = $user->getFirstName();
-            $originalLastName = $user->getLastName();
-            $originalPassword = $user->getPassword();
-
+            // Update the user fields with the provided input
             $user->updateFields($input);
 
+            // Persist the changes and flush the entity manager
             $this->entityManager->persist($user);
             $this->entityManager->flush();
 
-            // Check for changes and send corresponding emails
-            if (isset($input['email']) && $input['email'] !== $originalEmail) {
-                $this->emailService->sendEmailChangeConfirmation($user->getEmail());
-            }
-            if (isset($input['first_name']) && $input['first_name'] !== $originalFirstName || isset($input['last_name']) && $input['last_name'] !== $originalLastName) {
-                $this->emailService->sendNameChangeNotification($user->getEmail(), $user->getFirstName(), $user->getLastName());
-            }
-            if (isset($input['password']) && $input['password'] !== $originalPassword) {
-                $this->emailService->sendPasswordChangeNotification($user->getEmail());
-            }
-
+            // Return a success message
             return ['message' => 'User updated successfully'];
         } catch (\Exception $e) {
+            // Log the exception
             error_log($e->getMessage());
 
+            // Return a 500 error in case of an exception
             http_response_code(500);
             return ['error' => 'Internal Server Error'];
         }
@@ -466,9 +493,11 @@ class UserController
             return ['message' => 'User deleted successfully'];
 
         } catch (\Exception $e) {
+            // Vous pouvez ajouter un logging ici pour l'erreur
             error_log("Erreur lors de la suppression de l'utilisateur avec l'ID $id : " . $e->getMessage());
             return false;
         }
     }
+
 }
 ?>

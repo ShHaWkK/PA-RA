@@ -32,11 +32,10 @@ class ProductController
                     return $this->createProduct($input);
                 case 'GET':
                     if (isset($uriParts[1])) {
-                        if ($uriParts[1] === 'stock') {
-                            return $this->getProductsInStock();
-                        } else {
-                            return $this->getProductByBarcode($uriParts[1]);
+                        if(isset($uriParts[2])){
+                            return $this->getProductByID($uriParts[2]);
                         }
+                        return $this->getProductByBarcode($uriParts[1]);
                     } else {
                         return $this->getAllProducts();
                     }
@@ -147,7 +146,7 @@ class ProductController
 
             $stock = new StockModel();
             $stock->setProductId($product->getId());
-            $stock->setQuantity(1); 
+            $stock->setQuantity(1);
             $stock->setAvailability('available');
             $stock->setWarehouseId($data['warehouse_id']);
             $stock->setEntryDate(new \DateTime("now"));
@@ -171,7 +170,9 @@ class ProductController
         $currentVolume = 0;
         foreach ($stocks as $stock) {
             $product = $this->entityManager->getRepository(ProductModel::class)->find($stock->getProductId());
-            $currentVolume += $product->getVolume() * $stock->getQuantity();
+            if ($product) {
+                $currentVolume += $product->getVolume() * $stock->getQuantity();
+            }
         }
         return $currentVolume;
     }
@@ -184,7 +185,23 @@ class ProductController
                 http_response_code(404);
                 return ['error' => 'Product not found'];
             }
-            return json_decode($this->serializer->serialize($product, 'json'), true);
+            return $product->jsonSerialize();
+        } catch (\Exception $e) {
+            error_log("Exception in getProductByBarcode: " . $e->getMessage());
+            throw $e;
+        }
+    }
+
+
+    public function getProductByID($id)
+    {
+        try {
+            $product = $this->entityManager->getRepository(ProductModel::class)->findOneBy(['id' => $id]);
+            if (!$product) {
+                http_response_code(404);
+                return ['error' => 'Product not found'];
+            }
+            return $product->jsonSerialize();
         } catch (\Exception $e) {
             error_log("Exception in getProductByBarcode: " . $e->getMessage());
             throw $e;
@@ -244,7 +261,11 @@ class ProductController
         try {
             $productRepository = $this->entityManager->getRepository(ProductModel::class);
             $products = $productRepository->findAll();
-            return json_decode($this->serializer->serialize($products, 'json'), true);
+            $data = [];
+            foreach ($products as $product) {
+                $data[] = $product->jsonSerialize();
+            }
+            return $data;
         } catch (\Exception $e) {
             error_log("Exception in getAllProducts: " . $e->getMessage());
             throw $e;

@@ -1,4 +1,8 @@
 <?php
+ob_start(); // Start output buffering
+
+require_once($_SERVER['DOCUMENT_ROOT'] . '/views/includes/lang.php'); // Inclusion de lang.php
+
 $jwtToken = isset($_COOKIE['jwt']) ? $_COOKIE['jwt'] : null;
 
 // Fonction pour nettoyer l'URL
@@ -11,13 +15,13 @@ $request = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $request = cleanUrl($request);
 
 // Fonction pour vérifier l'authentification
-function requireAuth($jwtToken,$role) {
+function requireAuth($jwtToken, $role) {
     try {
         require_once($_SERVER['DOCUMENT_ROOT'] . '/assets/js/modules/env.php');
         // Appeler la fonction JavaScript authenticate
         $authResponse = "<script type='module'>
                             import { authenticate } from '/assets/js/api/Login.js';
-                            authenticate('{$jwtToken}','{$role}').then(response => {
+                            authenticate('{$jwtToken}', '{$role}').then(response => {
                                 if (!response.valid) {
                                       alert(response.json());
                                     window.location.href = '/Login'; 
@@ -51,20 +55,45 @@ switch ($request) {
     case '/Login':
         require __DIR__ . '/views/Login/Login.php';
         break;
-    case '/Admin':
-        // Exemple de route protégée
+    case '/Admin/Volunteers':
         if ($jwtToken) {
-            requireAuth($jwtToken,'admin');
+            requireAuth($jwtToken, 'admin');
             require __DIR__ . '/views/Admin/Volunteers.php';
         } else {
             require __DIR__ . '/views/Login/Login.php';
             exit;
         }
         break;
-    case '/Volunteer':
-        // Exemple de route protégée
+    case '/Admin/Merchants':
         if ($jwtToken) {
-            requireAuth($jwtToken,'volunteer');
+            requireAuth($jwtToken, 'admin');
+            require __DIR__ . '/views/Admin/Merchants.php';
+        } else {
+            require __DIR__ . '/views/Login/Login.php';
+            exit;
+        }
+        break;
+    case '/Admin/Stocks':
+        if ($jwtToken) {
+            requireAuth($jwtToken, 'admin');
+            require __DIR__ . '/views/Admin/Stocks.php';
+        } else {
+            require __DIR__ . '/views/Login/Login.php';
+            exit;
+        }
+        break;
+    case '/Admin/Collections':
+        if ($jwtToken) {
+            requireAuth($jwtToken, 'admin');
+            require __DIR__ . '/views/Admin/Collections.php';
+        } else {
+            require __DIR__ . '/views/Login/Login.php';
+            exit;
+        }
+        break;
+    case '/Volunteer':
+        if ($jwtToken) {
+            requireAuth($jwtToken, 'volunteer');
             require __DIR__ . '/views/Volunteer/Volunteer.php';
         } else {
             require __DIR__ . '/views/Login/Login.php';
@@ -72,9 +101,8 @@ switch ($request) {
         }
         break;
     case '/Merchant':
-        // Exemple de route protégée
         if ($jwtToken) {
-            requireAuth($jwtToken,'merchant');
+            requireAuth($jwtToken, 'merchant');
             require __DIR__ . '/views/Merchant/Merchant.php';
         } else {
             require __DIR__ . '/views/Login/Login.php';
@@ -83,7 +111,10 @@ switch ($request) {
         break;
     default:
         http_response_code(404);
-         require __DIR__ . '/views/includes/404.php';
+        require __DIR__ . '/views/includes/404.php';
         break;
 }
+
+// Envoyer la sortie tamponnée à la fin du script
+ob_end_flush();
 ?>

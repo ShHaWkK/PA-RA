@@ -1,17 +1,13 @@
-<?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/includes/lang.php'); ?>
+<?php
+// Générer un identifiant unique pour chaque instance du loader
+$loaderId = $loaderId ?? uniqid('');
+?>
 
-<!DOCTYPE html>
-<html lang="<?php echo strtolower($userLanguage); ?>">
-<head>
-    <title><?php echo htmlspecialchars($data['loading_text']); ?></title>
-    <link rel="stylesheet" href="/assets/css/loader.css">
-</head>
-<body>
-    <div id="loading-body" class="hidden">
-        <div class="loading-container">
-            <div class="loader"></div>
-            <p><?php echo htmlspecialchars($data['loading_text']); ?></p>
-        </div>
+<link rel="stylesheet" href="/assets/css/loader.css">
+
+<div class="loading-body hidden" id="<?php echo htmlspecialchars($loaderId); ?>">
+    <div class="loading-container">
+        <div class="loader"></div>
+        <p>Chargement...</p>
     </div>
-</body>
-</html>
+</div>

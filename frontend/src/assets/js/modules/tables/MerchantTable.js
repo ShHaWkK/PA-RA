@@ -1,19 +1,19 @@
 import { getAllUsers } from '/assets/js/api/Users.js';
 import { setupSearch } from '/assets/js/modules/SearchBar.js';
-import {populateModifyUserForm,populateSkillsInModal,populateAvailabilitiesInModal} from "/assets/js/modules/modals/AdminUserModals.js";
+import {populateModifyUserForm,populateCompaniesInModal,populateSkillsInModal} from "/assets/js/modules/modals/AdminUserModals.js";
 
-export var selectedUserId;
+export var selectedUserIdMerchant;
 
-export async function populateVolunteerTable(status) {
+export async function populateMerchantTable(status) {
 
     // On affiche le Loader
     document.getElementById('loadingBodyGeneral').classList.remove('hidden');
 
-    const users = await getAllUsers('volunteer', status);
+    const users = await getAllUsers('merchant', status);
 
     if (!users || users.length === 0) {
-        console.log('No volunteers found');
-        document.querySelector('.volunteer-table').innerHTML = '';
+        console.log('No merchants found');
+        document.querySelector('.merchant-table').innerHTML = '';
         document.getElementById('loadingBodyGeneral').classList.add('hidden');
         return;
     }
@@ -22,13 +22,13 @@ export async function populateVolunteerTable(status) {
     document.getElementById('loadingBodyGeneral').classList.add('hidden');
 
     const table = document.createElement('table');
-    table.classList.add('volunteer-table'); // Ajout de la classe volunteer-table pour le style
-    table.id = 'volunteerTable';
+    table.classList.add('merchant-table'); // Ajout de la classe merchant-table pour le style
+    table.id = 'merchantTable';
 
     const thead = document.createElement('thead');
     const headerRow = document.createElement('tr');
 
-    const headers = ['', 'First Name', 'Last Name', 'Email', 'Phone Number', 'Status', 'Availabilities', 'Skills', 'Modify', 'Created At', 'Updated At'];
+    const headers = ['', 'First Name', 'Last Name', 'Email', 'Phone Number', 'Status', 'Company', 'Modify', 'Created At', 'Updated At'];
     headers.forEach(headerText => {
         const th = document.createElement('th');
         th.textContent = headerText;
@@ -67,20 +67,13 @@ export async function populateVolunteerTable(status) {
             row.appendChild(td);
         });
 
-        // Ajout des boutons "Voir" pour "Availabilities" et "Skills"
-        const availabilitiesButtonCell = document.createElement('td');
-        const availabilitiesButton = document.createElement('button');
-        availabilitiesButton.textContent = 'Voir';
-        availabilitiesButton.onclick = () => viewAvailabilities(user.id);
-        availabilitiesButtonCell.appendChild(availabilitiesButton);
-        row.appendChild(availabilitiesButtonCell);
-
-        const skillsButtonCell = document.createElement('td');
-        const skillsButton = document.createElement('button');
-        skillsButton.textContent = 'Voir';
-        skillsButton.onclick = () => viewSkills(user.id);
-        skillsButtonCell.appendChild(skillsButton);
-        row.appendChild(skillsButtonCell);
+        // Ajout des boutons "Voir" pour l'entreprise
+        const companyButtonCell = document.createElement('td');
+        const companyButton = document.createElement('button');
+        companyButton.textContent = 'Voir';
+        companyButton.onclick = () => viewCompany(user.id);
+        companyButtonCell.appendChild(companyButton);
+        row.appendChild(companyButtonCell);
 
         // Ajout du bouton "Modifier"
         const modifyButtonCell = document.createElement('td');
@@ -108,12 +101,12 @@ export async function populateVolunteerTable(status) {
     table.appendChild(tbody);
 
     // Sélectionner le conteneur back-office-content et y attacher le tableau
-    const backOfficeContent = document.querySelector('.volunteer-table');
+    const backOfficeContent = document.querySelector('.merchant-table');
     if (backOfficeContent) {
         backOfficeContent.innerHTML = ''; // Effacer le contenu existant si nécessaire
         backOfficeContent.appendChild(table);
 
-        setupSearch(users,'volunteerTable'); // Configuration de la recherche
+        setupSearch(users,'merchantTable');
     } else {
         console.error('Back office content container not found.');
     }
@@ -129,24 +122,25 @@ function formatDateToFrench(dateString) {
 }
 
 // Fonctions pour les boutons "Voir" et "Modifier"
-function viewAvailabilities(userId) {
-    selectedUserId = userId;
-    populateAvailabilitiesInModal(selectedUserId);
-    var availabilitiesModal = document.getElementById("volunteerAvailabilitiesModal");
-    console.log("click on availabilities");
-    availabilitiesModal.style.display = "block";
-}
 
 function viewSkills(userId) {
-    selectedUserId = userId;
-    populateSkillsInModal(selectedUserId);
+    selectedUserIdMerchant = userId;
+    populateSkillsInModal(selectedUserIdMerchant);
     var skillModal = document.getElementById("volunteerSkillModal");
     console.log("click on skills");
     skillModal.style.display = "block";
 }
 
+function viewCompany(userId){
+    selectedUserIdMerchant = userId;
+    populateCompaniesInModal(selectedUserIdMerchant);
+    var companyModal = document.getElementById("userCompaniesModal");
+    console.log("click on companies");
+    companyModal.style.display = "block";
+}
+
 function openModifyUserModal(userId) {
-    selectedUserId = userId;
+    selectedUserIdMerchant = userId;
     var modifyModal = document.getElementById("modifyUserModal");
     populateModifyUserForm(userId);
     console.log("click on modify");

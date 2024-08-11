@@ -151,6 +151,11 @@ class SkillController
     {
         $skills = $this->entityManager->getRepository(SkillModel::class)->findAll();
 
+        if (!$skills) {
+            http_response_code(404);
+            return ['error' => 'Skill not found'];
+        }
+
         // Prepare data using jsonSerialize() method
         $serializedSkills = [];
         foreach ($skills as $skill) {

@@ -1,26 +1,41 @@
-import {registerMerchant} from "../api/Users.js";
+import { registerMerchant } from "../api/Users.js";
 
-document.getElementById('registrationForm').addEventListener('submit', async function(event) {
-    event.preventDefault();
+// Fonction pour ajouter un écouteur d'événement de soumission au formulaire des marchands
+function addMerchantSubmitEvent() {
+    // Supprime les écouteurs d'événements existants, s'il y en a, pour éviter les soumissions multiples
+    const form = document.getElementById('merchantForm');
+    const newForm = form.cloneNode(true);
+    form.parentNode.replaceChild(newForm, form);
 
-    const formData = new FormData(event.target);
-    const userData = Object.fromEntries(formData.entries());
-    console.log(formData);
-    console.log(userData);
-    const result = await registerMerchant(userData);
+    newForm.addEventListener('submit', async function(event) {
+        event.preventDefault();
 
-    if (!result.ok) {
-        switch (result.status){
-            case 409:
-                alert("User with this email or SIRET already exists");
-                break;
-            default:
-                console.log('Failed to register merchant');
-                alert('Failed to register merchant');
-                break;
+        const formData = new FormData(event.target);
+        const userData = Object.fromEntries(formData.entries());
+        console.log(formData);
+        console.log(userData);
+        const result = await registerMerchant(userData);
+
+        if (!result.ok) {
+            switch (result.status) {
+                case 409:
+                    alert("Un utilisateur avec cet e-mail ou SIRET existe déjà");
+                    break;
+                default:
+                    console.log('Échec de l\'inscription du marchand');
+                    alert('Échec de l\'inscription du marchand');
+                    break;
+            }
+        } else {
+            console.log('Marchand inscrit avec succès');
+            alert('Marchand inscrit avec succès');
         }
-    } else {
-        console.log('Merchant registered successfully');
-        alert('Merchant registered successfully');
-    }
+    });
+}
+
+// Configuration initiale lorsque le document est prêt
+document.addEventListener('DOMContentLoaded', function() {
+    addMerchantSubmitEvent();
 });
+
+export {addMerchantSubmitEvent}
