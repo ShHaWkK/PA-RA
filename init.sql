@@ -85,6 +85,55 @@ CREATE TABLE IF NOT EXISTS products (
                                         scanned BOOLEAN DEFAULT FALSE
 );
 
+
+-- Cette table associative lie les produits aux notifications faites par les entreprises pour indiquer que ces produits sont disponibles, y compris l'adresse de récupération.
+CREATE TABLE product_notifications (
+                                       id INT AUTO_INCREMENT PRIMARY KEY,
+                                       company_id INT NOT NULL,
+                                       product_id INT NOT NULL,
+                                       notified_quantity INT NOT NULL,
+                                       address VARCHAR(255) NOT NULL, -- Ajout de l'adresse de récupération
+                                       notified_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                                       FOREIGN KEY (company_id) REFERENCES companies(id) ON DELETE CASCADE,
+                                       FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
+);
+
+-- Table des véhicules (vehicles)
+CREATE TABLE IF NOT EXISTS vehicles (
+                                        id INT AUTO_INCREMENT PRIMARY KEY,
+                                        brand VARCHAR(255),
+                                        model VARCHAR(255),
+                                        license_plate VARCHAR(50),
+                                        status VARCHAR(100),
+                                        current_location TEXT,
+                                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                                        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- Table des collectes (collections)
+CREATE TABLE collections (
+                             id INT AUTO_INCREMENT PRIMARY KEY,
+                             volunteer_id INT NOT NULL,
+                             vehicle_id INT NOT NULL,
+                             collection_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                             FOREIGN KEY (volunteer_id) REFERENCES users(id),
+                             FOREIGN KEY (vehicle_id) REFERENCES vehicles(id)
+);
+
+-- Cette table associative lie les produits aux collectes. Elle permet de spécifier quels produits sont collectés dans une collecte donnée et en relation avec quelle notification.
+CREATE TABLE collection_products (
+                                     collection_id INT NOT NULL,
+                                     product_id INT NOT NULL,
+                                     notification_id INT NOT NULL,
+                                     quantity_collected INT NOT NULL,
+                                     PRIMARY KEY (collection_id, product_id, notification_id),
+                                     FOREIGN KEY (collection_id) REFERENCES collections(id) ON DELETE CASCADE,
+                                     FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE,
+                                     FOREIGN KEY (notification_id) REFERENCES product_notifications(id) ON DELETE CASCADE
+);
+
 -- Table des recettes (recipes)
 CREATE TABLE IF NOT EXISTS recipes (
                                        id INT AUTO_INCREMENT PRIMARY KEY,
@@ -103,34 +152,6 @@ CREATE TABLE IF NOT EXISTS recipe_ingredients (
                                                   quantity_needed INT NOT NULL,
                                                   FOREIGN KEY (recipe_id) REFERENCES recipes(id) ON DELETE CASCADE,
                                                   FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
-);
-
--- Table des véhicules (vehicles)
-CREATE TABLE IF NOT EXISTS vehicles (
-                                        id INT AUTO_INCREMENT PRIMARY KEY,
-                                        brand VARCHAR(255),
-                                        model VARCHAR(255),
-                                        license_plate VARCHAR(50),
-                                        status VARCHAR(100),
-                                        current_location TEXT,
-                                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                                        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-);
-
--- Table des collectes (collections)
-CREATE TABLE IF NOT EXISTS collections (
-                                           id INT AUTO_INCREMENT PRIMARY KEY,
-                                           company_id INT NOT NULL,
-                                           product_id INT NOT NULL,
-                                           vehicle_id INT NOT NULL,
-                                           volunteer_id INT NOT NULL,
-                                           collection_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                                           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                                           updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                                           FOREIGN KEY (company_id) REFERENCES companies(id) ON DELETE CASCADE,
-                                           FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE,
-                                           FOREIGN KEY (vehicle_id) REFERENCES vehicles(id) ON DELETE CASCADE,
-                                           FOREIGN KEY (volunteer_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 -- Table des entrepôts (warehouses)
@@ -350,9 +371,19 @@ INSERT INTO vehicles (brand, model, license_plate, status, current_location) VAL
 # (5, 50, CURRENT_TIMESTAMP, 'available', 5);
 
 -- Insertion des exemples de collectes
-INSERT INTO collections (company_id, product_id, vehicle_id, driver_id) VALUES
-                                                                 (1, 1, 1, 1),
-                                                                 (2, 2, 2, 2);
+INSERT INTO collections (vehicle_id, volunteer_id) VALUES
+                                                       (1, 1),
+                                                       (2, 2);
+
+INSERT INTO product_notifications (company_id, product_id, notified_quantity, address) VALUES
+                                                                                           (1, 1, 100, '12 Rue de Rivoli, 75001 Paris, France'),
+                                                                                           (1, 2, 200, '22 Avenue des Champs-Élysées, 75008 Paris, France'),
+                                                                                           (2, 3, 150, '5 Boulevard Saint-Germain, 75005 Paris, France');
+
+INSERT INTO collection_products (collection_id, product_id, notification_id, quantity_collected) VALUES
+                                                                                                     (1, 1, 1, 50),  -- Collecte 1 récupère 50 unités du Product A (notifié par Company 1)
+                                                                                                     (1, 2, 2, 100), -- Collecte 1 récupère 100 unités du Product B (notifié par Company 1)
+                                                                                                     (2, 3, 3, 75);  -- Collecte 2 récupère 75 unités du Product C (notifié par Company 2)
 
 -- Insertion des exemples de livraisons
 INSERT INTO deliveries (route_name, destination, recipient_type, delivery_date, status, comment, warehouse_id, vehicle_id) VALUES
