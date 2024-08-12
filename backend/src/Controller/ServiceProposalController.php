@@ -38,15 +38,15 @@ class ServiceProposalController
                     } else {
                         return $this->getAllProposals();
                     }
-                case 'PUT':
-                    if (isset($uriParts[1]) && isset($uriParts[2]) && $uriParts[2] === 'approve') {
-                        return $this->approveAndCreateService((int) $uriParts[1]);
-                    }
-                    if (isset($uriParts[1])) {
-                        return $this->updateProposal((int) $uriParts[1], $input);
-                    }
-                    http_response_code(400);
-                    return ['error' => 'Proposal ID not specified'];
+                    case 'PUT':
+                        if (isset($uriParts[1]) && isset($uriParts[2]) && $uriParts[2] === 'approve') {
+                            return $this->approveAndCreateService((int) $uriParts[1]);
+                        }
+                        if (isset($uriParts[1])) {
+                            return $this->updateProposal((int) $uriParts[1], $input);
+                        }
+                        http_response_code(400);
+                        return ['error' => 'Proposal ID not specified'];
                 case 'DELETE':
                     if (isset($uriParts[1])) {
                         return $this->deleteProposal((int) $uriParts[1]);
@@ -145,10 +145,10 @@ class ServiceProposalController
         try {
             // Approve the proposal
             $proposal = $this->serviceProposalService->approveProposal($proposalId);
-
+    
             // Create service from approved proposal
             $service = $this->serviceService->createServiceFromProposal($proposalId);
-
+    
             return [
                 'proposal_id' => $proposal->getId(),
                 'service_id' => $service->getId(),
@@ -160,4 +160,5 @@ class ServiceProposalController
             return ['error' => $e->getMessage()];
         }
     }
+    
 }

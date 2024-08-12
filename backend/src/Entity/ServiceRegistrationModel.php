@@ -30,63 +30,58 @@ class ServiceRegistrationModel
 
     // Getters and setters for each property
 
-    public function getId(): ?int
+    public function getId()
     {
         return $this->id;
     }
 
-    public function getServiceId(): ?int
+    public function getServiceId()
     {
         return $this->service_id;
     }
 
-    public function setServiceId(int $serviceId): self
+    public function setServiceId($service_id)
     {
-        $this->service_id = $serviceId;
-        return $this;
+        $this->service_id = $service_id;
     }
 
-    public function getUserId(): ?int
+    public function getUserId()
     {
         return $this->user_id;
     }
 
-    public function setUserId(int $userId): self
+    public function setUserId($user_id)
     {
-        $this->user_id = $userId;
-        return $this;
+        $this->user_id = $user_id;
     }
 
-    public function getRegistrationDate(): ?\DateTimeInterface
+    public function getRegistrationDate()
     {
         return $this->registration_date;
     }
 
-    public function setRegistrationDate(\DateTimeInterface $registrationDate): self
+    public function setRegistrationDate($registration_date)
     {
-        $this->registration_date = $registrationDate;
-        return $this;
+        $this->registration_date = $registration_date;
     }
 
-    public function getCreatedAt(): ?\DateTimeInterface
+    public function getCreatedAt()
     {
         return $this->created_at;
     }
 
-    public function setCreatedAt(\DateTimeInterface $createdAt): self
+    public function setCreatedAt($created_at)
     {
-        $this->created_at = $createdAt;
-        return $this;
+        $this->created_at = $created_at;
     }
 
-    public function getUpdatedAt(): ?\DateTimeInterface
+    public function getUpdatedAt()
     {
         return $this->updated_at;
     }
 
-    public function setUpdatedAt(\DateTimeInterface $updatedAt): self
+    public function setUpdatedAt($updated_at)
     {
-        $this->updated_at = $updatedAt;
-        return $this;
+        $this->updated_at = $updated_at;
     }
 }

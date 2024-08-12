@@ -168,6 +168,32 @@ class ServiceService
         return $this->entityManager->getRepository(ServiceScheduleModel::class)
             ->findBy(['service' => $serviceId]);
     }
+
+    public function createServiceFromProposal($proposalId)
+    {
+        $proposal = $this->entityManager->find(ServiceProposalModel::class, $proposalId);
+
+        if (!$proposal) {
+            throw new \Exception('Proposal not found');
+        }
+
+        if ($proposal->getStatus() !== 'approved') {
+            throw new \Exception('Proposal must be approved before it can be made into a service');
+        }
+
+        $service = new ServiceModel();
+        $service->setName($proposal->getName());
+        $service->setDescription($proposal->getDescription());
+        $service->setSchedule(new \DateTime());
+        $service->setCapacity(10);
+        $service->setStatus('open');
+        $service->setLocation('Default Location');
+
+        $this->entityManager->persist($service);
+        $this->entityManager->flush();
+
+        return $service;
+    }
 }
 
 ?>
