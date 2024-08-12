@@ -41,6 +41,7 @@ use Controller\WarehouseController;
 use Controller\MessageController;
 use Controller\RecipeController;
 use Controller\RecipeIngredientController;
+use Controller\ServiceScheduleController;
 use Service\PDFService;
 use Service\JWTService;
 use Service\EmailService;
@@ -109,6 +110,9 @@ $controllerMap = [
     'warehouses' => WarehouseController::class,
     'recipe' => RecipeController::class, 
     'recipe_ingredients' => RecipeIngredientController::class,
+    'service-schedules' => ServiceScheduleController::class,
+    'service-registrations' => ServiceRegistrationController::class,
+    'services' => ServiceController::class,
 ];
 
 // Vérifie si le contrôleur existe pour le premier élément de l'URI

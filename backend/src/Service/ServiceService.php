@@ -4,6 +4,8 @@ namespace Service;
 
 use Doctrine\ORM\EntityManager;
 use Entity\ServiceModel;
+use Entity\ServiceScheduleModel;
+use Entity\ServiceRegistrationModel;
 
 class ServiceService
 {
@@ -81,4 +83,91 @@ class ServiceService
     {
         return $this->entityManager->getRepository(ServiceModel::class)->findAll();
     }
+
+    public function createServiceSchedule($data)
+    {
+        $service = $this->entityManager->find(ServiceModel::class, $data['service_id']);
+        if (!$service) {
+            throw new \Exception('Service not found');
+        }
+    
+        $schedule = new ServiceScheduleModel();
+        $schedule->setService($service);
+        $schedule->setStartTime(new \DateTime($data['start_time']));
+        $schedule->setEndTime(new \DateTime($data['end_time']));
+        $schedule->setLocation($data['location']); 
+        $schedule->setCreatedAt(new \DateTime("now"));
+        $schedule->setUpdatedAt(new \DateTime("now"));
+    
+        $this->entityManager->persist($schedule);
+        $this->entityManager->flush();
+    
+        return $schedule;
+    }
+    
+
+    public function getServiceSchedule($id)
+    {
+        return $this->entityManager->find(ServiceScheduleModel::class, $id);
+    }
+
+    public function updateServiceSchedule($id, $data)
+    {
+        error_log("Searching for Service Schedule with ID: $id");
+        $schedule = $this->entityManager->find(ServiceScheduleModel::class, $id);
+        if (!$schedule) {
+            error_log("Service Schedule not found with ID: $id"); 
+            throw new \Exception('Schedule not found');
+        }
+    
+        // Log the original values before update
+        error_log("Original Start Time: " . $schedule->getStartTime()->format('Y-m-d H:i:s'));
+        error_log("Original End Time: " . $schedule->getEndTime()->format('Y-m-d H:i:s'));
+        error_log("Original Location: " . $schedule->getLocation());
+    
+        // Update fields
+        if (isset($data['start_time'])) {
+            $schedule->setStartTime(new \DateTime($data['start_time']));
+        }
+        if (isset($data['end_time'])) {
+            $schedule->setEndTime(new \DateTime($data['end_time']));
+        }
+        if (isset($data['location'])) {
+            $schedule->setLocation($data['location']);
+        }
+        $schedule->setUpdatedAt(new \DateTime("now"));
+    
+        // Log the new values before flush
+        error_log("Updated Start Time: " . $schedule->getStartTime()->format('Y-m-d H:i:s'));
+        error_log("Updated End Time: " . $schedule->getEndTime()->format('Y-m-d H:i:s'));
+        error_log("Updated Location: " . $schedule->getLocation());
+    
+        $this->entityManager->flush();
+    
+        // Log after flush to confirm transaction success
+        error_log("Flush completed successfully for Schedule ID: $id");
+    
+        return $schedule;
+    }
+    
+    
+
+    public function deleteServiceSchedule($id)
+    {
+        $schedule = $this->entityManager->find(ServiceScheduleModel::class, $id);
+        if (!$schedule) {
+            throw new \Exception('Schedule not found');
+        }
+
+        $this->entityManager->remove($schedule);
+        $this->entityManager->flush();
+    }
+
+    public function getServiceSchedulesByServiceId($serviceId)
+    {
+        return $this->entityManager->getRepository(ServiceScheduleModel::class)
+            ->findBy(['service' => $serviceId]);
+    }
 }
+
+?>

@@ -208,6 +208,18 @@ CREATE TABLE IF NOT EXISTS service_proposals (
     FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE
 );
 
+-- Table des plannings des services (service_schedules)
+CREATE TABLE IF NOT EXISTS service_schedules (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    service_id INT NOT NULL,
+    start_time TIMESTAMP NOT NULL,
+    end_time TIMESTAMP NOT NULL,
+    location VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (service_id) REFERENCES services(id) ON DELETE CASCADE
+);
+
 -- Table des stocks (stocks)
 CREATE TABLE IF NOT EXISTS stocks (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -347,11 +359,6 @@ INSERT INTO deliveries (route_name, destination, recipient_type, delivery_date, 
 ('Route 4', 'Limoges', 'individual', CURRENT_TIMESTAMP, 'pending', 'Fourth delivery', 4, 2),
 ('Route 5', 'Naples', 'association', CURRENT_TIMESTAMP, 'pending', 'Fifth delivery', 5, 1);
 
--- Insertion des exemples de services
-INSERT INTO services (name, description, schedule, capacity, status, location) VALUES 
-('Food Distribution', 'Distribution of food to those in need.', CURRENT_TIMESTAMP, 100, 'open', 'Paris Warehouse'),
-('Clothing Distribution', 'Distribution of clothes to those in need.', CURRENT_TIMESTAMP, 50, 'open', 'Nantes Warehouse');
-
 -- Insertion des recettes
 INSERT INTO recipes (name, instructions, tags) VALUES
 ('Pasta', 'Boil pasta. Add sauce.', '["vegetarian", "gluten_free"]'),
@@ -371,6 +378,39 @@ INSERT INTO products (name, barcode, expiration_date, volume) VALUES
 ('Bread', '1234567890130', '2026-01-01', 1.0),
 ('Cheese', '1234567890131', '2026-06-01', 0.5),
 ('Butter', '1234567890132', '2026-12-31', 0.5);
+
+-- Insertion des services proposés
+INSERT INTO services (name, description, schedule, capacity, status, location) VALUES 
+('Conseils anti-gaspi', 'Sessions de conseils pour éviter le gaspillage alimentaire.', '2024-08-25 10:00:00', 20, 'open', 'Paris Warehouse'),
+('Cours de cuisine', 'Cours de cuisine pour apprendre à préparer des repas sans gaspiller.', '2024-08-26 15:00:00', 15, 'open', 'Nantes Warehouse'),
+('Partage de véhicules', 'Service de partage de véhicules entre adhérents.', '2024-08-27 09:00:00', 10, 'open', 'Marseille Warehouse'),
+('Echange de services', 'Echange de services entre particuliers (bricolage, électricité, plomberie).', '2024-08-28 14:00:00', 25, 'open', 'Limoges Warehouse'),
+('Services de réparation', 'Service de réparation pour divers objets et équipements.', '2024-08-29 11:00:00', 30, 'open', 'Paris Warehouse'),
+('Gardiennage', 'Service de gardiennage pour les membres.', '2024-08-30 13:00:00', 10, 'open', 'Nantes Warehouse');
+
+
+INSERT INTO service_proposals (name, description, status, created_by) VALUES 
+('Nouveaux ateliers de jardinage', 'Ateliers pour apprendre les bases du jardinage.', 'proposed', (SELECT id FROM users WHERE email = 'john.doe@example.com')),
+('Service de covoiturage', 'Service de covoiturage pour les membres.', 'proposed', (SELECT id FROM users WHERE email = 'alice.smith@example.com')),
+('Consultations médicales gratuites', 'Organisation de consultations médicales gratuites.', 'proposed', (SELECT id FROM users WHERE email = 'jane.doe@example.com')),
+('Cours de yoga', 'Cours de yoga hebdomadaires.', 'proposed', (SELECT id FROM users WHERE email = 'bob.johnson@example.com'));
+
+-- Insertion d'inscriptions aux services
+INSERT INTO service_registrations (service_id, user_id, registration_date) VALUES 
+((SELECT id FROM services WHERE name = 'Conseils anti-gaspi'), (SELECT id FROM users WHERE email = 'john.doe@example.com'), CURRENT_TIMESTAMP),
+((SELECT id FROM services WHERE name = 'Cours de cuisine'), (SELECT id FROM users WHERE email = 'jane.doe@example.com'), CURRENT_TIMESTAMP),
+((SELECT id FROM services WHERE name = 'Partage de véhicules'), (SELECT id FROM users WHERE email = 'alice.smith@example.com'), CURRENT_TIMESTAMP),
+((SELECT id FROM services WHERE name = 'Echange de services'), (SELECT id FROM users WHERE email = 'bob.johnson@example.com'), CURRENT_TIMESTAMP),
+((SELECT id FROM services WHERE name = 'Services de réparation'), (SELECT id FROM users WHERE email = 'john.doe@example.com'), CURRENT_TIMESTAMP);
+
+-- Insertion de plannings pour les services
+INSERT INTO service_schedules (service_id, start_time, end_time, location) VALUES
+((SELECT id FROM services WHERE name = 'Conseils anti-gaspi'), '2024-08-21 09:00:00', '2024-08-21 12:00:00', 'Paris Warehouse'),
+((SELECT id FROM services WHERE name = 'Conseils anti-gaspi'), '2024-08-22 09:00:00', '2024-08-22 12:00:00', 'Paris Warehouse'),
+((SELECT id FROM services WHERE name = 'Cours de cuisine'), '2024-08-26 15:00:00', '2024-08-26 18:00:00', 'Nantes Warehouse'),
+((SELECT id FROM services WHERE name = 'Partage de véhicules'), '2024-08-27 09:00:00', '2024-08-27 12:00:00', 'Marseille Warehouse'),
+((SELECT id FROM services WHERE name = 'Echange de services'), '2024-08-28 14:00:00', '2024-08-28 17:00:00', 'Limoges Warehouse'),
+((SELECT id FROM services WHERE name = 'Services de réparation'), '2024-08-29 11:00:00', '2024-08-29 14:00:00', 'Paris Warehouse');
 
 -- Insertion des nouvelles recettes
 INSERT INTO recipes (name, instructions, tags) VALUES
