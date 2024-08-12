@@ -42,6 +42,7 @@ use Controller\MessageController;
 use Controller\RecipeController;
 use Controller\RecipeIngredientController;
 use Controller\ServiceScheduleController;
+use Controller\ServiceRegistrationController;
 use Service\PDFService;
 use Service\JWTService;
 use Service\EmailService;
