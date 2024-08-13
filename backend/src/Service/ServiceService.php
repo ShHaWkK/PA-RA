@@ -6,6 +6,7 @@ use Doctrine\ORM\EntityManager;
 use Entity\ServiceModel;
 use Entity\ServiceScheduleModel;
 use Entity\ServiceRegistrationModel;
+use Entity\ServiceProposalModel;
 
 class ServiceService
 {
@@ -193,6 +194,21 @@ class ServiceService
         $this->entityManager->flush();
 
         return $service;
+    }
+
+    public function approveProposal($id)
+    {
+        $proposal = $this->entityManager->find(ServiceProposalModel::class, $id);
+        if (!$proposal) {
+            throw new \Exception('Proposal not found');
+        }
+    
+        $proposal->setStatus('approved');
+        $proposal->setUpdatedAt(new \DateTime());
+    
+        $this->entityManager->flush();
+    
+        return $proposal;
     }
 }
 

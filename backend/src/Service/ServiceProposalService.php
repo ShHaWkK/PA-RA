@@ -5,6 +5,7 @@ namespace Service;
 use Doctrine\ORM\EntityManager;
 use Entity\ServiceProposalModel;
 use Entity\UserModel;
+use Entity\ServiceModel;
 
 class ServiceProposalService
 {
@@ -22,7 +23,7 @@ class ServiceProposalService
             throw new \Exception('User not found');
         }
 
-        $proposal = new ServiceProposalModel();
+        $proposal = new ServiceProposalModel();  // This should now work correctly
         $proposal->setName($data['name']);
         $proposal->setDescription($data['description']);
         $proposal->setStatus($data['status'] ?? 'proposed');
@@ -85,12 +86,12 @@ class ServiceProposalService
         if (!$proposal) {
             throw new \Exception('Proposal not found');
         }
-
+    
         $proposal->setStatus('approved');
         $proposal->setUpdatedAt(new \DateTime());
-
+    
         $this->entityManager->flush();
-
+    
         return $proposal;
     }
 }
