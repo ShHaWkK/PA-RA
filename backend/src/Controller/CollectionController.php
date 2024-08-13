@@ -4,23 +4,17 @@ namespace Controller;
 
 use Entity\CollectionModel;
 use Entity\VehicleModel;
+use Entity\UserModel;
 use Doctrine\ORM\EntityManager;
-use Symfony\Component\Serializer\Serializer;
-use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
-use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Doctrine\ORM\EntityNotFoundException;
 
 class CollectionController
 {
     private $entityManager;
-    private $serializer;
 
     public function __construct(EntityManager $entityManager)
     {
         $this->entityManager = $entityManager;
-        $normalizers = [new ObjectNormalizer()];
-        $encoders = [new JsonEncoder()];
-        $this->serializer = new Serializer($normalizers, $encoders);
     }
 
     public function processRequest($method, $uriParts, $input)
@@ -60,9 +54,15 @@ class CollectionController
     public function createCollection($data)
     {
         try {
-            if (!isset($data['company_id']) || !isset($data['product_id']) || !isset($data['vehicle_id'])) {
+            if (!isset($data['volunteer_id']) || !isset($data['vehicle_id'])) {
                 http_response_code(400);
                 return ['error' => 'Missing required fields for new collection'];
+            }
+
+            $volunteer = $this->entityManager->find(UserModel::class, $data['volunteer_id']);
+            if (!$volunteer) {
+                http_response_code(404);
+                return ['error' => 'Volunteer not found'];
             }
 
             $vehicle = $this->entityManager->find(VehicleModel::class, $data['vehicle_id']);
@@ -72,9 +72,8 @@ class CollectionController
             }
 
             $collection = new CollectionModel();
-            $collection->setCompanyId($data['company_id']);
-            $collection->setProductId($data['product_id']);
-            $collection->setVehicleId($data['vehicle_id']);
+            $collection->setVolunteer($volunteer);
+            $collection->setVehicle($vehicle);
             $collection->setCollectionDate(new \DateTime("now"));
             $collection->setCreatedAt(new \DateTime("now"));
             $collection->setUpdatedAt(new \DateTime("now"));
@@ -97,7 +96,7 @@ class CollectionController
                 http_response_code(404);
                 return ['error' => 'Collection not found'];
             }
-            return json_decode($this->serializer->serialize($collection, 'json'), true);
+            return $collection->jsonSerialize();
         } catch (\Exception $e) {
             error_log("Exception in getCollection: " . $e->getMessage());
             throw $e;
@@ -113,14 +112,21 @@ class CollectionController
                 return ['error' => 'Collection not found'];
             }
 
-            if (isset($data['company_id'])) {
-                $collection->setCompanyId($data['company_id']);
-            }
-            if (isset($data['product_id'])) {
-                $collection->setProductId($data['product_id']);
+            if (isset($data['volunteer_id'])) {
+                $volunteer = $this->entityManager->find(UserModel::class, $data['volunteer_id']);
+                if (!$volunteer) {
+                    http_response_code(404);
+                    return ['error' => 'Volunteer not found'];
+                }
+                $collection->setVolunteer($volunteer);
             }
             if (isset($data['vehicle_id'])) {
-                $collection->setVehicleId($data['vehicle_id']);
+                $vehicle = $this->entityManager->find(VehicleModel::class, $data['vehicle_id']);
+                if (!$vehicle) {
+                    http_response_code(404);
+                    return ['error' => 'Vehicle not found'];
+                }
+                $collection->setVehicle($vehicle);
             }
             $collection->setUpdatedAt(new \DateTime("now"));
 
@@ -157,7 +163,13 @@ class CollectionController
         try {
             $collectionRepository = $this->entityManager->getRepository(CollectionModel::class);
             $collections = $collectionRepository->findAll();
-            return json_decode($this->serializer->serialize($collections, 'json'), true);
+
+            $serializedCollections = [];
+            foreach ($collections as $collection) {
+                $serializedCollections[] = $collection->jsonSerialize();
+            }
+
+            return $serializedCollections;
         } catch (\Exception $e) {
             error_log("Exception in getAllCollections: " . $e->getMessage());
             throw $e;

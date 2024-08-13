@@ -92,7 +92,8 @@ CREATE TABLE product_notifications (
                                        company_id INT NOT NULL,
                                        product_id INT NOT NULL,
                                        notified_quantity INT NOT NULL,
-                                       address VARCHAR(255) NOT NULL, -- Ajout de l'adresse de récupération
+                                       address VARCHAR(255) NOT NULL,
+                                       wished_collection_date TIMESTAMP NOT NULL,
                                        notified_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                                        FOREIGN KEY (company_id) REFERENCES companies(id) ON DELETE CASCADE,
                                        FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
@@ -125,12 +126,10 @@ CREATE TABLE collections (
 -- Cette table associative lie les produits aux collectes. Elle permet de spécifier quels produits sont collectés dans une collecte donnée et en relation avec quelle notification.
 CREATE TABLE collection_products (
                                      collection_id INT NOT NULL,
-                                     product_id INT NOT NULL,
                                      notification_id INT NOT NULL,
                                      quantity_collected INT NOT NULL,
-                                     PRIMARY KEY (collection_id, product_id, notification_id),
+                                     PRIMARY KEY (collection_id, notification_id),
                                      FOREIGN KEY (collection_id) REFERENCES collections(id) ON DELETE CASCADE,
-                                     FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE,
                                      FOREIGN KEY (notification_id) REFERENCES product_notifications(id) ON DELETE CASCADE
 );
 
@@ -370,21 +369,6 @@ INSERT INTO vehicles (brand, model, license_plate, status, current_location) VAL
 # (4, 40, CURRENT_TIMESTAMP, 'available', 4),
 # (5, 50, CURRENT_TIMESTAMP, 'available', 5);
 
--- Insertion des exemples de collectes
-INSERT INTO collections (vehicle_id, volunteer_id) VALUES
-                                                       (1, 1),
-                                                       (2, 2);
-
-INSERT INTO product_notifications (company_id, product_id, notified_quantity, address) VALUES
-                                                                                           (1, 1, 100, '12 Rue de Rivoli, 75001 Paris, France'),
-                                                                                           (1, 2, 200, '22 Avenue des Champs-Élysées, 75008 Paris, France'),
-                                                                                           (2, 3, 150, '5 Boulevard Saint-Germain, 75005 Paris, France');
-
-INSERT INTO collection_products (collection_id, product_id, notification_id, quantity_collected) VALUES
-                                                                                                     (1, 1, 1, 50),  -- Collecte 1 récupère 50 unités du Product A (notifié par Company 1)
-                                                                                                     (1, 2, 2, 100), -- Collecte 1 récupère 100 unités du Product B (notifié par Company 1)
-                                                                                                     (2, 3, 3, 75);  -- Collecte 2 récupère 75 unités du Product C (notifié par Company 2)
-
 -- Insertion des exemples de livraisons
 INSERT INTO deliveries (route_name, destination, recipient_type, delivery_date, status, comment, warehouse_id, vehicle_id) VALUES
                                                                                                                                ('Route 1', 'Paris', 'association', CURRENT_TIMESTAMP, 'pending', 'First delivery', 1, 1),
@@ -462,3 +446,18 @@ INSERT INTO stocks (product_id, quantity, entry_date, availability, warehouse_id
                                                                                       ((SELECT id FROM products WHERE name = 'Butter'), 500, CURRENT_TIMESTAMP, 'available', 3),
                                                                                       ((SELECT id FROM products WHERE name = 'Tomatoes'), 600, CURRENT_TIMESTAMP, 'available', 4),
                                                                                       ((SELECT id FROM products WHERE name = 'Potatoes'), 400, CURRENT_TIMESTAMP, 'available', 5);
+
+-- Insertion des exemples de collectes
+INSERT INTO collections (vehicle_id, volunteer_id) VALUES
+                                                       (1, 1),
+                                                       (2, 2);
+
+INSERT INTO product_notifications (company_id, product_id, notified_quantity, address, wished_collection_date) VALUES
+                                                                                                                   (1, 1, 100, '12 Rue de Rivoli, 75001 Paris, France', '2024-08-12 10:00:00'),
+                                                                                                                   (1, 2, 200, '22 Avenue des Champs-Élysées, 75008 Paris, France', '2024-08-13 11:00:00'),
+                                                                                                                   (2, 3, 150, '5 Boulevard Saint-Germain, 75005 Paris, France', '2024-08-14 12:00:00');
+
+INSERT INTO collection_products (collection_id, notification_id, quantity_collected) VALUES
+                                                                                                     (1, 1, 50),  -- Collecte 1 récupère 50 unités du Product A (notifié par Company 1)
+                                                                                                     (1, 2, 100), -- Collecte 1 récupère 100 unités du Product B (notifié par Company 1)
+                                                                                                     (2, 3, 75);  -- Collecte 2 récupère 75 unités du Product C (notifié par Company 2)

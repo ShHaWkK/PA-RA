@@ -322,8 +322,8 @@ class UserController
             return ['error' => 'Internal Server Error'];
         }
     }
-    
-    
+
+
 
     private function getAllUsers()
     {

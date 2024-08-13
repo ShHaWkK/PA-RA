@@ -1,105 +1,48 @@
 <?php
-// Path: backend/src/Entity/CollectionModel.php
 namespace Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity]
 #[ORM\Table(name: "collections")]
-class CollectionModel
+class CollectionModel implements \JsonSerializable
 {
     #[ORM\Id]
     #[ORM\GeneratedValue(strategy: "AUTO")]
     #[ORM\Column(type: "integer")]
     private $id;
 
-    #[ORM\Column(type: "integer")]
-    private $company_id;
+    #[ORM\ManyToOne(targetEntity: "UserModel")]
+    #[ORM\JoinColumn(name: "volunteer_id", referencedColumnName: "id")]
+    private $volunteer;
 
-    #[ORM\Column(type: "integer")]
-    private $product_id;
+    #[ORM\ManyToOne(targetEntity: "VehicleModel")]
+    #[ORM\JoinColumn(name: "vehicle_id", referencedColumnName: "id")]
+    private $vehicle;
 
-    #[ORM\Column(type: "integer")]
-    private $vehicle_id;
-
-    #[ORM\Column(type: "datetime", options: ["default" => "CURRENT_TIMESTAMP"])]
+    #[ORM\Column(type: "datetime")]
     private $collection_date;
 
-    #[ORM\Column(type: "datetime", options: ["default" => "CURRENT_TIMESTAMP"])]
+    #[ORM\Column(type: "datetime")]
     private $created_at;
 
-    #[ORM\Column(type: "datetime", options: ["default" => "CURRENT_TIMESTAMP", "onUpdate" => "CURRENT_TIMESTAMP"])]
+    #[ORM\Column(type: "datetime")]
     private $updated_at;
 
-    public function getId(): ?int
-    {
-        return $this->id;
-    }
+    // Getters and setters for properties
 
-    public function getCompanyId(): ?int
+    public function jsonSerialize(): array
     {
-        return $this->company_id;
-    }
-
-    public function setCompanyId(int $company_id): self
-    {
-        $this->company_id = $company_id;
-        return $this;
-    }
-
-    public function getProductId(): ?int
-    {
-        return $this->product_id;
-    }
-
-    public function setProductId(int $product_id): self
-    {
-        $this->product_id = $product_id;
-        return $this;
-    }
-
-    public function getVehicleId(): ?int
-    {
-        return $this->vehicle_id;
-    }
-
-    public function setVehicleId(int $vehicle_id): self
-    {
-        $this->vehicle_id = $vehicle_id;
-        return $this;
-    }
-
-    public function getCollectionDate(): ?\DateTimeInterface
-    {
-        return $this->collection_date;
-    }
-
-    public function setCollectionDate(\DateTimeInterface $collection_date): self
-    {
-        $this->collection_date = $collection_date;
-        return $this;
-    }
-
-    public function getCreatedAt(): ?\DateTimeInterface
-    {
-        return $this->created_at;
-    }
-
-    public function setCreatedAt(\DateTimeInterface $created_at): self
-    {
-        $this->created_at = $created_at;
-        return $this;
-    }
-
-    public function getUpdatedAt(): ?\DateTimeInterface
-    {
-        return $this->updated_at;
-    }
-
-    public function setUpdatedAt(\DateTimeInterface $updated_at): self
-    {
-        $this->updated_at = $updated_at;
-        return $this;
+        return [
+            'id' => $this->id,
+            'volunteer_id' => $this->volunteer ? $this->volunteer->getId() : null,
+            'volunteer_name' => $this->volunteer ? $this->volunteer->getFirstName() . ' ' . $this->volunteer->getLastName() : null,
+            'vehicle_id' => $this->vehicle ? $this->vehicle->getId() : null,
+            'vehicle_license_plate' => $this->vehicle ? $this->vehicle->getLicensePlate() : null,
+            'collection_date' => $this->collection_date->format('Y-m-d H:i:s'),
+            'created_at' => $this->created_at->format('Y-m-d H:i:s'),
+            'updated_at' => $this->updated_at->format('Y-m-d H:i:s')
+        ];
     }
 }
 ?>
