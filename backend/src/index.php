@@ -34,6 +34,8 @@ use Controller\PlannedRouteController;
 use Controller\LoginController;
 use Controller\PrivateAreaController;
 use Controller\ServiceProposalController;
+use Controller\ServiceScheduleController;
+use Controller\ServiceRegistrationController;
 use Controller\TicketController;
 use Controller\VehicleController;
 use Controller\ScanController;
@@ -102,6 +104,8 @@ $controllerMap = [
     'merchant' => PrivateAreaController::class,
     'services' => ServiceController::class,
     'service_proposals' => ServiceProposalController::class,
+    'service_schedules' => ServiceScheduleController::class,
+    'service_registrations' => ServiceRegistrationController::class,
     'tickets' => TicketController::class,
     'messages' => MessageController::class,
     'scripts' => 'Scripts',
