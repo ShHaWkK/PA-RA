@@ -91,6 +91,15 @@ switch ($request) {
             exit;
         }
         break;
+    case '/Admin/Services':
+        if ($jwtToken) {
+            requireAuth($jwtToken, 'admin');
+            require __DIR__ . '/views/Admin/Services.php';
+        } else {
+            require __DIR__ . '/views/Login/Login.php';
+            exit;
+        }
+        break;
     case '/Volunteer':
         if ($jwtToken) {
             requireAuth($jwtToken, 'volunteer');

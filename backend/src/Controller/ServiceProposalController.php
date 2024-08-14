@@ -2,21 +2,25 @@
 // Path: backend/src/Controller/ServiceProposalController.php
 namespace Controller;
 
-use Entity\ServiceProposalModel; 
 use Doctrine\ORM\EntityManager;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
-use Doctrine\ORM\EntityNotFoundException;
+use Service\ServiceProposalService;
+use Service\ServiceService;
 
 class ServiceProposalController
 {
     private $entityManager;
     private $serializer;
+    private $serviceProposalService;
+    private $serviceService;
 
     public function __construct(EntityManager $entityManager)
     {
         $this->entityManager = $entityManager;
+        $this->serviceProposalService = new ServiceProposalService($entityManager);
+        $this->serviceService = new ServiceService($entityManager);
         $normalizers = [new ObjectNormalizer()];
         $encoders = [new JsonEncoder()];
         $this->serializer = new Serializer($normalizers, $encoders);
@@ -34,12 +38,15 @@ class ServiceProposalController
                     } else {
                         return $this->getAllProposals();
                     }
-                case 'PUT':
-                    if (isset($uriParts[1])) {
-                        return $this->updateProposal((int) $uriParts[1], $input);
-                    }
-                    http_response_code(400);
-                    return ['error' => 'Proposal ID not specified'];
+                    case 'PUT':
+                        if (isset($uriParts[1]) && isset($uriParts[2]) && $uriParts[2] === 'approve') {
+                            return $this->approveAndCreateService((int) $uriParts[1]);
+                        }
+                        if (isset($uriParts[1])) {
+                            return $this->updateProposal((int) $uriParts[1], $input);
+                        }
+                        http_response_code(400);
+                        return ['error' => 'Proposal ID not specified'];
                 case 'DELETE':
                     if (isset($uriParts[1])) {
                         return $this->deleteProposal((int) $uriParts[1]);
@@ -52,40 +59,33 @@ class ServiceProposalController
             }
         } catch (\Exception $e) {
             error_log("Exception in processRequest: " . $e->getMessage());
-            throw $e;
+            http_response_code(500);
+            return ['error' => 'Internal Server Error'];
         }
     }
 
-    public function createProposal($data)
+    private function createProposal($data)
     {
         try {
-            if (!isset($data['name']) || !isset($data['description']) || !isset($data['created_by']) || !isset($data['status'])) {
+            if (!isset($data['name']) || !isset($data['description']) || !isset($data['created_by'])) {
                 http_response_code(400);
                 return ['error' => 'Missing required fields for new proposal'];
             }
 
-            $proposal = new ServiceProposalModel();
-            $proposal->setName($data['name']);
-            $proposal->setDescription($data['description']);
-            $proposal->setCreatedBy($data['created_by']);
-            $proposal->setStatus($data['status']);
-            $proposal->setCreatedAt(new \DateTime("now"));
-            $proposal->setUpdatedAt(new \DateTime("now"));
-
-            $this->entityManager->persist($proposal);
-            $this->entityManager->flush();
+            $proposal = $this->serviceProposalService->createProposal($data, (int) $data['created_by']);
 
             return ['id' => $proposal->getId(), 'message' => 'Proposal created successfully'];
         } catch (\Exception $e) {
             error_log("Exception in createProposal: " . $e->getMessage());
-            throw $e;
+            http_response_code(400);
+            return ['error' => $e->getMessage()];
         }
     }
 
-    public function getProposal($id)
+    private function getProposal($id)
     {
         try {
-            $proposal = $this->entityManager->find(ServiceProposalModel::class, $id);
+            $proposal = $this->serviceProposalService->getProposal($id);
             if (!$proposal) {
                 http_response_code(404);
                 return ['error' => 'Proposal not found'];
@@ -93,74 +93,72 @@ class ServiceProposalController
             return json_decode($this->serializer->serialize($proposal, 'json'), true);
         } catch (\Exception $e) {
             error_log("Exception in getProposal: " . $e->getMessage());
-            throw $e;
+            http_response_code(500);
+            return ['error' => 'Internal Server Error'];
         }
     }
 
-    public function updateProposal($id, $data)
+    private function updateProposal($id, $data)
     {
         try {
-            if (!isset($data['name']) && !isset($data['description']) && !isset($data['status'])) {
+            if (empty($data)) {
                 http_response_code(400);
                 return ['error' => 'No fields to update'];
             }
 
-            $proposal = $this->entityManager->find(ServiceProposalModel::class, $id);
-            if (!$proposal) {
-                http_response_code(404);
-                return ['error' => 'Proposal not found'];
-            }
-
-            if (isset($data['name'])) {
-                $proposal->setName($data['name']);
-            }
-            if (isset($data['description'])) {
-                $proposal->setDescription($data['description']);
-            }
-            if (isset($data['status'])) {
-                $proposal->setStatus($data['status']);
-            }
-            $proposal->setUpdatedAt(new \DateTime("now"));
-
-            $this->entityManager->flush();
+            $proposal = $this->serviceProposalService->updateProposal($id, $data);
 
             return ['id' => $proposal->getId(), 'message' => 'Proposal updated successfully'];
         } catch (\Exception $e) {
             error_log("Exception in updateProposal: " . $e->getMessage());
-            throw $e;
+            http_response_code(400);
+            return ['error' => $e->getMessage()];
         }
     }
 
-    public function deleteProposal($id)
+    private function deleteProposal($id)
     {
         try {
-            $proposal = $this->entityManager->find(ServiceProposalModel::class, $id);
-            if (!$proposal) {
-                http_response_code(404);
-                return ['error' => 'Proposal not found'];
-            }
-
-            $this->entityManager->remove($proposal);
-            $this->entityManager->flush();
-
+            $this->serviceProposalService->deleteProposal($id);
             return ['message' => 'Proposal deleted successfully'];
         } catch (\Exception $e) {
             error_log("Exception in deleteProposal: " . $e->getMessage());
-            throw $e;
+            http_response_code(400);
+            return ['error' => $e->getMessage()];
         }
     }
 
-    public function getAllProposals()
+    private function getAllProposals()
     {
         try {
-            $proposalRepository = $this->entityManager->getRepository(ServiceProposalModel::class);
-            $proposals = $proposalRepository->findAll();
+            $proposals = $this->serviceProposalService->getAllProposals();
             return json_decode($this->serializer->serialize($proposals, 'json'), true);
         } catch (\Exception $e) {
             error_log("Exception in getAllProposals: " . $e->getMessage());
-            throw $e;
+            http_response_code(500);
+            return ['error' => 'Internal Server Error'];
         }
     }
-}
 
-?>
+    private function approveAndCreateService($proposalId)
+    {
+        try {
+            // Approve the proposal
+            $proposal = $this->serviceProposalService->approveProposal($proposalId);
+    
+            // Create service from approved proposal
+            $service = $this->serviceService->createServiceFromProposal($proposalId);
+    
+            return [
+                'proposal_id' => $proposal->getId(),
+                'service_id' => $service->getId(),
+                'message' => 'Proposal approved and service created successfully'
+            ];
+        } catch (\Exception $e) {
+            error_log("Exception in approveAndCreateService: " . $e->getMessage());
+            http_response_code(400);
+            return ['error' => $e->getMessage()];
+        }
+    }
+    
+}

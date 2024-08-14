@@ -208,27 +208,39 @@ CREATE TABLE IF NOT EXISTS services (
 
 -- Table des inscriptions aux services (service_registrations)
 CREATE TABLE IF NOT EXISTS service_registrations (
-                                                     id INT AUTO_INCREMENT PRIMARY KEY,
-                                                     service_id INT NOT NULL,
-                                                     user_id INT NOT NULL,
-                                                     registration_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                                                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                                                     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                                                     FOREIGN KEY (service_id) REFERENCES services(id) ON DELETE CASCADE,
-                                                     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+                                        id INT AUTO_INCREMENT PRIMARY KEY,
+                                        service_id INT NOT NULL,
+                                        user_id INT NOT NULL,
+                                        registration_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                                        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                                        FOREIGN KEY (service_id) REFERENCES services(id) ON DELETE CASCADE,
+                                        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 -- Table des propositions de services (service_proposals)
 CREATE TABLE IF NOT EXISTS service_proposals (
-                                                 id INT AUTO_INCREMENT PRIMARY KEY,
-                                                 name VARCHAR(255) NOT NULL,
-                                                 description TEXT NOT NULL,
-                                                 status ENUM('proposed', 'approved', 'rejected') NOT NULL DEFAULT 'proposed',
-                                                 created_by INT NOT NULL,
-                                                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                                                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                                                 FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE
+                                        id INT AUTO_INCREMENT PRIMARY KEY,
+                                        name VARCHAR(255) NOT NULL,
+                                        description TEXT NOT NULL,
+                                        status ENUM('proposed', 'approved', 'rejected') NOT NULL DEFAULT 'proposed',
+                                        created_by INT NOT NULL,
+                                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                                        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                                        FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE
 );
+
+-- Table des plannings des services (service_schedules)
+    CREATE TABLE IF NOT EXISTS service_schedules (
+                                        id INT AUTO_INCREMENT PRIMARY KEY,
+                                        service_id INT NOT NULL,
+                                        start_time TIMESTAMP NOT NULL,
+                                        end_time TIMESTAMP NOT NULL,
+                                        location VARCHAR(255) NOT NULL,
+                                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                                        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                                        FOREIGN KEY (service_id) REFERENCES services(id) ON DELETE CASCADE
+    );
 
 -- Table des stocks (stocks)
 CREATE TABLE IF NOT EXISTS stocks (
@@ -461,3 +473,36 @@ INSERT INTO collection_products (collection_id, notification_id, quantity_collec
                                                                                                      (1, 1, 50),  -- Collecte 1 récupère 50 unités du Product A (notifié par Company 1)
                                                                                                      (1, 2, 100), -- Collecte 1 récupère 100 unités du Product B (notifié par Company 1)
                                                                                                      (2, 3, 75);  -- Collecte 2 récupère 75 unités du Product C (notifié par Company 2)
+
+-- Insertion des services proposés
+INSERT INTO services (name, description, schedule, capacity, status, location) VALUES 
+                                                                        ('Conseils anti-gaspi', 'Sessions de conseils pour éviter le gaspillage alimentaire.', '2024-08-25 10:00:00', 20, 'open', 'Paris Warehouse'),
+                                                                        ('Cours de cuisine', 'Cours de cuisine pour apprendre à préparer des repas sans gaspiller.', '2024-08-26 15:00:00', 15, 'open', 'Nantes Warehouse'),
+                                                                        ('Partage de véhicules', 'Service de partage de véhicules entre adhérents.', '2024-08-27 09:00:00', 10, 'open', 'Marseille Warehouse'),
+                                                                        ('Echange de services', 'Echange de services entre particuliers (bricolage, électricité, plomberie).', '2024-08-28 14:00:00', 25, 'open', 'Limoges Warehouse'),
+                                                                        ('Services de réparation', 'Service de réparation pour divers objets et équipements.', '2024-08-29 11:00:00', 30, 'open', 'Paris Warehouse'),
+                                                                        ('Gardiennage', 'Service de gardiennage pour les membres.', '2024-08-30 13:00:00', 10, 'open', 'Nantes Warehouse');
+
+
+INSERT INTO service_proposals (name, description, status, created_by) VALUES 
+                                                                    ('Nouveaux ateliers de jardinage', 'Ateliers pour apprendre les bases du jardinage.', 'proposed', (SELECT id FROM users WHERE email = 'john.doe@example.com')),
+                                                                    ('Service de covoiturage', 'Service de covoiturage pour les membres.', 'proposed', (SELECT id FROM users WHERE email = 'alice.smith@example.com')),
+                                                                    ('Consultations médicales gratuites', 'Organisation de consultations médicales gratuites.', 'proposed', (SELECT id FROM users WHERE email = 'jane.doe@example.com')),
+                                                                    ('Cours de yoga', 'Cours de yoga hebdomadaires.', 'proposed', (SELECT id FROM users WHERE email = 'bob.johnson@example.com'));
+
+-- Insertion d'inscriptions aux services
+INSERT INTO service_registrations (service_id, user_id, registration_date) VALUES 
+                                                                                    ((SELECT id FROM services WHERE name = 'Conseils anti-gaspi'), (SELECT id FROM users WHERE email = 'john.doe@example.com'), CURRENT_TIMESTAMP),
+                                                                                    ((SELECT id FROM services WHERE name = 'Cours de cuisine'), (SELECT id FROM users WHERE email = 'jane.doe@example.com'), CURRENT_TIMESTAMP),
+                                                                                    ((SELECT id FROM services WHERE name = 'Partage de véhicules'), (SELECT id FROM users WHERE email = 'alice.smith@example.com'), CURRENT_TIMESTAMP),
+                                                                                    ((SELECT id FROM services WHERE name = 'Echange de services'), (SELECT id FROM users WHERE email = 'bob.johnson@example.com'), CURRENT_TIMESTAMP),
+                                                                                    ((SELECT id FROM services WHERE name = 'Services de réparation'), (SELECT id FROM users WHERE email = 'john.doe@example.com'), CURRENT_TIMESTAMP);
+
+-- Insertion de plannings pour les services
+INSERT INTO service_schedules (service_id, start_time, end_time, location) VALUES
+                                                                                            ((SELECT id FROM services WHERE name = 'Conseils anti-gaspi'), '2024-08-21 09:00:00', '2024-08-21 12:00:00', 'Paris Warehouse'),
+                                                                                            ((SELECT id FROM services WHERE name = 'Conseils anti-gaspi'), '2024-08-22 09:00:00', '2024-08-22 12:00:00', 'Paris Warehouse'),
+                                                                                            ((SELECT id FROM services WHERE name = 'Cours de cuisine'), '2024-08-26 15:00:00', '2024-08-26 18:00:00', 'Nantes Warehouse'),
+                                                                                            ((SELECT id FROM services WHERE name = 'Partage de véhicules'), '2024-08-27 09:00:00', '2024-08-27 12:00:00', 'Marseille Warehouse'),
+                                                                                            ((SELECT id FROM services WHERE name = 'Echange de services'), '2024-08-28 14:00:00', '2024-08-28 17:00:00', 'Limoges Warehouse'),
+                                                                                            ((SELECT id FROM services WHERE name = 'Services de réparation'), '2024-08-29 11:00:00', '2024-08-29 14:00:00', 'Paris Warehouse');
