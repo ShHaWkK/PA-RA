@@ -1,5 +1,6 @@
 import { getAllCollections } from '/assets/js/api/Collections.js';
-import {populateVolunteerDetailsInModal, populateVehicleDetailsInModal} from "../modals/CollectionModals.js";
+import {populateVolunteerDetailsInModal, populateVehicleDetailsInModal, populateCollectedProductsModal} from "../modals/CollectionModals.js";
+import {formatDateToFrench} from "../FormatDate.js";
 
 export async function populateCollectionTable() {
     // Afficher le loader
@@ -24,7 +25,7 @@ export async function populateCollectionTable() {
     const headerRow = document.createElement('tr');
 
     // Modifier les en-têtes de colonnes (sans ID)
-    const headers = ['Affected driver','Affected vehicle', 'Collection Date', 'Created At', 'Updated At'];
+    const headers = ['','Affected driver','Affected vehicle', 'Collected Products','Collection Date', 'Created At', 'Updated At'];
     headers.forEach(headerText => {
         const th = document.createElement('th');
         th.textContent = headerText;
@@ -55,7 +56,15 @@ export async function populateCollectionTable() {
             const row = document.createElement('tr');
             row.dataset.collectionId = collection.id; // Ajout de l'id de la collection en tant que dataset
 
-            // Créer les cellules de données
+            // Créer la cellule du bouton radio
+            const radioCell = document.createElement('td');
+            const radioInput = document.createElement('input');
+            radioInput.type = 'radio';
+            radioInput.name = 'collectionSelection'; // Assurez-vous que toutes les options radio partagent le même nom
+            radioInput.value = collection.id; // Attribuez l'ID de la collection comme valeur du bouton radio
+            radioCell.appendChild(radioInput);
+
+            // Créer les cellules de données pour le chauffeur
             const volunteerCell = document.createElement('td');
             const volunteerLink = document.createElement('a');
             volunteerLink.href = "#";
@@ -81,21 +90,37 @@ export async function populateCollectionTable() {
             });
             vehicleCell.appendChild(vehicleLink); // Ajouter le lien à la cellule
 
-            const cells = [
-                volunteerCell,
-                vehicleCell,
-                formatDateToFrench(new Date(collection.collection_date).getTime()), // Convertir la date en timestamp
-                collection.created_at ? formatDateToFrench(new Date(collection.created_at).getTime()) : 'N/A',
-                collection.updated_at ? formatDateToFrench(new Date(collection.updated_at).getTime()) : 'N/A'
-            ];
-
-            cells.forEach(cell => {
-                const td = typeof cell === 'object' ? cell : document.createElement('td');
-                if (typeof cell !== 'object') {
-                    td.textContent = cell;
-                }
-                row.appendChild(td);
+            // Créer la cellule avec le bouton 'voir' pour 'Collected Products'
+            const productsCell = document.createElement('td');
+            const viewProductsButton = document.createElement('button');
+            viewProductsButton.textContent = 'Voir';
+            viewProductsButton.value = collection.id;
+            viewProductsButton
+            viewProductsButton.addEventListener('click', (e) => {
+                e.preventDefault();
+                populateCollectedProductsModal(collection.id);
+                document.getElementById('collectedProductsDetailsModal').style.display = 'block';
             });
+            productsCell.appendChild(viewProductsButton);
+
+            // Créer les autres cellules de données
+            const collectionDateCell = document.createElement('td');
+            collectionDateCell.textContent = formatDateToFrench(new Date(collection.collection_date).getTime());
+
+            const createdAtCell = document.createElement('td');
+            createdAtCell.textContent = collection.created_at ? formatDateToFrench(new Date(collection.created_at).getTime()) : 'N/A';
+
+            const updatedAtCell = document.createElement('td');
+            updatedAtCell.textContent = collection.updated_at ? formatDateToFrench(new Date(collection.updated_at).getTime()) : 'N/A';
+
+            // Ajouter toutes les cellules à la ligne
+            row.appendChild(radioCell);
+            row.appendChild(volunteerCell);
+            row.appendChild(vehicleCell);
+            row.appendChild(productsCell);
+            row.appendChild(collectionDateCell);
+            row.appendChild(createdAtCell);
+            row.appendChild(updatedAtCell);
 
             tbody.appendChild(row);
         });
@@ -107,10 +132,4 @@ export async function populateCollectionTable() {
         // Retirer le loader en cas d'erreur
         document.getElementById('loadingBodyGeneral').classList.add('hidden');
     }
-}
-
-// Fonction de formatage de date
-function formatDateToFrench(timestamp) {
-    const date = new Date(timestamp);
-    return date.toLocaleDateString('fr-FR') + ' ' + date.toLocaleTimeString('fr-FR');
 }

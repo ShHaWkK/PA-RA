@@ -59,11 +59,6 @@ async function populateProductDetailsInModal(productId) {
     }
 }
 
-function formatDateToFrench(timestamp) {
-    const date = new Date(timestamp);
-    return date.toLocaleDateString('fr-FR') + ' ' + date.toLocaleTimeString('fr-FR');
-}
-
 // Fonction pour peupler le sélecteur de produits dans le formulaire d'ajout de stock
 async function populateProductSelector() {
     try {

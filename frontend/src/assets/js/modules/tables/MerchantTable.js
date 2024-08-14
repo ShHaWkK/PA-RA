@@ -1,6 +1,7 @@
 import { getAllUsers } from '/assets/js/api/Users.js';
 import { setupSearch } from '/assets/js/modules/SearchBar.js';
 import {populateModifyUserForm,populateCompaniesInModal,populateSkillsInModal} from "/assets/js/modules/modals/AdminUserModals.js";
+import {formatDateToFrench} from "../FormatDate.js";
 
 export var selectedUserIdMerchant;
 
@@ -112,17 +113,7 @@ export async function populateMerchantTable(status) {
     }
 }
 
-// Fonction pour formater les dates au format francophone
-function formatDateToFrench(dateString) {
-    const date = new Date(dateString);
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const year = date.getFullYear();
-    return `${day}/${month}/${year}`;
-}
-
 // Fonctions pour les boutons "Voir" et "Modifier"
-
 function viewSkills(userId) {
     selectedUserIdMerchant = userId;
     populateSkillsInModal(selectedUserIdMerchant);

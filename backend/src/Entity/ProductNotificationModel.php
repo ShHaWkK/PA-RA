@@ -77,6 +77,12 @@ class ProductNotificationModel
         return $this->product_id;
     }
 
+    public function getProduct(): ?ProductModel
+
+    {
+        return $this->product;
+    }
+
     public function setProductId(int $product_id, EntityManager $entityManager): self
     {
         $product = $entityManager->find(ProductModel::class, $product_id);

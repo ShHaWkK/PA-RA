@@ -58,6 +58,8 @@ class CollectionProductModel
         return [
             'collection_id' => $this->collection->getId(),
             'notification_id' => $this->notification->getId(),
+            'product_id' => $this->notification->getProductId(),
+            'product' => $this->notification->getProduct(),
             'quantity_collected' => $this->quantity_collected,
         ];
     }

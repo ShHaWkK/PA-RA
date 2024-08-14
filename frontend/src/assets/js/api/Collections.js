@@ -90,4 +90,22 @@ async function getAllCollections() {
     }
 }
 
-export { createCollection, getCollectionByID, updateCollection, deleteCollection, getAllCollections };
+async function getProductsFromCollection(collectionId){
+    try {
+        const response = await fetch(apiEndpoint + '/collections/' + collectionId +'/products', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        if (!response.ok) {
+            throw new Error('Failed to get all products from the collection');
+        }
+        return await response.json();
+    } catch (error) {
+        console.error('Error getting all products from collection:', error.message);
+        throw error;
+    }
+}
+
+export { createCollection, getCollectionByID, updateCollection, deleteCollection, getAllCollections, getProductsFromCollection };

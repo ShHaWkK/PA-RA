@@ -1,6 +1,7 @@
 import { getStockByWarehouse } from '/assets/js/api/Stocks.js'; // Assurez-vous que le chemin vers votre fichier Stock.js est correct
 import {populateProductDetailsInModal} from "/assets/js/modules/modals/StockModals.js";
 import {selectedWarehouseId,populateProgressBar} from "/assets/js/pages/AdminStockPage.js";
+import {formatDateToFrench} from "../FormatDate.js";
 
 export async function populateStockTable(warehouseId) {
     console.log("warehouse id", warehouseId);
@@ -124,11 +125,4 @@ export async function populateStockTable(warehouseId) {
             console.log('Stocks not found or bad request');
         }
     }
-}
-
-
-// Fonction de formatage de date
-function formatDateToFrench(timestamp) {
-    const date = new Date(timestamp);
-    return date.toLocaleDateString('fr-FR') + ' ' + date.toLocaleTimeString('fr-FR');
 }

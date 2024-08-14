@@ -18,6 +18,9 @@
     <div class="back-office-content">
         <h1>Tableau de Bord des Collectes</h1>
 
+
+        <label for="start">Collection date:</label>
+        <input type="date" id="collectionDate" name="collection-date"/>
         <!-- Tableau des Collectes -->
         <div class="collection-table">
             <table>
@@ -46,11 +49,10 @@
 
         <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/VolunteerDetailsModal.php'); ?>
         <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/VehicleDetailsModal.php'); ?>
+        <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/CollectedProductsModal.php'); ?>
 
         <!-- Script pour gérer les interactions avec la page -->
         <script type="module" src="/assets/js/pages/AdminCollectionPage.js"></script>
-<!--        <script src="/assets/js/modules/modals/CollectionModals.js"></script>-->
-<!--        <script src="/assets/js/modules/modals/VehicleManagementModals.js"></script>-->
     </div>
 </div>
 </body>

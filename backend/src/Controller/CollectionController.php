@@ -27,16 +27,30 @@ class CollectionController
                     return $this->createCollection($input);
                 case 'GET':
                     if (isset($uriParts[1])) {
-                        return $this->getCollection((int) $uriParts[1]);
+                        if (isset($uriParts[2]) && $uriParts[2] === 'products') {
+                            return $this->getProductsFromCollection((int) $uriParts[1]);
+                        } else {
+                            return $this->getCollection((int) $uriParts[1]);
+                        }
                     } else {
                         return $this->getAllCollections();
                     }
                 case 'PUT':
-                    if (isset($uriParts[1]) && !isset($uriParts[2])) {
-                        return $this->updateCollection((int) $uriParts[1], $input);
+                    if (isset($uriParts[1])) {
+                        if (isset($uriParts[2])) {
+                            return $this->assignProduct((int) $uriParts[1], $input['products']);
+                        } else {
+                            return $this->updateCollection((int) $uriParts[1], $input);
+                        }
                     }
                     http_response_code(400);
-                    return ['error' => 'Invalid request for PUT method'];
+                    return ['error' => 'Collection ID not specified'];
+                case 'DELETE':
+                    if (isset($uriParts[1])) {
+                        return $this->deleteCollection((int) $uriParts[1]);
+                    }
+                    http_response_code(400);
+                    return ['error' => 'Collection ID not specified'];
                 case 'PATCH':
                     if (isset($uriParts[1])) {
                         if (isset($input['products'])) {
@@ -48,12 +62,6 @@ class CollectionController
                         }
                         http_response_code(400);
                         return ['error' => 'Products not specified'];
-                    }
-                    http_response_code(400);
-                    return ['error' => 'Collection ID not specified'];
-                case 'DELETE':
-                    if (isset($uriParts[1])) {
-                        return $this->deleteCollection((int) $uriParts[1]);
                     }
                     http_response_code(400);
                     return ['error' => 'Collection ID not specified'];
@@ -305,6 +313,34 @@ class CollectionController
         } catch (\Exception $e) {
             $this->entityManager->rollback();
             error_log("Exception in removeProductsFromCollection: " . $e->getMessage());
+            throw $e;
+        }
+    }
+
+    public function getProductsFromCollection(int $collectionId)
+    {
+        try {
+            // Récupérer la collecte par son ID
+            $collection = $this->entityManager->find(CollectionModel::class, $collectionId);
+            if (!$collection) {
+                http_response_code(404);
+                return ['error' => 'Collection not found'];
+            }
+
+            // Récupérer tous les produits associés à la collecte
+            $collectionProducts = $this->entityManager->getRepository(CollectionProductModel::class)
+                ->findBy(['collection' => $collection]);
+
+            if (empty($collectionProducts)) {
+                return ['message' => 'No products found for this collection'];
+            }
+
+            // Utiliser jsonSerialize pour formater les résultats en JSON
+            $products = array_map(fn($collectionProduct) => $collectionProduct->jsonSerialize(), $collectionProducts);
+
+            return $products;
+        } catch (\Exception $e) {
+            error_log("Exception in getProductsFromCollection: " . $e->getMessage());
             throw $e;
         }
     }
