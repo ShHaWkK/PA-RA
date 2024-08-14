@@ -90,6 +90,32 @@ async function getAllCollections() {
     }
 }
 
+    async function getCollectionsByDate(date) {
+        try {
+            // Construire l'URL avec le paramètre de date
+            const url = new URL(apiEndpoint + '/collections');
+            url.searchParams.append('date', date);
+
+            console.log("url",url);
+
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to get collections by date');
+            }
+
+            return await response.json();
+        } catch (error) {
+            console.error('Error getting collections by date:', error.message);
+            throw error;
+        }
+    }
+
 async function getProductsFromCollection(collectionId){
     try {
         const response = await fetch(apiEndpoint + '/collections/' + collectionId +'/products', {
@@ -108,4 +134,4 @@ async function getProductsFromCollection(collectionId){
     }
 }
 
-export { createCollection, getCollectionByID, updateCollection, deleteCollection, getAllCollections, getProductsFromCollection };
+export { createCollection, getCollectionByID, updateCollection, deleteCollection, getAllCollections, getProductsFromCollection, getCollectionsByDate };

@@ -1,8 +1,8 @@
-import { getAllCollections } from '/assets/js/api/Collections.js';
-import {populateVolunteerDetailsInModal, populateVehicleDetailsInModal, populateCollectedProductsModal} from "../modals/CollectionModals.js";
-import {formatDateToFrench} from "../FormatDate.js";
+import { getAllCollections, getCollectionsByDate } from '/assets/js/api/Collections.js';
+import { populateVolunteerDetailsInModal, populateVehicleDetailsInModal, populateCollectedProductsModal } from "../modals/CollectionModals.js";
+import { formatDateToFrench } from "../FormatDate.js";
 
-export async function populateCollectionTable() {
+export async function populateCollectionTable(date) {
     // Afficher le loader
     document.getElementById('loadingBodyGeneral').classList.remove('hidden');
 
@@ -25,7 +25,7 @@ export async function populateCollectionTable() {
     const headerRow = document.createElement('tr');
 
     // Modifier les en-têtes de colonnes (sans ID)
-    const headers = ['','Affected driver','Affected vehicle', 'Collected Products','Collection Date', 'Created At', 'Updated At'];
+    const headers = ['', 'Affected driver', 'Affected vehicle', 'Collected Products', 'Collection Date', 'Created At', 'Updated At'];
     headers.forEach(headerText => {
         const th = document.createElement('th');
         th.textContent = headerText;
@@ -39,7 +39,18 @@ export async function populateCollectionTable() {
     backOfficeContent.appendChild(table);
 
     try {
-        const collections = await getAllCollections();
+        let collections;
+
+        // Vérifier si une date valide est fournie (non vide et non null)
+        if (date && date.trim() !== "") {
+            console.log("date",date);
+            console.log("collectionByDate");
+            collections = await getCollectionsByDate(date);
+        } else {
+            console.log("date",date);
+            console.log("collectionByDate");
+            collections = await getAllCollections();
+        }
 
         if (!collections || collections.length === 0) {
             console.log('No collections found');
@@ -95,7 +106,6 @@ export async function populateCollectionTable() {
             const viewProductsButton = document.createElement('button');
             viewProductsButton.textContent = 'Voir';
             viewProductsButton.value = collection.id;
-            viewProductsButton
             viewProductsButton.addEventListener('click', (e) => {
                 e.preventDefault();
                 populateCollectedProductsModal(collection.id);

@@ -75,6 +75,12 @@ class CollectionModel implements \JsonSerializable
         return $this;
     }
 
+    public function setCreatedAt(\DateTimeInterface $created_at): self
+    {
+        $this->created_at = $created_at;
+        return $this;
+    }
+
     public function getCreatedAt(): ?\DateTimeInterface
     {
         return $this->created_at;

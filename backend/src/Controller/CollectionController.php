@@ -26,9 +26,22 @@ class CollectionController
                 case 'POST':
                     return $this->createCollection($input);
                 case 'GET':
+                    // Vérifier si un paramètre "date" est passé dans la requête
+                    if (isset($_GET['date'])) {
+                        $date = $_GET['date'];
+                        return $this->getCollectionsByDate($date);
+                    }
+
                     if (isset($uriParts[1])) {
-                        if (isset($uriParts[2]) && $uriParts[2] === 'products') {
-                            return $this->getProductsFromCollection((int) $uriParts[1]);
+                        if (isset($uriParts[2])) {
+                            if ($uriParts[2] === 'products') {
+                                return $this->getProductsFromCollection((int) $uriParts[1]);
+                            } elseif ($uriParts[2] === 'by-date') {
+                                return $this->getCollectionsByDate($uriParts[1]);
+                            } else {
+                                http_response_code(400);
+                                return ['error' => 'Invalid endpoint'];
+                            }
                         } else {
                             return $this->getCollection((int) $uriParts[1]);
                         }
@@ -74,6 +87,7 @@ class CollectionController
             throw $e;
         }
     }
+
 
     public function createCollection($data)
     {
@@ -344,5 +358,35 @@ class CollectionController
             throw $e;
         }
     }
+
+    public function getCollectionsByDate(string $date)
+    {
+        try {
+            // Créez un objet DateTime pour le début de la journée
+            $startOfDay = new \DateTime($date . ' 00:00:00');
+            // Créez un objet DateTime pour la fin de la journée
+            $endOfDay = new \DateTime($date . ' 23:59:59');
+
+            // Créez une instance de QueryBuilder
+            $collectionRepository = $this->entityManager->getRepository(CollectionModel::class);
+            $queryBuilder = $collectionRepository->createQueryBuilder('c')
+                ->where('c.collection_date >= :start')
+                ->andWhere('c.collection_date <= :end')
+                ->setParameter('start', $startOfDay)
+                ->setParameter('end', $endOfDay);
+
+            // Exécutez la requête et récupérez les résultats
+            $collections = $queryBuilder->getQuery()->getResult();
+
+            // Retournez les collections en utilisant jsonSerialize
+            return array_map(function ($collection) {
+                return $collection->jsonSerialize();
+            }, $collections);
+        } catch (\Exception $e) {
+            error_log("Exception in getCollectionsByDate: " . $e->getMessage());
+            throw $e;
+        }
+    }
+
 }
 ?>

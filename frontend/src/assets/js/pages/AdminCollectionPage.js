@@ -11,6 +11,14 @@ function populateCollectionDate(){
 
 document.addEventListener('DOMContentLoaded',
     function (){
-        populateCollectionTable();
         populateCollectionDate();
+        document.getElementById('collectionDate').addEventListener('change', function() {
+            // Récupérer l'élément input
+            const dateInput = document.getElementById('collectionDate');
+            const selectedDate = dateInput.value;
+
+            console.log('Selected Date:', selectedDate);
+            populateCollectionTable(selectedDate);
+        });
+        populateCollectionTable();
     });
