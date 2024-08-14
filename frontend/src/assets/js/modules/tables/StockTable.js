@@ -116,7 +116,6 @@ export async function populateStockTable(warehouseId) {
 
         table.appendChild(tbody);
 
-        setupSearch(stocks, 'stockTable');
     } catch (error) {
         console.error('Error in populateStockTable:', error.message);
         // Retirer le loader en cas d'erreur 400 ou 404
@@ -132,9 +131,4 @@ export async function populateStockTable(warehouseId) {
 function formatDateToFrench(timestamp) {
     const date = new Date(timestamp);
     return date.toLocaleDateString('fr-FR') + ' ' + date.toLocaleTimeString('fr-FR');
-}
-
-// Fonction d'initialisation de recherche (doit être implémentée)
-function setupSearch(items, tableId) {
-    // Implémentez la logique de recherche ici
 }

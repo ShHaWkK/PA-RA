@@ -7,6 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tableau de Bord des Collectes</title>
     <link rel="stylesheet" href="/assets/css/global.css">
+    <link rel="stylesheet" href="/assets/css/modal.css">
     <link rel="stylesheet" href="/assets/css/table.css">
     <link rel="stylesheet" href="/assets/css/backoffice.css">
     <link rel="stylesheet" href="/assets/css/progressbar.css">
@@ -21,16 +22,16 @@
         <div class="collection-table">
             <table>
                 <thead>
-<!--                <tr>-->
-<!--                    <th>ID</th>-->
-<!--                    <th>Entreprise</th>-->
-<!--                    <th>Produit</th>-->
-<!--                    <th>Véhicule</th>-->
-<!--                    <th>Date de Collecte</th>-->
-<!--                    <th>Date de Création</th>-->
-<!--                    <th>Date de Mise à Jour</th>-->
-<!--                    <th>Actions</th>-->
-<!--                </tr>-->
+                <tr>
+                    <th>ID</th>
+                    <th>Entreprise</th>
+                    <th>Produit</th>
+                    <th>Véhicule</th>
+                    <th>Date de Collecte</th>
+                    <th>Date de Création</th>
+                    <th>Date de Mise à Jour</th>
+                    <th>Actions</th>
+                </tr>
                 </thead>
                 <tbody id="collectionTableBody">
                 <!-- Les lignes du tableau seront générées dynamiquement par JavaScript -->
@@ -42,6 +43,9 @@
         $loaderId = 'loadingBodyGeneral';
         include($_SERVER['DOCUMENT_ROOT'] . '/views/includes/Loader.php');
         ?>
+
+        <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/VolunteerDetailsModal.php'); ?>
+        <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/VehicleDetailsModal.php'); ?>
 
         <!-- Script pour gérer les interactions avec la page -->
         <script type="module" src="/assets/js/pages/AdminCollectionPage.js"></script>
