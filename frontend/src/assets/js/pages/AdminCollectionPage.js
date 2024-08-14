@@ -1,5 +1,7 @@
 import {populateCollectionTable} from "/assets/js/modules/tables/CollectionTable.js";
 
+console.log("bonjour");
+
 function populateCollectionDate(){
     // Récupérer la date actuelle
     const today = new Date();
