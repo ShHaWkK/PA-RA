@@ -2,10 +2,13 @@
 namespace Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use JsonSerializable;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 
 #[ORM\Entity]
 #[ORM\Table(name: "warehouses")]
-class WarehouseModel
+class WarehouseModel implements JsonSerializable
 {
     #[ORM\Id]
     #[ORM\GeneratedValue(strategy: "AUTO")]
@@ -35,6 +38,13 @@ class WarehouseModel
 
     #[ORM\Column(type: "datetime", options: ["default" => "CURRENT_TIMESTAMP", "onUpdate" => "CURRENT_TIMESTAMP"])]
     private $updated_at;
+
+    #[ORM\OneToMany(targetEntity: StockModel::class, mappedBy: "warehouse")]
+    private $stocks;
+
+    public function __construct() {
+        $this->stocks = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -127,6 +137,33 @@ class WarehouseModel
     {
         $this->updated_at = $updated_at;
         return $this;
+    }
+
+    public function getStocks(): Collection
+    {
+        return $this->stocks;
+    }
+
+    public function setStocks(Collection $stocks): self
+    {
+        $this->stocks = $stocks;
+        return $this;
+    }
+
+    public function jsonSerialize(): array
+    {
+        return [
+            'id' => $this->id,
+            'name' => $this->name,
+            'address' => $this->address,
+            'contact_info' => $this->contact_info,
+            'capacity' => $this->capacity,
+            'city' => $this->city,
+            'country' => $this->country,
+            'created_at' => $this->created_at->format('Y-m-d H:i:s'),
+            'updated_at' => $this->updated_at->format('Y-m-d H:i:s'),
+            'stocks_count' => count($this->stocks) // Optionnel: nombre de stocks associés
+        ];
     }
 }
 ?>

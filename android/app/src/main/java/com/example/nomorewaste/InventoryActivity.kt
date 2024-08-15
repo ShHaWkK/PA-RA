@@ -1,4 +1,3 @@
-// InventoryActivity.kt
 package com.example.nomorewaste
 
 import android.os.Bundle
@@ -80,7 +79,11 @@ class InventoryActivity : AppCompatActivity() {
         apiService.getProducts().enqueue(object : Callback<List<Product>> {
             override fun onResponse(call: Call<List<Product>>, response: Response<List<Product>>) {
                 if (response.isSuccessful) {
-                    recyclerViewProducts.adapter = ProductAdapter(response.body() ?: listOf())
+                    recyclerViewProducts.adapter = ProductAdapter(
+                        response.body() ?: listOf(),
+                        onEditClick = { product -> editProduct(product) },
+                        onDeleteClick = { product -> deleteProduct(product) }
+                    )
                 } else {
                     Toast.makeText(this@InventoryActivity, "Erreur lors du chargement des produits", Toast.LENGTH_SHORT).show()
                 }
@@ -91,4 +94,34 @@ class InventoryActivity : AppCompatActivity() {
             }
         })
     }
+
+    private fun editProduct(product: Product) {
+        // Logic to edit the product
+        Toast.makeText(this, "Edit: ${product.name}", Toast.LENGTH_SHORT).show()
+        // You might want to start an activity to edit the product
+    }
+
+    private fun deleteProduct(product: Product) {
+        val barcode = product.barcode ?: ""
+        if (barcode.isEmpty()) {
+            Toast.makeText(this, "Erreur: Code-barres non disponible", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        apiService.deleteProduct(barcode).enqueue(object : Callback<Void> {
+            override fun onResponse(call: Call<Void>, response: Response<Void>) {
+                if (response.isSuccessful) {
+                    Toast.makeText(this@InventoryActivity, "Produit supprimé avec succès", Toast.LENGTH_SHORT).show()
+                    loadProducts()
+                } else {
+                    Toast.makeText(this@InventoryActivity, "Erreur lors de la suppression du produit", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onFailure(call: Call<Void>, t: Throwable) {
+                Toast.makeText(this@InventoryActivity, "Échec de la connexion : ${t.message}", Toast.LENGTH_SHORT).show()
+            }
+        })
+    }
+
 }

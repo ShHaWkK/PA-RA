@@ -27,12 +27,12 @@ class AddProductActivity : AppCompatActivity() {
         val barcodeEditText: EditText = findViewById(R.id.editTextProductBarcode)
         val expirationDateEditText: EditText = findViewById(R.id.editTextExpirationDate)
         val volumeEditText: EditText = findViewById(R.id.editTextVolume)
-        val addButton: Button = findViewById(R.id.buttonAddProduct)
+        val saveButton: Button = findViewById(R.id.buttonSaveProduct)
         warehouseSpinner = findViewById(R.id.spinnerWarehouse)
 
         apiService = RetrofitClient.getClient().create(ApiService::class.java)
 
-        addButton.setOnClickListener {
+        saveButton.setOnClickListener {
             val name = nameEditText.text.toString().trim()
             val barcode = barcodeEditText.text.toString().trim()
             val expirationDate = expirationDateEditText.text.toString().trim()
@@ -59,7 +59,7 @@ class AddProductActivity : AppCompatActivity() {
                     adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
                     warehouseSpinner.adapter = adapter
                     warehouseSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-                        override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
+                        override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
                             selectedWarehouseId = warehouses[position].id
                         }
 

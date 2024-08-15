@@ -128,5 +128,12 @@
             android:label="Select Products"
             android:theme="@style/Theme.Nomorewaste" />
 
+        <activity android:name=".DeleteProductActivity" />
+        <activity android:name=".AddProductActivity" />
+        <activity android:name=".EditProductActivity" />
+        <activity android:name=".ProductDetailActivity" />
+
+
+
     </application>
 </manifest>

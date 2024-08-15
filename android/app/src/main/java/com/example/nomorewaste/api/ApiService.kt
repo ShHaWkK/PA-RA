@@ -46,6 +46,12 @@ interface ApiService {
     @PUT("products/{barcode}")
     fun updateProduct(@Path("barcode") barcode: String, @Body product: Product): Call<Void>
 
+    @GET("products/{barcode}")
+    fun getProduct(@Path("barcode") barcode: String): Call<Product>
+
+    @GET("stocks/getStocksByWarehouse/{warehouseId}")
+    fun getStocksByWarehouse(@Path("warehouseId") warehouseId: Int): Call<List<Stock>>
+
     @DELETE("products/{barcode}")
     fun deleteProduct(@Path("barcode") barcode: String): Call<Void>
 

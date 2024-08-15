@@ -63,5 +63,6 @@ dependencies {
     annotationProcessor ("androidx.room:room-compiler:2.4.3")
     implementation ("com.journeyapps:zxing-android-embedded:4.3.0")
     implementation ("com.google.zxing:core:3.4.0")
+    implementation ("com.airbnb.android:lottie:5.2.0")
 
 }

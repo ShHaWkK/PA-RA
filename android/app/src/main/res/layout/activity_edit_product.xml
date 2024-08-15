@@ -19,7 +19,8 @@
         android:layout_height="wrap_content"
         android:hint="@string/product_barcode_hint"
         android:inputType="number"
-        android:minHeight="48dp"/>
+        android:minHeight="48dp"
+        android:enabled="false"/>
 
     <EditText
         android:id="@+id/editTextVolume"

@@ -73,4 +73,7 @@
     <string name="add_product">Ajouter le produit</string>
     <string name="update_product">Mettre à jour le produit</string>
     <string name="delete_product">Supprimer le produit</string>
+    <string name="search_hint">Search</string>
+    <string name="edit_product">Edit Product</string>
+    <string name="save_product">Save Product</string>
 </resources>

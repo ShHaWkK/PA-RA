@@ -4,11 +4,16 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.CheckBox
+import android.widget.ImageButton
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.nomorewaste.R
 
-class ProductAdapter(private var productList: List<Product>) : RecyclerView.Adapter<ProductAdapter.ProductViewHolder>() {
+class ProductAdapter(
+    private var productList: List<Product>,
+    private val onEditClick: (Product) -> Unit,
+    private val onDeleteClick: (Product) -> Unit
+) : RecyclerView.Adapter<ProductAdapter.ProductViewHolder>() {
 
     private val selectedProducts = mutableSetOf<Product>()
 
@@ -29,27 +34,40 @@ class ProductAdapter(private var productList: List<Product>) : RecyclerView.Adap
         notifyDataSetChanged()
     }
 
-    fun getSelectedProducts(): List<Product> = selectedProducts.toList()
+    fun getSelectedProducts(): List<Product> {
+        return selectedProducts.toList()
+    }
 
     inner class ProductViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val productName: TextView = itemView.findViewById(R.id.productName)
+        private val productQuantity: TextView = itemView.findViewById(R.id.productQuantity)
+        private val productVolume: TextView = itemView.findViewById(R.id.productVolume)
+        private val productExpiration: TextView = itemView.findViewById(R.id.productExpiration)
+        private val buttonEditProduct: ImageButton = itemView.findViewById(R.id.buttonEditProduct)
+        private val buttonDeleteProduct: ImageButton = itemView.findViewById(R.id.buttonDeleteProduct)
         private val checkBox: CheckBox = itemView.findViewById(R.id.checkbox)
 
         fun bind(product: Product) {
-            if (!product.name.isNullOrBlank() && !product.barcode.isNullOrBlank()) {
-                productName.text = "Produit: ${product.name} - Quantité: ${product.volume} g"
-                checkBox.isChecked = selectedProducts.contains(product)
+            productName.text = product.name ?: "Nom non disponible"
+            productQuantity.text = "Quantité : ${product.volume}"
+            productVolume.text = "Volume : ${product.volume} m³"
+            productExpiration.text = "Exp. : ${product.expirationDate ?: "Non spécifiée"}"
+            checkBox.isChecked = selectedProducts.contains(product)
 
-                checkBox.setOnCheckedChangeListener { _, isChecked ->
-                    if (isChecked) {
-                        selectedProducts.add(product)
-                    } else {
-                        selectedProducts.remove(product)
-                    }
+            checkBox.setOnCheckedChangeListener { _, isChecked ->
+                if (isChecked) {
+                    selectedProducts.add(product)
+                } else {
+                    selectedProducts.remove(product)
                 }
-            } else {
-                productName.text = "Produit inconnu"
-                checkBox.isEnabled = false
+            }
+
+            buttonEditProduct.setOnClickListener {
+                onEditClick(product)
+            }
+
+            buttonDeleteProduct.setOnClickListener {
+                onDeleteClick(product)
             }
         }
     }

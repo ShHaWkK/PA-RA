@@ -32,11 +32,10 @@ class ProductController
                     return $this->createProduct($input);
                 case 'GET':
                     if (isset($uriParts[1])) {
-                        if ($uriParts[1] === 'stock') {
-                            return $this->getProductsInStock();
-                        } else {
-                            return $this->getProductByBarcode($uriParts[1]);
+                        if(isset($uriParts[2])){
+                            return $this->getProductByID($uriParts[2]);
                         }
+                        return $this->getProductByBarcode($uriParts[1]);
                     } else {
                         return $this->getAllProducts();
                     }
@@ -65,49 +64,52 @@ class ProductController
     public function createProduct($data)
     {
         try {
+            // Vérification des champs obligatoires
             if (!isset($data['name']) || !isset($data['barcode']) || !isset($data['expiration_date']) || !isset($data['volume']) || !isset($data['warehouse_id'])) {
                 http_response_code(400);
                 return ['error' => 'Missing required fields for new product'];
             }
-
-            $existingProduct = $this->entityManager->getRepository(ProductModel::class)->findOneBy(['barcode' => $data['barcode']]);
-            if ($existingProduct) {
-                http_response_code(400);
-                return ['error' => 'Product with this barcode already exists'];
-            }
-
-            if (!preg_match('/^[0-9]{13}$/', $data['barcode'])) {
-                http_response_code(400);
-                return ['error' => 'Barcode must be a 13-digit number'];
-            }
-
-            if (!preg_match('/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/', $data['expiration_date'])) {
-                http_response_code(400);
-                return ['error' => 'Expiration date must be in the format YYYY-MM-DD'];
-            }
-
-            if (!is_numeric($data['volume']) || $data['volume'] < 0) {
-                http_response_code(400);
-                return ['error' => 'Volume must be a non-negative float'];
-            }
-
-            if (!is_numeric($data['warehouse_id']) || $data['warehouse_id'] < 0) {
-                http_response_code(400);
-                return ['error' => 'Warehouse ID must be a non-negative integer'];
-            }
-
+    
+            // Vérification que l'entrepôt existe bien
             $warehouse = $this->entityManager->getRepository(WarehouseModel::class)->find($data['warehouse_id']);
             if (!$warehouse) {
                 http_response_code(400);
                 return ['error' => 'Warehouse not found'];
             }
-
+    
+            // Validation du produit existant par code-barres
+            $existingProduct = $this->entityManager->getRepository(ProductModel::class)->findOneBy(['barcode' => $data['barcode']]);
+            if ($existingProduct) {
+                http_response_code(400);
+                return ['error' => 'Product with this barcode already exists'];
+            }
+    
+            // Validation du format du code-barres
+            if (!preg_match('/^[0-9]{13}$/', $data['barcode'])) {
+                http_response_code(400);
+                return ['error' => 'Barcode must be a 13-digit number'];
+            }
+    
+            // Validation du format de la date d'expiration
+            if (!preg_match('/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/', $data['expiration_date'])) {
+                http_response_code(400);
+                return ['error' => 'Expiration date must be in the format YYYY-MM-DD'];
+            }
+    
+            // Validation du volume
+            if (!is_numeric($data['volume']) || $data['volume'] < 0) {
+                http_response_code(400);
+                return ['error' => 'Volume must be a non-negative float'];
+            }
+    
+            // Calcul de la capacité disponible dans l'entrepôt
             $availableCapacity = $warehouse->getCapacity() - $this->getCurrentWarehouseStockVolume($data['warehouse_id']);
             if ($availableCapacity < $data['volume']) {
                 http_response_code(400);
                 return ['error' => 'Not enough capacity in the warehouse'];
             }
-
+    
+            // Création du produit
             $product = new ProductModel();
             $product->setName($data['name']);
             $product->setBarcode($data['barcode']);
@@ -115,7 +117,8 @@ class ProductController
             $product->setVolume($data['volume']);
             $product->setCreatedAt(new \DateTime("now"));
             $product->setUpdatedAt(new \DateTime("now"));
-
+    
+            // Génération du QR code
             $qrCode = new QrCode(json_encode([
                 'name' => $data['name'],
                 'barcode' => $data['barcode'],
@@ -124,39 +127,42 @@ class ProductController
             ]));
             $qrCode->setSize(300);
             $qrCode->setMargin(10);
-
+    
             $writer = new PngWriter();
             $result = $writer->write($qrCode);
-
+    
             $qrCodeDir = __DIR__ . '/../../public/qrcodes';
             if (!is_dir($qrCodeDir)) {
                 if (!mkdir($qrCodeDir, 0777, true)) {
                     throw new \Exception("Failed to create directory: $qrCodeDir");
                 }
             }
-
+    
             $qrCodePath = '/qrcodes/' . $data['barcode'] . '.png';
             $fullPath = $qrCodeDir . '/' . $data['barcode'] . '.png';
             if (file_put_contents($fullPath, $result->getString()) === false) {
                 throw new \Exception("Failed to write QR code to file: $fullPath");
             }
             $product->setQrCodePath($qrCodePath);
-
+    
+            // Persistance du produit dans la base de données
             $this->entityManager->persist($product);
             $this->entityManager->flush();
-
+    
+            // Création de l'entrée dans le stock
             $stock = new StockModel();
             $stock->setProductId($product->getId());
-            $stock->setQuantity(1); 
+            $stock->setQuantity(1);
             $stock->setAvailability('available');
-            $stock->setWarehouseId($data['warehouse_id']);
+            $stock->setWarehouseId($warehouse->getId()); // Utilisation de l'ID de l'entrepôt récupéré
             $stock->setEntryDate(new \DateTime("now"));
             $stock->setCreatedAt(new \DateTime("now"));
             $stock->setUpdatedAt(new \DateTime("now"));
-
+    
+            // Persistance du stock dans la base de données
             $this->entityManager->persist($stock);
             $this->entityManager->flush();
-
+    
             return ['id' => $product->getId(), 'message' => 'Product created successfully'];
         } catch (\Exception $e) {
             error_log("Exception in createProduct: " . $e->getMessage());
@@ -164,14 +170,16 @@ class ProductController
             throw $e;
         }
     }
-
+    
     private function getCurrentWarehouseStockVolume($warehouseId)
     {
         $stocks = $this->entityManager->getRepository(StockModel::class)->findBy(['warehouse_id' => $warehouseId]);
         $currentVolume = 0;
         foreach ($stocks as $stock) {
             $product = $this->entityManager->getRepository(ProductModel::class)->find($stock->getProductId());
-            $currentVolume += $product->getVolume() * $stock->getQuantity();
+            if ($product) {
+                $currentVolume += $product->getVolume() * $stock->getQuantity();
+            }
         }
         return $currentVolume;
     }
@@ -184,7 +192,23 @@ class ProductController
                 http_response_code(404);
                 return ['error' => 'Product not found'];
             }
-            return json_decode($this->serializer->serialize($product, 'json'), true);
+            return $product->jsonSerialize();
+        } catch (\Exception $e) {
+            error_log("Exception in getProductByBarcode: " . $e->getMessage());
+            throw $e;
+        }
+    }
+
+
+    public function getProductByID($id)
+    {
+        try {
+            $product = $this->entityManager->getRepository(ProductModel::class)->findOneBy(['id' => $id]);
+            if (!$product) {
+                http_response_code(404);
+                return ['error' => 'Product not found'];
+            }
+            return $product->jsonSerialize();
         } catch (\Exception $e) {
             error_log("Exception in getProductByBarcode: " . $e->getMessage());
             throw $e;
@@ -244,7 +268,11 @@ class ProductController
         try {
             $productRepository = $this->entityManager->getRepository(ProductModel::class);
             $products = $productRepository->findAll();
-            return json_decode($this->serializer->serialize($products, 'json'), true);
+            $data = [];
+            foreach ($products as $product) {
+                $data[] = $product->jsonSerialize();
+            }
+            return $data;
         } catch (\Exception $e) {
             error_log("Exception in getAllProducts: " . $e->getMessage());
             throw $e;

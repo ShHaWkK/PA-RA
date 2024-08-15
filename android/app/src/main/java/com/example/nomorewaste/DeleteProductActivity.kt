@@ -26,8 +26,7 @@ class DeleteProductActivity : AppCompatActivity() {
         editTextBarcode = findViewById(R.id.editTextBarcode)
         buttonDeleteProduct = findViewById(R.id.buttonDeleteProduct)
 
-        val retrofit = RetrofitClient.getClient()
-        apiService = retrofit.create(ApiService::class.java)
+        apiService = RetrofitClient.getClient().create(ApiService::class.java)
 
         buttonDeleteProduct.setOnClickListener {
             val barcode = editTextBarcode.text.toString().trim()

@@ -1,23 +1,21 @@
 <?php
 namespace Controller;
 
+use Entity\ProductModel;
 use Entity\WarehouseModel;
 use Doctrine\ORM\EntityManager;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
+use Symfony\Component\HttpFoundation\Response;
 
 class WarehouseController
 {
     private $entityManager;
-    private $serializer;
 
     public function __construct(EntityManager $entityManager)
     {
         $this->entityManager = $entityManager;
-        $normalizers = [new ObjectNormalizer()];
-        $encoders = [new JsonEncoder()];
-        $this->serializer = new Serializer($normalizers, $encoders);
     }
 
     public function processRequest($method, $uriParts, $input)
@@ -27,7 +25,11 @@ class WarehouseController
                 return $this->createWarehouse($input);
             case 'GET':
                 if (isset($uriParts[1])) {
-                    return $this->getWarehouse((int) $uriParts[1]);
+                    if (isset($uriParts[2])) {
+                        return $this->getWarehouseCapacity($uriParts[1]);
+                    } else {
+                        return $this->getWarehouse((int) $uriParts[1]);
+                    }
                 } else {
                     return $this->getAllWarehouses();
                 }
@@ -80,7 +82,7 @@ class WarehouseController
             http_response_code(400);
             return ['error' => 'Name, address, city, and country must be less than 255 characters'];
         }
-        
+
         $warehouse = new WarehouseModel();
         $warehouse->setName($data['name']);
         $warehouse->setAddress($data['address']);
@@ -104,7 +106,9 @@ class WarehouseController
             http_response_code(404);
             return ['error' => 'Warehouse not found'];
         }
-        return json_decode($this->serializer->serialize($warehouse, 'json'), true);
+
+        $data = $warehouse->jsonSerialize();
+        return $data;
     }
 
     public function updateWarehouse($id, $data)
@@ -158,6 +162,65 @@ class WarehouseController
     {
         $warehouseRepository = $this->entityManager->getRepository(WarehouseModel::class);
         $warehouses = $warehouseRepository->findAll();
-        return json_decode($this->serializer->serialize($warehouses, 'json'), true);
+
+        // Préparer les données en utilisant jsonSerialize()
+        $serializedWarehouses = [];
+        foreach ($warehouses as $warehouse) {
+            $serializedWarehouses[] = $warehouse->jsonSerialize();
+        }
+
+        return $serializedWarehouses;
     }
+
+    public function getWarehouseCapacity($id)
+    {
+        $warehouse = $this->entityManager->find(WarehouseModel::class, $id);
+        if (!$warehouse) {
+            http_response_code(404);
+            return ['error' => 'Warehouse not found'];
+        }
+
+        $stocks = $warehouse->getStocks();
+
+        // Calculate the occupied capacity
+        $occupiedCapacity = 0;
+        $totalCapacity = $warehouse->getCapacity();
+
+        foreach ($stocks as $stock) {
+            $productId = $stock->getProductId();
+            $product = $this->entityManager->find(ProductModel::class, $productId);
+
+            if ($product) {
+                $productVolume = $product->getVolume();
+                $stockQuantity = $stock->getQuantity();
+
+                // Debugging logs
+                error_log("Product ID: " . $productId);
+                error_log("Product Volume: " . $productVolume);
+                error_log("Stock Quantity: " . $stockQuantity);
+
+                // Ensure product volume and stock quantity are positive
+                if ($productVolume > 0 && $stockQuantity > 0) {
+                    $occupiedCapacity += $stockQuantity * $productVolume;
+                }
+            }
+        }
+
+        // Debugging logs
+        error_log("Total Capacity: " . $totalCapacity);
+        error_log("Occupied Capacity: " . $occupiedCapacity);
+
+        // Ensure occupied capacity doesn't exceed total capacity
+        $availableCapacity = $totalCapacity - $occupiedCapacity;
+        if ($availableCapacity < 0) {
+            $availableCapacity = 0;
+        }
+
+        return [
+            'total_capacity' => $totalCapacity,
+            'occupied_capacity' => $occupiedCapacity,
+            'available_capacity' => $availableCapacity
+        ];
+    }
+
 }

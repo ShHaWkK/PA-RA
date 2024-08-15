@@ -6,63 +6,36 @@
     android:padding="16dp">
 
     <EditText
-        android:id="@+id/editTextProductName"
+        android:id="@+id/searchBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="@string/product_name_hint"
+        android:hint="@string/search_hint"
         android:inputType="text"
-        android:autofillHints="name"/>
-
-    <EditText
-        android:id="@+id/editTextProductBarcode"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="@string/product_barcode_hint"
-        android:inputType="number"
-        android:autofillHints="postalCode"/>
-
-    <EditText
-        android:id="@+id/editTextQuantity"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="@string/product_quantity_hint"
-        android:inputType="number"
-        android:autofillHints="postalCode"/>
-
-    <EditText
-        android:id="@+id/editTextExpirationDate"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="@string/product_expiration_date_hint"
-        android:inputType="date"
-        android:autofillHints="postalCode"/>
-
-    <Spinner
-        android:id="@+id/spinnerWarehouse"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:minHeight="48dp"
         android:padding="8dp"/>
+    <Spinner
+        android:id="@+id/filterSpinner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:minHeight="48dp"
+        android:padding="8dp"/>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerViewProducts"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginTop="8dp"/>
 
     <Button
         android:id="@+id/buttonAddProduct"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/add_product"/>
+        android:text="@string/add_product"
+        android:layout_marginTop="8dp"
+        android:backgroundTint="@color/purple_500"
+        android:textColor="@android:color/white"/>
 
-    <Button
-        android:id="@+id/buttonUpdateProduct"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/update_product"/>
 
-    <Button
-        android:id="@+id/buttonDeleteProduct"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/delete_product"/>
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerViewProducts"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
 </LinearLayout>

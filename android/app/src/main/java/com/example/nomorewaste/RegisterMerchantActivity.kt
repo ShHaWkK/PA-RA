@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Button
 import android.widget.EditText
+import android.widget.RelativeLayout
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.nomorewaste.api.ApiService
@@ -24,6 +25,8 @@ class RegisterMerchantActivity : AppCompatActivity() {
     private lateinit var addressEditText: EditText
     private lateinit var contactInfoEditText: EditText
     private lateinit var registerButton: Button
+    private lateinit var loaderLayout: RelativeLayout
+
     private var apiService: ApiService? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -57,6 +60,7 @@ class RegisterMerchantActivity : AppCompatActivity() {
         val siret = siretEditText.text.toString()
         val address = addressEditText.text.toString()
         val contactInfo = contactInfoEditText.text.toString()
+
 
         if (firstName.isEmpty() || lastName.isEmpty() || email.isEmpty() || phoneNumber.isEmpty() || password.isEmpty() || companyName.isEmpty() || siret.isEmpty() || address.isEmpty() || contactInfo.isEmpty()) {
             Toast.makeText(this, "Tous les champs sont obligatoires", Toast.LENGTH_SHORT).show()

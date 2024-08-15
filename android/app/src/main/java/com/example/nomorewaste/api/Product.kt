@@ -9,7 +9,8 @@ data class Product(
     @SerializedName("volume") val volume: Float,
     @SerializedName("warehouse_id") val warehouseId: Int,
     @SerializedName("scanned") val scanned: Boolean = false
-) {
+)
+ {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is Product) return false
