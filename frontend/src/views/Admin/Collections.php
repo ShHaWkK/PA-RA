@@ -19,9 +19,28 @@
         <h1>Tableau de Bord des Collectes</h1>
 
 
-        <label for="start">Collection date:</label>
-        <input type="date" id="collectionDate" name="collection-date"/>
-        <button id="allCollectionDates" > Toutes les dates </button>
+        <div class="row">
+            <label for="collectionDate">Collection date:</label>
+            <input type="date" id="collectionDate" name="collection-date"/>
+            <button id="allCollectionDates" > Toutes les dates </button>
+        </div>
+
+        <div class="row">
+            <label for="completionSelector">Completion:</label>
+
+            <select name="completion" id="completionSelector">
+                <option value="">All</option>
+                <option value="true">Completed</option>
+                <option value="false">Ongoing</option>
+            </select>
+        </div>
+
+        <div class="row">
+            <button class="add-button" id="addCollectionButton"> Ajouter </button>
+            <button class="delete-button" id="deleteCollectionButton"> Supprimer </button>
+            <button class="modify-button" id="modifyCollectionButton"> Modifier </button>
+        </div>
+
         <!-- Tableau des Collectes -->
         <div class="collection-table">
             <table>

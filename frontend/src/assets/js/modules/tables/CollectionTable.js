@@ -1,8 +1,8 @@
-import { getAllCollections, getCollectionsByDate } from '/assets/js/api/Collections.js';
+import { getCollectionsByDateAndCompletion, getAllCollections, getCollectionsByDate } from '/assets/js/api/Collections.js';
 import { populateVolunteerDetailsInModal, populateVehicleDetailsInModal, populateCollectedProductsModal } from "../modals/CollectionModals.js";
 import { formatDateToFrench } from "../FormatDate.js";
 
-export async function populateCollectionTable(date) {
+export async function populateCollectionTable(date, completion) {
     // Afficher le loader
     document.getElementById('loadingBodyGeneral').classList.remove('hidden');
 
@@ -25,7 +25,7 @@ export async function populateCollectionTable(date) {
     const headerRow = document.createElement('tr');
 
     // Modifier les en-têtes de colonnes (sans ID)
-    const headers = ['', 'Affected driver', 'Affected vehicle', 'Collected Products', 'Collection Date', 'Created At', 'Updated At'];
+    const headers = ['', 'Affected driver', 'Affected vehicle', 'Collected Products', 'Collection Date', 'Completion', 'Created At', 'Updated At'];
     headers.forEach(headerText => {
         const th = document.createElement('th');
         th.textContent = headerText;
@@ -41,14 +41,19 @@ export async function populateCollectionTable(date) {
     try {
         let collections;
 
-        // Vérifier si une date valide est fournie (non vide et non null)
-        if (date && date.trim() !== "") {
-            console.log("date",date);
-            console.log("collectionByDate");
+        // Vérifier si les paramètres sont fournis
+        if (date && date.trim() !== "" && completion !== undefined) {
+            console.log("date", date);
+            console.log("completion", completion);
+            collections = await getCollectionsByDateAndCompletion(date, completion);
+        } else if (date && date.trim() !== "") {
+            console.log("date", date);
             collections = await getCollectionsByDate(date);
+        } else if (completion !== undefined) {
+            console.log("completion", completion);
+            collections = await getCollectionsByCompletion(completion);
         } else {
-            console.log("date",date);
-            console.log("collectionByDate");
+            console.log("No filters applied");
             collections = await getAllCollections();
         }
 
@@ -117,6 +122,9 @@ export async function populateCollectionTable(date) {
             const collectionDateCell = document.createElement('td');
             collectionDateCell.textContent = formatDateToFrench(new Date(collection.collection_date).getTime());
 
+            const completionCell = document.createElement('td');
+            completionCell.textContent = collection.is_completed ? 'Completed' : 'Ongoing';
+
             const createdAtCell = document.createElement('td');
             createdAtCell.textContent = collection.created_at ? formatDateToFrench(new Date(collection.created_at).getTime()) : 'N/A';
 
@@ -129,6 +137,7 @@ export async function populateCollectionTable(date) {
             row.appendChild(vehicleCell);
             row.appendChild(productsCell);
             row.appendChild(collectionDateCell);
+            row.appendChild(completionCell);
             row.appendChild(createdAtCell);
             row.appendChild(updatedAtCell);
 

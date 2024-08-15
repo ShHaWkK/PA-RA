@@ -134,4 +134,32 @@ async function getProductsFromCollection(collectionId){
     }
 }
 
-export { createCollection, getCollectionByID, updateCollection, deleteCollection, getAllCollections, getProductsFromCollection, getCollectionsByDate };
+async function getCollectionsByDateAndCompletion(date = null, completed) {
+    try {
+        // Construire l'URL avec les paramètres requis
+        let url = apiEndpoint + '/collections?completed=' + completed;
+
+        // Ajouter la date au paramètre si elle est fournie
+        if (date) {
+            url += '&date=' + encodeURIComponent(date);
+        }
+
+        const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to get collections by date and completion');
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error('Error getting collections by date and completion:', error.message);
+        throw error;
+    }
+}
+
+export { createCollection, getCollectionByID, updateCollection, deleteCollection, getAllCollections, getProductsFromCollection, getCollectionsByDate, getCollectionsByDateAndCompletion};

@@ -26,10 +26,20 @@ class CollectionController
                 case 'POST':
                     return $this->createCollection($input);
                 case 'GET':
-                    // Vérifier si un paramètre "date" est passé dans la requête
-                    if (isset($_GET['date'])) {
-                        $date = $_GET['date'];
-                        return $this->getCollectionsByDate($date);
+                    // Vérifier si des paramètres "completed" et éventuellement "date" sont passés dans la requête
+                    if (isset($_GET['completed'])) {
+                        // Convertir le paramètre "completed" en booléen
+                        $completed = filter_var($_GET['completed'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+                        if ($completed === null) {
+                            http_response_code(400);
+                            return ['error' => 'Invalid completed status'];
+                        }
+
+                        // Récupérer la date si elle est fournie
+                        $date = $_GET['date'] ?? null;
+
+                        // Appeler la fonction pour récupérer les collections par date et complétion
+                        return $this->getCollectionsByDateAndCompletion($date, $completed);
                     }
 
                     if (isset($uriParts[1])) {
@@ -39,7 +49,6 @@ class CollectionController
                             } elseif ($uriParts[2] === 'by-date') {
                                 return $this->getCollectionsByDate($uriParts[1]);
                             } elseif ($uriParts[2] === 'by-completion') {
-                                // Convertir l'argument en booléen de manière explicite
                                 if ($uriParts[1] === 'true') {
                                     $completed = true;
                                 } elseif ($uriParts[1] === 'false') {
@@ -426,6 +435,37 @@ class CollectionController
             return $serializedCollections;
         } catch (\Exception $e) {
             error_log("Exception in getCollectionsByCompletion: " . $e->getMessage());
+            throw $e;
+        }
+    }
+
+    private function getCollectionsByDateAndCompletion(?string $date, bool $completed)
+    {
+        try {
+            $collectionRepository = $this->entityManager->getRepository(CollectionModel::class);
+            $queryBuilder = $collectionRepository->createQueryBuilder('c')
+                ->where('c.is_completed = :completed')
+                ->setParameter('completed', $completed);
+
+            // Si la date est fournie, ajoutez le filtre de date
+            if ($date !== null) {
+                $startOfDay = new \DateTime($date . ' 00:00:00');
+                $endOfDay = new \DateTime($date . ' 23:59:59');
+                $queryBuilder->andWhere('c.collection_date >= :start')
+                    ->andWhere('c.collection_date <= :end')
+                    ->setParameter('start', $startOfDay)
+                    ->setParameter('end', $endOfDay);
+            }
+
+            // Exécutez la requête et récupérez les résultats
+            $collections = $queryBuilder->getQuery()->getResult();
+
+            // Retournez les collections en utilisant jsonSerialize
+            return array_map(function ($collection) {
+                return $collection->jsonSerialize();
+            }, $collections);
+        } catch (\Exception $e) {
+            error_log("Exception in getCollectionsByDateAndCompletion: " . $e->getMessage());
             throw $e;
         }
     }

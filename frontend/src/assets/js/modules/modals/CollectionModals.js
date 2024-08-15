@@ -206,7 +206,7 @@ export async function populateCollectedProductsModal(CollectionID) {
 
         const modalContent = document.getElementById('modalBodyCollectedProductsDetails');
         if (modalContent) {
-            modalContent.textContent = 'Failed to load products.';
+            modalContent.textContent = 'No products affected to this collection.';
         }
 
     } finally {
