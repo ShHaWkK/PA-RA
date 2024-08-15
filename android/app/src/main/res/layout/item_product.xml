@@ -1,31 +1,22 @@
-<?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- item_product.xml -->
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
+    android:orientation="horizontal"
     android:padding="8dp">
 
     <TextView
         android:id="@+id/productName"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Nom du produit" />
+        android:layout_weight="1"
+        android:text="Product Name"
+        android:textSize="16sp"
+        android:textColor="#000000"/>
 
-    <TextView
-        android:id="@+id/productBarcode"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Code-barres" />
-
-    <TextView
-        android:id="@+id/productExpirationDate"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Date de péremption" />
-
-    <TextView
-        android:id="@+id/productQuantity"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Quantité" />
+    <CheckBox
+        android:id="@+id/checkbox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
 </LinearLayout>

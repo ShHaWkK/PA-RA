@@ -1,4 +1,3 @@
-// ProductManagementActivity.kt
 package com.example.nomorewaste
 
 import android.os.Bundle

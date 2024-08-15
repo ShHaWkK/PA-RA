@@ -13,7 +13,7 @@ class ProductAdapter(private var productList: List<Product>) : RecyclerView.Adap
     private val selectedProducts = mutableSetOf<Product>()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ProductViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_products, parent, false)
+        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_product, parent, false)
         return ProductViewHolder(view)
     }
 
@@ -36,7 +36,6 @@ class ProductAdapter(private var productList: List<Product>) : RecyclerView.Adap
         private val checkBox: CheckBox = itemView.findViewById(R.id.checkbox)
 
         fun bind(product: Product) {
-            // Ensure the product has a valid name and barcode before proceeding
             if (!product.name.isNullOrBlank() && !product.barcode.isNullOrBlank()) {
                 productName.text = "Produit: ${product.name} - Quantité: ${product.volume} g"
                 checkBox.isChecked = selectedProducts.contains(product)
@@ -49,13 +48,9 @@ class ProductAdapter(private var productList: List<Product>) : RecyclerView.Adap
                     }
                 }
             } else {
-                // Handle products with missing name or barcode
                 productName.text = "Produit inconnu"
                 checkBox.isEnabled = false
             }
         }
     }
-
-
-
 }

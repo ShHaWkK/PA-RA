@@ -1,5 +1,5 @@
-<?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
@@ -9,51 +9,43 @@
         android:id="@+id/editTextProductName"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Nom du produit"
-        android:minHeight="48dp"
-        android:padding="12dp"
-        android:textSize="16sp" />
+        android:hint="@string/product_name_hint"
+        android:inputType="text"
+        android:autofillHints="name"/>
 
     <EditText
         android:id="@+id/editTextProductBarcode"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Code-barres du produit"
-        android:minHeight="48dp"
-        android:padding="12dp"
-        android:textSize="16sp" />
-
-    <EditText
-        android:id="@+id/editTextQuantity"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Quantité"
-        android:minHeight="48dp"
-        android:padding="12dp"
-        android:textSize="16sp" />
+        android:hint="@string/product_barcode_hint"
+        android:inputType="number"
+        android:autofillHints="postalCode"/>
 
     <EditText
         android:id="@+id/editTextExpirationDate"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Date de péremption (YYYY-MM-DD)"
-        android:minHeight="48dp"
-        android:padding="12dp"
-        android:textSize="16sp" />
+        android:hint="@string/product_expiration_date_hint"
+        android:inputType="date"
+        android:autofillHints="postalCode"/>
+
+    <EditText
+        android:id="@+id/editTextVolume"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/product_volume_hint"
+        android:inputType="number"
+        android:autofillHints="postalCode"/>
 
     <Spinner
         android:id="@+id/spinnerWarehouse"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:minHeight="48dp"
-        android:padding="12dp" />
+        android:padding="8dp"/>
 
     <Button
         android:id="@+id/buttonAddProduct"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Ajouter le produit"
-        android:padding="16dp"
-        android:textSize="18sp"
-        android:layout_marginTop="16dp" />
+        android:text="@string/add_product"/>
 </LinearLayout>

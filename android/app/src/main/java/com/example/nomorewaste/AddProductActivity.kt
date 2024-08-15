@@ -2,12 +2,7 @@ package com.example.nomorewaste
 
 import android.os.Bundle
 import android.view.View
-import android.widget.AdapterView
-import android.widget.ArrayAdapter
-import android.widget.Button
-import android.widget.EditText
-import android.widget.Spinner
-import android.widget.Toast
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import com.example.nomorewaste.api.ApiService
 import com.example.nomorewaste.api.Product
