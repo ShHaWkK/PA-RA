@@ -22,5 +22,10 @@ document.addEventListener('DOMContentLoaded',
             console.log('Selected Date:', selectedDate);
             populateCollectionTable(selectedDate);
         });
+        
+        // Afficher toutes les collectes peu importe la date
+        document.getElementById('allCollectionDates').addEventListener('click', function (){
+            populateCollectionTable();
+        })
         populateCollectionTable();
     });

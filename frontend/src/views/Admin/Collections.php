@@ -21,6 +21,7 @@
 
         <label for="start">Collection date:</label>
         <input type="date" id="collectionDate" name="collection-date"/>
+        <button id="allCollectionDates" > Toutes les dates </button>
         <!-- Tableau des Collectes -->
         <div class="collection-table">
             <table>

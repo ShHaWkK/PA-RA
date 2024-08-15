@@ -117,6 +117,7 @@ CREATE TABLE collections (
                              volunteer_id INT NOT NULL,
                              vehicle_id INT NOT NULL,
                              collection_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                             is_completed BOOLEAN NOT NULL DEFAULT FALSE,
                              created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                              updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                              FOREIGN KEY (volunteer_id) REFERENCES users(id),

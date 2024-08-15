@@ -38,6 +38,17 @@ class CollectionController
                                 return $this->getProductsFromCollection((int) $uriParts[1]);
                             } elseif ($uriParts[2] === 'by-date') {
                                 return $this->getCollectionsByDate($uriParts[1]);
+                            } elseif ($uriParts[2] === 'by-completion') {
+                                // Convertir l'argument en booléen de manière explicite
+                                if ($uriParts[1] === 'true') {
+                                    $completed = true;
+                                } elseif ($uriParts[1] === 'false') {
+                                    $completed = false;
+                                } else {
+                                    http_response_code(400);
+                                    return ['error' => 'Invalid completion status'];
+                                }
+                                return $this->getCollectionsByCompletion($completed);
                             } else {
                                 http_response_code(400);
                                 return ['error' => 'Invalid endpoint'];
@@ -167,6 +178,10 @@ class CollectionController
                 $collection->setVehicle($vehicle);
             }
             $collection->setUpdatedAt(new \DateTime("now"));
+
+            if (isset($data['is_completed'])){
+                $collection->setIsCompleted($data['vehicle_id']);
+            }
 
             $this->entityManager->flush();
 
@@ -384,6 +399,33 @@ class CollectionController
             }, $collections);
         } catch (\Exception $e) {
             error_log("Exception in getCollectionsByDate: " . $e->getMessage());
+            throw $e;
+        }
+    }
+
+    private function getCollectionsByCompletion(bool $completed)
+    {
+        try {
+            $collectionRepository = $this->entityManager->getRepository(CollectionModel::class);
+            $collections = $collectionRepository->createQueryBuilder('c')
+                ->where('c.is_completed = :completed')
+                ->setParameter('completed', $completed)
+                ->getQuery()
+                ->getResult();
+
+            if (empty($collections)) {
+                http_response_code(404);
+                return ['error' => 'No collections found for the specified completion status'];
+            }
+
+            $serializedCollections = [];
+            foreach ($collections as $collection) {
+                $serializedCollections[] = $collection->jsonSerialize();
+            }
+
+            return $serializedCollections;
+        } catch (\Exception $e) {
+            error_log("Exception in getCollectionsByCompletion: " . $e->getMessage());
             throw $e;
         }
     }

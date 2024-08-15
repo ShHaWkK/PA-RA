@@ -20,6 +20,9 @@ class CollectionModel implements \JsonSerializable
     #[ORM\JoinColumn(name: "vehicle_id", referencedColumnName: "id", nullable: false)]
     private $vehicle;
 
+    #[ORM\Column(type: "boolean", options: ["default" => false])]
+    private $is_completed = false;
+
     #[ORM\Column(type: "datetime", options: ["default" => "CURRENT_TIMESTAMP"])]
     private $collection_date;
 
@@ -63,9 +66,20 @@ class CollectionModel implements \JsonSerializable
         return $this->collection_date;
     }
 
+    public function getIsCompleted(): bool
+    {
+        return $this->is_completed;
+    }
+
     public function setCollectionDate(\DateTimeInterface $collection_date): self
     {
         $this->collection_date = $collection_date;
+        return $this;
+    }
+
+    public function setIsCompleted(bool $is_completed): self
+    {
+        $this->is_completed = $is_completed;
         return $this;
     }
 
@@ -100,6 +114,7 @@ class CollectionModel implements \JsonSerializable
             'vehicle_id' => $this->vehicle ? $this->vehicle->getId() : null,
             'vehicle_license_plate' => $this->vehicle ? $this->vehicle->getLicensePlate() : null,
             'collection_date' => $this->collection_date ? $this->collection_date->format('Y-m-d H:i:s') : null,
+            'is_completed' =>  $this->getIsCompleted(),
             'created_at' => $this->created_at ? $this->created_at->format('Y-m-d H:i:s') : null,
             'updated_at' => $this->updated_at ? $this->updated_at->format('Y-m-d H:i:s') : null,
         ];
