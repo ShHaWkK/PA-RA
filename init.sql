@@ -94,6 +94,8 @@ CREATE TABLE product_notifications (
                                        notified_quantity INT NOT NULL,
                                        address VARCHAR(255) NOT NULL,
                                        wished_collection_date TIMESTAMP NOT NULL,
+                                       is_assigned BOOLEAN DEFAULT FALSE,
+                                       is_collected BOOLEAN DEFAULT FALSE,
                                        notified_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                                        FOREIGN KEY (company_id) REFERENCES companies(id) ON DELETE CASCADE,
                                        FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE

@@ -144,17 +144,17 @@ class ProductController
             $this->entityManager->persist($product);
             $this->entityManager->flush();
 
-            $stock = new StockModel();
-            $stock->setProductId($product->getId());
-            $stock->setQuantity(1);
-            $stock->setAvailability('available');
-            $stock->setWarehouseId($data['warehouse_id']);
-            $stock->setEntryDate(new \DateTime("now"));
-            $stock->setCreatedAt(new \DateTime("now"));
-            $stock->setUpdatedAt(new \DateTime("now"));
-
-            $this->entityManager->persist($stock);
-            $this->entityManager->flush();
+//            $stock = new StockModel();
+//            $stock->setProductId($product->getId());
+//            $stock->setQuantity(1);
+//            $stock->setAvailability('available');
+//            $stock->setWarehouseId($data['warehouse_id']);
+//            $stock->setEntryDate(new \DateTime("now"));
+//            $stock->setCreatedAt(new \DateTime("now"));
+//            $stock->setUpdatedAt(new \DateTime("now"));
+//
+//            $this->entityManager->persist($stock);
+//            $this->entityManager->flush();
 
             return ['id' => $product->getId(), 'message' => 'Product created successfully'];
         } catch (\Exception $e) {

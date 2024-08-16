@@ -28,6 +28,12 @@ class ProductNotificationModel
     #[ORM\JoinColumn(name: "product_id", referencedColumnName: "id")]
     private $product;
 
+    #[ORM\Column(type: "boolean", options: ["default" => false])]
+    private $is_assigned = false;
+
+    #[ORM\Column(type: "boolean", options: ["default" => false])]
+    private $is_collected = false;
+
     #[ORM\Column(type: "integer")]
     private $notified_quantity;
 
@@ -53,6 +59,28 @@ class ProductNotificationModel
     public function setCompany(CompanyModel $company): self
     {
         $this->company = $company;
+        return $this;
+    }
+
+    public function getIsAssigned(): bool
+    {
+        return $this->is_assigned;
+    }
+
+    public function setIsAssigned(bool $is_assigned): self
+    {
+        $this->is_assigned = $is_assigned;
+        return $this;
+    }
+
+    public function getIsCollected(): bool
+    {
+        return $this->is_collected;
+    }
+
+    public function setIsCollected(bool $is_collected): self
+    {
+        $this->is_collected = $is_collected;
         return $this;
     }
 
@@ -148,6 +176,7 @@ class ProductNotificationModel
             'product_name' => $this->product ? $this->product->getName(): null,
             'notified_quantity' => $this->notified_quantity,
             'address' => $this->address,
+            'is_assigned' => $this->is_assigned,
             'wished_collection_date' => $this->wished_collection_date->format('Y-m-d H:i:s'),
             'notified_at' => $this->notified_at->format('Y-m-d H:i:s'),
         ];

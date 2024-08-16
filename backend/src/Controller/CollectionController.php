@@ -258,7 +258,7 @@ class CollectionController
             }
 
             foreach ($products as $data) {
-                if (!isset($data['notification_id']) || !isset($data['quantity_collected'])) {
+                if (!isset($data['notification_id']) ) {
                     http_response_code(400);
                     return ['error' => 'Missing required fields for product assignment'];
                 }
@@ -268,6 +268,7 @@ class CollectionController
                     http_response_code(404);
                     return ['error' => 'ProductNotification not found'];
                 }
+                $productNotification->setIsAssigned(true);
 
                 // Vérifier si l'association existe déjà
                 $existingAssociation = $this->entityManager->getRepository(CollectionProductModel::class)
@@ -285,7 +286,9 @@ class CollectionController
                 $collectionProduct = new CollectionProductModel();
                 $collectionProduct->setCollection($collection);
                 $collectionProduct->setNotification($productNotification);
-                $collectionProduct->setQuantityCollected($data['quantity_collected']);
+                if(isset($data['quantity_collected'])) {
+                    $collectionProduct->setQuantityCollected($data['quantity_collected']);
+                }
 
                 $this->entityManager->persist($collectionProduct);
             }
@@ -394,6 +397,7 @@ class CollectionController
                     http_response_code(404);
                     return ['error' => 'ProductNotification not found'];
                 }
+                $productNotification->setIsAssigned(false);
 
                 // Trouver et supprimer l'association
                 $collectionProduct = $this->entityManager->getRepository(CollectionProductModel::class)

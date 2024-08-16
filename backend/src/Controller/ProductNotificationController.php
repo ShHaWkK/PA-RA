@@ -31,7 +31,7 @@ class ProductNotificationController
                     if (isset($uriParts[1])) {
                         return $this->getProductNotification((int) $uriParts[1]);
                     } else {
-                        return $this->getAllProductNotifications($input);
+                        return $this->getAllProductNotifications($_GET);
                     }
                 case 'PUT':
                     if (isset($uriParts[1])) {
@@ -155,20 +155,37 @@ class ProductNotificationController
         try {
             $productNotificationRepository = $this->entityManager->getRepository(ProductNotificationModel::class);
 
-            $criteria = [];
+            // Création d'un QueryBuilder
+            $qb = $productNotificationRepository->createQueryBuilder('p');
+
+            // Ajout des conditions pour la date et l'adresse
             if (isset($queryParams['date'])) {
-                $criteria['wished_collection_date'] = new \DateTime($queryParams['date']);
+                $qb->andWhere('p.wished_collection_date = :date')
+                    ->setParameter('date', new \DateTime($queryParams['date']));
             }
             if (isset($queryParams['address'])) {
-                $criteria['address'] = $queryParams['address'];
+                $qb->andWhere('p.address = :address')
+                    ->setParameter('address', $queryParams['address']);
             }
 
-            $productNotifications = $productNotificationRepository->findBy($criteria);
+            // Vérification du champ 'is_assigned' dans les paramètres
+            if (isset($queryParams['is_assigned'])) {
+                $isAssigned = (bool)$queryParams['is_assigned'];
+                $qb->andWhere('p.is_assigned = :is_assigned')
+                    ->setParameter('is_assigned', $isAssigned);
+            }
+
+            // Exécution de la requête
+            $productNotifications = $qb->getQuery()->getResult();
+
+            // Sérialisation des résultats en JSON
             return json_decode($this->serializer->serialize($productNotifications, 'json'), true);
         } catch (\Exception $e) {
+            // Journalisation des erreurs
             error_log("Exception in getAllProductNotifications: " . $e->getMessage());
             throw $e;
         }
     }
+
 }
 ?>
