@@ -1,3 +1,4 @@
+<!-- res/layout/activity_product_management.xml -->
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
@@ -5,14 +6,6 @@
     android:orientation="vertical"
     android:padding="16dp">
 
-    <EditText
-        android:id="@+id/searchBar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="@string/search_hint"
-        android:inputType="text"
-        android:minHeight="48dp"
-        android:padding="8dp"/>
     <Spinner
         android:id="@+id/filterSpinner"
         android:layout_width="match_parent"
@@ -20,6 +13,25 @@
         android:layout_marginTop="8dp"
         android:minHeight="48dp"
         android:padding="8dp"/>
+
+    <!-- ProgressBar to show the warehouse capacity -->
+    <ProgressBar
+        android:id="@+id/progressBarCapacity"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:progressDrawable="@drawable/progress_bar_states"
+        android:indeterminate="false"
+        android:progress="0"
+        style="?android:attr/progressBarStyleHorizontal" />
+
+    <TextView
+        android:id="@+id/warehouseCapacityTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:text="Capacité de l'Entrepôt : 0%"
+        android:textSize="16sp"/>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewProducts"
@@ -32,10 +44,9 @@
         android:id="@+id/buttonAddProduct"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/add_product"
+        android:text="Ajouter le Produit"
         android:layout_marginTop="8dp"
         android:backgroundTint="@color/purple_500"
         android:textColor="@android:color/white"/>
-
 
 </LinearLayout>

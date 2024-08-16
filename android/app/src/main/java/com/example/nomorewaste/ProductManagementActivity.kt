@@ -1,13 +1,17 @@
+// src/main/java/com/example/nomorewaste/ProductManagementActivity.kt
 package com.example.nomorewaste
 
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
 import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.nomorewaste.api.ApiService
+import com.example.nomorewaste.api.CapacityData
 import com.example.nomorewaste.api.RetrofitClient
 import com.example.nomorewaste.api.Stock
 import com.example.nomorewaste.api.StockAdapter
@@ -22,7 +26,9 @@ class ProductManagementActivity : AppCompatActivity() {
     private lateinit var recyclerViewStocks: RecyclerView
     private lateinit var apiService: ApiService
     private lateinit var stockAdapter: StockAdapter
-    private lateinit var warehouseMap: Map<String, Int>
+    private lateinit var warehouseMap: Map<String, Warehouse>
+    private lateinit var warehouseCapacityTextView: TextView
+    private lateinit var progressBarCapacity: ProgressBar
     private lateinit var buttonAddProduct: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -31,6 +37,8 @@ class ProductManagementActivity : AppCompatActivity() {
 
         filterSpinner = findViewById(R.id.filterSpinner)
         recyclerViewStocks = findViewById(R.id.recyclerViewProducts)
+        warehouseCapacityTextView = findViewById(R.id.warehouseCapacityTextView)
+        progressBarCapacity = findViewById(R.id.progressBarCapacity)
         buttonAddProduct = findViewById(R.id.buttonAddProduct)
 
         recyclerViewStocks.layoutManager = LinearLayoutManager(this)
@@ -44,7 +52,11 @@ class ProductManagementActivity : AppCompatActivity() {
         filterSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
                 val selectedWarehouseName = parent.getItemAtPosition(position) as String
-                loadStocksByWarehouse(selectedWarehouseName)
+                val selectedWarehouse = warehouseMap[selectedWarehouseName]
+                if (selectedWarehouse != null) {
+                    loadStocksByWarehouse(selectedWarehouse.id)
+                    updateCapacityProgress(selectedWarehouse)
+                }
             }
 
             override fun onNothingSelected(parent: AdapterView<*>) {}
@@ -60,7 +72,7 @@ class ProductManagementActivity : AppCompatActivity() {
             override fun onResponse(call: Call<List<Warehouse>>, response: Response<List<Warehouse>>) {
                 if (response.isSuccessful) {
                     val warehouses = response.body() ?: listOf()
-                    warehouseMap = warehouses.associate { it.name to it.id }
+                    warehouseMap = warehouses.associateBy { it.name }
                     val warehouseNames = warehouseMap.keys.toList()
                     val adapter = ArrayAdapter(this@ProductManagementActivity, android.R.layout.simple_spinner_item, warehouseNames)
                     adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
@@ -76,30 +88,64 @@ class ProductManagementActivity : AppCompatActivity() {
         })
     }
 
-    private fun loadStocksByWarehouse(warehouseName: String) {
-        val warehouseId = warehouseMap[warehouseName]
-        if (warehouseId != null) {
-            apiService.getStocksByWarehouse(warehouseId).enqueue(object : Callback<List<Stock>> {
-                override fun onResponse(call: Call<List<Stock>>, response: Response<List<Stock>>) {
-                    if (response.isSuccessful) {
-                        val stocks = response.body() ?: listOf()
-                        stockAdapter.updateData(stocks)
-                    } else {
-                        Toast.makeText(this@ProductManagementActivity, "Erreur de chargement des stocks", Toast.LENGTH_SHORT).show()
-                    }
+    private fun loadStocksByWarehouse(warehouseId: Int) {
+        apiService.getStocksByWarehouse(warehouseId).enqueue(object : Callback<List<Stock>> {
+            override fun onResponse(call: Call<List<Stock>>, response: Response<List<Stock>>) {
+                if (response.isSuccessful) {
+                    val stocks = response.body() ?: listOf()
+                    stockAdapter.updateData(stocks)
+                } else {
+                    Toast.makeText(this@ProductManagementActivity, "Erreur de chargement des stocks", Toast.LENGTH_SHORT).show()
                 }
+            }
 
-                override fun onFailure(call: Call<List<Stock>>, t: Throwable) {
-                    Toast.makeText(this@ProductManagementActivity, "Échec de la connexion : ${t.message}", Toast.LENGTH_SHORT).show()
+            override fun onFailure(call: Call<List<Stock>>, t: Throwable) {
+                Toast.makeText(this@ProductManagementActivity, "Échec de la connexion : ${t.message}", Toast.LENGTH_SHORT).show()
+            }
+        })
+    }
+
+    private fun updateCapacityProgress(warehouse: Warehouse) {
+        apiService.getWarehouseCapacity(warehouse.id).enqueue(object : Callback<CapacityData> {
+            override fun onResponse(call: Call<CapacityData>, response: Response<CapacityData>) {
+                if (response.isSuccessful) {
+                    val capacityData = response.body()
+                    if (capacityData != null) {
+                        try {
+                            val percentage = (capacityData.occupiedCapacity.toFloat() / capacityData.totalCapacity.toFloat()) * 100
+                            progressBarCapacity.progress = percentage.toInt()
+                            progressBarCapacity.visibility = View.VISIBLE
+                            warehouseCapacityTextView.text = "Warehouse Capacity: ${"%.2f".format(percentage)}%"
+                            updateProgressBarColor(percentage)
+                        } catch (e: NumberFormatException) {
+                            e.printStackTrace()
+                            Toast.makeText(this@ProductManagementActivity, "Invalid capacity data received", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                } else {
+                    Toast.makeText(this@ProductManagementActivity, "Erreur de chargement de la capacité", Toast.LENGTH_SHORT).show()
                 }
-            })
-        } else {
-            Toast.makeText(this, "Entrepôt non trouvé", Toast.LENGTH_SHORT).show()
+            }
+
+            override fun onFailure(call: Call<CapacityData>, t: Throwable) {
+                Toast.makeText(this@ProductManagementActivity, "Échec de la connexion : ${t.message}", Toast.LENGTH_SHORT).show()
+            }
+        })
+    }
+
+
+    private fun updateProgressBarColor(percentage: Float) {
+        val color = when {
+            percentage < 50 -> ContextCompat.getColor(this, R.color.green)
+            percentage < 75 -> ContextCompat.getColor(this, R.color.yellow)
+            percentage < 90 -> ContextCompat.getColor(this, R.color.orange)
+            percentage < 100 -> ContextCompat.getColor(this, R.color.red)
+            else -> ContextCompat.getColor(this, R.color.dark_red)
         }
+        progressBarCapacity.progressDrawable.setColorFilter(color, android.graphics.PorterDuff.Mode.SRC_IN)
     }
 
     private fun onAddProductClicked() {
-        // Lancer l'activité pour ajouter un nouveau produit
         val intent = Intent(this, AddProductActivity::class.java)
         startActivity(intent)
     }

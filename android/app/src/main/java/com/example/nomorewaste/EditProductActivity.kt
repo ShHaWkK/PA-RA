@@ -49,14 +49,13 @@ class EditProductActivity : AppCompatActivity() {
 
         saveButton.setOnClickListener {
             val name = nameEditText.text.toString().trim()
-            val barcode = barcodeEditText.text.toString().trim()
             val expirationDate = expirationDateEditText.text.toString().trim()
             val volume = volumeEditText.text.toString().trim().toFloatOrNull()
 
-            if (name.isEmpty() || barcode.isEmpty() || expirationDate.isEmpty() || volume == null || selectedWarehouseId == null) {
+            if (name.isEmpty() || expirationDate.isEmpty() || volume == null || selectedWarehouseId == null) {
                 Toast.makeText(this, "Tous les champs sont requis", Toast.LENGTH_SHORT).show()
             } else {
-                val updatedProduct = Product(name, barcode, expirationDate, volume, selectedWarehouseId!!)
+                val updatedProduct = Product(name, productBarcode, expirationDate, volume, selectedWarehouseId!!)
                 updateProduct(productBarcode, updatedProduct)
             }
         }
@@ -117,7 +116,7 @@ class EditProductActivity : AppCompatActivity() {
 
     private fun populateProductDetails(product: Product) {
         nameEditText.setText(product.name)
-        barcodeEditText.setText(product.barcode)
+        barcodeEditText.setText(product.barcode)  // Champ désactivé pour l'édition
         expirationDateEditText.setText(product.expirationDate)
         volumeEditText.setText(product.volume.toString())
 
