@@ -1,7 +1,15 @@
-import {getUser} from "../../api/Users.js";
-import {getVehicleByID} from "../../api/Vehicle.js";
-import {getProductsFromCollection} from "../../api/Collections.js"
+import {getAllUsers, getUser} from "../../api/Users.js";
+import {getAllVehicles, getVehicleByID} from "../../api/Vehicle.js";
+import {
+    getCollectionByID,
+    getProductsFromCollection,
+    removeProductsFromCollection,
+    updateCollection
+} from "../../api/Collections.js"
 import {formatDateToFrench} from "../FormatDate.js";
+import {populateCollectionTable} from "../tables/CollectionTable.js";
+
+let selectedCollectionId;
 
 export async function populateVolunteerDetailsInModal(volunteerID) {
     console.log("we are here", volunteerID);
@@ -141,7 +149,9 @@ export async function populateVehicleDetailsInModal(vehicleID) {
     }
 }
 
-export async function populateCollectedProductsModal(CollectionID) {
+export async function populateCollectedProductsModal(collectionID) {
+    selectedCollectionId = collectionID;
+
     // Afficher le loader
     document.getElementById('loadingCollectedProductsDetails').classList.remove('hidden');
 
@@ -151,7 +161,7 @@ export async function populateCollectedProductsModal(CollectionID) {
 
     try {
         // Récupérer les produits de la collection
-        const products = await getProductsFromCollection(CollectionID);
+        const products = await getProductsFromCollection(collectionID);
 
         console.log(products);
 
@@ -179,17 +189,26 @@ export async function populateCollectedProductsModal(CollectionID) {
             const productItem = document.createElement('li');
             productItem.classList.add('product-item'); // Ajout d'une classe pour le style, si nécessaire
 
+            // Créer un radio-button
+            const radioInput = document.createElement('input');
+            radioInput.type = 'radio';
+            radioInput.name = 'productSelection'; // Tous les radio-buttons partagent le même nom pour permettre une sélection unique
+            radioInput.value = element.product.id; // Attribuer l'ID du produit comme valeur du radio-button
+
             // Contenu du produit
-            const productInfo = `
+            const productInfo = document.createElement('span');
+            productInfo.innerHTML = `
                 <strong>Product Name:</strong> ${element.product.name} <br>
                 <strong>Barcode:</strong> ${element.product.barcode} <br>
                 <strong>Expiration Date:</strong> ${formatDateToFrench(new Date(element.product.expiration_date).getTime())} <br>
                 <strong>Volume:</strong> ${element.product.volume} L <br>
                 <strong>Quantity Collected:</strong> ${element.quantity_collected} <br>
                 <strong>Scanned:</strong> ${element.product.scanned ? 'Yes' : 'No'}
-                <br>
             `;
-            productItem.innerHTML = productInfo;
+
+            // Ajouter le radio-button et les informations du produit à l'élément de la liste
+            productItem.appendChild(radioInput);
+            productItem.appendChild(productInfo);
 
             // Ajouter l'élément à la liste
             productList.appendChild(productItem);
@@ -212,6 +231,157 @@ export async function populateCollectedProductsModal(CollectionID) {
     } finally {
         // Cacher le loader
         document.getElementById('loadingCollectedProductsDetails').classList.add('hidden');
+    }
+}
+
+async function removeProducts() {
+    const selectedProductCheckboxes = document.querySelectorAll('input[name="productSelection"]:checked');
+    const selectedProductIds = Array.from(selectedProductCheckboxes).map(checkbox => parseInt(checkbox.value, 10)); // Conversion en entier
+
+    if (!selectedCollectionId) {
+        alert("Veuillez sélectionner une collection.");
+        return;
+    }
+
+    if (selectedProductIds.length === 0) {
+        alert("Veuillez sélectionner au moins un produit à supprimer.");
+        return;
+    }
+
+    // Afficher la boîte de confirmation
+    const isConfirmed = confirm("Êtes-vous sûr de vouloir supprimer ces produits de la collection ? Cette action est définitive.");
+
+    if (!isConfirmed) {
+        return;
+    }
+
+    try {
+        const response = await removeProductsFromCollection(selectedCollectionId, selectedProductIds);
+        if (response.error) {
+            alert(`Erreur: ${response.error}`);
+        } else {
+            alert("Produits retirés de la collection avec succès.");
+            await populateCollectedProductsModal();
+        }
+    } catch (error) {
+        console.error("Erreur lors de la suppression des produits:", error.message);
+        alert("Une erreur est survenue lors de la suppression des produits.");
+    }
+}
+
+// Fenêtre de modification de produit:
+async function populateModifyCollectionForm() {
+    const selectedRadio = document.querySelector('input[name="collectionSelection"]:checked');
+    const selectedCollectionId = selectedRadio ? selectedRadio.value : null;
+
+    try {
+        if (!selectedCollectionId) {
+            alert("Veuillez sélectionner une collection.");
+            return;
+        }
+
+        document.getElementById("editCollectionModal").style.display = "block";
+
+        // Masquer le formulaire et afficher le loader
+        document.getElementById('editCollectionForm').classList.add('hidden');
+        document.getElementById('loadingModifyCollection').classList.remove('hidden');
+
+        // Récupérer les données de la collecte
+        const collectionData = await getCollectionByID(selectedCollectionId);
+
+        // Peupler les sélecteurs (volunteers et vehicles)
+        await populateVolunteerSelector();
+        await populateVehicleSelector();
+
+        // Pré-remplir les champs du formulaire avec les données existantes de la collecte
+        document.getElementById('volunteerSelect').value = collectionData.volunteer_id || '';
+        document.getElementById('vehicleSelect').value = collectionData.vehicle_id || '';
+        document.getElementById('completionCheckbox').checked = collectionData.is_completed;
+
+        // Masquer le loader et afficher le formulaire
+        document.getElementById('loadingModifyCollection').classList.add('hidden');
+        document.getElementById('editCollectionForm').classList.remove('hidden');
+    } catch (error) {
+        console.error('Erreur lors du pré-remplissage du formulaire de modification de la collecte:', error);
+    }
+}
+
+async function populateVolunteerSelector() {
+    try {
+        const volunteerSelect = document.getElementById('volunteerSelect');
+        volunteerSelect.innerHTML = ''; // Vider les options existantes
+
+        const volunteers = await getAllUsers('volunteer','approved');
+
+        console.log("volunteers",volunteers);
+
+        volunteers.forEach(volunteer => {
+            const option = document.createElement('option');
+            option.value = volunteer.id;
+            option.textContent = `${volunteer.first_name} ${volunteer.last_name}`;
+            volunteerSelect.appendChild(option);
+        });
+    } catch (error) {
+        console.error('Erreur lors du peuplement du sélecteur de chauffeurs:', error);
+    }
+}
+
+async function populateVehicleSelector() {
+    try {
+        const vehicleSelect = document.getElementById('vehicleSelect');
+        vehicleSelect.innerHTML = ''; // Vider les options existantes
+
+        const vehicles = await getAllVehicles(); // Fonction pour récupérer les véhicules depuis l'API
+
+        console.log("vehicles",vehicles);
+
+        vehicles.forEach(vehicle => {
+            const option = document.createElement('option');
+            option.value = vehicle.id;
+            option.textContent = vehicle.licensePlate;
+            vehicleSelect.appendChild(option);
+        });
+    } catch (error) {
+        console.error('Erreur lors du peuplement du sélecteur de véhicules:', error);
+    }
+}
+
+async function modifyCollection(){
+    const selectedRadio = document.querySelector('input[name="collectionSelection"]:checked');
+    const selectedCollectionId = selectedRadio ? selectedRadio.value : null;
+    // Afficher le loader
+    document.getElementById('loadingModifyCollection').classList.remove('hidden');
+    document.getElementById('editCollectionForm').classList.add('hidden');
+
+
+    // Récupérer les valeurs des champs du formulaire
+    const collectionId = selectedCollectionId;
+    const volunteerId = document.getElementById('volunteerSelect').value;
+    const vehicleId = document.getElementById('vehicleSelect').value;
+    const isCompleted = document.getElementById('completionCheckbox').checked;
+
+    // Créer un objet contenant les données de la collecte
+    const collectionData = {
+        volunteer_id: volunteerId,
+        vehicle_id: vehicleId,
+        is_completed: isCompleted
+    };
+
+    try {
+        // Appeler la fonction pour mettre à jour la collecte avec les nouvelles données
+        const result = await updateCollection(collectionId, collectionData);
+
+        // Vérifier le résultat et agir en conséquence
+        if (result && result.message) {
+            alert(result.message);
+            document.getElementById('editCollectionModal').style.display = 'none';
+            await populateCollectionTable();
+        }
+    } catch (error) {
+        console.error('Erreur lors de la modification de la collecte:', error.message);
+        alert('Erreur lors de la modification de la collecte. Veuillez réessayer.');
+    } finally {
+        document.getElementById('loadingModifyCollection').classList.add('hidden');
     }
 }
 
@@ -239,4 +409,28 @@ document.addEventListener('DOMContentLoaded', async function() {
     productDetailsSpan.onclick = function() {
         productDetailsModal.style.display = "none";
     }
+
+    // Fenêtre modale de modification des collectes
+    const editCollectionModal = document.getElementById("editCollectionModal");
+    const editCollectionForm = document.getElementById('editCollectionForm');
+    const modifyCollectionButton = document.getElementById("modifyCollectionButton");
+    const closeEditModal = document.getElementById("closeEditModal");
+
+    modifyCollectionButton.addEventListener('click',function (){
+        populateModifyCollectionForm(selectedCollectionId);
+    })
+
+    closeEditModal.onclick = function() {
+        editCollectionModal.style.display = "none";
+    }
+
+    editCollectionForm.addEventListener('submit', function(event) {
+        event.preventDefault();
+        modifyCollection();
+    });
+
+    // Ajouter l'event listener au bouton de suppression de produit
+    document.getElementById('deleteProductInModalButton').addEventListener('click',function (){
+        removeProducts();
+    })
 });

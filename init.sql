@@ -128,7 +128,8 @@ CREATE TABLE collections (
 CREATE TABLE collection_products (
                                      collection_id INT NOT NULL,
                                      notification_id INT NOT NULL,
-                                     quantity_collected INT NOT NULL,
+                                     quantity_collected INT,
+                                     is_collected BOOLEAN NOT NULL DEFAULT FALSE,
                                      PRIMARY KEY (collection_id, notification_id),
                                      FOREIGN KEY (collection_id) REFERENCES collections(id) ON DELETE CASCADE,
                                      FOREIGN KEY (notification_id) REFERENCES product_notifications(id) ON DELETE CASCADE
@@ -471,9 +472,9 @@ INSERT INTO product_notifications (company_id, product_id, notified_quantity, ad
                                                                                                                    (2, 3, 150, '5 Boulevard Saint-Germain, 75005 Paris, France', '2024-08-14 12:00:00');
 
 INSERT INTO collection_products (collection_id, notification_id, quantity_collected) VALUES
-                                                                                                     (1, 1, 50),  -- Collecte 1 récupère 50 unités du Product A (notifié par Company 1)
-                                                                                                     (1, 2, 100), -- Collecte 1 récupère 100 unités du Product B (notifié par Company 1)
-                                                                                                     (2, 3, 75);  -- Collecte 2 récupère 75 unités du Product C (notifié par Company 2)
+                                                                                         (1, 1, 50),  -- Collecte 1 récupère 50 unités du Product A (notifié par Company 1)
+                                                                                         (1, 2, 100), -- Collecte 1 récupère 100 unités du Product B (notifié par Company 1)
+                                                                                         (2, 3, 75);  -- Collecte 2 récupère 75 unités du Product C (notifié par Company 2)
 
 -- Insertion des services proposés
 INSERT INTO services (name, description, schedule, capacity, status, location) VALUES 

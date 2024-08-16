@@ -70,6 +70,7 @@
         <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/VolunteerDetailsModal.php'); ?>
         <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/VehicleDetailsModal.php'); ?>
         <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/CollectedProductsModal.php'); ?>
+        <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/ModifyCollectionModal.php'); ?>
 
         <!-- Script pour gérer les interactions avec la page -->
         <script type="module" src="/assets/js/pages/AdminCollectionPage.js"></script>

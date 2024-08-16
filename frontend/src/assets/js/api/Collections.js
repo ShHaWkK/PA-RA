@@ -162,4 +162,27 @@ async function getCollectionsByDateAndCompletion(date = null, completed) {
     }
 }
 
-export { createCollection, getCollectionByID, updateCollection, deleteCollection, getAllCollections, getProductsFromCollection, getCollectionsByDate, getCollectionsByDateAndCompletion};
+async function removeProductsFromCollection(collectionId, productIds) {
+    const url = apiEndpoint + `/collections/${collectionId}/remove`;
+    const response = await fetch( url, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            products: productIds.map(id => ({ notification_id: id }))
+        })
+    });
+
+    console.log(JSON.stringify({
+        products: productIds.map(id => ({ notification_id: id }))
+    }));
+
+    if (!response.ok) {
+        throw new Error(`Erreur HTTP: ${response.status}`);
+    }
+
+    return response.json();
+}
+
+export { createCollection, getCollectionByID, updateCollection, deleteCollection, getAllCollections, getProductsFromCollection, getCollectionsByDate, getCollectionsByDateAndCompletion, removeProductsFromCollection};

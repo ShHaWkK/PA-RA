@@ -17,6 +17,9 @@ class CollectionProductModel
     #[ORM\JoinColumn(name: "notification_id", referencedColumnName: "id", onDelete: "CASCADE")]
     private $notification;
 
+    #[ORM\Column(type: "boolean", options: ["default" => false])]
+    private $is_collected = false;
+
     #[ORM\Column(type: "integer")]
     private $quantity_collected;
 
@@ -47,6 +50,17 @@ class CollectionProductModel
         return $this->quantity_collected;
     }
 
+    public function getIsCollected(): ?bool
+    {
+        return $this->is_collected;
+    }
+
+    public function setIsCollected(bool $is_collected): self
+    {
+        $this->is_collected = $is_collected;
+        return $this;
+    }
+
     public function setQuantityCollected(int $quantity_collected): self
     {
         $this->quantity_collected = $quantity_collected;
@@ -60,6 +74,7 @@ class CollectionProductModel
             'notification_id' => $this->notification->getId(),
             'product_id' => $this->notification->getProductId(),
             'product' => $this->notification->getProduct(),
+            'is_collected' => $this->getIsCollected(),
             'quantity_collected' => $this->quantity_collected,
         ];
     }

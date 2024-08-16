@@ -89,7 +89,10 @@ class CollectionController
                         if (isset($input['products'])) {
                             if (isset($uriParts[2]) && $uriParts[2] === 'remove') {
                                 return $this->removeProductsFromCollection((int) $uriParts[1], $input['products']);
-                            } else {
+                            } elseif (isset($uriParts[2]) && $uriParts[2] === 'update') {
+                                return $this->modifyProduct((int) $uriParts[1], $input['products']);
+                            }else
+                            {
                                 return $this->assignProduct((int) $uriParts[1], $input['products']);
                             }
                         }
@@ -298,6 +301,69 @@ class CollectionController
         } catch (\Exception $e) {
             $this->entityManager->rollback();
             error_log("Exception in assignProduct: " . $e->getMessage());
+            throw $e;
+        }
+    }
+
+    public function modifyProduct(int $collectionId, array $products)
+    {
+        $this->entityManager->beginTransaction();
+        try {
+            // Vérifier les données
+            if (empty($products)) {
+                http_response_code(400);
+                return ['error' => 'No products provided for modification'];
+            }
+
+            $collection = $this->entityManager->find(CollectionModel::class, $collectionId);
+            if (!$collection) {
+                http_response_code(404);
+                return ['error' => 'Collection not found'];
+            }
+
+            foreach ($products as $data) {
+                if (!isset($data['notification_id'])) {
+                    http_response_code(400);
+                    return ['error' => 'Missing notification_id for product modification'];
+                }
+
+                $productNotification = $this->entityManager->find(ProductNotificationModel::class, $data['notification_id']);
+                if (!$productNotification) {
+                    http_response_code(404);
+                    return ['error' => 'ProductNotification not found'];
+                }
+
+                // Rechercher l'association existante
+                $existingAssociation = $this->entityManager->getRepository(CollectionProductModel::class)
+                    ->findOneBy([
+                        'collection' => $collection,
+                        'notification' => $productNotification
+                    ]);
+
+                if (!$existingAssociation) {
+                    http_response_code(404);
+                    return ['error' => 'Product not assigned to this collection'];
+                }
+
+                // Modifier les champs de l'association existante
+                if (isset($data['quantity_collected'])) {
+                    $existingAssociation->setQuantityCollected($data['quantity_collected']);
+                }
+
+                if (isset($data['is_collected'])) {
+                    $existingAssociation->setIsCollected($data['is_collected']);
+                }
+
+                $this->entityManager->persist($existingAssociation);
+            }
+
+            $this->entityManager->flush();
+            $this->entityManager->commit();
+
+            return ['message' => 'Product(s) modified successfully'];
+        } catch (\Exception $e) {
+            $this->entityManager->rollback();
+            error_log("Exception in modifyProduct: " . $e->getMessage());
             throw $e;
         }
     }
