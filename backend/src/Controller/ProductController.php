@@ -70,43 +70,18 @@ class ProductController
                 return ['error' => 'Missing required fields for new product'];
             }
     
-            // Vérification que l'entrepôt existe bien
-            $warehouse = $this->entityManager->getRepository(WarehouseModel::class)->find($data['warehouse_id']);
-            if (!$warehouse) {
-                http_response_code(400);
-                return ['error' => 'Warehouse not found'];
-            }
-    
-            // Validation du produit existant par code-barres
+            // Vérification de l'existence du produit
             $existingProduct = $this->entityManager->getRepository(ProductModel::class)->findOneBy(['barcode' => $data['barcode']]);
             if ($existingProduct) {
                 http_response_code(400);
                 return ['error' => 'Product with this barcode already exists'];
             }
     
-            // Validation du format du code-barres
-            if (!preg_match('/^[0-9]{13}$/', $data['barcode'])) {
+            // Vérification de l'existence de l'entrepôt
+            $warehouse = $this->entityManager->getRepository(WarehouseModel::class)->find($data['warehouse_id']);
+            if (!$warehouse) {
                 http_response_code(400);
-                return ['error' => 'Barcode must be a 13-digit number'];
-            }
-    
-            // Validation du format de la date d'expiration
-            if (!preg_match('/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/', $data['expiration_date'])) {
-                http_response_code(400);
-                return ['error' => 'Expiration date must be in the format YYYY-MM-DD'];
-            }
-    
-            // Validation du volume
-            if (!is_numeric($data['volume']) || $data['volume'] < 0) {
-                http_response_code(400);
-                return ['error' => 'Volume must be a non-negative float'];
-            }
-    
-            // Calcul de la capacité disponible dans l'entrepôt
-            $availableCapacity = $warehouse->getCapacity() - $this->getCurrentWarehouseStockVolume($data['warehouse_id']);
-            if ($availableCapacity < $data['volume']) {
-                http_response_code(400);
-                return ['error' => 'Not enough capacity in the warehouse'];
+                return ['error' => 'Warehouse not found'];
             }
     
             // Création du produit
@@ -118,7 +93,7 @@ class ProductController
             $product->setCreatedAt(new \DateTime("now"));
             $product->setUpdatedAt(new \DateTime("now"));
     
-            // Génération du QR code
+            // Génération et sauvegarde du QR Code
             $qrCode = new QrCode(json_encode([
                 'name' => $data['name'],
                 'barcode' => $data['barcode'],
@@ -145,25 +120,24 @@ class ProductController
             }
             $product->setQrCodePath($qrCodePath);
     
-            // Persistance du produit dans la base de données
+            // Sauvegarde du produit
             $this->entityManager->persist($product);
             $this->entityManager->flush();
     
-            // Création de l'entrée dans le stock
+            // Création de l'entrée de stock
             $stock = new StockModel();
             $stock->setProductId($product->getId());
             $stock->setQuantity(1);
             $stock->setAvailability('available');
-            $stock->setWarehouseId($warehouse->getId()); // Utilisation de l'ID de l'entrepôt récupéré
+            $stock->setWarehouse($warehouse);  // Associer l'objet WarehouseModel directement
             $stock->setEntryDate(new \DateTime("now"));
             $stock->setCreatedAt(new \DateTime("now"));
             $stock->setUpdatedAt(new \DateTime("now"));
     
-            // Persistance du stock dans la base de données
             $this->entityManager->persist($stock);
             $this->entityManager->flush();
     
-            return ['id' => $product->getId(), 'message' => 'Product created successfully'];
+            return ['id' => $product->getId(), 'message' => 'Product created and stock entry added successfully'];
         } catch (\Exception $e) {
             error_log("Exception in createProduct: " . $e->getMessage());
             error_log("Stack trace: " . $e->getTraceAsString());
@@ -171,18 +145,31 @@ class ProductController
         }
     }
     
+    
+    
     private function getCurrentWarehouseStockVolume($warehouseId)
     {
-        $stocks = $this->entityManager->getRepository(StockModel::class)->findBy(['warehouse_id' => $warehouseId]);
+        // Recherchez d'abord l'entité WarehouseModel en utilisant l'ID fourni
+        $warehouse = $this->entityManager->getRepository(WarehouseModel::class)->find($warehouseId);
+    
+        if (!$warehouse) {
+            throw new \Exception("Warehouse not found");
+        }
+    
+        // Ensuite, récupérez tous les stocks associés à cet entrepôt
+        $stocks = $warehouse->getStocks(); // Utilisation de la relation définie dans WarehouseModel
         $currentVolume = 0;
+        
         foreach ($stocks as $stock) {
             $product = $this->entityManager->getRepository(ProductModel::class)->find($stock->getProductId());
             if ($product) {
                 $currentVolume += $product->getVolume() * $stock->getQuantity();
             }
         }
+        
         return $currentVolume;
     }
+    
 
     public function getProductByBarcode($barcode)
     {
