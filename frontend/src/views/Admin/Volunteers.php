@@ -45,11 +45,11 @@
     </div>
 
     <!--    Ajout des fenêtres modales-->
-    <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/AddVolunteerModal.php'); ?>
-    <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/DeleteVolunteerModal.php'); ?>
-    <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/ModifyVolunteerModal.php'); ?>
-    <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/VolunteerSkillModal.php'); ?>
-    <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/VolunteerAvailabilitiesModal.php'); ?>
+    <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/AdminUsersPages/AddVolunteerModal.php'); ?>
+    <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/AdminUsersPages/DeleteVolunteerModal.php'); ?>
+    <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/AdminUsersPages/ModifyVolunteerModal.php'); ?>
+    <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/AdminUsersPages/VolunteerSkillModal.php'); ?>
+    <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/AdminUsersPages/VolunteerAvailabilitiesModal.php'); ?>
 
 </div>
 </body>

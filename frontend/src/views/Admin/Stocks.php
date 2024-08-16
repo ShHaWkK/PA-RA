@@ -43,9 +43,9 @@
     </div>
 
     <!--    Ajout des fenêtres modales-->
-    <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/ProductDetailModal.php'); ?>
-    <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/AddStockModal.php'); ?>
-    <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/WithdrawStockModal.php'); ?>
+    <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/AdminStockPage/ProductDetailModal.php'); ?>
+    <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/AdminStockPage/AddStockModal.php'); ?>
+    <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/AdminStockPage/WithdrawStockModal.php'); ?>
 
 </div>
 </body>

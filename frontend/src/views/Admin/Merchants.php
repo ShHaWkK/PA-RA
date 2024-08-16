@@ -47,10 +47,10 @@
     </div>
 
     <!--    Ajout des fenêtres modales-->
-    <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/AddMerchantModal.php'); ?>
-    <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/DeleteVolunteerModal.php'); ?>
-    <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/ModifyVolunteerModal.php'); ?>
-    <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/MerchantCompaniesModal.php'); ?>
+    <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/AdminUsersPages/AddMerchantModal.php'); ?>
+    <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/AdminUsersPages/DeleteVolunteerModal.php'); ?>
+    <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/AdminUsersPages/ModifyVolunteerModal.php'); ?>
+    <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/AdminUsersPages/MerchantCompaniesModal.php'); ?>
 
 </div>
 </body>

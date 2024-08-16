@@ -185,4 +185,31 @@ async function removeProductsFromCollection(collectionId, productIds) {
     return response.json();
 }
 
-export { createCollection, getCollectionByID, updateCollection, deleteCollection, getAllCollections, getProductsFromCollection, getCollectionsByDate, getCollectionsByDateAndCompletion, removeProductsFromCollection};
+async function assignProductsToCollection(collectionId, products) {
+    const url = apiEndpoint + `/collections/${collectionId}/assign`;
+    const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ products })
+    });
+
+    console.log(JSON.stringify({ products }));
+
+    if (!response.ok) {
+        if (response.status === 400) {
+            throw new Error('Bad Request: No products provided or missing required fields.');
+        } else if (response.status === 404) {
+            throw new Error('Not Found: Collection or ProductNotification not found.');
+        } else if (response.status === 409) {
+            throw new Error('Conflict: Product already assigned to this collection.');
+        } else {
+            throw new Error(`HTTP Error: ${response.status}`);
+        }
+    }
+
+    return response.json();
+}
+
+export { createCollection, getCollectionByID, updateCollection, deleteCollection, getAllCollections, getProductsFromCollection, getCollectionsByDate, getCollectionsByDateAndCompletion, removeProductsFromCollection, assignProductsToCollection};

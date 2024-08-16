@@ -67,10 +67,11 @@
         include($_SERVER['DOCUMENT_ROOT'] . '/views/includes/Loader.php');
         ?>
 
-        <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/VolunteerDetailsModal.php'); ?>
-        <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/VehicleDetailsModal.php'); ?>
-        <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/CollectedProductsModal.php'); ?>
-        <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/ModifyCollectionModal.php'); ?>
+        <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/AdminCollectionPage/VolunteerDetailsModal.php'); ?>
+        <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/AdminCollectionPage/VehicleDetailsModal.php'); ?>
+        <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/AdminCollectionPage/CollectedProductsModal.php'); ?>
+        <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/AdminCollectionPage/ModifyCollectionModal.php'); ?>
+        <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/AdminCollectionPage/AssignProductToCollectionModal.php'); ?>
 
         <!-- Script pour gérer les interactions avec la page -->
         <script type="module" src="/assets/js/pages/AdminCollectionPage.js"></script>
