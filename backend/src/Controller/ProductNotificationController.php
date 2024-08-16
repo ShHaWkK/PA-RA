@@ -158,11 +158,23 @@ class ProductNotificationController
             // Création d'un QueryBuilder
             $qb = $productNotificationRepository->createQueryBuilder('p');
 
-            // Ajout des conditions pour la date et l'adresse
+            // Ajout des conditions pour la date
             if (isset($queryParams['date'])) {
-                $qb->andWhere('p.wished_collection_date = :date')
-                    ->setParameter('date', new \DateTime($queryParams['date']));
+                // Convertir la date reçue en DateTime avec début et fin de journée
+                $date = \DateTime::createFromFormat('Y-m-d', $queryParams['date']);
+                if (!$date) {
+                    throw new \Exception('Invalid date format.');
+                }
+
+                $startOfDay = $date->setTime(0, 0, 0);
+                $endOfDay = (clone $date)->setTime(23, 59, 59);
+
+                $qb->andWhere('p.wished_collection_date BETWEEN :start AND :end')
+                    ->setParameter('start', $startOfDay)
+                    ->setParameter('end', $endOfDay);
             }
+
+            // Ajout des conditions pour l'adresse
             if (isset($queryParams['address'])) {
                 $qb->andWhere('p.address = :address')
                     ->setParameter('address', $queryParams['address']);
@@ -170,7 +182,7 @@ class ProductNotificationController
 
             // Vérification du champ 'is_assigned' dans les paramètres
             if (isset($queryParams['is_assigned'])) {
-                $isAssigned = (bool)$queryParams['is_assigned'];
+                $isAssigned = filter_var($queryParams['is_assigned'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
                 $qb->andWhere('p.is_assigned = :is_assigned')
                     ->setParameter('is_assigned', $isAssigned);
             }

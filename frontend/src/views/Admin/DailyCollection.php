@@ -16,7 +16,7 @@
 <div class="back-office-container">
     <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/includes/AdminDashboard.php'); ?>
     <div class="back-office-content">
-        <h1>Tableau de Bord des Collectes</h1>
+        <h1>Nouvelle collecte</h1>
 
 
         <div class="row">
@@ -26,42 +26,30 @@
         </div>
 
         <div class="row">
-            <label for="completionSelector">Completion:</label>
-
-            <select name="completion" id="completionSelector">
-                <option value="">All</option>
-                <option value="true">Completed</option>
-                <option value="false">Ongoing</option>
-            </select>
-        </div>
-
-        <div class="row">
-<!--            <button class="add-button" id="addCollectionButton"> Ajouter </button>-->
-            <input class="add-button" type="button" onclick="location.href='/Admin/Collections/NewCollection';" value="New collection" />
+            <button class="add-button" id="addCollectionButton"> Ajouter </button>
             <button class="delete-button" id="deleteCollectionButton"> Supprimer </button>
             <button class="modify-button" id="modifyCollectionButton"> Modifier </button>
         </div>
 
         <!-- Tableau des Collectes -->
-        <div class="collection-table">
+        <div class="product-notification-table">
             <table>
                 <thead>
                 <tr>
-                    <th>ID</th>
-                    <th>Entreprise</th>
-                    <th>Produit</th>
-                    <th>Véhicule</th>
-                    <th>Date de Collecte</th>
-                    <th>Date de Création</th>
-                    <th>Date de Mise à Jour</th>
-                    <th>Actions</th>
+                    <th></th>
+                    <th>Company</th>
+                    <th>Product</th>
+                    <th>Notified Quantity</th>
+                    <th>Address</th>
+                    <th>Wished Collection Date</th>
+                    <th>Notified At</th>
                 </tr>
                 </thead>
-                <tbody id="collectionTableBody">
-                <!-- Les lignes du tableau seront générées dynamiquement par JavaScript -->
-                </tbody>
             </table>
         </div>
+
+        <!-- Tableau de sélection du chauffeur -->
+        <div class="volunteer-table"></div>
 
         <?php
         $loaderId = 'loadingBodyGeneral';
@@ -75,7 +63,7 @@
         <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/AdminCollectionPage/AssignProductToCollectionModal.php'); ?>
 
         <!-- Script pour gérer les interactions avec la page -->
-        <script type="module" src="/assets/js/pages/AdminCollectionPage.js"></script>
+        <script type="module" src="/assets/js/pages/AdminNewCollection.js"></script>
     </div>
 </div>
 </body>

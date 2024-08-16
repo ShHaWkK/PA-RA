@@ -91,6 +91,15 @@ switch ($request) {
             exit;
         }
         break;
+    case '/Admin/Collections/NewCollection':
+        if ($jwtToken) {
+            requireAuth($jwtToken, 'admin');
+            require __DIR__ . '/views/Admin/DailyCollection.php';
+        } else {
+            require __DIR__ . '/views/Login/Login.php';
+            exit;
+        }
+        break;
     case '/Admin/Services':
         if ($jwtToken) {
             requireAuth($jwtToken, 'admin');
