@@ -378,7 +378,6 @@ document.addEventListener('DOMContentLoaded',
                 modifyModal.style.display = "none";
             }
         }
-
     });
 
 

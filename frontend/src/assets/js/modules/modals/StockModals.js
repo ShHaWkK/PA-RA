@@ -3,6 +3,7 @@ import {getWarehouseCapacity} from "/assets/js/api//Warehouse.js";
 import {createStock, updateStock, getStock} from "/assets/js/api/Stocks.js";
 import {selectedWarehouseId} from "/assets/js/pages/AdminStockPage.js";
 import {populateStockTable} from "/assets/js/modules/tables/StockTable.js";
+import {formatDateToFrench} from "../FormatDate.js";
 
 // Variable pour les volumes des produits
 let productsVolume = {};
@@ -192,110 +193,4 @@ function getSelectedStockId() {
     return selectedRadio.value;
 }
 
-document.addEventListener('DOMContentLoaded', async function() {
-    // Fenêtre modale d'ajout de stock
-    const addStockButton = document.getElementById("addStockButton");
-    const stockModal = document.getElementById("addStockModal");
-    const stockSpan = document.getElementById("closeStockAdd");
-
-    addStockButton.onclick = async function() {
-        if (selectedWarehouseId == undefined || selectedWarehouseId == 'Choose a warehouse') {
-            alert("Please select a warehouse");
-        } else {
-            populateProductSelector();
-            document.getElementById('warehouse_id').value = selectedWarehouseId;
-            addStockSubmitEvent();
-            stockModal.style.display = "block";
-        }
-    }
-
-    stockSpan.onclick = function() {
-        stockModal.style.display = "none";
-    }
-
-    // Fenêtre modale de vue des détails du produit
-    const productModal = document.getElementById("productDetailModal");
-    const productSpan = document.getElementById("closeProductButton");
-
-    productSpan.onclick = function() {
-        productModal.style.display = "none";
-    }
-
-    // Fenêtre modale de retrait de stock
-    const withdrawStockButton = document.getElementById("withdrawStockButton");
-    const withdrawModal = document.getElementById("withdrawStockModal");
-    const closeWithdrawModal = document.getElementById("closeWithdrawModal");
-
-    withdrawStockButton.onclick = async function() {
-        const selectedRadio = document.querySelector('input[name="selectedStock"]:checked');
-
-        if (!selectedRadio) {
-            alert("Veuillez sélectionner un stock à retirer.");
-        } else {
-            var selectedStockId = selectedRadio.value;
-            // Récupérer les détails du stock sélectionné
-            // Afficher la fenêtre modale
-            withdrawModal.style.display = "block";
-
-            const stock = await getStock(selectedStockId);
-
-            if (stock) {
-                // Utiliser le volume par unité à partir de la variable globale
-                const volumePerUnit = productsVolume[stock.product_id] || 0;
-
-                // Calculer le volume actuel du stock
-                const currentVolume = stock.quantity * volumePerUnit;
-
-                // Récupérer la capacité de l'entrepôt
-                const warehouseCapacity = await getWarehouseCapacity(stock.warehouse_id);
-
-                // Remplir les champs de la modale avec les informations pertinentes
-                document.getElementById('currentStockVolume').value = currentVolume;
-                document.getElementById('warehouseVolume').value = warehouseCapacity?.total_capacity || 'Capacité inconnue';
-
-                // Réinitialiser les autres champs
-                document.getElementById('withdrawQuantity').value = '';
-                document.getElementById('withdrawVolume').value = '';
-                document.getElementById('postWithdrawStockVolume').value = '';
-
-                // Écouter les changements dans la quantité pour mettre à jour les autres champs
-                document.getElementById('withdrawQuantity').addEventListener('input', function() {
-                    const withdrawQuantity = parseInt(this.value, 10);
-
-                    // Calculer le volume à retirer
-                    const withdrawVolume = withdrawQuantity * volumePerUnit;
-                    const postWithdrawVolume = currentVolume - withdrawVolume;
-
-                    document.getElementById('withdrawVolume').value = withdrawVolume;
-                    document.getElementById('postWithdrawStockVolume').value = postWithdrawVolume < 0 ? 0 : postWithdrawVolume;
-                });
-            } else {
-                alert("Stock non trouvé.");
-            }
-        }
-    };
-
-    closeWithdrawModal.onclick = function() {
-        withdrawModal.style.display = "none";
-    };
-
-    // Ajoute un écouteur d'événement au bouton de confirmation dans la fenêtre de retrait
-    const confirmWithdrawButton = document.getElementById('confirmWithdrawButton');
-    confirmWithdrawButton.onclick = async function() {
-        const withdrawQuantity = parseInt(document.getElementById('withdrawQuantity').value, 10);
-        if (isNaN(withdrawQuantity) || withdrawQuantity <= 0) {
-            alert("Veuillez entrer une quantité valide à retirer.");
-            return;
-        }
-
-        const selectedStockId = getSelectedStockId();
-
-        if (selectedStockId) {
-            await applyWithdraw(selectedStockId, withdrawQuantity);
-            withdrawModal.style.display = 'none'; // Fermer la modale après confirmation
-        }
-    };
-});
-
-
-export { populateProductDetailsInModal }
+export { populateProductDetailsInModal, populateProductSelector,getSelectedStockId,applyWithdraw , checkVolume, updateAddedVolume, addStockSubmitEvent }

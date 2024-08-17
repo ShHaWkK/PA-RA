@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', function () {
         };
 
         // Appeler la fonction pour peupler la table avec les notifications mises à jour
-        populateProductNotificationTable(queryParams);
+        await populateProductNotificationTable(queryParams);
     });
 
     document.getElementById('collectionDate').addEventListener('change', async () => {
@@ -42,8 +42,7 @@ document.addEventListener('DOMContentLoaded', function () {
         };
 
         // Appeler la fonction pour peupler la table avec les notifications mises à jour
-        populateProductNotificationTable(queryParams);
+        await populateProductNotificationTable(queryParams);
     });
-
 
 });

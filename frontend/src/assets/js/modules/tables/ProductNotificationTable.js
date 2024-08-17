@@ -1,5 +1,7 @@
 import { formatDateToFrench } from "../FormatDate.js";
 import { getAllProductNotifications } from "../../api/ProductNotification.js";
+import { populateCompaniesInModal } from "../modals/NewCollectionModal.js";
+import { populateProductDetailsInModal } from "../modals/StockModals.js";
 
 export async function populateProductNotificationTable(queryParameters) {
     try {
@@ -36,22 +38,41 @@ export async function populateProductNotificationTable(queryParameters) {
         // Ajouter les lignes au tbody
         notifications.forEach(notification => {
             const row = document.createElement('tr');
-            row.dataset.notificationId = notification.id; // Ajout de l'id de la notification en tant que dataset
+            row.dataset.notificationId = notification.id;
 
             // Créer une cellule pour la checkbox
             const checkboxCell = document.createElement('td');
             const checkbox = document.createElement('input');
             checkbox.type = 'checkbox';
-            checkbox.id = `notification-${notification.id}`; // Utiliser l'id de la notification
-            checkbox.value = notification.id; // Optionnel, si vous avez besoin de la valeur lors de la soumission
+            checkbox.id = `notification-${notification.id}`;
+            checkbox.value = notification.id;
             checkboxCell.appendChild(checkbox);
 
             // Créer les cellules de données pour chaque champ
             const companyCell = document.createElement('td');
-            companyCell.textContent = notification.company.name;
+            const companyLink = document.createElement('a');
+            companyLink.href = "#";
+            companyLink.textContent = notification.company.name;
+            companyLink.setAttribute('data-id', notification.company.id);
+            companyLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                populateCompaniesInModal(notification.company.id);
+                document.getElementById('userCompaniesModal').style.display = 'block';
+            });
+            companyCell.appendChild(companyLink);
 
             const productCell = document.createElement('td');
-            productCell.textContent = notification.product.name;
+            const productLink = document.createElement('a');
+            productLink.href = "#";
+            productLink.textContent = notification.product.name;
+            productLink.setAttribute('data-id', notification.product.id);
+            productLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                populateProductDetailsInModal(notification.product.id);
+                document.getElementById('productDetailModal').style.display = 'block';
+            });
+            productCell.appendChild(productLink);
+
 
             const quantityCell = document.createElement('td');
             quantityCell.textContent = notification.notifiedQuantity;
