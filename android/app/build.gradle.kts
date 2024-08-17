@@ -64,5 +64,7 @@ dependencies {
     implementation ("com.journeyapps:zxing-android-embedded:4.3.0")
     implementation ("com.google.zxing:core:3.4.0")
     implementation ("com.airbnb.android:lottie:5.2.0")
+    implementation ("com.github.bumptech.glide:glide:4.12.0")
+    implementation ("com.google.firebase:firebase-messaging:23.0.0")
 
 }

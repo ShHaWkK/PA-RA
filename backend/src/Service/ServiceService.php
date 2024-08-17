@@ -35,8 +35,35 @@ class ServiceService
 
     public function getService($id)
     {
-        return $this->entityManager->find(ServiceModel::class, $id);
+        error_log("Attempting to fetch service with ID: $id");
+        
+        try {
+            $service = $this->entityManager->find(ServiceModel::class, $id);
+            
+            if (!$service) {
+                error_log("No service found with ID: $id");
+                return null;
+            }
+            
+            // Log the fetched service details
+            error_log("Service found: " . json_encode([
+                'ID' => $service->getId(),
+                'Name' => $service->getName(),
+                'Description' => $service->getDescription(),
+                'Status' => $service->getStatus(),
+                'Location' => $service->getLocation(),
+                'Capacity' => $service->getCapacity(),
+                'Schedule' => $service->getSchedule()->format('Y-m-d H:i:s'),
+            ]));
+            
+            return $service;
+            
+        } catch (\Exception $e) {
+            error_log("Exception encountered while fetching service with ID: $id. Exception message: " . $e->getMessage());
+            throw $e; // Re-throw the exception after logging
+        }
     }
+    
 
     public function updateService($id, $data)
     {
@@ -209,6 +236,28 @@ class ServiceService
         $this->entityManager->flush();
     
         return $proposal;
+    }
+
+
+    public function getServiceCapacity($serviceId)
+    {
+        // Find the service by ID
+        $service = $this->entityManager->find(ServiceModel::class, $serviceId);
+        if (!$service) {
+            throw new \Exception('Service not found');
+        }
+
+        // Get the total capacity from the service
+        $totalCapacity = $service->getCapacity();
+
+        // Calculate the occupied capacity based on current registrations
+        $occupiedCapacity = $this->entityManager->getRepository(ServiceRegistrationModel::class)
+            ->count(['service_id' => $serviceId]);
+
+        return [
+            'total_capacity' => $totalCapacity,
+            'occupied_capacity' => $occupiedCapacity
+        ];
     }
 }
 

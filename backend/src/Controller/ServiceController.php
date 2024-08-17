@@ -31,7 +31,9 @@ class ServiceController
                 case 'POST':
                     return $this->createService($input);
                 case 'GET':
-                    if (isset($uriParts[1])) {
+                    if (isset($uriParts[1]) && isset($uriParts[2]) && $uriParts[2] === 'capacity') {
+                        return $this->getServiceCapacity((int) $uriParts[1]);
+                    } elseif (isset($uriParts[1])) {
                         return $this->getService((int) $uriParts[1]);
                     } else {
                         return $this->getAllServices();
@@ -74,21 +76,55 @@ class ServiceController
         }
     }
 
+
     public function getService($id)
     {
+        error_log("Attempting to fetch service with ID: $id");
+        
         try {
             $service = $this->serviceService->getService($id);
+            
             if (!$service) {
+                error_log("No service found with ID: $id");
                 http_response_code(404);
-                return ['error' => 'Service not found'];
+                echo json_encode(['error' => 'Service not found'], JSON_PRETTY_PRINT);
+                return;
             }
-            return json_decode($this->serializer->serialize($service, 'json'), true);
+            
+            // Filtrer et simplifier la réponse en renvoyant le schedule comme un objet
+            $filteredService = [
+                'id' => $service->getId(),
+                'name' => $service->getName(),
+                'description' => $service->getDescription(),
+                'schedule' => [
+                    'date' => $service->getSchedule()->format('Y-m-d'),
+                    'time' => $service->getSchedule()->format('H:i:s')
+                ],
+                'capacity' => $service->getCapacity(),
+                'status' => $service->getStatus(),
+                'location' => $service->getLocation(),
+                'createdAt' => $service->getCreatedAt()->format('Y-m-d H:i:s'),
+                'updatedAt' => $service->getUpdatedAt()->format('Y-m-d H:i:s'),
+            ];
+            
+            // Log the fetched service details
+            error_log("Service found: " . json_encode($filteredService));
+            
+            // Return the filtered service as JSON
+            header('Content-Type: application/json');
+            http_response_code(200);
+            echo json_encode($filteredService, JSON_PRETTY_PRINT);
+            exit();
+            
         } catch (\Exception $e) {
-            error_log("Exception in getService: " . $e->getMessage());
-            throw $e;
+            error_log("Exception encountered while fetching service with ID: $id. Exception message: " . $e->getMessage());
+            http_response_code(500);
+            echo json_encode(['error' => 'Internal Server Error'], JSON_PRETTY_PRINT);
+            exit();
         }
     }
-
+    
+    
     public function updateService($id, $data)
     {
         try {
@@ -121,4 +157,27 @@ class ServiceController
             throw $e;
         }
     }
+
+    public function getServiceCapacity($serviceId)
+    {
+        try {
+            $capacityData = $this->serviceService->getServiceCapacity($serviceId);
+            
+            if (!$capacityData) {
+                http_response_code(404);
+                return ['error' => 'Service capacity data not found'];
+            }
+            
+            header('Content-Type: application/json');
+            http_response_code(200);
+            echo json_encode($capacityData, JSON_PRETTY_PRINT);
+            exit();
+            
+        } catch (\Exception $e) {
+            error_log("Exception in getServiceCapacity: " . $e->getMessage());
+            http_response_code(500);
+            return ['error' => 'Internal Server Error'];
+        }
+    }
 }
+?>

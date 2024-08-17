@@ -1,12 +1,7 @@
 package com.example.nomorewaste.api
 
 import retrofit2.Call
-import retrofit2.http.Body
-import retrofit2.http.GET
-import retrofit2.http.POST
-import retrofit2.http.Path
-import retrofit2.http.PUT
-import retrofit2.http.DELETE
+import retrofit2.http.*
 
 interface ApiService {
 
@@ -46,11 +41,14 @@ interface ApiService {
     @GET("products")
     fun getProducts(): Call<List<Product>>
 
-    @PUT("products/{barcode}")
-    fun updateProduct(@Path("barcode") barcode: String, @Body product: Product): Call<Void>
+    @DELETE("products/{id}")
+    fun deleteProduct(@Path("id") id: Int): Call<Void>
 
-    @GET("products/{barcode}")
-    fun getProduct(@Path("barcode") barcode: String): Call<Product>
+    @GET("products/{id}")
+    fun getProduct(@Path("id") id: String): Call<Product>
+
+    @PUT("products/{id}")
+    fun updateProduct(@Path("id") id: String, @Body product: Product): Call<Void>
 
     @GET("stocks/getStocksByWarehouse/{warehouseId}")
     fun getStocksByWarehouse(@Path("warehouseId") warehouseId: Int): Call<List<Stock>>
@@ -60,4 +58,19 @@ interface ApiService {
 
     @GET("products/stock")
     fun getProductsInStock(): Call<Map<String, Product>>
+
+    @GET("services")
+    fun getServices(): Call<List<Service>>
+
+    @GET("services/{id}")
+    fun getService(@Path("id") id: Int): Call<Service>
+
+    @POST("service_registrations")
+    fun registerForService(@Body request: ServiceRegistrationRequest): Call<Void>
+
+    @GET("service_registrations/{user_id}")
+    fun getUserRegistrations(@Path("user_id") userId: Int): Call<List<Service>>
+
+    @POST("service_proposals")
+    fun proposeService(@Body request: ServiceProposalRequest): Call<Void>
 }

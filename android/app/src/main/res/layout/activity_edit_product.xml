@@ -1,3 +1,4 @@
+<!-- activity_edit_product.xml-->
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
@@ -5,51 +6,53 @@
     android:orientation="vertical"
     android:padding="16dp">
 
+    <!-- Editable Product Name -->
     <EditText
         android:id="@+id/editTextProductName"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="@string/product_name_hint"
-        android:inputType="text"
-        android:minHeight="48dp"/>
+        android:hint="Nom du produit"
+        android:textSize="18sp"/>
 
+    <!-- Non-editable Product Barcode -->
     <EditText
-        android:id="@+id/editTextProductBarcode"
+        android:id="@+id/textViewProductBarcode"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="@string/product_barcode_hint"
-        android:inputType="number"
-        android:minHeight="48dp"
+        android:hint="Code-barres"
+        android:textSize="18sp"
         android:enabled="false"/>
 
-    <EditText
-        android:id="@+id/editTextVolume"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="@string/product_volume_hint"
-        android:inputType="number"
-        android:minHeight="48dp"/>
-
+    <!-- Editable Expiration Date -->
     <EditText
         android:id="@+id/editTextExpirationDate"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="@string/product_expiration_date_hint"
-        android:inputType="date"
-        android:minHeight="48dp"/>
+        android:hint="Date d'expiration"
+        android:textSize="18sp"/>
 
-    <Spinner
-        android:id="@+id/spinnerWarehouse"
+    <!-- Editable Volume -->
+    <EditText
+        android:id="@+id/editTextVolume"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="8dp"
-        android:minHeight="48dp"/>
+        android:hint="Volume"
+        android:textSize="18sp"/>
 
+    <!-- QR Code ImageView -->
+    <ImageView
+        android:id="@+id/imageViewQRCode"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:layout_gravity="center"
+        android:layout_marginTop="16dp"
+        android:contentDescription="QR Code"/>
+
+    <!-- Save Changes Button -->
     <Button
-        android:id="@+id/buttonSaveProduct"
+        android:id="@+id/buttonSaveChanges"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/save_product"
-        android:minHeight="48dp"/>
+        android:text="Enregistrer les modifications"/>
 
 </LinearLayout>

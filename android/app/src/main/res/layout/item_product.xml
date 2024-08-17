@@ -1,4 +1,4 @@
-<!--item_product -->
+<!-- res/layout/item_product.xml -->
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
@@ -7,61 +7,63 @@
     android:padding="8dp"
     android:gravity="center_vertical">
 
+    <!-- Product Name -->
     <TextView
         android:id="@+id/productName"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:text="Product Name"
+        android:layout_weight="2"
+        android:text="Nom du produit"
         android:textSize="14sp"
         android:textColor="#000000"
         android:maxLines="1"
         android:ellipsize="end"/>
 
+    <!-- Product Quantity -->
     <TextView
         android:id="@+id/productQuantity"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Qty"
-        android:textSize="12sp"
+        android:layout_weight="1"
+        android:text="Quantité"
+        android:textSize="14sp"
+        android:layout_marginStart="8dp"
         android:layout_marginEnd="8dp"/>
 
+    <!-- Product Volume -->
     <TextView
         android:id="@+id/productVolume"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_weight="1"
         android:text="Volume"
-        android:textSize="12sp"
+        android:textSize="14sp"
+        android:layout_marginStart="8dp"
         android:layout_marginEnd="8dp"/>
 
-    <TextView
-        android:id="@+id/productExpiration"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Exp. Date"
-        android:textSize="12sp"
-        android:layout_marginEnd="8dp" />
-
+    <!-- Edit Button -->
     <ImageButton
         android:id="@+id/buttonEditProduct"
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:layout_marginStart="4dp"
         android:padding="10dp"
-    android:contentDescription="@string/edit_product"
-    android:src="@drawable/ic_edit2"
-    android:background="?attr/selectableItemBackgroundBorderless"/>
+        android:contentDescription="Edit Product"
+        android:src="@drawable/ic_edit2"
+        android:background="?attr/selectableItemBackgroundBorderless"/>
 
+    <!-- Delete Button -->
     <ImageButton
         android:id="@+id/buttonDeleteProduct"
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:layout_marginStart="4dp"
         android:padding="10dp"
-        android:contentDescription="@string/delete_product"
+        android:contentDescription="Delete Product"
         android:src="@drawable/ic_delete2"
         android:background="?attr/selectableItemBackgroundBorderless"/>
 
+    <!-- Optional CheckBox if needed -->
     <CheckBox
         android:id="@+id/checkbox"
         android:layout_width="wrap_content"

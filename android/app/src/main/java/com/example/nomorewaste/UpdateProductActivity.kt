@@ -39,8 +39,7 @@ class UpdateProductActivity : AppCompatActivity() {
         spinnerWarehouse = findViewById(R.id.spinnerWarehouse)
         buttonUpdateProduct = findViewById(R.id.buttonUpdateProduct)
 
-        val retrofit = RetrofitClient.getClient()
-        apiService = retrofit.create(ApiService::class.java)
+        apiService = RetrofitClient.getClient().create(ApiService::class.java)
 
         loadWarehouses()
 
@@ -81,7 +80,15 @@ class UpdateProductActivity : AppCompatActivity() {
     }
 
     private fun updateProduct(barcode: String, name: String, expirationDate: String, volume: Float, warehouseId: Int) {
-        val product = Product(barcode, name, expirationDate, volume, warehouseId)
+        val qrCodePath = "" // You might want to retrieve or generate the actual QR code path
+        val product = Product(
+            name = name,
+            barcode = barcode,
+            expirationDate = expirationDate,
+            volume = volume,
+            warehouseId = warehouseId,
+            qrCodePath = qrCodePath
+        )
         apiService.updateProduct(barcode, product).enqueue(object : Callback<Void> {
             override fun onResponse(call: Call<Void>, response: Response<Void>) {
                 if (response.isSuccessful) {

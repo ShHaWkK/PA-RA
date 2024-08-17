@@ -17,6 +17,7 @@ import com.example.nomorewaste.PlanningsActivity
 import com.example.nomorewaste.InventoryActivity
 import com.example.nomorewaste.ProductManagementActivity
 import com.example.nomorewaste.RecipesActivity
+import com.example.nomorewaste.ServiceActivity
 import com.example.nomorewaste.SuggestMenuActivity
 import com.example.nomorewaste.R
 import com.example.nomorewaste.SelectProductsActivity
@@ -42,6 +43,7 @@ class VolunteerActivity : AppCompatActivity() {
     private lateinit var buttonManageUser: Button
     private lateinit var buttonViewPlannings: Button
     private lateinit var buttonManageProducts: Button
+    private lateinit var buttonServices: Button
     private lateinit var buttonInventory: Button
     private lateinit var buttonRecipes: Button
     private lateinit var buttonSuggestMenu: Button
@@ -58,6 +60,7 @@ class VolunteerActivity : AppCompatActivity() {
         buttonManageUser = findViewById(R.id.button_manage_user)
         buttonViewPlannings = findViewById(R.id.button_view_plannings)
         buttonManageProducts = findViewById(R.id.button_manage_products)
+        buttonServices = findViewById(R.id.button_services) // Initialize the button
         buttonInventory = findViewById(R.id.button_inventory)
         buttonRecipes = findViewById(R.id.button_recipes)
         buttonSuggestMenu = findViewById(R.id.button_suggest_menu)
@@ -103,6 +106,12 @@ class VolunteerActivity : AppCompatActivity() {
         buttonManageProducts.setOnClickListener {
             Log.d("VolunteerDashboard", "buttonManageProducts clicked")
             val intent = Intent(this, ProductManagementActivity::class.java)
+            startActivity(intent)
+        }
+
+        buttonServices.setOnClickListener {
+            Log.d("VolunteerDashboard", "buttonServices clicked")
+            val intent = Intent(this, ServiceActivity::class.java)
             startActivity(intent)
         }
 

@@ -190,17 +190,31 @@ class ProductController
     public function getProductByID($id)
     {
         try {
-            $product = $this->entityManager->getRepository(ProductModel::class)->findOneBy(['id' => $id]);
+            error_log("Fetching product with ID: " . $id);
+            // Vérifiez si l'ID est bien passé
+            if (!is_numeric($id)) {
+                error_log("Invalid ID: " . $id);
+                http_response_code(400);
+                return ['error' => 'Invalid ID'];
+            }
+            
+            $product = $this->entityManager->getRepository(ProductModel::class)->find($id);
+    
             if (!$product) {
+                error_log("Product not found for ID: " . $id);
                 http_response_code(404);
                 return ['error' => 'Product not found'];
             }
+    
+            error_log("Product found: " . json_encode($product));
             return $product->jsonSerialize();
         } catch (\Exception $e) {
-            error_log("Exception in getProductByBarcode: " . $e->getMessage());
+            error_log("Exception in getProductByID: " . $e->getMessage());
             throw $e;
         }
     }
+    
+    
 
     public function updateProduct($barcode, $data)
     {

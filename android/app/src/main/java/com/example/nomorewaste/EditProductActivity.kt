@@ -1,13 +1,15 @@
 package com.example.nomorewaste
 
 import android.os.Bundle
-import android.view.View
-import android.widget.*
+import android.widget.Button
+import android.widget.EditText
+import android.widget.ImageView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.bumptech.glide.Glide
 import com.example.nomorewaste.api.ApiService
 import com.example.nomorewaste.api.Product
 import com.example.nomorewaste.api.RetrofitClient
-import com.example.nomorewaste.api.Warehouse
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -15,94 +17,47 @@ import retrofit2.Response
 class EditProductActivity : AppCompatActivity() {
 
     private lateinit var apiService: ApiService
-    private lateinit var warehouseSpinner: Spinner
-    private lateinit var warehouses: List<Warehouse>
-    private var selectedWarehouseId: Int? = null
     private lateinit var nameEditText: EditText
-    private lateinit var barcodeEditText: EditText
+    private lateinit var barcodeTextView: EditText
     private lateinit var expirationDateEditText: EditText
     private lateinit var volumeEditText: EditText
-    private lateinit var saveButton: Button
+    private lateinit var imageViewQRCode: ImageView
+    private lateinit var buttonSaveChanges: Button
+
+    private lateinit var product: Product
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_edit_product)
 
         nameEditText = findViewById(R.id.editTextProductName)
-        barcodeEditText = findViewById(R.id.editTextProductBarcode)
+        barcodeTextView = findViewById(R.id.textViewProductBarcode) // Set to TextView since it's non-editable
         expirationDateEditText = findViewById(R.id.editTextExpirationDate)
         volumeEditText = findViewById(R.id.editTextVolume)
-        saveButton = findViewById(R.id.buttonSaveProduct)
-        warehouseSpinner = findViewById(R.id.spinnerWarehouse)
+        imageViewQRCode = findViewById(R.id.imageViewQRCode)
+        buttonSaveChanges = findViewById(R.id.buttonSaveChanges)
 
         apiService = RetrofitClient.getClient().create(ApiService::class.java)
 
-        val productBarcode: String? = intent.getStringExtra("product_id")
-        if (productBarcode == null) {
-            Toast.makeText(this, "Erreur: Produit non trouvé", Toast.LENGTH_SHORT).show()
-            finish()
-            return
-        }
+        val productId = intent.getStringExtra("product_id") ?: return
 
-        loadWarehouses()
-        loadProductDetails(productBarcode)
+        loadProductDetails(productId)
 
-        saveButton.setOnClickListener {
-            val name = nameEditText.text.toString().trim()
-            val expirationDate = expirationDateEditText.text.toString().trim()
-            val volume = volumeEditText.text.toString().trim().toFloatOrNull()
-
-            if (name.isEmpty() || expirationDate.isEmpty() || volume == null || selectedWarehouseId == null) {
-                Toast.makeText(this, "Tous les champs sont requis", Toast.LENGTH_SHORT).show()
-            } else {
-                val updatedProduct = Product(name, productBarcode, expirationDate, volume, selectedWarehouseId!!)
-                updateProduct(productBarcode, updatedProduct)
-            }
+        buttonSaveChanges.setOnClickListener {
+            saveProductChanges()
         }
     }
 
-    private fun loadWarehouses() {
-        apiService.getWarehouses().enqueue(object : Callback<List<Warehouse>> {
-            override fun onResponse(call: Call<List<Warehouse>>, response: Response<List<Warehouse>>) {
-                if (response.isSuccessful) {
-                    warehouses = response.body() ?: emptyList()
-                    val warehouseNames = warehouses.map { it.name }
-                    val adapter = ArrayAdapter(this@EditProductActivity, android.R.layout.simple_spinner_item, warehouseNames)
-                    adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-                    warehouseSpinner.adapter = adapter
-                    warehouseSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-                        override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
-                            selectedWarehouseId = warehouses[position].id
-                        }
-
-                        override fun onNothingSelected(parent: AdapterView<*>) {
-                            selectedWarehouseId = null
-                        }
-                    }
-                } else {
-                    Toast.makeText(this@EditProductActivity, "Erreur lors du chargement des entrepôts", Toast.LENGTH_SHORT).show()
-                }
-            }
-
-            override fun onFailure(call: Call<List<Warehouse>>, t: Throwable) {
-                Toast.makeText(this@EditProductActivity, "Échec de la connexion : ${t.message}", Toast.LENGTH_SHORT).show()
-            }
-        })
-    }
-
-    private fun loadProductDetails(barcode: String) {
-        apiService.getProduct(barcode).enqueue(object : Callback<Product> {
+    private fun loadProductDetails(productId: String) {
+        apiService.getProduct(productId).enqueue(object : Callback<Product> {
             override fun onResponse(call: Call<Product>, response: Response<Product>) {
                 if (response.isSuccessful) {
-                    val product = response.body()
-                    if (product != null) {
-                        populateProductDetails(product)
-                    } else {
-                        Toast.makeText(this@EditProductActivity, "Produit non trouvé", Toast.LENGTH_SHORT).show()
-                        finish()
+                    response.body()?.let {
+                        product = it
+                        populateProductDetails(it)
                     }
                 } else {
-                    Toast.makeText(this@EditProductActivity, "Erreur lors du chargement du produit", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@EditProductActivity, "Erreur: Produit non trouvé", Toast.LENGTH_SHORT).show()
                     finish()
                 }
             }
@@ -116,20 +71,30 @@ class EditProductActivity : AppCompatActivity() {
 
     private fun populateProductDetails(product: Product) {
         nameEditText.setText(product.name)
-        barcodeEditText.setText(product.barcode)  // Champ désactivé pour l'édition
+        barcodeTextView.setText(product.barcode) // Display barcode as non-editable
         expirationDateEditText.setText(product.expirationDate)
         volumeEditText.setText(product.volume.toString())
 
-        selectedWarehouseId = product.warehouseId
-        warehouseSpinner.setSelection(warehouses.indexOfFirst { it.id == product.warehouseId })
+        // Load the QR code image using Glide or another image loading library
+        Glide.with(this)
+            .load(product.qrCodePath)
+            .placeholder(R.drawable.placeholder_qr_code)  // Optional placeholder
+            .into(imageViewQRCode)
     }
 
-    private fun updateProduct(barcode: String, updatedProduct: Product) {
-        apiService.updateProduct(barcode, updatedProduct).enqueue(object : Callback<Void> {
+    private fun saveProductChanges() {
+        val updatedProduct = product.copy(
+            name = nameEditText.text.toString(),
+            expirationDate = expirationDateEditText.text.toString(),
+            volume = volumeEditText.text.toString().toFloat()
+        )
+
+        // Call the API to update the product
+        apiService.updateProduct(updatedProduct.barcode!!, updatedProduct).enqueue(object : Callback<Void> {
             override fun onResponse(call: Call<Void>, response: Response<Void>) {
                 if (response.isSuccessful) {
                     Toast.makeText(this@EditProductActivity, "Produit mis à jour avec succès", Toast.LENGTH_SHORT).show()
-                    finish()
+                    finish() // Close the activity
                 } else {
                     Toast.makeText(this@EditProductActivity, "Erreur lors de la mise à jour du produit", Toast.LENGTH_SHORT).show()
                 }

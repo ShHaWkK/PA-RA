@@ -1,8 +1,6 @@
-// src/main/java/com/example/nomorewaste/ProductManagementActivity.kt
 package com.example.nomorewaste
 
 import android.content.Intent
-import android.graphics.Color
 import android.os.Bundle
 import android.view.View
 import android.widget.*
@@ -30,6 +28,7 @@ class ProductManagementActivity : AppCompatActivity() {
     private lateinit var warehouseCapacityTextView: TextView
     private lateinit var progressBarCapacity: ProgressBar
     private lateinit var buttonAddProduct: Button
+    private var selectedWarehouseId: Int? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,7 +41,14 @@ class ProductManagementActivity : AppCompatActivity() {
         buttonAddProduct = findViewById(R.id.buttonAddProduct)
 
         recyclerViewStocks.layoutManager = LinearLayoutManager(this)
-        stockAdapter = StockAdapter(listOf())
+        stockAdapter = StockAdapter(
+            listOf(),
+            context = this,
+            onDeleteClick = { stock ->
+                deleteProduct(stock)
+            }
+        )
+
         recyclerViewStocks.adapter = stockAdapter
 
         apiService = RetrofitClient.getClient().create(ApiService::class.java)
@@ -53,6 +59,7 @@ class ProductManagementActivity : AppCompatActivity() {
             override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
                 val selectedWarehouseName = parent.getItemAtPosition(position) as String
                 val selectedWarehouse = warehouseMap[selectedWarehouseName]
+                selectedWarehouseId = selectedWarehouse?.id
                 if (selectedWarehouse != null) {
                     loadStocksByWarehouse(selectedWarehouse.id)
                     updateCapacityProgress(selectedWarehouse)
@@ -133,7 +140,6 @@ class ProductManagementActivity : AppCompatActivity() {
         })
     }
 
-
     private fun updateProgressBarColor(percentage: Float) {
         val color = when {
             percentage < 50 -> ContextCompat.getColor(this, R.color.green)
@@ -148,5 +154,23 @@ class ProductManagementActivity : AppCompatActivity() {
     private fun onAddProductClicked() {
         val intent = Intent(this, AddProductActivity::class.java)
         startActivity(intent)
+    }
+
+    private fun deleteProduct(stock: Stock) {
+        val productId = stock.id.toString()
+        apiService.deleteProduct(productId).enqueue(object : Callback<Void> {
+            override fun onResponse(call: Call<Void>, response: Response<Void>) {
+                if (response.isSuccessful) {
+                    Toast.makeText(this@ProductManagementActivity, "Produit supprimé avec succès", Toast.LENGTH_SHORT).show()
+                    selectedWarehouseId?.let { loadStocksByWarehouse(it) }
+                } else {
+                    Toast.makeText(this@ProductManagementActivity, "Erreur lors de la suppression du produit", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onFailure(call: Call<Void>, t: Throwable) {
+                Toast.makeText(this@ProductManagementActivity, "Échec de la connexion : ${t.message}", Toast.LENGTH_SHORT).show()
+            }
+        })
     }
 }

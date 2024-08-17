@@ -132,6 +132,10 @@
         <activity android:name=".AddProductActivity" />
         <activity android:name=".EditProductActivity" />
         <activity android:name=".ProductDetailActivity" />
+        <activity android:name=".ServiceActivity" />
+        <activity android:name=".ServicePropositionActivity" />
+        <activity android:name=".ServiceRegistrationActivity" />
+
 
 
 

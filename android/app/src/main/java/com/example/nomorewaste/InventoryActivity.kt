@@ -48,7 +48,14 @@ class InventoryActivity : AppCompatActivity() {
             val expirationDate = editTextExpirationDate.text.toString().trim()
 
             if (name.isNotEmpty() && barcode.isNotEmpty() && quantity != null && expirationDate.isNotEmpty()) {
-                val product = Product(name, barcode, expirationDate, volume = quantity.toFloat(), warehouseId = 1) // Simplification : warehouseId = 1
+                val product = Product(
+                    name = name,
+                    barcode = barcode,
+                    expirationDate = expirationDate,
+                    volume = quantity.toFloat(),
+                    warehouseId = 1,  // Simplification: warehouseId = 1
+                    qrCodePath = "", // Set this to an appropriate default or a generated value
+                )
                 addProduct(product)
             } else {
                 Toast.makeText(this, "Veuillez remplir tous les champs", Toast.LENGTH_SHORT).show()
@@ -123,5 +130,4 @@ class InventoryActivity : AppCompatActivity() {
             }
         })
     }
-
 }

@@ -34,6 +34,8 @@ use Controller\PlannedRouteController;
 use Controller\LoginController;
 use Controller\PrivateAreaController;
 use Controller\ServiceProposalController;
+use Controller\ServiceScheduleController;
+use Controller\ServiceRegistrationController;
 use Controller\TicketController;
 use Controller\VehicleController;
 use Controller\ScanController;
@@ -41,8 +43,7 @@ use Controller\WarehouseController;
 use Controller\MessageController;
 use Controller\RecipeController;
 use Controller\RecipeIngredientController;
-use Controller\ServiceScheduleController;
-use Controller\ServiceRegistrationController;
+use Controller\ProductNotificationController;
 use Service\PDFService;
 use Service\JWTService;
 use Service\EmailService;
@@ -103,6 +104,8 @@ $controllerMap = [
     'merchant' => PrivateAreaController::class,
     'services' => ServiceController::class,
     'service_proposals' => ServiceProposalController::class,
+    'service_schedules' => ServiceScheduleController::class,
+    'service_registrations' => ServiceRegistrationController::class,
     'tickets' => TicketController::class,
     'messages' => MessageController::class,
     'scripts' => 'Scripts',
@@ -111,9 +114,7 @@ $controllerMap = [
     'warehouses' => WarehouseController::class,
     'recipe' => RecipeController::class, 
     'recipe_ingredients' => RecipeIngredientController::class,
-    'service-schedules' => ServiceScheduleController::class,
-    'service-registrations' => ServiceRegistrationController::class,
-    'services' => ServiceController::class,
+    'product_notifications' => ProductNotificationController::class
 ];
 
 // Vérifie si le contrôleur existe pour le premier élément de l'URI
@@ -181,16 +182,13 @@ try {
     } else {
         // Ajout de la vérification des tickets d'un utilisateur spécifique
         if ($route === 'users' && isset($uriParts[2]) && $uriParts[2] === 'tickets') {
-            error_log("Using TicketController for /users/{id}/tickets");
             $userId = (int) $uriParts[1];
-            $controller = new TicketController($entityManager, $emailService);
             $response = $controller->getTicketsByUser($userId);
-        }
-        else if ($route === 'tickets' && isset($uriParts[2]) && $uriParts[2] === 'messages') {
+        } else if ($route === 'tickets' && isset($uriParts[2]) && $uriParts[2] === 'messages') {
             $ticketId = (int) $uriParts[1];
             error_log("Redirection vers MessageController pour ticketId: $ticketId");
-            $controller = new MessageController($entityManager, $emailService);
-            $response = $controller->processRequest($_SERVER['REQUEST_METHOD'], $uriParts, $input);
+            $controller = new MessageController($entityManager);
+            $response = $controller->processRequest($_SERVER['REQUEST_METHOD'], $uriParts, $input); // Redirige vers MessageController
         } else {
             $response = $controller->processRequest($_SERVER['REQUEST_METHOD'], $uriParts, $input);
         }

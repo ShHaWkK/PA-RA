@@ -1,0 +1,17 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <Button
+        android:id="@+id/button_propose_service"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Proposer un nouveau service" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler_view_services"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+</LinearLayout>

@@ -29,11 +29,6 @@ class ProductAdapter(
 
     override fun getItemCount(): Int = productList.size
 
-    fun updateData(newProducts: List<Product>) {
-        productList = newProducts
-        notifyDataSetChanged()
-    }
-
     fun getSelectedProducts(): List<Product> {
         return selectedProducts.toList()
     }
@@ -42,16 +37,12 @@ class ProductAdapter(
         private val productName: TextView = itemView.findViewById(R.id.productName)
         private val productQuantity: TextView = itemView.findViewById(R.id.productQuantity)
         private val productVolume: TextView = itemView.findViewById(R.id.productVolume)
-        private val productExpiration: TextView = itemView.findViewById(R.id.productExpiration)
-        private val buttonEditProduct: ImageButton = itemView.findViewById(R.id.buttonEditProduct)
-        private val buttonDeleteProduct: ImageButton = itemView.findViewById(R.id.buttonDeleteProduct)
         private val checkBox: CheckBox = itemView.findViewById(R.id.checkbox)
 
         fun bind(product: Product) {
             productName.text = product.name ?: "Nom non disponible"
             productQuantity.text = "Quantité : ${product.volume}"
             productVolume.text = "Volume : ${product.volume} m³"
-            productExpiration.text = "Exp. : ${product.expirationDate ?: "Non spécifiée"}"
             checkBox.isChecked = selectedProducts.contains(product)
 
             checkBox.setOnCheckedChangeListener { _, isChecked ->
@@ -60,14 +51,6 @@ class ProductAdapter(
                 } else {
                     selectedProducts.remove(product)
                 }
-            }
-
-            buttonEditProduct.setOnClickListener {
-                onEditClick(product)
-            }
-
-            buttonDeleteProduct.setOnClickListener {
-                onDeleteClick(product)
             }
         }
     }
