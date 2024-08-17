@@ -25,43 +25,6 @@ async function populateModifyUserForm(userId) {
     }
 }
 
-// Ajouter un écouteur d'événement au formulaire pour la soumission
-document.getElementById('modificationForm').addEventListener('submit', async function(event) {
-    event.preventDefault();
-
-    let userId;
-
-    if (selectedUserIdMerchant === undefined ){
-        userId = selectedUserId;
-    }
-    else {
-        userId = selectedUserIdMerchant;
-    }
-    const formData = {
-        first_name: document.getElementById('first_name_modify').value,
-        last_name: document.getElementById('last_name_modify').value,
-        email: document.getElementById('email_modify').value,
-        phone_number: document.getElementById('phone_number_modify').value,
-        password: document.getElementById('password_modify').value
-    };
-
-    console.log("formData",formData);
-
-    try {
-        const result = await modifyUser(userId, formData);
-        console.log('Modification succeeded:', result);
-        alert('Modification succeeded:');
-        populateVolunteerTable("");
-        populateMerchantTable("");
-
-        document.getElementById("modifyUserModal").style.display = "none";
-
-    } catch (error) {
-        console.error('Erreur lors de la modification de l\'utilisateur:', error);
-        alert('Modification failed');
-    }
-});
-
 // Fonction pour supprimer les utilisateurs sélectionnés
 async function deleteUsers(type) {
     if (type == 'merchant'){
@@ -378,6 +341,43 @@ document.addEventListener('DOMContentLoaded',
                 modifyModal.style.display = "none";
             }
         }
+
+        // Ajouter un écouteur d'événement au formulaire pour la soumission
+        document.getElementById('modificationForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+
+            let userId;
+
+            if (selectedUserIdMerchant === undefined ){
+                userId = selectedUserId;
+            }
+            else {
+                userId = selectedUserIdMerchant;
+            }
+            const formData = {
+                first_name: document.getElementById('first_name_modify').value,
+                last_name: document.getElementById('last_name_modify').value,
+                email: document.getElementById('email_modify').value,
+                phone_number: document.getElementById('phone_number_modify').value,
+                password: document.getElementById('password_modify').value
+            };
+
+            console.log("formData",formData);
+
+            try {
+                const result = await modifyUser(userId, formData);
+                console.log('Modification succeeded:', result);
+                alert('Modification succeeded:');
+                populateVolunteerTable("");
+                populateMerchantTable("");
+
+                document.getElementById("modifyUserModal").style.display = "none";
+
+            } catch (error) {
+                console.error('Erreur lors de la modification de l\'utilisateur:', error);
+                alert('Modification failed');
+            }
+        });
     });
 
 

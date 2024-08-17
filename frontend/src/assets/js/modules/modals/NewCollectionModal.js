@@ -62,4 +62,20 @@ document.addEventListener('DOMContentLoaded', function () {
     closeProductModal.addEventListener('click',function (){
         productModal.style.display = "none";
     });
+
+    // Fenêtre modale de vue des disponibilités
+    var availabilityModal = document.getElementById("volunteerAvailabilitiesModal");
+    var availabilitySpan = document.getElementById("closeVolunteerAvailabilitiesButton");
+
+    availabilitySpan.onclick = function() {
+        availabilityModal.style.display = "none";
+    }
+
+    // Fenêtre modale de vue des compétences
+    var skillModal = document.getElementById("volunteerSkillModal");
+    var skillSpan = document.getElementById("closeVolunteerSkillButton");
+
+    skillSpan.onclick = function() {
+        skillModal.style.display = "none";
+    }
 });

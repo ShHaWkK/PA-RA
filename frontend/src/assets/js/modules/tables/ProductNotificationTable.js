@@ -6,23 +6,14 @@ import { populateProductDetailsInModal } from "../modals/StockModals.js";
 export async function populateProductNotificationTable(queryParameters) {
     try {
         // Afficher le loader
-        document.getElementById('loadingBodyGeneral').classList.remove('hidden');
+        document.getElementById('loadingBodyNotification').classList.remove('hidden');
 
-        // Sélectionner la table et le tbody
-        const productNotificationTable = document.querySelector('.product-notification-table table');
-        if (!productNotificationTable) {
-            console.error('Product notification table not found.');
+        // Sélectionner le conteneur où la table sera insérée
+        const tableContainer = document.querySelector('.product-notification-table');
+        if (!tableContainer) {
+            console.error('Product notification table container not found.');
             return;
         }
-
-        let tbody = productNotificationTable.querySelector('tbody');
-        if (!tbody) {
-            tbody = document.createElement('tbody');
-            productNotificationTable.appendChild(tbody);
-        }
-
-        // Effacer le contenu existant du tbody
-        tbody.innerHTML = '';
 
         // Récupérer les notifications
         const notifications = await getAllProductNotifications(queryParameters);
@@ -31,9 +22,30 @@ export async function populateProductNotificationTable(queryParameters) {
         // Vérifier si des notifications sont fournies
         if (!notifications || notifications.length === 0) {
             console.log('No product notifications found');
-            document.getElementById('loadingBodyGeneral').classList.add('hidden');
+            document.getElementById('loadingBodyNotification').classList.add('hidden');
             return;
         }
+
+        // Créer la structure de la table
+        const table = document.createElement('table');
+        table.classList.add('product-notification-table'); // Ajouter une classe pour le style
+
+        const thead = document.createElement('thead');
+        const headerRow = document.createElement('tr');
+
+        // Définir les en-têtes de la table
+        const headers = ['Select', 'Company', 'Product', 'Quantity', 'Address', 'Wished Collection Date', 'Notified At'];
+        headers.forEach(headerText => {
+            const th = document.createElement('th');
+            th.textContent = headerText;
+            headerRow.appendChild(th);
+        });
+
+        thead.appendChild(headerRow);
+        table.appendChild(thead);
+
+        // Créer le tbody
+        const tbody = document.createElement('tbody');
 
         // Ajouter les lignes au tbody
         notifications.forEach(notification => {
@@ -73,7 +85,6 @@ export async function populateProductNotificationTable(queryParameters) {
             });
             productCell.appendChild(productLink);
 
-
             const quantityCell = document.createElement('td');
             quantityCell.textContent = notification.notifiedQuantity;
 
@@ -87,7 +98,7 @@ export async function populateProductNotificationTable(queryParameters) {
             notifiedAtCell.textContent = formatDateToFrench(new Date(notification.notifiedAt.timestamp * 1000));
 
             // Ajouter toutes les cellules à la ligne
-            row.appendChild(checkboxCell); // Ajouter la cellule de la checkbox en premier
+            row.appendChild(checkboxCell);
             row.appendChild(companyCell);
             row.appendChild(productCell);
             row.appendChild(quantityCell);
@@ -98,10 +109,19 @@ export async function populateProductNotificationTable(queryParameters) {
             tbody.appendChild(row);
         });
 
+        // Attacher le tbody à la table
+        table.appendChild(tbody);
+
+        // Effacer le contenu existant du conteneur
+        tableContainer.innerHTML = '';
+
+        // Attacher la table complète au conteneur
+        tableContainer.appendChild(table);
+
     } catch (error) {
         console.error('Error in populateProductNotificationTable:', error.message);
     } finally {
         // Retirer le loader
-        document.getElementById('loadingBodyGeneral').classList.add('hidden');
+        document.getElementById('loadingBodyNotification').classList.add('hidden');
     }
 }

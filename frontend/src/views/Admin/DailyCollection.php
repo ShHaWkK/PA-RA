@@ -25,36 +25,43 @@
             <button id="allCollectionDates" > Toutes les dates </button>
         </div>
 
-        <div class="row">
-            <button class="add-button" id="addCollectionButton"> Ajouter </button>
-            <button class="delete-button" id="deleteCollectionButton"> Supprimer </button>
-            <button class="modify-button" id="modifyCollectionButton"> Modifier </button>
+        <h2> Sélectionner l'entrepot</h2>
+<!--        <select name="warehouse" id="warehouseSelect"></select>-->
+        <div class="warehouse-table">
+            <?php
+            $loaderId = 'loadingBodyWarehouse';
+            include($_SERVER['DOCUMENT_ROOT'] . '/views/includes/Loader.php');
+            ?>
         </div>
 
+        <h2> Sélectionner le véhicule</h2>
+<!--        <select name="vehicle" id="vehicleSelect"></select>-->
+        <div class="vehicle-table">
+            <?php
+            $loaderId = 'loadingBodyVehicle';
+            include($_SERVER['DOCUMENT_ROOT'] . '/views/includes/Loader.php');
+            ?>
+        </div>
+
+        <h2> Sélectionner les produits de la collecte</h2>
         <!-- Tableau des Collectes -->
         <div class="product-notification-table">
-            <table>
-                <thead>
-                <tr>
-                    <th></th>
-                    <th>Company</th>
-                    <th>Product</th>
-                    <th>Notified Quantity</th>
-                    <th>Address</th>
-                    <th>Wished Collection Date</th>
-                    <th>Notified At</th>
-                </tr>
-                </thead>
-            </table>
+            <?php
+            $loaderId = 'loadingBodyNotification';
+            include($_SERVER['DOCUMENT_ROOT'] . '/views/includes/Loader.php');
+            ?>
         </div>
 
+        <h2> Sélectionner le chauffeur</h2>
         <!-- Tableau de sélection du chauffeur -->
-        <div class="volunteer-table"></div>
+        <div class="volunteer-table">
+            <?php
+            $loaderId = 'loadingBodyDriver';
+            include($_SERVER['DOCUMENT_ROOT'] . '/views/includes/Loader.php');
+            ?>
+        </div>
 
-        <?php
-        $loaderId = 'loadingBodyGeneral';
-        include($_SERVER['DOCUMENT_ROOT'] . '/views/includes/Loader.php');
-        ?>
+        <button id="createCollection"></button>
 
         <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/AdminCollectionPage/VolunteerDetailsModal.php'); ?>
         <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/AdminCollectionPage/VehicleDetailsModal.php'); ?>
@@ -63,6 +70,8 @@
         <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/AdminCollectionPage/AssignProductToCollectionModal.php'); ?>
         <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/AdminUsersPages/MerchantCompaniesModal.php'); ?>
         <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/AdminStockPage/productDetailModal.php'); ?>
+        <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/AdminUsersPages/VolunteerSkillModal.php'); ?>
+        <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/AdminUsersPages/VolunteerAvailabilitiesModal.php'); ?>
 
         <!-- Script pour gérer les interactions avec la page -->
         <script type="module" src="/assets/js/pages/AdminNewCollection.js"></script>
