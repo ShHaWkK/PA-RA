@@ -42,8 +42,8 @@ class ServicePropositionActivity : AppCompatActivity() {
     }
 
     private fun proposeService(userId: Int) {
-        val name = nameEditText.text.toString()
-        val description = descriptionEditText.text.toString()
+        val name = nameEditText.text.toString().trim()
+        val description = descriptionEditText.text.toString().trim()
 
         if (name.isEmpty() || description.isEmpty()) {
             Toast.makeText(this, "Veuillez remplir tous les champs", Toast.LENGTH_SHORT).show()

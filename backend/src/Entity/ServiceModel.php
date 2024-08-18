@@ -20,10 +20,16 @@ class ServiceModel
     private $description;
 
     #[ORM\Column(type: "datetime")]
-    private $schedule;
+    private $start_schedule;
+
+    #[ORM\Column(type: "datetime")]
+    private $end_schedule;
 
     #[ORM\Column(type: "integer")]
     private $capacity;
+
+    #[ORM\Column(type: "integer", options: ["default" => 0])]
+    private $current_registrations;
 
     #[ORM\Column(type: "string", length: 50, options: ["default" => "open"])]
     private $status;
@@ -37,7 +43,7 @@ class ServiceModel
     #[ORM\Column(type: "datetime", options: ["default" => "CURRENT_TIMESTAMP", "onUpdate" => "CURRENT_TIMESTAMP"])]
     private $updated_at;
 
-    // Getters and setters for each property
+    // Getters and setters for each property...
 
     public function getId(): ?int
     {
@@ -66,14 +72,25 @@ class ServiceModel
         return $this;
     }
 
-    public function getSchedule(): ?\DateTimeInterface
+    public function getStartSchedule(): ?\DateTimeInterface
     {
-        return $this->schedule;
+        return $this->start_schedule;
     }
 
-    public function setSchedule(\DateTimeInterface $schedule): self
+    public function setStartSchedule(\DateTimeInterface $start_schedule): self
     {
-        $this->schedule = $schedule;
+        $this->start_schedule = $start_schedule;
+        return $this;
+    }
+
+    public function getEndSchedule(): ?\DateTimeInterface
+    {
+        return $this->end_schedule;
+    }
+
+    public function setEndSchedule(\DateTimeInterface $end_schedule): self
+    {
+        $this->end_schedule = $end_schedule;
         return $this;
     }
 
@@ -85,6 +102,17 @@ class ServiceModel
     public function setCapacity(int $capacity): self
     {
         $this->capacity = $capacity;
+        return $this;
+    }
+
+    public function getCurrentRegistrations(): ?int
+    {
+        return $this->current_registrations;
+    }
+
+    public function setCurrentRegistrations(int $current_registrations): self
+    {
+        $this->current_registrations = $current_registrations;
         return $this;
     }
 
@@ -132,3 +160,4 @@ class ServiceModel
         return $this;
     }
 }
+

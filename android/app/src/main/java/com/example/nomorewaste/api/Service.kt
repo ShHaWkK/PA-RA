@@ -33,13 +33,13 @@ data class Service(
     @SerializedName("id") val id: Int,
     @SerializedName("name") val name: String,
     @SerializedName("description") val description: String,
-    @SerializedName("schedule") val schedule: Schedule,
+    @SerializedName("start_schedule") val startSchedule: String,
+    @SerializedName("end_schedule") val endSchedule: String,
     @SerializedName("capacity") val capacity: Int,
+    @SerializedName("current_registrations") val currentRegistrations: Int,
     @SerializedName("status") val status: String,
-    @SerializedName("location") val location: String,
-    @SerializedName("currentRegistrations") val currentRegistrations: Int // Add this field to track current registrations
-)
-{
+    @SerializedName("location") val location: String
+) {
     val remainingCapacity: Int
         get() = capacity - currentRegistrations
 }

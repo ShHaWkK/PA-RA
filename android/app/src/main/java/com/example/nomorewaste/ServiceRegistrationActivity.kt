@@ -21,6 +21,8 @@ class ServiceRegistrationActivity : AppCompatActivity() {
     private lateinit var registerButton: Button
     private lateinit var serviceNameTextView: TextView
     private lateinit var serviceDescriptionTextView: TextView
+    private lateinit var serviceStartTimeTextView: TextView
+    private lateinit var serviceEndTimeTextView: TextView
     private lateinit var serviceCapacityTextView: TextView
     private var serviceId: Int = 0
     private var isAlreadyRegistered: Boolean = false
@@ -31,6 +33,8 @@ class ServiceRegistrationActivity : AppCompatActivity() {
 
         serviceNameTextView = findViewById(R.id.text_service_name)
         serviceDescriptionTextView = findViewById(R.id.text_service_description)
+        serviceStartTimeTextView = findViewById(R.id.text_service_start_time)
+        serviceEndTimeTextView = findViewById(R.id.text_service_end_time)
         serviceCapacityTextView = findViewById(R.id.text_service_capacity)
         registerButton = findViewById(R.id.button_register_service)
 
@@ -65,6 +69,8 @@ class ServiceRegistrationActivity : AppCompatActivity() {
                         Log.d("ServiceRegistration", "Service details loaded: $it")
                         serviceNameTextView.text = it.name
                         serviceDescriptionTextView.text = it.description
+                        serviceStartTimeTextView.text = "Start Time: ${it.startSchedule}"
+                        serviceEndTimeTextView.text = "End Time: ${it.endSchedule}"
                         serviceCapacityTextView.text = "Places restantes : ${it.capacity - it.currentRegistrations}"
 
                         // Check if the user is already registered for this service

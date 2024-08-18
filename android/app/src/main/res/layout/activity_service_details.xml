@@ -1,3 +1,5 @@
+<!--activity_service_details -->
+
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -8,6 +10,7 @@
         android:id="@+id/service_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:text="Service Name"
         android:textStyle="bold"
         android:textSize="20sp"/>
 
@@ -16,6 +19,23 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
+        android:text="Service Description"
+        android:textSize="16sp"/>
+
+    <TextView
+        android:id="@+id/service_start_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Start Time"
+        android:textSize="16sp"/>
+
+    <TextView
+        android:id="@+id/service_end_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="End Time"
         android:textSize="16sp"/>
 
     <TextView
@@ -23,6 +43,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
+        android:text="Capacity"
         android:textSize="16sp"/>
 
     <Button
@@ -32,3 +53,4 @@
         android:layout_marginTop="16dp"
         android:text="Se désinscrire" />
 </LinearLayout>
+
