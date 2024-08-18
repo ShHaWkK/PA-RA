@@ -1,4 +1,4 @@
-import { getCollectionsByDateAndCompletion, getAllCollections, getCollectionsByDate } from '/assets/js/api/Collections.js';
+import { getCollections } from '/assets/js/api/Collections.js';
 import { populateVolunteerDetailsInModal, populateVehicleDetailsInModal, populateCollectedProductsModal } from "../modals/CollectionModals.js";
 import { formatDateToFrench } from "../FormatDate.js";
 
@@ -39,23 +39,17 @@ export async function populateCollectionTable(date, completion) {
     backOfficeContent.appendChild(table);
 
     try {
-        let collections;
-
-        // Vérifier si les paramètres sont fournis
-        if (date && date.trim() !== "" && completion !== undefined) {
-            console.log("date", date);
-            console.log("completion", completion);
-            collections = await getCollectionsByDateAndCompletion(date, completion);
-        } else if (date && date.trim() !== "") {
-            console.log("date", date);
-            collections = await getCollectionsByDate(date);
-        } else if (completion !== undefined) {
-            console.log("completion", completion);
-            collections = await getCollectionsByCompletion(completion);
-        } else {
-            console.log("No filters applied");
-            collections = await getAllCollections();
+        // Créer les queryParameters en fonction des arguments passés à la fonction
+        const queryParameters = {};
+        if (date && date.trim() !== "") {
+            queryParameters.date = date;
         }
+        if (completion !== undefined) {
+            queryParameters.completed = completion;
+        }
+
+        // Appeler la fonction générique pour obtenir les collections
+        const collections = await getCollections(queryParameters);
 
         if (!collections || collections.length === 0) {
             console.log('No collections found');

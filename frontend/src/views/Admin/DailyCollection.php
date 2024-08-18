@@ -18,50 +18,49 @@
     <div class="back-office-content">
         <h1>Nouvelle collecte</h1>
 
-
         <div class="row">
-            <label for="collectionDate">Collection date:</label>
+            <label for="collectionDate">Date souhaitée de récupération:</label>
             <input type="date" id="collectionDate" name="collection-date"/>
             <button id="allCollectionDates" > Toutes les dates </button>
-        </div>
-
-        <h2> Sélectionner l'entrepot</h2>
-<!--        <select name="warehouse" id="warehouseSelect"></select>-->
-        <div class="warehouse-table">
-            <?php
-            $loaderId = 'loadingBodyWarehouse';
-            include($_SERVER['DOCUMENT_ROOT'] . '/views/includes/Loader.php');
-            ?>
-        </div>
-
-        <h2> Sélectionner le véhicule</h2>
-<!--        <select name="vehicle" id="vehicleSelect"></select>-->
-        <div class="vehicle-table">
-            <?php
-            $loaderId = 'loadingBodyVehicle';
-            include($_SERVER['DOCUMENT_ROOT'] . '/views/includes/Loader.php');
-            ?>
         </div>
 
         <h2> Sélectionner les produits de la collecte</h2>
         <!-- Tableau des Collectes -->
         <div class="product-notification-table">
-            <?php
-            $loaderId = 'loadingBodyNotification';
-            include($_SERVER['DOCUMENT_ROOT'] . '/views/includes/Loader.php');
-            ?>
         </div>
+        <?php
+        $loaderId = 'loadingBodyNotification';
+        include($_SERVER['DOCUMENT_ROOT'] . '/views/includes/Loader.php');
+        ?>
+
+        <h2> Sélectionner l'entrepot</h2>
+<!--        <select name="warehouse" id="warehouseSelect"></select>-->
+        <div class="warehouse-table">
+        </div>
+        <?php
+        $loaderId = 'loadingBodyWarehouse';
+        include($_SERVER['DOCUMENT_ROOT'] . '/views/includes/Loader.php');
+        ?>
+
+        <h2> Sélectionner le véhicule</h2>
+<!--        <select name="vehicle" id="vehicleSelect"></select>-->
+        <div class="vehicle-table">
+        </div>
+        <?php
+        $loaderId = 'loadingBodyVehicle';
+        include($_SERVER['DOCUMENT_ROOT'] . '/views/includes/Loader.php');
+        ?>
 
         <h2> Sélectionner le chauffeur</h2>
         <!-- Tableau de sélection du chauffeur -->
         <div class="volunteer-table">
-            <?php
-            $loaderId = 'loadingBodyDriver';
-            include($_SERVER['DOCUMENT_ROOT'] . '/views/includes/Loader.php');
-            ?>
         </div>
+        <?php
+        $loaderId = 'loadingBodyDriver';
+        include($_SERVER['DOCUMENT_ROOT'] . '/views/includes/Loader.php');
+        ?>
 
-        <button id="createCollection"></button>
+        <button id="createCollection" class="add-button">Envoyer</button>
 
         <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/AdminCollectionPage/VolunteerDetailsModal.php'); ?>
         <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/AdminCollectionPage/VehicleDetailsModal.php'); ?>
@@ -76,6 +75,10 @@
         <!-- Script pour gérer les interactions avec la page -->
         <script type="module" src="/assets/js/pages/AdminNewCollection.js"></script>
     </div>
+    <?php
+    $loaderId = 'loadingBodyGeneral';
+    include($_SERVER['DOCUMENT_ROOT'] . '/views/includes/Loader.php');
+    ?>
 </div>
 </body>
 </html>

@@ -90,31 +90,41 @@ async function getAllCollections() {
     }
 }
 
-    async function getCollectionsByDate(date) {
-        try {
-            // Construire l'URL avec le paramètre de date
-            const url = new URL(apiEndpoint + '/collections');
-            url.searchParams.append('date', date);
+async function getCollections(queryParameters = {}) {
+    try {
+        // Construire l'URL avec les paramètres requis
+        const url = new URL(apiEndpoint + '/collections');
 
-            console.log("url",url);
-
-            const response = await fetch(url, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to get collections by date');
+        // Ajouter les query parameters à l'URL
+        Object.keys(queryParameters).forEach(key => {
+            if (queryParameters[key] !== undefined && queryParameters[key] !== null) {
+                url.searchParams.append(key, queryParameters[key]);
             }
+        });
 
-            return await response.json();
-        } catch (error) {
-            console.error('Error getting collections by date:', error.message);
-            throw error;
+        console.log("URL générée:", url.toString());
+
+        // Effectuer la requête GET
+        const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        // Vérifier si la réponse est correcte
+        if (!response.ok) {
+            throw new Error(`Failed to get collections with parameters: ${JSON.stringify(queryParameters)}`);
         }
+
+        // Retourner les données JSON
+        return await response.json();
+    } catch (error) {
+        console.error('Error in getCollections:', error.message);
+        throw error;
     }
+}
+
 
 async function getProductsFromCollection(collectionId){
     try {
@@ -130,34 +140,6 @@ async function getProductsFromCollection(collectionId){
         return await response.json();
     } catch (error) {
         console.error('Error getting all products from collection:', error.message);
-        throw error;
-    }
-}
-
-async function getCollectionsByDateAndCompletion(date = null, completed) {
-    try {
-        // Construire l'URL avec les paramètres requis
-        let url = apiEndpoint + '/collections?completed=' + completed;
-
-        // Ajouter la date au paramètre si elle est fournie
-        if (date) {
-            url += '&date=' + encodeURIComponent(date);
-        }
-
-        const response = await fetch(url, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
-
-        if (!response.ok) {
-            throw new Error('Failed to get collections by date and completion');
-        }
-
-        return await response.json();
-    } catch (error) {
-        console.error('Error getting collections by date and completion:', error.message);
         throw error;
     }
 }
@@ -186,9 +168,9 @@ async function removeProductsFromCollection(collectionId, productIds) {
 }
 
 async function assignProductsToCollection(collectionId, products) {
-    const url = apiEndpoint + `/collections/${collectionId}/assign`;
+    const url = apiEndpoint + `/collections/${collectionId}/products`;
     const response = await fetch(url, {
-        method: 'POST',
+        method: 'PATCH',
         headers: {
             'Content-Type': 'application/json'
         },
@@ -212,4 +194,4 @@ async function assignProductsToCollection(collectionId, products) {
     return response.json();
 }
 
-export { createCollection, getCollectionByID, updateCollection, deleteCollection, getAllCollections, getProductsFromCollection, getCollectionsByDate, getCollectionsByDateAndCompletion, removeProductsFromCollection, assignProductsToCollection};
+export { createCollection, getCollectionByID, updateCollection, deleteCollection, getAllCollections, getProductsFromCollection, removeProductsFromCollection, assignProductsToCollection, getCollections};

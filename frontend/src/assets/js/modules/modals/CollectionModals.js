@@ -193,7 +193,7 @@ export async function populateCollectedProductsModal(collectionID) {
             const radioInput = document.createElement('input');
             radioInput.type = 'radio';
             radioInput.name = 'productSelection'; // Tous les radio-buttons partagent le même nom pour permettre une sélection unique
-            radioInput.value = element.product.id; // Attribuer l'ID du produit comme valeur du radio-button
+            radioInput.value = element.notification_id; // Attribuer l'ID du produit comme valeur du radio-button
 
             // Contenu du produit
             const productInfo = document.createElement('span');
@@ -202,6 +202,7 @@ export async function populateCollectedProductsModal(collectionID) {
                 <strong>Barcode:</strong> ${element.product.barcode} <br>
                 <strong>Expiration Date:</strong> ${formatDateToFrench(new Date(element.product.expiration_date).getTime())} <br>
                 <strong>Volume:</strong> ${element.product.volume} L <br>
+                <strong>Collected:</strong> ${element.is_collected} <br>
                 <strong>Quantity Collected:</strong> ${element.quantity_collected} <br>
                 <strong>Scanned:</strong> ${element.product.scanned ? 'Yes' : 'No'}
             `;
@@ -261,7 +262,7 @@ async function removeProducts() {
             alert(`Erreur: ${response.error}`);
         } else {
             alert("Produits retirés de la collection avec succès.");
-            await populateCollectedProductsModal();
+            await populateCollectedProductsModal(selectedCollectionId);
         }
     } catch (error) {
         console.error("Erreur lors de la suppression des produits:", error.message);

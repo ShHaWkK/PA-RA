@@ -4,25 +4,39 @@ import { populateCompaniesInModal } from "../modals/NewCollectionModal.js";
 import { populateProductDetailsInModal } from "../modals/StockModals.js";
 
 export async function populateProductNotificationTable(queryParameters) {
-    try {
-        // Afficher le loader
-        document.getElementById('loadingBodyNotification').classList.remove('hidden');
+    const loader = document.getElementById('loadingBodyNotification');
+    const tableContainer = document.querySelector('.product-notification-table');
 
-        // Sélectionner le conteneur où la table sera insérée
-        const tableContainer = document.querySelector('.product-notification-table');
-        if (!tableContainer) {
+    try {
+        // Vérifiez si le loader existe et l'affichez
+        if (loader) {
+            loader.classList.remove('hidden');
+            console.log('Loader shown.');
+        } else {
+            console.error('Loader element not found.');
+            return;
+        }
+
+        // Vérifiez si le conteneur de la table existe
+        if (tableContainer) {
+            tableContainer.classList.add('hidden');
+        }else {
             console.error('Product notification table container not found.');
             return;
         }
 
         // Récupérer les notifications
         const notifications = await getAllProductNotifications(queryParameters);
-        console.log("notifications", notifications);
+        console.log("Retrieved notifications:", notifications);
 
-        // Vérifier si des notifications sont fournies
+        // Vérifiez si des notifications sont fournies
         if (!notifications || notifications.length === 0) {
             console.log('No product notifications found');
-            document.getElementById('loadingBodyNotification').classList.add('hidden');
+            tableContainer.innerHTML = '<p>No product collections set for this date.</p>'; // Afficher un message si aucune notification
+            if (loader) {
+                loader.classList.add('hidden');
+                console.log('Loader hidden.');
+            }
             return;
         }
 
@@ -112,9 +126,8 @@ export async function populateProductNotificationTable(queryParameters) {
         // Attacher le tbody à la table
         table.appendChild(tbody);
 
-        // Effacer le contenu existant du conteneur
+        // Réinitialiser le contenu du conteneur
         tableContainer.innerHTML = '';
-
         // Attacher la table complète au conteneur
         tableContainer.appendChild(table);
 
@@ -122,6 +135,13 @@ export async function populateProductNotificationTable(queryParameters) {
         console.error('Error in populateProductNotificationTable:', error.message);
     } finally {
         // Retirer le loader
-        document.getElementById('loadingBodyNotification').classList.add('hidden');
+        if (loader) {
+            loader.classList.add('hidden');
+            console.log('Loader hidden.');
+        }
+
+        if (tableContainer) {
+            tableContainer.classList.remove('hidden');
+        }
     }
 }

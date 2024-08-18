@@ -28,8 +28,8 @@ async function deleteCollections() {
 
     try {
         await deleteCollection(selectedCollectionId);
-        alert("Collection supprimée avec succés");
-
+        alert("Collecte supprimée avec succés");
+        populateCollectionTable();
     } catch (error) {
         console.error("Error deleting the collection:", error.message);
         alert("An error occurred while deleting the collection.");
@@ -52,12 +52,10 @@ function handleTableUpdate() {
     else{
         populateCollectionTable(selectedDate);
     }
-
 }
 
 document.addEventListener('DOMContentLoaded',
     function (){
-        populateCollectionDate();
         document.getElementById('collectionDate').addEventListener('change', handleTableUpdate);
 
         document.getElementById('allCollectionDates').addEventListener('click', function () {
