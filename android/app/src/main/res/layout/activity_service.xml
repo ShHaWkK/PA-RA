@@ -10,8 +10,23 @@
         android:layout_height="wrap_content"
         android:text="Proposer un nouveau service" />
 
+    <Button
+        android:id="@+id/button_my_registrations"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Mes inscriptions"
+        android:layout_marginTop="8dp"/>
+
+    <Button
+        android:id="@+id/button_my_proposals"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Mes propositions"
+        android:layout_marginTop="8dp"/>
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_view_services"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent"
+        android:layout_marginTop="16dp"/>
 </LinearLayout>

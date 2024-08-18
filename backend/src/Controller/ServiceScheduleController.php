@@ -34,25 +34,25 @@ class ServiceRegistrationController
         try {
             switch ($method) {
                 case 'POST':
-                    return $this->createRegistration($input);
+                    return $this->createSchedule($input);
                 case 'GET':
                     if (isset($uriParts[1])) {
-                        return $this->getRegistration((int) $uriParts[1]);
+                        return $this->getScheduleByUser((int) $uriParts[1]);
                     } else {
-                        return $this->getAllRegistrations();
+                        return $this->getAllSchedules();
                     }
                 case 'PUT':
                     if (isset($uriParts[1])) {
-                        return $this->updateRegistration((int) $uriParts[1], $input);
+                        return $this->updateSchedule((int) $uriParts[1], $input);
                     }
                     http_response_code(400);
-                    return ['error' => 'Registration ID not specified'];
+                    return ['error' => 'Schedule ID not specified'];
                 case 'DELETE':
                     if (isset($uriParts[1])) {
-                        return $this->deleteRegistration((int) $uriParts[1]);
+                        return $this->deleteSchedule((int) $uriParts[1]);
                     }
                     http_response_code(400);
-                    return ['error' => 'Registration ID not specified'];
+                    return ['error' => 'Schedule ID not specified'];
                 default:
                     http_response_code(405);
                     return ['error' => 'Method Not Allowed'];
@@ -64,6 +64,21 @@ class ServiceRegistrationController
         }
     }
 
+    private function getScheduleByUser($userId)
+    {
+        try {
+            $schedules = $this->serviceScheduleService->getScheduleByUser($userId);
+            if (!$schedules) {
+                http_response_code(404);
+                return ['error' => 'No schedules found for this user'];
+            }
+            return json_decode($this->serializer->serialize($schedules, 'json'), true);
+        } catch (\Exception $e) {
+            error_log("Exception in getScheduleByUser: " . $e->getMessage());
+            http_response_code(500);
+            return ['error' => 'Internal Server Error'];
+        }
+    }
     private function createRegistration($data)
     {
         try {

@@ -90,16 +90,17 @@ class ServiceRegistrationService
         if (!$registration) {
             throw new \Exception('Registration not found');
         }
-
+    
         // Augmente la capacité du service lors de la suppression d'une inscription
         $service = $this->entityManager->find(ServiceModel::class, $registration->getServiceId());
         if ($service) {
             $service->setCapacity($service->getCapacity() + 1);
         }
-
+    
         $this->entityManager->remove($registration);
         $this->entityManager->flush();
     }
+    
 
     public function getAllRegistrations()
     {
@@ -109,6 +110,11 @@ class ServiceRegistrationService
     public function getRegistrationsByServiceId($serviceId)
     {
         return $this->entityManager->getRepository(ServiceRegistrationModel::class)->findBy(['service_id' => $serviceId]);
+    }
+
+    public function getRegistrationsByUser($userId)
+    {
+        return $this->entityManager->getRepository(ServiceRegistrationModel::class)->findBy(['user_id' => $userId]);
     }
 }
 ?>

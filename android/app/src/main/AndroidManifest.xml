@@ -135,6 +135,9 @@
         <activity android:name=".ServiceActivity" />
         <activity android:name=".ServicePropositionActivity" />
         <activity android:name=".ServiceRegistrationActivity" />
+        <activity android:name=".MyRegistrationsActivity" />
+        <activity android:name=".MyProposalsActivity" />
+        <activity android:name=".ServiceDetailsActivity" />
 
 
 

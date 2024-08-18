@@ -44,7 +44,7 @@ interface ApiService {
     @DELETE("products/{id}")
     fun deleteProduct(@Path("id") id: Int): Call<Void>
 
-    @GET("products/{id}")
+    @GET("products/id/{id}")
     fun getProduct(@Path("id") id: String): Call<Product>
 
     @PUT("products/{id}")
@@ -65,12 +65,25 @@ interface ApiService {
     @GET("services/{id}")
     fun getService(@Path("id") id: Int): Call<Service>
 
+    @GET("services/{id}")
+    fun getServiceById(@Path("id") serviceId: Int): Call<Service>
+
+    @GET("service_registrations/{userId}")
+    fun getUserRegistrations(@Path("userId") userId: Int): Call<List<ServiceRegistration>>
+
+    @DELETE("service_registrations/{id}")
+    fun unsubscribeFromService(@Path("id") registrationId: Int): Call<Void>
+
     @POST("service_registrations")
     fun registerForService(@Body request: ServiceRegistrationRequest): Call<Void>
 
-    @GET("service_registrations/{user_id}")
-    fun getUserRegistrations(@Path("user_id") userId: Int): Call<List<Service>>
-
     @POST("service_proposals")
     fun proposeService(@Body request: ServiceProposalRequest): Call<Void>
+
+    @GET("service_proposals/{user_id}")
+    fun getUserProposals(@Path("user_id") userId: Int): Call<List<ServiceProposal>>
+
+    @GET("service_schedules/{user_id}")
+    fun getUserSchedule(@Path("user_id") userId: Int): Call<List<ServiceSchedule>>
+
 }

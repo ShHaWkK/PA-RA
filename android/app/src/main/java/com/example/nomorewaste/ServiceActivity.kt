@@ -20,6 +20,8 @@ class ServiceActivity : AppCompatActivity() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var apiService: ApiService
     private lateinit var proposeServiceButton: Button
+    private lateinit var myRegistrationsButton: Button
+    private lateinit var myProposalsButton: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -27,6 +29,8 @@ class ServiceActivity : AppCompatActivity() {
 
         recyclerView = findViewById(R.id.recycler_view_services)
         proposeServiceButton = findViewById(R.id.button_propose_service)
+        myRegistrationsButton = findViewById(R.id.button_my_registrations)
+        myProposalsButton = findViewById(R.id.button_my_proposals)
 
         recyclerView.layoutManager = LinearLayoutManager(this)
 
@@ -34,6 +38,16 @@ class ServiceActivity : AppCompatActivity() {
 
         proposeServiceButton.setOnClickListener {
             val intent = Intent(this, ServicePropositionActivity::class.java)
+            startActivity(intent)
+        }
+
+        myRegistrationsButton.setOnClickListener {
+            val intent = Intent(this, MyRegistrationsActivity::class.java)
+            startActivity(intent)
+        }
+
+        myProposalsButton.setOnClickListener {
+            val intent = Intent(this, MyProposalsActivity::class.java)
             startActivity(intent)
         }
 

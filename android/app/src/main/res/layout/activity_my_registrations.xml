@@ -1,0 +1,12 @@
+<!-- Path: res/layout/activity_my_registrations.xml -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler_view_my_registrations"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+</LinearLayout>

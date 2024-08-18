@@ -1,4 +1,3 @@
-<!-- Path: res/layout/item_service.xml -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -6,16 +5,17 @@
     android:padding="8dp">
 
     <TextView
-        android:id="@+id/service_name"
+        android:id="@+id/proposal_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:text="Proposal Name"
         android:textStyle="bold"
         android:textSize="16sp"/>
 
     <TextView
-        android:id="@+id/service_description"
+        android:id="@+id/proposal_description"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:textSize="14sp"/>
+        android:text="Proposal Description"
+        android:layout_marginTop="4dp"/>
 </LinearLayout>

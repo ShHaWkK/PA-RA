@@ -34,19 +34,19 @@ class ServiceProposalController
                     return $this->createProposal($input);
                 case 'GET':
                     if (isset($uriParts[1])) {
-                        return $this->getProposal((int) $uriParts[1]);
+                        return $this->getProposalsByUser((int) $uriParts[1]);
                     } else {
                         return $this->getAllProposals();
                     }
-                    case 'PUT':
-                        if (isset($uriParts[1]) && isset($uriParts[2]) && $uriParts[2] === 'approve') {
-                            return $this->approveAndCreateService((int) $uriParts[1]);
-                        }
-                        if (isset($uriParts[1])) {
-                            return $this->updateProposal((int) $uriParts[1], $input);
-                        }
-                        http_response_code(400);
-                        return ['error' => 'Proposal ID not specified'];
+                case 'PUT':
+                    if (isset($uriParts[1]) && isset($uriParts[2]) && $uriParts[2] === 'approve') {
+                        return $this->approveAndCreateService((int) $uriParts[1]);
+                    }
+                    if (isset($uriParts[1])) {
+                        return $this->updateProposal((int) $uriParts[1], $input);
+                    }
+                    http_response_code(400);
+                    return ['error' => 'Proposal ID not specified'];
                 case 'DELETE':
                     if (isset($uriParts[1])) {
                         return $this->deleteProposal((int) $uriParts[1]);
@@ -59,6 +59,22 @@ class ServiceProposalController
             }
         } catch (\Exception $e) {
             error_log("Exception in processRequest: " . $e->getMessage());
+            http_response_code(500);
+            return ['error' => 'Internal Server Error'];
+        }
+    }
+
+    private function getProposalsByUser($userId)
+    {
+        try {
+            $proposals = $this->serviceProposalService->getProposalsByUser($userId);
+            if (!$proposals) {
+                http_response_code(404);
+                return ['error' => 'No proposals found for this user'];
+            }
+            return json_decode($this->serializer->serialize($proposals, 'json'), true);
+        } catch (\Exception $e) {
+            error_log("Exception in getProposalsByUser: " . $e->getMessage());
             http_response_code(500);
             return ['error' => 'Internal Server Error'];
         }

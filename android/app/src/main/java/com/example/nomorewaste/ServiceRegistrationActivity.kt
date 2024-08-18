@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.example.nomorewaste.api.ApiService
 import com.example.nomorewaste.api.RetrofitClient
 import com.example.nomorewaste.api.Service
+import com.example.nomorewaste.api.ServiceRegistration
 import com.example.nomorewaste.api.ServiceRegistrationRequest
 import retrofit2.Call
 import retrofit2.Callback
@@ -22,6 +23,7 @@ class ServiceRegistrationActivity : AppCompatActivity() {
     private lateinit var serviceDescriptionTextView: TextView
     private lateinit var serviceCapacityTextView: TextView
     private var serviceId: Int = 0
+    private var isAlreadyRegistered: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -30,30 +32,31 @@ class ServiceRegistrationActivity : AppCompatActivity() {
         serviceNameTextView = findViewById(R.id.text_service_name)
         serviceDescriptionTextView = findViewById(R.id.text_service_description)
         serviceCapacityTextView = findViewById(R.id.text_service_capacity)
+        registerButton = findViewById(R.id.button_register_service)
 
         serviceId = intent.getIntExtra("service_id", 0)
-
         Log.d("ServiceRegistration", "Service ID received: $serviceId")
 
         val sharedPreferences = getSharedPreferences("NoMoreWastePrefs", MODE_PRIVATE)
         val userId = sharedPreferences.getInt("USER_ID", -1)
 
         apiService = RetrofitClient.getClient().create(ApiService::class.java)
-        registerButton = findViewById(R.id.button_register_service)
 
         // Load service details
-        loadServiceDetails(serviceId)
+        loadServiceDetails(serviceId, userId)
 
         registerButton.setOnClickListener {
-            if (userId != -1) {
+            if (userId != -1 && !isAlreadyRegistered) {
                 registerForService(serviceId, userId)
+            } else if (isAlreadyRegistered) {
+                Toast.makeText(this, "Vous êtes déjà inscrit à ce service", Toast.LENGTH_SHORT).show()
             } else {
                 Toast.makeText(this, "Erreur de récupération de l'ID de l'utilisateur", Toast.LENGTH_SHORT).show()
             }
         }
     }
 
-    private fun loadServiceDetails(serviceId: Int) {
+    private fun loadServiceDetails(serviceId: Int, userId: Int) {
         apiService.getService(serviceId).enqueue(object : Callback<Service> {
             override fun onResponse(call: Call<Service>, response: Response<Service>) {
                 if (response.isSuccessful) {
@@ -62,7 +65,10 @@ class ServiceRegistrationActivity : AppCompatActivity() {
                         Log.d("ServiceRegistration", "Service details loaded: $it")
                         serviceNameTextView.text = it.name
                         serviceDescriptionTextView.text = it.description
-                        serviceCapacityTextView.text = "Capacité : ${it.capacity}"
+                        serviceCapacityTextView.text = "Places restantes : ${it.capacity - it.currentRegistrations}"
+
+                        // Check if the user is already registered for this service
+                        checkUserRegistration(serviceId, userId)
                     } ?: run {
                         Log.e("ServiceRegistration", "Service is null")
                     }
@@ -75,6 +81,32 @@ class ServiceRegistrationActivity : AppCompatActivity() {
             override fun onFailure(call: Call<Service>, t: Throwable) {
                 Toast.makeText(this@ServiceRegistrationActivity, "Échec de la connexion : ${t.message}", Toast.LENGTH_SHORT).show()
                 Log.e("ServiceRegistration", "Network failure: ${t.message}", t)
+            }
+        })
+    }
+
+    private fun checkUserRegistration(serviceId: Int, userId: Int) {
+        apiService.getUserRegistrations(userId).enqueue(object : Callback<List<ServiceRegistration>> {
+            override fun onResponse(call: Call<List<ServiceRegistration>>, response: Response<List<ServiceRegistration>>) {
+                if (response.isSuccessful) {
+                    val registrations = response.body()
+                    registrations?.let {
+                        for (registration in it) {
+                            if (registration.serviceId == serviceId) {
+                                isAlreadyRegistered = true
+                                registerButton.text = "Vous êtes déjà inscrit à ce service"
+                                registerButton.isEnabled = false
+                                break
+                            }
+                        }
+                    }
+                } else {
+                    Log.e("ServiceRegistration", "Failed to check user registration")
+                }
+            }
+
+            override fun onFailure(call: Call<List<ServiceRegistration>>, t: Throwable) {
+                Log.e("ServiceRegistration", "Failed to check user registration: ${t.message}")
             }
         })
     }

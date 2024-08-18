@@ -36,5 +36,11 @@ data class Service(
     @SerializedName("schedule") val schedule: Schedule,
     @SerializedName("capacity") val capacity: Int,
     @SerializedName("status") val status: String,
-    @SerializedName("location") val location: String
+    @SerializedName("location") val location: String,
+    @SerializedName("currentRegistrations") val currentRegistrations: Int // Add this field to track current registrations
 )
+{
+    val remainingCapacity: Int
+        get() = capacity - currentRegistrations
+}
+
