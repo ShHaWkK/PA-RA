@@ -74,6 +74,9 @@ interface ApiService {
     @DELETE("service_registrations/{id}")
     fun unsubscribeFromService(@Path("id") registrationId: Int): Call<Void>
 
+    @GET("skills")
+    fun getSkills(): Call<List<Skill>>
+
     @POST("service_registrations")
     fun registerForService(@Body request: ServiceRegistrationRequest): Call<Void>
 

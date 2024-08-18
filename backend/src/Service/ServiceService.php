@@ -22,8 +22,10 @@ class ServiceService
         $service = new ServiceModel();
         $service->setName($data['name']);
         $service->setDescription($data['description']);
-        $service->setSchedule(new \DateTime($data['schedule']));
+        $service->setStartSchedule(new \DateTime($data['start_schedule']));
+        $service->setEndSchedule(new \DateTime($data['end_schedule']));
         $service->setCapacity($data['capacity']);
+        $service->setCurrentRegistrations(0); // Initial registrations set to 0
         $service->setStatus($data['status']);
         $service->setLocation($data['location']);
 
@@ -53,7 +55,9 @@ class ServiceService
                 'Status' => $service->getStatus(),
                 'Location' => $service->getLocation(),
                 'Capacity' => $service->getCapacity(),
-                'Schedule' => $service->getSchedule()->format('Y-m-d H:i:s'),
+                'CurrentRegistrations' => $service->getCurrentRegistrations(),
+                'StartSchedule' => $service->getStartSchedule()->format('Y-m-d H:i:s'),
+                'EndSchedule' => $service->getEndSchedule()->format('Y-m-d H:i:s'),
             ]));
             
             return $service;
@@ -78,8 +82,11 @@ class ServiceService
         if (isset($data['description'])) {
             $service->setDescription($data['description']);
         }
-        if (isset($data['schedule'])) {
-            $service->setSchedule(new \DateTime($data['schedule']));
+        if (isset($data['start_schedule'])) {
+            $service->setStartSchedule(new \DateTime($data['start_schedule']));
+        }
+        if (isset($data['end_schedule'])) {
+            $service->setEndSchedule(new \DateTime($data['end_schedule']));
         }
         if (isset($data['capacity'])) {
             $service->setCapacity($data['capacity']);
@@ -212,8 +219,10 @@ class ServiceService
         $service = new ServiceModel();
         $service->setName($proposal->getName());
         $service->setDescription($proposal->getDescription());
-        $service->setSchedule(new \DateTime());
+        $service->setStartSchedule(new \DateTime());
+        $service->setEndSchedule(new \DateTime());
         $service->setCapacity(10);
+        $service->setCurrentRegistrations(0);
         $service->setStatus('open');
         $service->setLocation('Default Location');
 
@@ -251,8 +260,7 @@ class ServiceService
         $totalCapacity = $service->getCapacity();
 
         // Calculate the occupied capacity based on current registrations
-        $occupiedCapacity = $this->entityManager->getRepository(ServiceRegistrationModel::class)
-            ->count(['service_id' => $serviceId]);
+        $occupiedCapacity = $service->getCurrentRegistrations();
 
         return [
             'total_capacity' => $totalCapacity,

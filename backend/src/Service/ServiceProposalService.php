@@ -5,7 +5,6 @@ namespace Service;
 use Doctrine\ORM\EntityManager;
 use Entity\ServiceProposalModel;
 use Entity\UserModel;
-use Entity\ServiceModel;
 
 class ServiceProposalService
 {
@@ -23,7 +22,7 @@ class ServiceProposalService
             throw new \Exception('User not found');
         }
 
-        $proposal = new ServiceProposalModel();  // This should now work correctly
+        $proposal = new ServiceProposalModel();
         $proposal->setName($data['name']);
         $proposal->setDescription($data['description']);
         $proposal->setStatus($data['status'] ?? 'proposed');
@@ -80,6 +79,12 @@ class ServiceProposalService
         return $this->entityManager->getRepository(ServiceProposalModel::class)->findAll();
     }
 
+    public function getProposalsByUser($userId)
+    {
+        return $this->entityManager->getRepository(ServiceProposalModel::class)
+            ->findBy(['created_by' => $userId]);
+    }
+    
     public function approveProposal($id)
     {
         $proposal = $this->entityManager->find(ServiceProposalModel::class, $id);

@@ -74,6 +74,7 @@
                 android:inputType="textPassword" />
         </com.google.android.material.textfield.TextInputLayout>
 
+        <!-- Conteneur pour les compétences -->
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -82,47 +83,11 @@
             android:paddingBottom="8dp" />
 
         <LinearLayout
+            android:id="@+id/skills_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="8dp">
-
-            <CheckBox
-                android:id="@+id/skill_driver"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Driver" />
-
-            <CheckBox
-                android:id="@+id/skill_cook"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Cook" />
-
-            <CheckBox
-                android:id="@+id/skill_plumber"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Plumber" />
-
-            <CheckBox
-                android:id="@+id/skill_electrician"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Electrician" />
-
-            <CheckBox
-                android:id="@+id/skill_teacher"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Teacher" />
-
-            <CheckBox
-                android:id="@+id/skill_gardener"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Gardener" />
-        </LinearLayout>
+            android:padding="8dp" />
 
         <TextView
             android:layout_width="match_parent"

@@ -1,56 +1,49 @@
-<!--activity_service_details -->
-
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="16dp">
+    android:padding="16dp"
+    android:background="@color/background_color">
 
     <TextView
         android:id="@+id/service_name"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Service Name"
-        android:textStyle="bold"
-        android:textSize="20sp"/>
+        style="@style/TitleTextStyle"
+        android:text="Nom du Service : "
+        android:textColor="@color/primary_text_color"/>
 
     <TextView
         android:id="@+id/service_description"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="Service Description"
-        android:textSize="16sp"/>
+        style="@style/LabelTextStyle"
+        android:text="Description : "
+        android:textColor="@color/secondary_text_color"
+        android:layout_marginTop="8dp"/>
 
     <TextView
         android:id="@+id/service_start_time"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
+        style="@style/LabelTextStyle"
         android:text="Start Time"
-        android:textSize="16sp"/>
+        android:textColor="@color/secondary_text_color"
+        android:layout_marginTop="8dp"/>
 
     <TextView
         android:id="@+id/service_end_time"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
+        style="@style/LabelTextStyle"
         android:text="End Time"
-        android:textSize="16sp"/>
+        android:textColor="@color/secondary_text_color"
+        android:layout_marginTop="8dp"/>
 
     <TextView
         android:id="@+id/service_capacity"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="Capacity"
-        android:textSize="16sp"/>
+        style="@style/LabelTextStyle"
+        android:text="Place restante : "
+        android:textColor="@color/secondary_text_color"
+        android:layout_marginTop="8dp"/>
 
     <Button
         android:id="@+id/button_unsubscribe"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text="Se désinscrire" />
+        style="@style/ButtonStyle"
+        android:layout_marginTop="24dp"
+        android:text="Se désinscrire"
+        android:backgroundTint="@color/button_color"
+        android:textColor="@color/button_text_color"/>
 </LinearLayout>
-

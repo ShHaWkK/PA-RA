@@ -2,12 +2,12 @@ package com.example.nomorewaste.api
 
 import com.google.gson.annotations.SerializedName
 
-
 data class RegisterVolunteerRequest(
-    val first_name: String,
-    val last_name: String,
+    @SerializedName("first_name") val firstName: String,
+    @SerializedName("last_name") val lastName: String,
     val email: String,
-    val phone_number: String,
+    @SerializedName("phone_number") val phoneNumber: String,
     val password: String,
+    val skills: List<Int>,
     val availabilities: List<Availability>
 )

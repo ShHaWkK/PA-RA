@@ -29,11 +29,16 @@ class ServiceRegistrationService
             throw new \Exception('User not found');
         }
 
-        // Vérifie s'il reste des places disponibles pour ce service
-        $registrationsCount = $this->entityManager->getRepository(ServiceRegistrationModel::class)
-            ->count(['service_id' => $service->getId()]);
+        // Vérifiez si l'utilisateur est déjà inscrit
+        $existingRegistration = $this->entityManager->getRepository(ServiceRegistrationModel::class)
+            ->findOneBy(['service_id' => $data['service_id'], 'user_id' => $data['user_id']]);
 
-        if ($registrationsCount >= $service->getCapacity()) {
+        if ($existingRegistration) {
+            throw new \Exception('User is already registered for this service');
+        }
+
+        // Vérifiez s'il reste des places disponibles
+        if ($service->getCurrentRegistrations() >= $service->getCapacity()) {
             throw new \Exception('No more slots available for this service');
         }
 
@@ -48,8 +53,8 @@ class ServiceRegistrationService
         // Sauvegarde l'inscription
         $this->entityManager->persist($registration);
 
-        // Met à jour la capacité du service
-        $service->setCapacity($service->getCapacity() - 1);
+        // Met à jour le nombre d'inscriptions actuelles
+        $service->setCurrentRegistrations($service->getCurrentRegistrations() + 1);
 
         // Sauvegarde tous les changements
         $this->entityManager->flush();
@@ -90,17 +95,15 @@ class ServiceRegistrationService
         if (!$registration) {
             throw new \Exception('Registration not found');
         }
-    
-        // Augmente la capacité du service lors de la suppression d'une inscription
+
         $service = $this->entityManager->find(ServiceModel::class, $registration->getServiceId());
         if ($service) {
-            $service->setCapacity($service->getCapacity() + 1);
+            $service->setCurrentRegistrations($service->getCurrentRegistrations() - 1);
         }
-    
+
         $this->entityManager->remove($registration);
         $this->entityManager->flush();
     }
-    
 
     public function getAllRegistrations()
     {
@@ -117,4 +120,3 @@ class ServiceRegistrationService
         return $this->entityManager->getRepository(ServiceRegistrationModel::class)->findBy(['user_id' => $userId]);
     }
 }
-?>
