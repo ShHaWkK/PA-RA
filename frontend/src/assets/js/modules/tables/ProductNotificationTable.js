@@ -14,7 +14,6 @@ export async function populateProductNotificationTable(queryParameters) {
             console.log('Loader shown.');
         } else {
             console.error('Loader element not found.');
-            return;
         }
 
         // Vérifiez si le conteneur de la table existe
@@ -48,7 +47,7 @@ export async function populateProductNotificationTable(queryParameters) {
         const headerRow = document.createElement('tr');
 
         // Définir les en-têtes de la table
-        const headers = ['Select', 'Company', 'Product', 'Quantity', 'Address', 'Wished Collection Date', 'Notified At'];
+        const headers = ['', 'Company', 'Product', 'Quantity', 'Address', 'Wished Collection Date', 'Notified At'];
         headers.forEach(headerText => {
             const th = document.createElement('th');
             th.textContent = headerText;

@@ -58,8 +58,8 @@ async function handleCollectionSubmission(message) {
         const selectedWarehouse = document.querySelector('input[name="selectedWarehouse"]:checked');
         const selectedVehicle = document.querySelector('input[name="selectedVehicle"]:checked');
         const selectedVolunteer = document.querySelector('input[name="selectedVolunteer"]:checked');
-        const selectedProducts = Array.from(document.querySelectorAll('input[type="checkbox"]:checked'))
-            .map(checkbox => ({ notification_id: parseInt(checkbox.value,10) }));
+    const selectedProducts = Array.from(document.querySelectorAll('input[type="checkbox"]:checked'))
+        .map(checkbox => ({ notification_id: parseInt(checkbox.value,10) }));
 
         // Vérification de la sélection des éléments requis
         if (!selectedWarehouse) {

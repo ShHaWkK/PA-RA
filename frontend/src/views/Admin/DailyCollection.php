@@ -25,9 +25,8 @@
         </div>
 
         <h2> Sélectionner les produits de la collecte</h2>
-        <!-- Tableau des Collectes -->
-        <div class="product-notification-table">
-        </div>
+        <!-- Tableau des demandes de collecte -->
+        <div class="product-notification-table"></div>
         <?php
         $loaderId = 'loadingBodyNotification';
         include($_SERVER['DOCUMENT_ROOT'] . '/views/includes/Loader.php');

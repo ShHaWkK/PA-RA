@@ -1,16 +1,17 @@
 <div id="addProductModal" class="modal">
     <div class="modal-content">
         <span class="close" id="closeAddProductModal">&times;</span>
-        <h2>Ajouter des produits à la collecte</h2>
-        <form id="addProductForm">
-            <div id="productListContainer">
-                <!-- Les champs pour les produits seront ajoutés ici dynamiquement -->
-            </div>
-            <button type="button" id="addProductButton">Ajouter un produit</button>
-            <button type="submit">Enregistrer</button>
-        </form>
+
+        <div id="addProductContent">
+            <h2>Ajouter des produits à la collecte</h2>
+            <div class="product-notification-table"></div>
+            <button type="button" id="addProductsButton">Enregistrer</button>
+        </div>
+
         <?php
-        $loaderId = 'loadingAddProduct';
-        include ($_SERVER['DOCUMENT_ROOT'] . '/views/includes/Loader.php'); ?>
+        $loaderId = 'loadingBodyNotification';
+        include($_SERVER['DOCUMENT_ROOT'] . '/views/includes/Loader.php');
+        ?>
+
     </div>
 </div>

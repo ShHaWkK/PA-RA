@@ -1,6 +1,7 @@
 import {getAllUsers, getUser} from "../../api/Users.js";
 import {getAllVehicles, getVehicleByID} from "../../api/Vehicle.js";
 import {
+    assignProductsToCollection,
     getCollectionByID,
     getProductsFromCollection,
     removeProductsFromCollection,
@@ -8,6 +9,7 @@ import {
 } from "../../api/Collections.js"
 import {formatDateToFrench} from "../FormatDate.js";
 import {populateCollectionTable} from "../tables/CollectionTable.js";
+import {populateProductNotificationTable} from "../tables/ProductNotificationTable.js";
 
 let selectedCollectionId;
 
@@ -434,4 +436,54 @@ document.addEventListener('DOMContentLoaded', async function() {
     document.getElementById('deleteProductInModalButton').addEventListener('click',function (){
         removeProducts();
     })
+
+    document.getElementById('addProductInModalButton').addEventListener('click',function (){
+        openAssignProductModal();
+    })
+
+    function openAssignProductModal(){
+        console.log("we are in openAssignProductModal");
+        const assignProductModal = document.getElementById('addProductModal');
+        const closeAssignProductModal = document.getElementById('closeAddProductModal');
+        const addProductsButton = document.getElementById('addProductsButton');
+
+        assignProductModal.style.display = 'block';
+
+        closeAssignProductModal.onclick = function() {
+            assignProductModal.style.display = "none";
+        }
+
+        const queryParams = { is_assigned: false };
+
+        populateProductNotificationTable(queryParams);
+
+        addProductsButton.addEventListener('click',async function (){
+            const selectedProducts = Array.from(document.querySelectorAll('input[type="checkbox"]:checked'))
+                .map(checkbox => ({ notification_id: parseInt(checkbox.value,10) }));
+
+            // Afficher le loader
+            document.getElementById('loadingBodyNotification').classList.remove('hidden');
+            document.getElementById('addProductContent').classList.add('hidden');
+
+
+            const modalBody = document.getElementById('modalBodyCollectedProductsDetails');
+            // Vider le contenu précédent du corps de la modale
+            modalBody.innerHTML = '';
+
+            const assigned_products = await assignProductsToCollection(parseInt(selectedCollectionId,10), selectedProducts);
+
+
+            if (assigned_products){
+                console.log("products assigned successfully");
+                alert("products assigned successfully");
+                populateProductNotificationTable(queryParams);
+                document.getElementById('addProductContent').classList.remove('hidden');
+                populateCollectedProductsModal(selectedCollectionId);
+                return;
+            }
+
+            alert("Failed to assign product");
+
+        });
+    }
 });
