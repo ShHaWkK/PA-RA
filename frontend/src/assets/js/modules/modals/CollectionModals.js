@@ -3,7 +3,7 @@ import {getAllVehicles, getVehicleByID} from "../../api/Vehicle.js";
 import {
     assignProductsToCollection,
     getCollectionByID,
-    getProductsFromCollection,
+    getProductsFromCollection, modifyProductsInCollection,
     removeProductsFromCollection,
     updateCollection
 } from "../../api/Collections.js"
@@ -486,4 +486,99 @@ document.addEventListener('DOMContentLoaded', async function() {
 
         });
     }
+
+    // Fonction pour configurer les éléments de la modale
+    function configureEditProductModal() {
+        const editCollectionProductModal = document.getElementById("editCollectedProductModal");
+        const closeEditProductModal = document.getElementById("closeEditProductModal");
+        const editCollectedProductForm = document.getElementById('editCollectedProductForm');
+        const loader = document.getElementById('loadingModifyProductCollection');
+
+        // Fonction pour ouvrir la modale
+        function openModal() {
+            editCollectionProductModal.style.display = 'block';
+            configureFormSubmission();
+        }
+
+        // Fonction pour fermer la modale
+        function closeModal() {
+            editCollectionProductModal.style.display = "none";
+        }
+
+        // Fonction pour configurer l'événement de soumission du formulaire
+        async function configureFormSubmission() {
+            editCollectedProductForm.addEventListener('submit', async function(event) {
+                event.preventDefault();
+
+                // Récupérer l'ID de notification à partir du bouton radio sélectionné
+                const selectedRadioButton = document.querySelector('input[name="productSelection"]:checked');
+                if (!selectedRadioButton) {
+                    alert('Veuillez sélectionner un produit.');
+                    return;
+                }
+                const notificationId = parseInt(selectedRadioButton.value, 10);
+
+                // Récupérer les autres valeurs du formulaire
+                const quantityCollected = parseInt(document.getElementById('quantityCollected').value, 10);
+                const isCollected = document.getElementById('collectedCheckbox').checked;
+
+                // Construire l'objet produit
+                const product = {
+                    notification_id: notificationId,
+                    quantity_collected: quantityCollected,
+                    is_collected: isCollected
+                };
+
+                // Afficher l'objet dans la console
+                console.log('Produit à modifier:', product);
+
+                try {
+                    // Afficher le loader et masquer le contenu du formulaire
+                    loader.classList.remove('hidden');
+                    editCollectedProductForm.classList.add('hidden');
+
+                    // Appel à la fonction pour modifier les produits dans la collection
+                    await modifyProductsInCollection(selectedCollectionId, [product]); // Envoyer un tableau de produits
+
+                    alert("Produit modifié avec succès.");
+
+                    // Réinitialiser le formulaire et fermer la modale
+                    editCollectedProductForm.reset();
+                    closeModal();
+
+                } catch (error) {
+                    console.error('Erreur lors de la modification du produit:', error);
+                    alert("Échec de la modification du produit.");
+                } finally {
+                    // Masquer le loader et réafficher le formulaire et actualiser la modale des produits collectés
+                    loader.classList.add('hidden');
+                    editCollectedProductForm.classList.remove('hidden');
+                    await populateCollectedProductsModal(selectedCollectionId);
+                }
+            });
+        }
+
+        // Ajouter les gestionnaires d'événements aux boutons
+        document.getElementById("modifyProductInModalButton").addEventListener('click', openModal);
+        closeEditProductModal.addEventListener('click', closeModal);
+    }
+
+    // Appeler la fonction pour configurer la modale dès le chargement du script
+    configureEditProductModal();
+
+        const collectedCheckbox = document.getElementById('collectedCheckbox');
+        const quantityCollectedContainer = document.getElementById('quantityCollectedContainer');
+        const quantityCollectedInput = document.getElementById('quantityCollected');
+
+        // Gestionnaire d'événement pour afficher ou masquer le champ de quantité
+        collectedCheckbox.addEventListener('change', function () {
+            if (collectedCheckbox.checked) {
+                quantityCollectedContainer.style.display = 'block';
+                quantityCollectedInput.setAttribute('required', 'required');
+            } else {
+                quantityCollectedContainer.style.display = 'none';
+                quantityCollectedInput.removeAttribute('required');
+            }
+        });
+
 });

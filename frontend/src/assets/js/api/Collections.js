@@ -194,4 +194,40 @@ async function assignProductsToCollection(collectionId, products) {
     return response.json();
 }
 
-export { createCollection, getCollectionByID, updateCollection, deleteCollection, getAllCollections, getProductsFromCollection, removeProductsFromCollection, assignProductsToCollection, getCollections};
+async function modifyProductsInCollection(collectionId, products) {
+    const url = `${apiEndpoint}/collections/${collectionId}/update`;
+    const response = await fetch(url, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ products }) // Utiliser directement le tableau de produits
+    });
+
+    console.log(JSON.stringify({ products }));
+
+    if (!response.ok) {
+        switch (response.status) {
+            case 400:
+                throw new Error('Bad Request: No products provided, missing required fields, or invalid data.');
+            case 404:
+                const errorData = await response.json();
+                if (errorData.error === 'Collection not found') {
+                    throw new Error('Not Found: Collection not found.');
+                } else if (errorData.error === 'ProductNotification not found') {
+                    throw new Error('Not Found: ProductNotification not found.');
+                } else if (errorData.error === 'Product not assigned to this collection') {
+                    throw new Error('Not Found: Product not assigned to this collection.');
+                }
+                break;
+            case 409:
+                throw new Error('Conflict: Attempt to modify an unassigned product.');
+            default:
+                throw new Error(`HTTP Error: ${response.status}`);
+        }
+    }
+
+    return response.json();
+}
+
+export { createCollection, getCollectionByID, updateCollection, deleteCollection, getAllCollections, getProductsFromCollection, removeProductsFromCollection, assignProductsToCollection, getCollections, modifyProductsInCollection};
