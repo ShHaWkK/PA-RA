@@ -280,6 +280,14 @@
             </LinearLayout>
         </LinearLayout>
 
+        <!-- RecyclerView for displaying selected availabilities -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/availability_recycler_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="16dp"
+            android:paddingBottom="8dp" />
+
         <Button
             android:id="@+id/register_button"
             android:layout_width="match_parent"

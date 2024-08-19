@@ -7,8 +7,8 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.nomorewaste.R
 
-class AvailabilityAdapter(private val availabilities: List<AvailabilityResponse>) :
-    RecyclerView.Adapter<AvailabilityAdapter.ViewHolder>() {
+class RegisterVolunteerAvailabilityAdapter(private val availabilities: List<AvailabilityRequest>) :
+    RecyclerView.Adapter<RegisterVolunteerAvailabilityAdapter.ViewHolder>() {
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val timeSlotTextView: TextView = view.findViewById(R.id.time_slot)
@@ -23,8 +23,8 @@ class AvailabilityAdapter(private val availabilities: List<AvailabilityResponse>
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val availability = availabilities[position]
-        holder.timeSlotTextView.text = "${availability.startTime ?: "N/A"} - ${availability.endTime ?: "N/A"}"
-        holder.dayOfWeekTextView.text = availability.dayOfWeek ?: "N/A"
+        holder.timeSlotTextView.text = "${availability.startTime} - ${availability.endTime}"
+        holder.dayOfWeekTextView.text = availability.dayOfWeek
     }
 
     override fun getItemCount() = availabilities.size

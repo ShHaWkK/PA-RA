@@ -2,17 +2,17 @@ package com.example.nomorewaste
 
 import android.app.TimePickerDialog
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import android.widget.CheckBox
 import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.example.nomorewaste.api.ApiService
-import com.example.nomorewaste.api.Availability
-import com.example.nomorewaste.api.RegisterVolunteerRequest
-import com.example.nomorewaste.api.RetrofitClient
-import com.example.nomorewaste.api.Skill
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.example.nomorewaste.api.*
+import com.google.gson.Gson
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -27,26 +27,12 @@ class RegisterVolunteerActivity : AppCompatActivity() {
     private lateinit var editPassword: EditText
     private lateinit var buttonRegister: Button
     private lateinit var skillsContainer: LinearLayout
-
-    // Buttons for availabilities
-    private lateinit var mondayStartButton: Button
-    private lateinit var mondayEndButton: Button
-    private lateinit var tuesdayStartButton: Button
-    private lateinit var tuesdayEndButton: Button
-    private lateinit var wednesdayStartButton: Button
-    private lateinit var wednesdayEndButton: Button
-    private lateinit var thursdayStartButton: Button
-    private lateinit var thursdayEndButton: Button
-    private lateinit var fridayStartButton: Button
-    private lateinit var fridayEndButton: Button
-    private lateinit var saturdayStartButton: Button
-    private lateinit var saturdayEndButton: Button
-    private lateinit var sundayStartButton: Button
-    private lateinit var sundayEndButton: Button
+    private lateinit var availabilityRecyclerView: RecyclerView
 
     private lateinit var apiService: ApiService
-    private val availabilities = mutableListOf<Availability>()
+    private val availabilities = mutableListOf<AvailabilityRequest>()
     private val selectedSkills = mutableListOf<Int>()
+    private lateinit var availabilityAdapter: RegisterVolunteerAvailabilityAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,7 +43,7 @@ class RegisterVolunteerActivity : AppCompatActivity() {
         apiService = retrofit.create(ApiService::class.java)
 
         loadSkills()
-        setupTimePickerListeners()
+        setupRecyclerView()
         buttonRegister.setOnClickListener { registerVolunteer() }
     }
 
@@ -69,22 +55,28 @@ class RegisterVolunteerActivity : AppCompatActivity() {
         editPassword = findViewById(R.id.password)
         buttonRegister = findViewById(R.id.register_button)
         skillsContainer = findViewById(R.id.skills_container)
+        availabilityRecyclerView = findViewById(R.id.availability_recycler_view)
 
-        // Initialize buttons for each day of the week
-        mondayStartButton = findViewById(R.id.monday_start_button)
-        mondayEndButton = findViewById(R.id.monday_end_button)
-        tuesdayStartButton = findViewById(R.id.tuesday_start_button)
-        tuesdayEndButton = findViewById(R.id.tuesday_end_button)
-        wednesdayStartButton = findViewById(R.id.wednesday_start_button)
-        wednesdayEndButton = findViewById(R.id.wednesday_end_button)
-        thursdayStartButton = findViewById(R.id.thursday_start_button)
-        thursdayEndButton = findViewById(R.id.thursday_end_button)
-        fridayStartButton = findViewById(R.id.friday_start_button)
-        fridayEndButton = findViewById(R.id.friday_end_button)
-        saturdayStartButton = findViewById(R.id.saturday_start_button)
-        saturdayEndButton = findViewById(R.id.saturday_end_button)
-        sundayStartButton = findViewById(R.id.sunday_start_button)
-        sundayEndButton = findViewById(R.id.sunday_end_button)
+        val days = listOf(
+            "Monday" to Pair(R.id.monday_start_button, R.id.monday_end_button),
+            "Tuesday" to Pair(R.id.tuesday_start_button, R.id.tuesday_end_button),
+            "Wednesday" to Pair(R.id.wednesday_start_button, R.id.wednesday_end_button),
+            "Thursday" to Pair(R.id.thursday_start_button, R.id.thursday_end_button),
+            "Friday" to Pair(R.id.friday_start_button, R.id.friday_end_button),
+            "Saturday" to Pair(R.id.saturday_start_button, R.id.saturday_end_button),
+            "Sunday" to Pair(R.id.sunday_start_button, R.id.sunday_end_button)
+        )
+
+        for ((day, buttonIds) in days) {
+            findViewById<Button>(buttonIds.first).setOnClickListener { setupTimePicker(day, true) }
+            findViewById<Button>(buttonIds.second).setOnClickListener { setupTimePicker(day, false) }
+        }
+    }
+
+    private fun setupRecyclerView() {
+        availabilityAdapter = RegisterVolunteerAvailabilityAdapter(availabilities)
+        availabilityRecyclerView.layoutManager = LinearLayoutManager(this)
+        availabilityRecyclerView.adapter = availabilityAdapter
     }
 
     private fun loadSkills() {
@@ -118,32 +110,15 @@ class RegisterVolunteerActivity : AppCompatActivity() {
         }
     }
 
-    private fun setupTimePickerListeners() {
-        val timePickerListener = { button: Button, day: String, isStart: Boolean ->
-            val calendar = Calendar.getInstance()
-            val hour = calendar.get(Calendar.HOUR_OF_DAY)
-            val minute = calendar.get(Calendar.MINUTE)
-            TimePickerDialog(this, { _, selectedHour, selectedMinute ->
-                val time = String.format("%02d:%02d", selectedHour, selectedMinute)
-                button.text = time
-                updateAvailability(day, time, isStart)
-            }, hour, minute, true).show()
-        }
+    private fun setupTimePicker(day: String, isStart: Boolean) {
+        val calendar = Calendar.getInstance()
+        val hour = calendar.get(Calendar.HOUR_OF_DAY)
+        val minute = calendar.get(Calendar.MINUTE)
 
-        mondayStartButton.setOnClickListener { timePickerListener(mondayStartButton, "Monday", true) }
-        mondayEndButton.setOnClickListener { timePickerListener(mondayEndButton, "Monday", false) }
-        tuesdayStartButton.setOnClickListener { timePickerListener(tuesdayStartButton, "Tuesday", true) }
-        tuesdayEndButton.setOnClickListener { timePickerListener(tuesdayEndButton, "Tuesday", false) }
-        wednesdayStartButton.setOnClickListener { timePickerListener(wednesdayStartButton, "Wednesday", true) }
-        wednesdayEndButton.setOnClickListener { timePickerListener(wednesdayEndButton, "Wednesday", false) }
-        thursdayStartButton.setOnClickListener { timePickerListener(thursdayStartButton, "Thursday", true) }
-        thursdayEndButton.setOnClickListener { timePickerListener(thursdayEndButton, "Thursday", false) }
-        fridayStartButton.setOnClickListener { timePickerListener(fridayStartButton, "Friday", true) }
-        fridayEndButton.setOnClickListener { timePickerListener(fridayEndButton, "Friday", false) }
-        saturdayStartButton.setOnClickListener { timePickerListener(saturdayStartButton, "Saturday", true) }
-        saturdayEndButton.setOnClickListener { timePickerListener(saturdayEndButton, "Saturday", false) }
-        sundayStartButton.setOnClickListener { timePickerListener(sundayStartButton, "Sunday", true) }
-        sundayEndButton.setOnClickListener { timePickerListener(sundayEndButton, "Sunday", false) }
+        TimePickerDialog(this, { _, selectedHour, selectedMinute ->
+            val time = String.format("%02d:%02d", selectedHour, selectedMinute)
+            updateAvailability(day, time, isStart)
+        }, hour, minute, true).show()
     }
 
     private fun registerVolunteer() {
@@ -153,9 +128,13 @@ class RegisterVolunteerActivity : AppCompatActivity() {
         val phoneNumber = editPhoneNumber.text.toString()
         val password = editPassword.text.toString()
 
-        if (firstName.isEmpty() || lastName.isEmpty() || email.isEmpty() || phoneNumber.isEmpty() || password.isEmpty()) {
-            Toast.makeText(this, "Veuillez remplir tous les champs", Toast.LENGTH_SHORT).show()
-            return
+        for (availability in availabilities) {
+            if (availability.dayOfWeek.isEmpty() ||
+                availability.startTime.isEmpty() ||
+                availability.endTime.isEmpty()) {
+                Toast.makeText(this, "Please provide complete availability information", Toast.LENGTH_SHORT).show()
+                return
+            }
         }
 
         val registerRequest = RegisterVolunteerRequest(
@@ -168,13 +147,18 @@ class RegisterVolunteerActivity : AppCompatActivity() {
             availabilities = availabilities
         )
 
+        val json = Gson().toJson(registerRequest)
+        Log.d("RegisterVolunteer", "JSON Payload: $json")
+
         apiService.registerVolunteer(registerRequest).enqueue(object : Callback<Void> {
             override fun onResponse(call: Call<Void>, response: Response<Void>) {
                 if (response.isSuccessful) {
                     Toast.makeText(this@RegisterVolunteerActivity, "Inscription réussie", Toast.LENGTH_SHORT).show()
                     finish()
                 } else {
-                    Toast.makeText(this@RegisterVolunteerActivity, "Erreur lors de l'inscription", Toast.LENGTH_SHORT).show()
+                    val errorBody = response.errorBody()?.string()
+                    Log.e("RegisterVolunteer", "Error response: $errorBody")
+                    Toast.makeText(this@RegisterVolunteerActivity, "Erreur lors de l'inscription: $errorBody", Toast.LENGTH_SHORT).show()
                 }
             }
 
@@ -194,12 +178,13 @@ class RegisterVolunteerActivity : AppCompatActivity() {
             )
             availabilities[availabilityIndex] = updatedAvailability
         } else {
-            val newAvailability = Availability(
+            val newAvailability = AvailabilityRequest(
                 dayOfWeek = day,
                 startTime = if (isStart) time else "",
-                endTime = if (isStart) "" else time
+                endTime = if (!isStart) time else ""
             )
             availabilities.add(newAvailability)
         }
+        availabilityAdapter.notifyDataSetChanged()
     }
 }

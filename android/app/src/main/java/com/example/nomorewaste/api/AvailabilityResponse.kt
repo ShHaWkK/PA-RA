@@ -2,11 +2,13 @@ package com.example.nomorewaste.api
 
 import com.google.gson.annotations.SerializedName
 
-data class Availability(
+data class AvailabilityResponse(
     @SerializedName("dayOfWeek")
-    val dayOfWeek: String,
+    val dayOfWeek: String?,
+
     @SerializedName("startTime")
-    val startTime: String,
+    val startTime: String?,
+
     @SerializedName("endTime")
-    val endTime: String
+    val endTime: String?
 )

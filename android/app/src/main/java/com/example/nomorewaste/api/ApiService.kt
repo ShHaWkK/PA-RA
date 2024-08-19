@@ -1,5 +1,6 @@
 package com.example.nomorewaste.api
 
+import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.http.*
 
@@ -17,9 +18,8 @@ interface ApiService {
     @GET("users/{id}")
     fun getUser(@Path("id") id: Int): Call<User>
 
-    @GET("availabilities/{id}")
-    fun getAvailabilities(@Path("id") userId: Int): Call<Any>
-
+ @GET("availabilities/{id}")
+ fun getAvailabilities(@Path("id") userId: Int): Call<ResponseBody>
     @PUT("users/{id}")
     fun updateUser(@Path("id") id: Int, @Body user: User): Call<Void>
 
