@@ -8,11 +8,13 @@ use PHPMailer\PHPMailer\Exception;
 class EmailService
 {
     private $mailer;
+    private string $publicDir;
 
     public function __construct(PHPMailer $mailer)
     {
         $this->mailer = $mailer;
         $this->mailer->CharSet = 'UTF-8';
+        $this->publicDir = __DIR__ . '/../../public';
     }
 
     public function sendVerificationEmail($email, $verificationCode)
@@ -91,8 +93,6 @@ class EmailService
             error_log("Message could not be sent. Mailer Error: {$this->mailer->ErrorInfo}");
         }
     }
-    
-    
 
     public function sendPasswordChangeNotification($email)
     {
@@ -121,5 +121,26 @@ class EmailService
             error_log("Message could not be sent. Mailer Error: {$this->mailer->ErrorInfo}");
         }
     }
+
+    public function sendExcelFile($to, $subject, $body, $fileName, $fileContent)
+    {
+        try {
+            $this->mailer->setFrom('morewaste1@gmail.com', 'No More Waste');
+            $this->mailer->addAddress($to);
+            $this->mailer->isHTML(true);
+            $this->mailer->Subject = $subject;
+            $this->mailer->Body    = $body;
+
+            // Attacher le fichier Excel
+            $this->mailer->addStringAttachment($fileContent, $fileName, 'base64', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+
+            $this->mailer->send();
+            return true; // Email sent successfully
+        } catch (Exception $e) {
+            error_log("Message could not be sent. Mailer Error: {$this->mailer->ErrorInfo}");
+            return false; // Email failed to send
+        }
+    }
+
 }
 ?>

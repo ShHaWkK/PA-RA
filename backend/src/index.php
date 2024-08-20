@@ -158,7 +158,7 @@ try {
     } elseif ($controllerClass === MessageController::class) {
         $controller = new $controllerClass($entityManager);
     } elseif ($controllerClass === CollectionController::class) {
-        $controller = new $controllerClass($entityManager, $excelService);
+        $controller = new $controllerClass($entityManager, $excelService, $emailService);
     }
     elseif ($route === 'scripts') {
         if (isset($uriParts[1]) && $uriParts[1] === 'remove_unverified_users') {

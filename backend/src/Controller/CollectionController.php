@@ -17,12 +17,14 @@ class CollectionController
 {
     private $entityManager;
     private $excelService;
+    private $emailService;
 
 
-    public function __construct(EntityManager $entityManager, $excelService)
+    public function __construct(EntityManager $entityManager, $excelService, $emailService)
     {
         $this->entityManager = $entityManager;
         $this->excelService = $excelService;
+        $this->emailService = $emailService;
     }
 
     public function processRequest($method, $uriParts, $input)
@@ -30,8 +32,15 @@ class CollectionController
         try {
             switch ($method) {
                 case 'POST':
-                if ( $uriParts[2] === 'export') {
-                    return $this->exportCollectionToExcel($uriParts[1]);
+                if ( isset($uriParts[2]) ) {
+                    if($uriParts[2] === 'send_excel')
+                    {
+                        return $this->sendCollectionExcelEmail($uriParts[1],$uriParts[3]);
+                    }
+                    elseif ($uriParts[2] === 'export')
+                    {
+                        return $this->exportCollectionToExcel($uriParts[1]);
+                    }
                 }else {
                     return $this->createCollection($input);
                 }
@@ -310,6 +319,9 @@ class CollectionController
             $this->entityManager->flush();
             $this->entityManager->commit();
 
+            // Une fois les produits affectés, on génére le fichier excel pour la collecte
+            $this->exportCollectionToExcel($collectionId);
+
             return ['message' => 'Products assigned to collection successfully'];
         } catch (UniqueConstraintViolationException $e) {
             $this->entityManager->rollback();
@@ -430,6 +442,9 @@ class CollectionController
 
             $this->entityManager->flush();
             $this->entityManager->commit();
+
+            // Une fois les produits retirés, on regénére le fichier excel pour la collecte
+            $this->exportCollectionToExcel($collectionId);
 
             return ['message' => 'Products removed from collection successfully'];
         } catch (\Exception $e) {
@@ -593,8 +608,13 @@ class CollectionController
                 return ["Collection with ID $collectionId not found."];
             }
 
-            // Récupérer le chemin du fichier Excel
+            // Récupérer le chemin relatif du fichier Excel
             $relativeFilePath = $collection->getExcelPath();
+
+            if (!$relativeFilePath) {
+                http_response_code(400);
+                return ["Invalid file path. No file path associated with collection ID $collectionId."];
+            }
 
             // Obtenir le contenu du fichier et d'autres informations depuis le service
             $fileData = $this->excelService->getFileContent($relativeFilePath);
@@ -613,11 +633,66 @@ class CollectionController
             echo $fileData['content'];
             exit;
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             http_response_code(500);
             return ["An error occurred while retrieving the Excel file.", 'error' => $e->getMessage()];
         }
     }
+
+    public function sendCollectionExcelEmail($collectionId, $recipientEmail)
+    {
+        try {
+            // Récupérer la collection à partir de l'ID
+            $collection = $this->entityManager->find(CollectionModel::class, $collectionId);
+            if (!$collection) {
+                http_response_code(404);
+                throw new \Exception("Collection with ID $collectionId not found.");
+            }
+
+            // Obtenir le chemin relatif du fichier Excel associé à la collection
+            $relativeFilePath = $collection->getExcelPath();
+
+            // Obtenir le contenu du fichier et d'autres informations depuis le service
+            $fileData = $this->excelService->getFileContent($relativeFilePath);
+
+            // Vérifier si le contenu du fichier est disponible
+            if (!isset($fileData['content']) || empty($fileData['content'])) {
+                http_response_code(404);
+                throw new \Exception("Excel file content not found or empty at path: $relativeFilePath.");
+            }
+
+            // Obtenir et formater la date de la collection
+            $collectionDate = $collection->getCollectionDate();
+            if (!$collectionDate) {
+                http_response_code(404);
+                throw new \Exception("Collection date is not set.");
+            }
+            $formattedDate = $collectionDate->format('d-m-Y');
+
+            // Préparer le sujet et le corps de l'e-mail
+            $subject = "Votre fichier Excel collecte du {$formattedDate}";
+            $body = "Ci-joint votre fichier excel de collecte du {$formattedDate}.";
+
+            // Obtenir le nom du fichier
+            $fileName = basename($relativeFilePath);
+
+            // Envoyer le fichier Excel en pièce jointe au destinataire
+            $result = $this->emailService->sendExcelFile($recipientEmail, $subject, $body, $fileName, $fileData['content']);
+
+            // Vérifier le résultat de l'envoi d'e-mail
+            if (!$result) {
+                http_response_code(400);
+                throw new \Exception("Failed to send email to $recipientEmail.");
+            }
+
+            return ['message' => 'Mail successfully sent'];
+        } catch (\Exception $e) {
+            // Gérer les exceptions et enregistrer les erreurs
+            error_log("Exception in sendCollectionExcelEmail: " . $e->getMessage());
+            return ['error' => $e->getMessage()];
+        }
+    }
+
 
 }
 ?>

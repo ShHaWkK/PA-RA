@@ -13,7 +13,7 @@ class ExcelService
 
     public function __construct()
     {
-        $this->publicDir = __DIR__ . '/../../public'; // Initialisez la propriété dans le constructeur
+        $this->publicDir = __DIR__ . '/../../public';
     }
 
     public function generateCollectionExcel(array $data): string
@@ -70,14 +70,17 @@ class ExcelService
         return '/collection_route/' . $filename;
     }
 
-    public function getFileContent(string $relativeFilePath): ?array
+    public function getFileContent(?string $relativeFilePath): array
     {
-        // Construire le chemin absolu
+        if (!is_string($relativeFilePath) || empty($relativeFilePath)) {
+            return ['error' => 'Invalid file path provided.'];
+        }
+
+        // Construire le chemin absolu du fichier
         $absoluteFilePath = $this->publicDir . '/' . ltrim($relativeFilePath, '/');
 
-        // Vérifier l'existence du fichier
         if (!file_exists($absoluteFilePath)) {
-            return ['error' => "File not found at path $absoluteFilePath."];
+            return ['error' => "File not found at path: $absoluteFilePath"];
         }
 
         // Lire le contenu du fichier
@@ -89,9 +92,9 @@ class ExcelService
 
         return [
             'content' => $fileContent,
-            'path' => $absoluteFilePath,
             'filename' => basename($absoluteFilePath),
             'size' => filesize($absoluteFilePath)
         ];
     }
+
 }

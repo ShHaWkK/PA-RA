@@ -231,7 +231,7 @@ async function modifyProductsInCollection(collectionId, products) {
 }
 
 async function exportCollectionToExcel(collectionId) {
-    const url = `${apiEndpoint}/collections/${collectionId}/export-excel`;
+    const url = `${apiEndpoint}/collections/${collectionId}/export`;
 
     const response = await fetch(url, {
         method: 'POST',
