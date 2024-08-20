@@ -125,6 +125,7 @@ class CollectionModel implements \JsonSerializable
             'id' => $this->id,
             'volunteer_id' => $this->volunteer ? $this->volunteer->getId() : null,
             'volunteer_name' => $this->volunteer ? $this->volunteer->getFirstName() . ' ' . $this->volunteer->getLastName() : null,
+            'volunteer_email' => $this->volunteer ? $this->volunteer->getEmail(): null,
             'vehicle_id' => $this->vehicle ? $this->vehicle->getId() : null,
             'vehicle_license_plate' => $this->vehicle ? $this->vehicle->getLicensePlate() : null,
             'collection_date' => $this->collection_date ? $this->collection_date->format('Y-m-d H:i:s') : null,

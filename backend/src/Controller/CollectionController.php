@@ -584,6 +584,10 @@ class CollectionController
             $collection->setExcelPath($excelFilePath);
             $this->entityManager->flush();
 
+            $recipient_email= $collection->getVolunteer()->getEmail();
+
+            $this->sendCollectionExcelEmail($collectionId, $recipient_email);
+
             // Retourner un message de confirmation avec le chemin du fichier
             return ['message' => 'Excel file successfully generated.'];
 
@@ -649,6 +653,11 @@ class CollectionController
                 throw new \Exception("Collection with ID $collectionId not found.");
             }
 
+            if($recipientEmail === null){
+                $recipientEmail = $collection->getVolunteer()->getEmail();
+            }
+
+
             // Obtenir le chemin relatif du fichier Excel associé à la collection
             $relativeFilePath = $collection->getExcelPath();
 
@@ -692,7 +701,6 @@ class CollectionController
             return ['error' => $e->getMessage()];
         }
     }
-
 
 }
 ?>
