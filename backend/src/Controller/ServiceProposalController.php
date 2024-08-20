@@ -8,6 +8,9 @@ use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Service\ServiceProposalService;
 use Service\ServiceService;
+use Service\EmailService;
+use Entity\UserModel;
+use Entity\ServiceProposalModel;
 
 class ServiceProposalController
 {
@@ -15,23 +18,32 @@ class ServiceProposalController
     private $serializer;
     private $serviceProposalService;
     private $serviceService;
+    private $emailService;  // Ensure this is declared
 
-    public function __construct(EntityManager $entityManager)
+    public function __construct(EntityManager $entityManager, EmailService $emailService)
     {
         $this->entityManager = $entityManager;
-        $this->serviceProposalService = new ServiceProposalService($entityManager);
+        $this->emailService = $emailService;  // Initialize it here
+        $this->serviceProposalService = new ServiceProposalService($entityManager, $emailService);
         $this->serviceService = new ServiceService($entityManager);
         $normalizers = [new ObjectNormalizer()];
         $encoders = [new JsonEncoder()];
         $this->serializer = new Serializer($normalizers, $encoders);
     }
 
+
+
     public function processRequest($method, $uriParts, $input)
     {
         try {
             switch ($method) {
                 case 'POST':
-                    return $this->createProposal($input);
+                    if (isset($input['created_by'])) {
+                        return $this->createProposal($input, (int) $input['created_by']);
+                    } else {
+                        http_response_code(400);
+                        return ['error' => 'Missing required field: created_by'];
+                    }
                 case 'GET':
                     if (isset($uriParts[1])) {
                         return $this->getProposalsByUser((int) $uriParts[1]);
@@ -63,7 +75,7 @@ class ServiceProposalController
             return ['error' => 'Internal Server Error'];
         }
     }
-
+    
     private function getProposalsByUser($userId)
     {
         try {
@@ -80,23 +92,38 @@ class ServiceProposalController
         }
     }
 
-    private function createProposal($data)
+    public function createProposal($data, $createdById)
     {
-        try {
-            if (!isset($data['name']) || !isset($data['description']) || !isset($data['created_by'])) {
-                http_response_code(400);
-                return ['error' => 'Missing required fields for new proposal'];
-            }
-
-            $proposal = $this->serviceProposalService->createProposal($data, (int) $data['created_by']);
-
-            return ['id' => $proposal->getId(), 'message' => 'Proposal created successfully'];
-        } catch (\Exception $e) {
-            error_log("Exception in createProposal: " . $e->getMessage());
-            http_response_code(400);
-            return ['error' => $e->getMessage()];
+        $user = $this->entityManager->find(UserModel::class, $createdById);
+        if (!$user) {
+            throw new \Exception('User not found');
         }
+    
+        $proposal = new ServiceProposalModel();
+        $proposal->setName($data['name']);
+        $proposal->setDescription($data['description']);
+        $proposal->setStatus($data['status'] ?? 'proposed');
+        $proposal->setCreatedBy($createdById);
+        $proposal->setCreatedAt(new \DateTime());
+        $proposal->setUpdatedAt(new \DateTime());
+    
+        $this->entityManager->persist($proposal);
+        $this->entityManager->flush();
+    
+        // Send notification email
+        $this->emailService->sendEmail(
+            $user->getEmail(),
+            'NO MORE WASTE - Votre proposition de service a été reçue',
+            'Cher ' . $user->getFirstName() . ',<br><br>' .
+            'Nous vous remercions chaleureusement pour votre proposition de service intitulée "' . $proposal->getName() . '".<br><br>' .
+            'Votre proposition a bien été prise en compte et sera étudiée attentivement par notre équipe. Nous vous tiendrons informé(e) de la suite donnée à votre initiative.<br><br>' .
+            'Votre engagement auprès de NO MORE WASTE est essentiel pour notre lutte contre le gaspillage. Merci pour votre contribution !<br><br>' .
+            'Cordialement,<br>L\'équipe NO MORE WASTE'
+        );
+
+        return ['id' => $proposal->getId(), 'message' => 'Proposal created successfully'];
     }
+    
 
     private function getProposal($id)
     {
@@ -132,18 +159,35 @@ class ServiceProposalController
         }
     }
 
-    private function deleteProposal($id)
+    public function deleteProposal($id)
     {
-        try {
-            $this->serviceProposalService->deleteProposal($id);
-            return ['message' => 'Proposal deleted successfully'];
-        } catch (\Exception $e) {
-            error_log("Exception in deleteProposal: " . $e->getMessage());
-            http_response_code(400);
-            return ['error' => $e->getMessage()];
+        $proposal = $this->entityManager->find(ServiceProposalModel::class, $id);
+        if (!$proposal) {
+            throw new \Exception('Proposal not found');
         }
-    }
 
+        // Retrieve the user who created the proposal
+        $user = $this->entityManager->find(UserModel::class, $proposal->getCreatedBy());
+        if (!$user) {
+            throw new \Exception('User not found');
+        }
+
+        // Remove the proposal from the database
+        $this->entityManager->remove($proposal);
+        $this->entityManager->flush();
+
+        // Send an email notification to the user
+        $this->emailService->sendEmail(
+            $user->getEmail(),
+            'NO MORE WASTE - Suppression de votre proposition de service',
+            'Cher ' . $user->getFirstName() . ',<br><br>' .
+            'Nous vous informons que votre proposition de service intitulée "' . $proposal->getName() . '" a été supprimée.<br><br>' .
+            'Si vous avez des questions ou si vous souhaitez soumettre une nouvelle proposition, n\'hésitez pas à nous contacter.<br><br>' .
+            'Cordialement,<br>L\'équipe NO MORE WASTE'
+        );
+
+        return ['message' => 'Proposal deleted and email notification sent'];
+    }
     private function getAllProposals()
     {
         try {

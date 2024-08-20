@@ -143,7 +143,10 @@ if (!array_key_exists($route, $controllerMap)) {
 // Instancie le contrôleur approprié
 $controllerClass = $controllerMap[$route];
 try {
-    if ($controllerClass === DeliveryController::class || $controllerClass === PlannedRouteController::class) {
+    if ($controllerClass === ServiceProposalController::class) {
+        // Pass both EntityManager and EmailService to ServiceProposalController
+        $controller = new $controllerClass($entityManager, $emailService);
+    }elseif ($controllerClass === DeliveryController::class || $controllerClass === PlannedRouteController::class) {
         $controller = new $controllerClass($entityManager, $pdfService);
     } elseif ($controllerClass === LoginController::class) {
         $controller = new $controllerClass($entityManager, $jwtService);
@@ -187,7 +190,7 @@ try {
         } else if ($route === 'tickets' && isset($uriParts[2]) && $uriParts[2] === 'messages') {
             $ticketId = (int) $uriParts[1];
             error_log("Redirection vers MessageController pour ticketId: $ticketId");
-            $controller = new MessageController($entityManager);
+            $controller = new MessageController($entityManager, $emailService);
             $response = $controller->processRequest($_SERVER['REQUEST_METHOD'], $uriParts, $input); // Redirige vers MessageController
         } else {
             $response = $controller->processRequest($_SERVER['REQUEST_METHOD'], $uriParts, $input);
