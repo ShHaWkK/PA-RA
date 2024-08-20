@@ -1,6 +1,7 @@
 import { getCollections } from '/assets/js/api/Collections.js';
 import { populateVolunteerDetailsInModal, populateVehicleDetailsInModal, populateCollectedProductsModal } from "../modals/CollectionModals.js";
 import { formatDateToFrench } from "../FormatDate.js";
+import {getCollectionExcel} from "../../api/Collections.js";
 
 export async function populateCollectionTable(date, completion) {
     // Afficher le loader
@@ -25,7 +26,7 @@ export async function populateCollectionTable(date, completion) {
     const headerRow = document.createElement('tr');
 
     // Modifier les en-têtes de colonnes (sans ID)
-    const headers = ['', 'Affected driver', 'Affected vehicle', 'Collected Products', 'Collection Date', 'Completion', 'Created At', 'Updated At'];
+    const headers = ['', 'Affected driver', 'Affected vehicle', 'Collected Products', 'Excel file', 'Collection Date', 'Completion', 'Created At', 'Updated At'];
     headers.forEach(headerText => {
         const th = document.createElement('th');
         th.textContent = headerText;
@@ -112,6 +113,21 @@ export async function populateCollectionTable(date, completion) {
             });
             productsCell.appendChild(viewProductsButton);
 
+            // Créer la cellule avec le bouton 'voir' pour 'Collected Products'
+            const excelCell = document.createElement('td');
+            const viewExcelButton = document.createElement('button');
+            viewExcelButton.textContent = 'Download';
+            viewExcelButton.value = collection.id;
+            viewExcelButton.addEventListener('click', async (e) => {
+                e.preventDefault();
+                try {
+                    const result = await getCollectionExcel(collection.id);
+                } catch (error) {
+                    alert(error.message);
+                }
+            });
+            excelCell.appendChild(viewExcelButton);
+
             // Créer les autres cellules de données
             const collectionDateCell = document.createElement('td');
             collectionDateCell.textContent = formatDateToFrench(new Date(collection.collection_date).getTime());
@@ -130,6 +146,7 @@ export async function populateCollectionTable(date, completion) {
             row.appendChild(volunteerCell);
             row.appendChild(vehicleCell);
             row.appendChild(productsCell);
+            row.appendChild(excelCell);
             row.appendChild(collectionDateCell);
             row.appendChild(completionCell);
             row.appendChild(createdAtCell);
