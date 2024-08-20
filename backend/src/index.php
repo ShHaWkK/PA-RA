@@ -47,6 +47,7 @@ use Controller\ProductNotificationController;
 use Service\PDFService;
 use Service\JWTService;
 use Service\EmailService;
+use Service\ExcelService;
 use Middleware\JWTMiddleware;
 
 use PHPMailer\PHPMailer\PHPMailer;
@@ -72,6 +73,9 @@ $googleMapsApiKey = 'AIzaSyA0nZoj1xey1WSaaA_BdLH5CRca48aYQC0';
 
 // Instancie le service PDF
 $pdfService = new PDFService($googleMapsApiKey);
+
+// Instancie le service Excel
+$excelService = new ExcelService();
 
 // Instancie PHPMailer
 $mailer = new PHPMailer(true);
@@ -153,7 +157,10 @@ try {
         $controller = new $controllerClass($entityManager, $emailService);
     } elseif ($controllerClass === MessageController::class) {
         $controller = new $controllerClass($entityManager);
-    } elseif ($route === 'scripts') {
+    } elseif ($controllerClass === CollectionController::class) {
+        $controller = new $controllerClass($entityManager, $excelService);
+    }
+    elseif ($route === 'scripts') {
         if (isset($uriParts[1]) && $uriParts[1] === 'remove_unverified_users') {
             include __DIR__ . '/Scripts/remove_unverified_users.php';
             exit();

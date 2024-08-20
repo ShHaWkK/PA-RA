@@ -8,15 +8,19 @@ use Entity\VehicleModel;
 use Entity\UserModel;
 use Entity\ProductNotificationModel;
 use Doctrine\ORM\EntityManager;
+use Service\ExcelService;
 use Doctrine\ORM\EntityNotFoundException;
 
 class CollectionController
 {
     private $entityManager;
+    private $excelService;
 
-    public function __construct(EntityManager $entityManager)
+
+    public function __construct(EntityManager $entityManager, $excelService)
     {
         $this->entityManager = $entityManager;
+        $this->excelService = $excelService;
     }
 
     public function processRequest($method, $uriParts, $input)
@@ -46,7 +50,11 @@ class CollectionController
                         if (isset($uriParts[2])) {
                             if ($uriParts[2] === 'products') {
                                 return $this->getProductsFromCollection((int) $uriParts[1]);
-                            } elseif ($uriParts[2] === 'by-date') {
+                            }
+                            elseif ( $uriParts[2] === 'export') {
+                                return $this->exportCollectionToExcel($uriParts[1]);
+                            }
+                            elseif ($uriParts[2] === 'by-date') {
                                 return $this->getCollectionsByDate($uriParts[1]);
                             } elseif ($uriParts[2] === 'by-completion') {
                                 if ($uriParts[1] === 'true') {
@@ -536,6 +544,33 @@ class CollectionController
             }, $collections);
         } catch (\Exception $e) {
             error_log("Exception in getCollectionsByDateAndCompletion: " . $e->getMessage());
+            throw $e;
+        }
+    }
+
+    public function exportCollectionToExcel(int $collectionId)
+    {
+        try {
+            // Retrieve the collection data
+            $collection = $this->getProductsFromCollection($collectionId);
+
+            // Generate the Excel file
+            $excelFilePath = $this->excelService->generateCollectionExcel($collection);
+
+            // Set headers for file download
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            header('Content-Disposition: attachment; filename="collection_' . uniqid() . '.xlsx"');
+            header('Content-Length: ' . filesize($excelFilePath));
+
+            // Read the file and output it to the browser
+            readfile($excelFilePath);
+
+            // Clean up: delete the temporary file
+            unlink($excelFilePath);
+
+            exit;
+        } catch (\Exception $e) {
+            error_log("Exception in exportCollectionsToExcel: " . $e->getMessage());
             throw $e;
         }
     }
