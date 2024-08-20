@@ -14,6 +14,8 @@
         <li><a href="/Admin/Merchants">Merchants</a></li>
         <li><a href="/Admin/Stocks">Stocks</a></li>
         <li><a href="/Admin/Collections">Collectes</a></li>
+        <li><a href="/Admin/Collections">Collectes</a></li>
+        <li><a href="/Admin/Distributions">Tournées de distribution</a></li>
         <li><a href="/Admin/Services">Services</a></li>
     </ul>
 </div>

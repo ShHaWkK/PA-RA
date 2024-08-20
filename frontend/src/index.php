@@ -100,6 +100,15 @@ switch ($request) {
             exit;
         }
         break;
+    case '/Admin/Deliveries':
+        if ($jwtToken) {
+            requireAuth($jwtToken, 'admin');
+            require __DIR__ . '/views/Admin/Deliveries.php';
+        } else {
+            require __DIR__ . '/views/Login/Login.php';
+            exit;
+        }
+        break;
     case '/Admin/Services':
         if ($jwtToken) {
             requireAuth($jwtToken, 'admin');

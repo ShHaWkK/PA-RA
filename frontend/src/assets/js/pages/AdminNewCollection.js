@@ -42,7 +42,33 @@ async function populateVehicleSelector() {
 }
 
 async function handleCollectionSubmission(message) {
-        const loader = document.getElementById("loadingBodyGeneral");
+
+    // Récupérer les valeurs cochées
+    const selectedWarehouse = document.querySelector('input[name="selectedWarehouse"]:checked');
+    const selectedVehicle = document.querySelector('input[name="selectedVehicle"]:checked');
+    const selectedVolunteer = document.querySelector('input[name="selectedVolunteer"]:checked');
+    const selectedProducts = Array.from(document.querySelectorAll('input[type="checkbox"]:checked'))
+        .map(checkbox => ({ notification_id: parseInt(checkbox.value,10) }));
+
+    // Vérification de la sélection des éléments requis
+    if (!selectedWarehouse) {
+        alert("Please select a warehouse.");
+        return; // Arrêter l'exécution si l'entrepôt n'est pas sélectionné
+    }
+    if (!selectedVehicle) {
+        alert("Please select a vehicle.");
+        return; // Arrêter l'exécution si le véhicule n'est pas sélectionné
+    }
+    if (!selectedVolunteer) {
+        alert("Please select a volunteer.");
+        return; // Arrêter l'exécution si le bénévole n'est pas sélectionné
+    }
+    if (selectedProducts.length === 0) {
+        alert("Please select at least one product.");
+        return; // Arrêter l'exécution si aucun produit n'est sélectionné
+    }
+
+    const loader = document.getElementById("loadingBodyGeneral");
     const content = document.getElementsByClassName("back-office-content");
 
     if(content) {
@@ -52,31 +78,6 @@ async function handleCollectionSubmission(message) {
         if (loader){
         loader.classList.remove('hidden');
         console.log("loader exist");
-        }
-
-        // Récupérer les valeurs cochées
-        const selectedWarehouse = document.querySelector('input[name="selectedWarehouse"]:checked');
-        const selectedVehicle = document.querySelector('input[name="selectedVehicle"]:checked');
-        const selectedVolunteer = document.querySelector('input[name="selectedVolunteer"]:checked');
-    const selectedProducts = Array.from(document.querySelectorAll('input[type="checkbox"]:checked'))
-        .map(checkbox => ({ notification_id: parseInt(checkbox.value,10) }));
-
-        // Vérification de la sélection des éléments requis
-        if (!selectedWarehouse) {
-            alert("Please select a warehouse.");
-            return; // Arrêter l'exécution si l'entrepôt n'est pas sélectionné
-        }
-        if (!selectedVehicle) {
-            alert("Please select a vehicle.");
-            return; // Arrêter l'exécution si le véhicule n'est pas sélectionné
-        }
-        if (!selectedVolunteer) {
-            alert("Please select a volunteer.");
-            return; // Arrêter l'exécution si le bénévole n'est pas sélectionné
-        }
-        if (selectedProducts.length === 0) {
-            alert("Please select at least one product.");
-            return; // Arrêter l'exécution si aucun produit n'est sélectionné
         }
 
         // Créer les données de la collecte
