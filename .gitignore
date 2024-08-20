@@ -4,5 +4,6 @@
 .env
 /backend/vendor
 /backend/composer.lock
+/backend/public
 tickets/venv/
 tickets/app.log

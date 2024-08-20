@@ -122,6 +122,7 @@ CREATE TABLE collections (
                              is_completed BOOLEAN NOT NULL DEFAULT FALSE,
                              created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                              updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                             excel_path TEXT,
                              FOREIGN KEY (volunteer_id) REFERENCES users(id),
                              FOREIGN KEY (vehicle_id) REFERENCES vehicles(id)
 );

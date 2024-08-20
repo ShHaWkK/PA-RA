@@ -5,17 +5,28 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use Exception;
 
+$publicDir = getenv('PUBLIC_DIR');
+
 class ExcelService
 {
+    private string $publicDir;
+
+    public function __construct()
+    {
+        $this->publicDir = __DIR__ . '/../../public'; // Initialisez la propriété dans le constructeur
+    }
+
     public function generateCollectionExcel(array $data): string
     {
-        $publicDir = __DIR__ . '/../public';
-        $collectionRouteDir = $publicDir . '/collection_route';
+        $collectionRouteDir = $this->publicDir . '/collection_route';
 
         // Ensure directory exists
         if (!is_dir($collectionRouteDir)) {
             mkdir($collectionRouteDir, 0777, true);
         }
+
+        $filename = 'collection_' . uniqid() . '.xlsx';
+        $filePath = $collectionRouteDir . '/' . $filename;
 
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
@@ -38,7 +49,7 @@ class ExcelService
 
         $row = 2;
         foreach ($data as $entry) {
-            $product = $entry['product']; // Assuming 'product' is a ProductModel object
+            $product = $entry['product'];
 
             $sheet->setCellValue('A' . $row, $entry['address']);
             $sheet->setCellValue('B' . $row, $product->getName());
@@ -52,11 +63,35 @@ class ExcelService
         }
 
         // Save the file in the 'collection_route' directory
-        $filename = $collectionRouteDir . '/collection_' . uniqid() . '.xlsx';
         $writer = new Xlsx($spreadsheet);
-        $writer->save($filename);
+        $writer->save($filePath);
 
-        return $filename;
+        // Return the relative path, starting after 'public/'
+        return '/collection_route/' . $filename;
     }
 
+    public function getFileContent(string $relativeFilePath): ?array
+    {
+        // Construire le chemin absolu
+        $absoluteFilePath = $this->publicDir . '/' . ltrim($relativeFilePath, '/');
+
+        // Vérifier l'existence du fichier
+        if (!file_exists($absoluteFilePath)) {
+            return ['error' => "File not found at path $absoluteFilePath."];
+        }
+
+        // Lire le contenu du fichier
+        $fileContent = file_get_contents($absoluteFilePath);
+
+        if ($fileContent === false) {
+            return ['error' => "Error reading the file at path $absoluteFilePath."];
+        }
+
+        return [
+            'content' => $fileContent,
+            'path' => $absoluteFilePath,
+            'filename' => basename($absoluteFilePath),
+            'size' => filesize($absoluteFilePath)
+        ];
+    }
 }

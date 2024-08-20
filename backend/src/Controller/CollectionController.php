@@ -10,6 +10,8 @@ use Entity\ProductNotificationModel;
 use Doctrine\ORM\EntityManager;
 use Service\ExcelService;
 use Doctrine\ORM\EntityNotFoundException;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 
 class CollectionController
 {
@@ -28,7 +30,11 @@ class CollectionController
         try {
             switch ($method) {
                 case 'POST':
+                if ( $uriParts[2] === 'export') {
+                    return $this->exportCollectionToExcel($uriParts[1]);
+                }else {
                     return $this->createCollection($input);
+                }
                 case 'GET':
                     // Vérifier si des paramètres "completed" et éventuellement "date" sont passés dans la requête
                     if (isset($_GET['completed'])) {
@@ -51,8 +57,8 @@ class CollectionController
                             if ($uriParts[2] === 'products') {
                                 return $this->getProductsFromCollection((int) $uriParts[1]);
                             }
-                            elseif ( $uriParts[2] === 'export') {
-                                return $this->exportCollectionToExcel($uriParts[1]);
+                            elseif ( $uriParts[2] === 'get_excel') {
+                                return $this->getCollectionExcel($uriParts[1]);
                             }
                             elseif ($uriParts[2] === 'by-date') {
                                 return $this->getCollectionsByDate($uriParts[1]);
@@ -548,30 +554,68 @@ class CollectionController
         }
     }
 
-    public function exportCollectionToExcel(int $collectionId)
+    public function exportCollectionToExcel(int $collectionId): array
     {
         try {
-            // Retrieve the collection data
-            $collection = $this->getProductsFromCollection($collectionId);
+            // Récupérer les données de la collection
+            $collection = $this->entityManager->find(CollectionModel::class, $collectionId);
+            $collection_products = $this->getProductsFromCollection($collectionId);
 
-            // Generate the Excel file
-            $excelFilePath = $this->excelService->generateCollectionExcel($collection);
+            // Générer le fichier Excel et récupérer le chemin du fichier
+            $excelFilePath = $this->excelService->generateCollectionExcel($collection_products);
 
-            // Set headers for file download
-            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-            header('Content-Disposition: attachment; filename="collection_' . uniqid() . '.xlsx"');
-            header('Content-Length: ' . filesize($excelFilePath));
+            error_log("Excel file generated at path: " . $excelFilePath);
 
-            // Read the file and output it to the browser
-            readfile($excelFilePath);
+            $collection->setExcelPath($excelFilePath);
+            $this->entityManager->flush();
 
-            // Clean up: delete the temporary file
-            unlink($excelFilePath);
+            // Retourner un message de confirmation avec le chemin du fichier
+            return ['message' => 'Excel file successfully generated.'];
 
-            exit;
         } catch (\Exception $e) {
-            error_log("Exception in exportCollectionsToExcel: " . $e->getMessage());
-            throw $e;
+            // Log l'erreur et retourner un message d'erreur
+            error_log("Exception dans exportCollectionsToExcel: " . $e->getMessage());
+            return [
+                'message' => 'Une erreur est survenue lors de la génération du fichier Excel.',
+                'error' => $e->getMessage()
+            ];
+        }
+    }
+
+    public function getCollectionExcel(int $collectionId): array
+    {
+        try {
+            // Récupérer la collection
+            $collection = $this->entityManager->find(CollectionModel::class, $collectionId);
+
+            if (!$collection) {
+                http_response_code(404);
+                return ["Collection with ID $collectionId not found."];
+            }
+
+            // Récupérer le chemin du fichier Excel
+            $relativeFilePath = $collection->getExcelPath();
+
+            // Obtenir le contenu du fichier et d'autres informations depuis le service
+            $fileData = $this->excelService->getFileContent($relativeFilePath);
+
+            if (isset($fileData['error'])) {
+                http_response_code(404);
+                return [$fileData['error']];
+            }
+
+            // Définir les headers pour le téléchargement
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            header('Content-Disposition: attachment; filename="' . $fileData['filename'] . '"');
+            header('Content-Length: ' . $fileData['size']);
+
+            // Envoyer le contenu du fichier
+            echo $fileData['content'];
+            exit;
+
+        } catch (\Exception $e) {
+            http_response_code(500);
+            return ["An error occurred while retrieving the Excel file.", 'error' => $e->getMessage()];
         }
     }
 

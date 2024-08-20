@@ -23,6 +23,9 @@ class CollectionModel implements \JsonSerializable
     #[ORM\Column(type: "boolean", options: ["default" => false])]
     private $is_completed = false;
 
+    #[ORM\Column(type: "text", nullable: true)]
+    private ?string $excel_path = null;
+
     #[ORM\Column(type: "datetime", options: ["default" => "CURRENT_TIMESTAMP"])]
     private $collection_date;
 
@@ -103,6 +106,17 @@ class CollectionModel implements \JsonSerializable
     public function getUpdatedAt(): ?\DateTimeInterface
     {
         return $this->updated_at;
+    }
+
+    public function getExcelPath(): ?string
+    {
+        return $this->excel_path;
+    }
+
+    public function setExcelPath(?string $excel_path): self
+    {
+        $this->excel_path = $excel_path;
+        return $this;
     }
 
     public function jsonSerialize(): array
