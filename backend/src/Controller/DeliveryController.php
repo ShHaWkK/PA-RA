@@ -65,12 +65,28 @@ class DeliveryController
                     break;
                 case 'GET':
                     if (isset($uriParts[1])) {
-                        if (isset($uriParts[2]) && $uriParts[2] === 'pdf') {
-                            return $this->generateDeliveryPDF((int) $uriParts[1]);
+                        $id = (int) $uriParts[1];
+
+                        // Récupérer une route par ID
+                        if (isset($uriParts[2]) && $uriParts[2] === 'route') {
+                            return $this->getRouteById($id);
                         }
-                        return $this->getDelivery((int) $uriParts[1]);
+
+                        // Récupérer une livraison par ID
+                        if (isset($uriParts[2]) && $uriParts[2] === 'delivery') {
+                            return $this->getDeliveryById($id);
+                        }
+
+                        // Récupérer une destination par ID
+                        if (isset($uriParts[2]) && $uriParts[2] === 'destination') {
+                            return $this->getDestinationById($id);
+                        }
+
+                        // Exemple d'URL : /routes/1
+                        return $this->getRouteById($id);
                     } else {
-                        return $this->getAllDeliveries();
+                        // Récupérer toutes les routes avec éventuellement des query parameters
+                        return $this->getAllRoutes($_GET);
                     }
                 case 'PUT':
                     if (isset($uriParts[1])) {
@@ -386,19 +402,149 @@ class DeliveryController
         }
     }
 
-
-    public function getDelivery($id)
+    public function getAllRoutes(array $queryParameters): array
     {
         try {
-            $delivery = $this->entityManager->find(DeliveryModel::class, $id);
+            // Création d'un tableau pour stocker les critères de recherche
+            $criteria = [];
+
+            // Vérification des paramètres de requête et ajout des critères correspondants
+            if (isset($queryParameters['start_date'])) {
+                $criteria['start_time'] = ['>=', new \DateTime($queryParameters['start_date'])];
+            }
+
+            if (isset($queryParameters['end_date'])) {
+                $criteria['end_time'] = ['<=', new \DateTime($queryParameters['end_date'])];
+            }
+
+            if (isset($queryParameters['vehicle_id'])) {
+                $criteria['vehicle'] = $queryParameters['vehicle_id'];
+            }
+
+            if (isset($queryParameters['driver_id'])) {
+                $criteria['driver'] = $queryParameters['driver_id'];
+            }
+
+            if (isset($queryParameters['status'])) {
+                $criteria['status'] = $queryParameters['status'];
+            }
+
+            // Construire la requête Doctrine en fonction des critères
+            $queryBuilder = $this->entityManager->getRepository(RouteModel::class)->createQueryBuilder('r');
+
+            foreach ($criteria as $field => $value) {
+                if (is_array($value)) {
+                    $queryBuilder->andWhere("r.$field " . $value[0] . " :$field")
+                        ->setParameter($field, $value[1]);
+                } else {
+                    $queryBuilder->andWhere("r.$field = :$field")
+                        ->setParameter($field, $value);
+                }
+            }
+
+            // Exécution de la requête
+            $routes = $queryBuilder->getQuery()->getResult();
+
+            // Vérification si des routes existent
+            if (empty($routes)) {
+                http_response_code(404);
+                return ['error' => 'No routes found with the given criteria'];
+            }
+
+            // Transforme chaque route en tableau associatif grâce à jsonSerialize
+            $routesArray = array_map(function($route) {
+                return $route->jsonSerialize();
+            }, $routes);
+
+            // Retourne les routes au format JSON
+            return [
+                'routes' => $routesArray,
+            ];
+        } catch (\Exception $e) {
+            // Log de l'exception pour débogage
+            error_log("Exception in getAllRoutes: " . $e->getMessage());
+
+            // Retourne une réponse d'erreur avec le message de l'exception
+            http_response_code(500);
+            return ['error' => 'An error occurred while retrieving the routes'];
+        }
+    }
+
+    public function getRouteById(int $id): array
+    {
+        try {
+            // Récupération de l'entité RouteModel à partir de l'id fourni
+            $route = $this->entityManager->getRepository(RouteModel::class)->find($id);
+
+            // Vérification si la route existe
+            if (!$route) {
+                http_response_code(404);
+                return ['error' => 'Route not found'];
+            }
+
+            // Retourne les détails de la route en format JSON
+            return [
+                'route' => $route->jsonSerialize(),
+            ];
+        } catch (\Exception $e) {
+            // Log de l'exception pour débogage
+            error_log("Exception in getRouteById: " . $e->getMessage());
+
+            // Retourne une réponse d'erreur avec le message de l'exception
+            http_response_code(500);
+            return ['error' => 'An error occurred while retrieving the route'];
+        }
+    }
+
+    public function getDestinationById(int $id): array
+    {
+        try {
+            // Récupération de l'entité DestinationModel à partir de l'id fourni
+            $destination = $this->entityManager->getRepository(DestinationModel::class)->find($id);
+
+            // Vérification si la destination existe
+            if (!$destination) {
+                http_response_code(404);
+                return ['error' => 'Destination not found'];
+            }
+
+            // Retourne les détails de la destination en format JSON
+            return [
+                'destination' => $destination->jsonSerialize(),
+            ];
+        } catch (\Exception $e) {
+            // Log de l'exception pour débogage
+            error_log("Exception in getDestinationById: " . $e->getMessage());
+
+            // Retourne une réponse d'erreur avec le message de l'exception
+            http_response_code(500);
+            return ['error' => 'An error occurred while retrieving the destination'];
+        }
+    }
+
+    public function getDeliveryById(int $id): array
+    {
+        try {
+            // Récupération de l'entité DeliveryModel à partir de l'id fourni
+            $delivery = $this->entityManager->getRepository(DeliveryModel::class)->find($id);
+
+            // Vérification si la livraison existe
             if (!$delivery) {
                 http_response_code(404);
                 return ['error' => 'Delivery not found'];
             }
-            return json_decode($this->serializer->serialize($delivery, 'json'), true);
+
+            // Retourne les détails de la livraison en format JSON
+            return [
+                'delivery' => $delivery->jsonSerialize(),
+            ];
         } catch (\Exception $e) {
-            error_log("Exception in getDelivery: " . $e->getMessage());
-            throw $e;
+            // Log de l'exception pour débogage
+            error_log("Exception in getDeliveryById: " . $e->getMessage());
+
+            // Retourne une réponse d'erreur avec le message de l'exception
+            http_response_code(500);
+            return ['error' => 'An error occurred while retrieving the delivery'];
         }
     }
 

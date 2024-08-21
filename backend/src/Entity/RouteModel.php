@@ -174,5 +174,25 @@ class RouteModel
 
         return $this;
     }
+
+    public function jsonSerialize(): array
+    {
+        return [
+            'id' => $this->getId(),
+            'name' => $this->getName(),
+            'vehicle' => $this->getVehicle()?->jsonSerialize(),
+            'driver' => $this->getDriver()?->jsonSerialize(),
+            'start_time' => $this->getStartTime()?->format('d-m-Y H:i:s'),
+            'end_time' => $this->getEndTime()?->format('d-m-Y H:i:s'),
+            'status' => $this->getStatus(),
+            'created_at' => $this->getCreatedAt()?->format('d-m-Y H:i:s'),
+            'updated_at' => $this->getUpdatedAt()?->format('d-m-Y H:i:s'),
+            'destinations' => $this->getDestinations()->map(function($destination) {
+                return $destination->jsonSerialize();
+            })->toArray(),
+        ];
+    }
+
+
 }
 ?>
