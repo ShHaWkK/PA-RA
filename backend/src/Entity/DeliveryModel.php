@@ -1,5 +1,4 @@
 <?php
-// Path: backend/src/Entity/DeliveryModel.php
 namespace Entity;
 
 use Doctrine\ORM\Mapping as ORM;
@@ -9,33 +8,26 @@ use Doctrine\ORM\Mapping as ORM;
 class DeliveryModel
 {
     #[ORM\Id]
-    #[ORM\GeneratedValue(strategy: "AUTO")]
+    #[ORM\GeneratedValue]
     #[ORM\Column(type: "integer")]
     private $id;
 
-    #[ORM\Column(type: "string", length: 255)]
-    private $route_name;
-
-    #[ORM\Column(type: "string", length: 255)]
+    #[ORM\ManyToOne(targetEntity: DestinationModel::class)]
+    #[ORM\JoinColumn(name: "destination_id", referencedColumnName: "id", onDelete: "CASCADE")]
     private $destination;
 
-    #[ORM\Column(type: "string", columnDefinition: "ENUM('association', 'individual')")]
-    private $recipient_type;
+    #[ORM\ManyToOne(targetEntity: ProductModel::class)]
+    #[ORM\JoinColumn(name: "product_id", referencedColumnName: "id", onDelete: "CASCADE")]
+    private $product;
 
-    #[ORM\Column(type: "datetime", options: ["default" => "CURRENT_TIMESTAMP"])]
-    private $delivery_date;
+    #[ORM\Column(type: "integer")]
+    private $quantity;
 
-    #[ORM\Column(type: "string", length: 255)]
+    #[ORM\Column(type: "string", length: 50, options: ["default" => "pending"], columnDefinition: "ENUM('pending', 'in_route', 'delivered')")]
     private $status;
 
     #[ORM\Column(type: "text", nullable: true)]
     private $comment;
-
-    #[ORM\Column(type: "integer")]
-    private $warehouse_id;
-
-    #[ORM\Column(type: "integer")]
-    private $vehicle_id;
 
     #[ORM\Column(type: "datetime", options: ["default" => "CURRENT_TIMESTAMP"])]
     private $created_at;
@@ -43,54 +35,49 @@ class DeliveryModel
     #[ORM\Column(type: "datetime", options: ["default" => "CURRENT_TIMESTAMP", "onUpdate" => "CURRENT_TIMESTAMP"])]
     private $updated_at;
 
-    // Getters and setters for each property
+    public function __construct()
+    {
+        $this->created_at = new \DateTime();
+        $this->updated_at = new \DateTime();
+    }
+
+    // Getters and Setters
 
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getRouteName(): ?string
-    {
-        return $this->route_name;
-    }
-
-    public function setRouteName(string $route_name): self
-    {
-        $this->route_name = $route_name;
-        return $this;
-    }
-
-    public function getDestination(): ?string
+    public function getDestination(): ?DestinationModel
     {
         return $this->destination;
     }
 
-    public function setDestination(string $destination): self
+    public function setDestination(?DestinationModel $destination): self
     {
         $this->destination = $destination;
         return $this;
     }
 
-    public function getRecipientType(): ?string
+    public function getProduct(): ?ProductModel
     {
-        return $this->recipient_type;
+        return $this->product;
     }
 
-    public function setRecipientType(string $recipient_type): self
+    public function setProduct(?ProductModel $product): self
     {
-        $this->recipient_type = $recipient_type;
+        $this->product = $product;
         return $this;
     }
 
-    public function getDeliveryDate(): ?\DateTimeInterface
+    public function getQuantity(): ?int
     {
-        return $this->delivery_date;
+        return $this->quantity;
     }
 
-    public function setDeliveryDate(\DateTimeInterface $delivery_date): self
+    public function setQuantity(int $quantity): self
     {
-        $this->delivery_date = $delivery_date;
+        $this->quantity = $quantity;
         return $this;
     }
 
@@ -116,37 +103,9 @@ class DeliveryModel
         return $this;
     }
 
-    public function getWarehouseId(): ?int
-    {
-        return $this->warehouse_id;
-    }
-
-    public function setWarehouseId(int $warehouse_id): self
-    {
-        $this->warehouse_id = $warehouse_id;
-        return $this;
-    }
-
-    public function getVehicleId(): ?int
-    {
-        return $this->vehicle_id;
-    }
-
-    public function setVehicleId(int $vehicle_id): self
-    {
-        $this->vehicle_id = $vehicle_id;
-        return $this;
-    }
-
     public function getCreatedAt(): ?\DateTimeInterface
     {
         return $this->created_at;
-    }
-
-    public function setCreatedAt(\DateTimeInterface $created_at): self
-    {
-        $this->created_at = $created_at;
-        return $this;
     }
 
     public function getUpdatedAt(): ?\DateTimeInterface
@@ -154,10 +113,16 @@ class DeliveryModel
         return $this->updated_at;
     }
 
-    public function setUpdatedAt(\DateTimeInterface $updated_at): self
+    #[ORM\PreUpdate]
+    public function setUpdatedAt(): void
     {
-        $this->updated_at = $updated_at;
-        return $this;
+        $this->updated_at = new \DateTime();
+    }
+
+    #[ORM\PreUpdate]
+    public function setCreatedAt($value): void
+    {
+        $this->created_at = $value;
     }
 }
 ?>
