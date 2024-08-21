@@ -2,9 +2,12 @@
 namespace Controller;
 
 use Entity\DeliveryModel;
-use Entity\CompanyModel;
-use Entity\PlannedRouteModel;
+use Entity\RouteModel;
+use Entity\DestinationModel;
+use Entity\ProductModel;
+use Entity\UserModel;
 use Entity\VehicleModel;
+use Entity\WarehouseModel;
 use Doctrine\ORM\EntityManager;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
@@ -33,7 +36,33 @@ class DeliveryController
         try {
             switch ($method) {
                 case 'POST':
-                    return $this->createDelivery($input);
+                     return $this->createRoute($input);
+                case 'PATCH':
+                    if (isset($uriParts[1])) {
+                        $id = (int) $uriParts[1];
+
+                        if (isset($uriParts[2])) {
+                            $operation = $uriParts[2];
+                            switch ($operation) {
+                                case 'add-delivery':
+                                    return $this->addDeliveryToDestination($id, $input);
+                                case 'remove-delivery':
+                                    return $this->removeDeliveryFromDestination($id);
+                                case 'add-destination':
+                                    return $this->addDestinationToRoute($id, $input);
+                                case 'remove-destination':
+                                    return $this->removeDestinationFromRoute($id);
+                                default:
+                                    http_response_code(400);
+                                    return ['error' => 'Invalid operation'];
+                            }
+                        }
+                        http_response_code(400);
+                        return ['error' => 'Operation not specified'];
+                    }
+                    http_response_code(400);
+                    return ['error' => 'ID not specified'];
+                    break;
                 case 'GET':
                     if (isset($uriParts[1])) {
                         if (isset($uriParts[2]) && $uriParts[2] === 'pdf') {
@@ -65,75 +94,298 @@ class DeliveryController
         }
     }
 
-    public function createDelivery($data)
+    public function createRoute(array $data): array
     {
         try {
-            if (!isset($data['route_name']) || !isset($data['destination']) || !isset($data['recipient_type']) || !isset($data['status']) || !isset($data['warehouse_id']) || !isset($data['email']) || !isset($data['volunteer_name']) || !isset($data['vehicle_id'])) {
+            // Vérifiez que les champs requis sont présents
+            if (!isset($data['name']) || !isset($data['vehicle_id']) || !isset($data['driver_id']) || !isset($data['destinations'])) {
                 http_response_code(400);
-                return ['error' => 'Missing required fields for new delivery'];
+                return ['error' => 'Missing required fields for new route'];
             }
-    
-            $vehicle = $this->entityManager->find(VehicleModel::class, $data['vehicle_id']);
+
+            // Récupération de l'entité VehicleModel à partir de l'id fourni
+            $vehicle = $this->entityManager->getRepository(VehicleModel::class)
+                ->find($data['vehicle_id']);
+
             if (!$vehicle) {
                 http_response_code(404);
                 return ['error' => 'Vehicle not found'];
             }
-    
-            $today = new \DateTime();
-            $existingDelivery = $this->entityManager->getRepository(DeliveryModel::class)->findOneBy([
-                'route_name' => $data['route_name'],
-                'delivery_date' => $today,
-            ]);
-    
-            if ($existingDelivery) {
-                http_response_code(400);
-                return ['error' => 'A delivery with the same route_name already exists for today'];
+
+            // Récupération de l'entité UserModel à partir de l'id fourni
+            $driver = $this->entityManager->getRepository(UserModel::class)
+                ->find($data['driver_id']);
+
+            if (!$driver) {
+                http_response_code(404);
+                return ['error' => 'Driver not found'];
             }
-    
-            $company = $this->entityManager->getRepository(CompanyModel::class)->findOneBy(['has_stock' => true]);
-    
-            if (!$company) {
-                http_response_code(400);
-                return ['error' => 'No companies with stock available'];
+
+            // Création d'une nouvelle instance de RouteModel
+            $route = new RouteModel();
+            $route->setName($data['name']);
+            $route->setVehicle($vehicle);
+            $route->setDriver($driver);
+            $route->setStatus('pending'); // Statut par défaut
+            $route->setStartTime(new \DateTime()); // Heure de début par défaut
+            $route->setCreatedAt(new \DateTime());
+            $route->setUpdatedAt(new \DateTime());
+
+            // Traitement des destinations
+            foreach ($data['destinations'] as $destinationData) {
+                if (!isset($destinationData['address']) || !isset($destinationData['recipient_type']) || !isset($destinationData['deliveries'])) {
+                    http_response_code(400);
+                    return ['error' => 'Missing required fields for destination'];
+                }
+
+                // Création d'une nouvelle instance de DestinationModel
+                $destination = new DestinationModel();
+                $destination->setAddress($destinationData['address']);
+                $destination->setRecipientType($destinationData['recipient_type']);
+                $destination->setRoute($route);
+                $destination->setStatus('pending'); // Statut par défaut
+                $destination->setDeliveryDate(new \DateTime()); // Date de livraison par défaut
+                $destination->setCreatedAt(new \DateTime());
+                $destination->setUpdatedAt(new \DateTime());
+
+                // Traitement des livraisons
+                foreach ($destinationData['deliveries'] as $deliveryData) {
+                    if (!isset($deliveryData['product_id']) || !isset($deliveryData['quantity']) || !isset($deliveryData['status'])) {
+                        http_response_code(400);
+                        return ['error' => 'Missing required fields for delivery'];
+                    }
+
+                    // Récupération de l'entité ProductModel à partir de l'id fourni
+                    $product = $this->entityManager->getRepository(ProductModel::class)
+                        ->find($deliveryData['product_id']);
+
+                    if (!$product) {
+                        http_response_code(404);
+                        return ['error' => 'Product not found'];
+                    }
+
+                    // Création d'une nouvelle instance de DeliveryModel
+                    $delivery = new DeliveryModel();
+                    $delivery->setDestination($destination);
+                    $delivery->setProduct($product);
+                    $delivery->setQuantity($deliveryData['quantity']);
+                    $delivery->setStatus($deliveryData['status']);
+                    $delivery->setCreatedAt(new \DateTime());
+                    $delivery->setUpdatedAt(new \DateTime());
+
+                    // Ajout de la livraison à la collection de livraisons de la destination
+                    $destination->addDelivery($delivery);
+
+                    // Persistance de la nouvelle livraison en base de données
+                    $this->entityManager->persist($delivery);
+                }
+
+                // Ajout de la destination à la collection de destinations de la route
+                $route->addDestination($destination);
+
+                // Persistance de la nouvelle destination en base de données
+                $this->entityManager->persist($destination);
             }
-    
-            $delivery = new DeliveryModel();
-            $delivery->setRouteName($data['route_name']);
-            $delivery->setDestination($data['destination']);
-            $delivery->setRecipientType($data['recipient_type']);
-            $delivery->setDeliveryDate($today);
-            $delivery->setStatus($data['status']);
-            if (isset($data['comment'])) {
-                $delivery->setComment($data['comment']);
-            }
-            $delivery->setWarehouseId($data['warehouse_id']);
-            $delivery->setVehicleId($data['vehicle_id']);
-            $delivery->setCreatedAt(new \DateTime("now"));
-            $delivery->setUpdatedAt(new \DateTime("now"));
-    
-            $this->entityManager->persist($delivery);
+
+            // Persistance de la nouvelle route en base de données
+            $this->entityManager->persist($route);
             $this->entityManager->flush();
-    
-            $plannedRoute = new PlannedRouteModel();
-            $plannedRoute->setDelivery($delivery);
-            $plannedRoute->setDate($today);
-            $this->entityManager->persist($plannedRoute);
-            $this->entityManager->flush();
-    
-            $emailSent = $this->sendEmailNotification($delivery, $data['email'], $data['volunteer_name']);
-    
-            if (!$emailSent) {
-                http_response_code(500);
-                return ['error' => 'Delivery created but email notification failed'];
-            }
-    
-            return ['id' => $delivery->getId(), 'message' => 'Delivery created successfully'];
+
+            // Retourne la réponse avec les détails de la route créée
+            return [
+                'id' => $route->getId(),
+                'message' => 'Route created successfully',
+            ];
         } catch (\Exception $e) {
-            error_log("Exception in createDelivery: " . $e->getMessage());
-            throw $e;
+            // Log de l'exception pour débogage
+            error_log("Exception in createRoute: " . $e->getMessage());
+
+            // Retourne une réponse d'erreur avec le message de l'exception
+            http_response_code(500);
+            return ['error' => 'An error occurred while creating the route'];
         }
     }
-    
+
+    public function addDeliveryToDestination(int $destinationId, array $data): array
+    {
+        try {
+            // Vérifiez que les champs requis sont présents
+            if (!isset($data['product_id']) || !isset($data['quantity']) || !isset($data['status'])) {
+                http_response_code(400);
+                return ['error' => 'Missing required fields for new delivery'];
+            }
+
+            // Récupération de l'entité DestinationModel à partir de l'id fourni
+            $destination = $this->entityManager->getRepository(DestinationModel::class)
+                ->find($destinationId);
+
+            if (!$destination) {
+                http_response_code(404);
+                return ['error' => 'Destination not found'];
+            }
+
+            // Récupération de l'entité ProductModel à partir de l'id fourni
+            $product = $this->entityManager->getRepository(ProductModel::class)
+                ->find($data['product_id']);
+
+            if (!$product) {
+                http_response_code(404);
+                return ['error' => 'Product not found'];
+            }
+
+            // Création d'une nouvelle instance de DeliveryModel
+            $delivery = new DeliveryModel();
+            $delivery->setDestination($destination);
+            $delivery->setProduct($product);
+            $delivery->setQuantity($data['quantity']);
+            $delivery->setStatus($data['status']);
+            $delivery->setCreatedAt(new \DateTime());
+            $delivery->setUpdatedAt(new \DateTime());
+
+            // Ajout de la livraison à la collection de livraisons de la destination
+            $destination->addDelivery($delivery);
+
+            // Persistance de la nouvelle livraison en base de données
+            $this->entityManager->persist($delivery);
+            $this->entityManager->flush();
+
+            // Retourne la réponse avec les détails de la livraison ajoutée
+            return [
+                'id' => $delivery->getId(),
+                'message' => 'Delivery added successfully',
+            ];
+        } catch (\Exception $e) {
+            // Log de l'exception pour débogage
+            error_log("Exception in addDeliveryToDestination: " . $e->getMessage());
+
+            // Retourne une réponse d'erreur avec le message de l'exception
+            http_response_code(500);
+            return ['error' => 'An error occurred while adding the delivery'];
+        }
+    }
+
+    public function removeDeliveryFromDestination(int $deliveryId): array
+    {
+        try {
+            // Récupération de l'entité DeliveryModel à partir de l'id fourni
+            $delivery = $this->entityManager->getRepository(DeliveryModel::class)
+                ->find($deliveryId);
+
+            if (!$delivery) {
+                http_response_code(404);
+                return ['error' => 'Delivery not found'];
+            }
+
+            // Récupération de l'entité DestinationModel associée à la livraison
+            $destination = $delivery->getDestination();
+
+            // Suppression de la livraison de la collection de livraisons de la destination
+            $destination->removeDelivery($delivery);
+
+            // Suppression de la livraison de la base de données
+            $this->entityManager->remove($delivery);
+            $this->entityManager->flush();
+
+            // Retourne une réponse de succès
+            return [
+                'message' => 'Delivery removed successfully',
+            ];
+        } catch (\Exception $e) {
+            // Log de l'exception pour débogage
+            error_log("Exception in removeDeliveryFromDestination: " . $e->getMessage());
+
+            // Retourne une réponse d'erreur avec le message de l'exception
+            http_response_code(500);
+            return ['error' => 'An error occurred while removing the delivery'];
+        }
+    }
+
+    public function addDestinationToRoute(int $routeId, array $data): array
+    {
+        try {
+            // Vérifiez que les champs requis sont présents
+            if (!isset($data['address']) || !isset($data['recipient_type'])) {
+                http_response_code(400);
+                return ['error' => 'Missing required fields for new destination'];
+            }
+
+            // Récupération de l'entité RouteModel à partir de l'id fourni
+            $route = $this->entityManager->getRepository(RouteModel::class)
+                ->find($routeId);
+
+            if (!$route) {
+                http_response_code(404);
+                return ['error' => 'Route not found'];
+            }
+
+            // Création d'une nouvelle instance de DestinationModel
+            $destination = new DestinationModel();
+            $destination->setAddress($data['address']);
+            $destination->setRecipientType($data['recipient_type']);
+            $destination->setRoute($route);
+            $destination->setStatus('pending'); // Statut par défaut
+            $destination->setDeliveryDate(new \DateTime()); // Date de livraison par défaut
+            $destination->setCreatedAt(new \DateTime());
+            $destination->setUpdatedAt(new \DateTime());
+
+            // Ajout de la destination à la collection de destinations de la route
+            $route->addDestination($destination);
+
+            // Persistance de la nouvelle destination en base de données
+            $this->entityManager->persist($destination);
+            $this->entityManager->flush();
+
+            // Retourne la réponse avec les détails de la destination ajoutée
+            return [
+                'id' => $destination->getId(),
+                'message' => 'Destination added successfully',
+            ];
+        } catch (\Exception $e) {
+            // Log de l'exception pour débogage
+            error_log("Exception in addDestinationToRoute: " . $e->getMessage());
+
+            // Retourne une réponse d'erreur avec le message de l'exception
+            http_response_code(500);
+            return ['error' => 'An error occurred while adding the destination'];
+        }
+    }
+
+    public function removeDestinationFromRoute(int $destinationId): array
+    {
+        try {
+            // Récupération de l'entité DestinationModel à partir de l'id fourni
+            $destination = $this->entityManager->getRepository(DestinationModel::class)
+                ->find($destinationId);
+
+            if (!$destination) {
+                http_response_code(404);
+                return ['error' => 'Destination not found'];
+            }
+
+            // Récupération de l'entité RouteModel associée à la destination
+            $route = $destination->getRoute();
+
+            // Suppression de la destination de la collection de destinations de la route
+            $route->removeDestination($destination);
+
+            // Suppression de la destination de la base de données
+            $this->entityManager->remove($destination);
+            $this->entityManager->flush();
+
+            // Retourne une réponse de succès
+            return [
+                'message' => 'Destination removed successfully',
+            ];
+        } catch (\Exception $e) {
+            // Log de l'exception pour débogage
+            error_log("Exception in removeDestinationFromRoute: " . $e->getMessage());
+
+            // Retourne une réponse d'erreur avec le message de l'exception
+            http_response_code(500);
+            return ['error' => 'An error occurred while removing the destination'];
+        }
+    }
+
 
     public function getDelivery($id)
     {
@@ -159,23 +411,24 @@ class DeliveryController
                 return ['error' => 'Delivery not found'];
             }
 
-            if (isset($data['route_name'])) {
-                $delivery->setRouteName($data['route_name']);
-            }
-            if (isset($data['destination'])) {
-                $delivery->setDestination($data['destination']);
-            }
-            if (isset($data['recipient_type'])) {
-                $delivery->setRecipientType($data['recipient_type']);
+            if (isset($data['route_id'])) {
+                $route = $this->entityManager->find(RouteModel::class, $data['route_id']);
+                if (!$route) {
+                    http_response_code(404);
+                    return ['error' => 'Route not found'];
+                }
+                $delivery->setRoute($route);
             }
             if (isset($data['status'])) {
                 $delivery->setStatus($data['status']);
             }
-            if (isset($data['comment'])) {
-                $delivery->setComment($data['comment']);
-            }
             if (isset($data['warehouse_id'])) {
-                $delivery->setWarehouseId($data['warehouse_id']);
+                $warehouse = $this->entityManager->find(WarehouseModel::class, $data['warehouse_id']);
+                if (!$warehouse) {
+                    http_response_code(404);
+                    return ['error' => 'Warehouse not found'];
+                }
+                $delivery->setWarehouse($warehouse);
             }
             if (isset($data['vehicle_id'])) {
                 $vehicle = $this->entityManager->find(VehicleModel::class, $data['vehicle_id']);
@@ -183,9 +436,26 @@ class DeliveryController
                     http_response_code(404);
                     return ['error' => 'Vehicle not found'];
                 }
-                $delivery->setVehicleId($data['vehicle_id']);
+                $delivery->setVehicle($vehicle);
+            }
+            if (isset($data['comment'])) {
+                $delivery->setComment($data['comment']);
             }
             $delivery->setUpdatedAt(new \DateTime("now"));
+
+            // Gestion des destinations
+            if (isset($data['destinations'])) {
+                foreach ($delivery->getDestinations() as $destination) {
+                    $this->entityManager->remove($destination);
+                }
+                foreach ($data['destinations'] as $destinationData) {
+                    $destination = new DestinationModel();
+                    $destination->setAddress($destinationData['address']);
+                    $destination->setRecipientType($destinationData['recipient_type']);
+                    $destination->setDelivery($delivery);
+                    $this->entityManager->persist($destination);
+                }
+            }
 
             $this->entityManager->flush();
 
@@ -205,6 +475,10 @@ class DeliveryController
                 return ['error' => 'Delivery not found'];
             }
 
+            foreach ($delivery->getDestinations() as $destination) {
+                $this->entityManager->remove($destination);
+            }
+
             $this->entityManager->remove($delivery);
             $this->entityManager->flush();
 
@@ -218,14 +492,23 @@ class DeliveryController
     public function getAllDeliveries()
     {
         try {
-            $deliveryRepository = $this->entityManager->getRepository(DeliveryModel::class);
-            $deliveries = $deliveryRepository->findAll();
-            return json_decode($this->serializer->serialize($deliveries, 'json'), true);
+            // Récupérer toutes les livraisons depuis le repository
+            $deliveries = $this->entityManager->getRepository(DeliveryModel::class)->findAll();
+
+            // Utiliser jsonSerialize pour chaque livraison
+            $serializedDeliveries = [];
+            foreach ($deliveries as $delivery) {
+                $serializedDeliveries[] = $delivery->jsonSerialize();
+            }
+
+            return $serializedDeliveries;
         } catch (\Exception $e) {
+            // Log de l'exception
             error_log("Exception in getAllDeliveries: " . $e->getMessage());
             throw $e;
         }
     }
+
 
     public function generateDeliveryPDF($id)
     {
@@ -254,7 +537,7 @@ class DeliveryController
 
         try {
             $mail->isSMTP();
-            $mail->Host = 'smtp.gmail.com'; 
+            $mail->Host = 'smtp.gmail.com';
             $mail->SMTPAuth = true;
             $mail->Username = 'morewaste1@gmail.com';
             $mail->Password = 'vhpewmlkxxrpnioj';
@@ -283,8 +566,8 @@ class DeliveryController
 
     private function generateEmailBody($delivery, $volunteerName)
     {
-        $googleMapsLink = $this->generateGoogleMapsLink($delivery->getRouteName(), $delivery->getDestination());
-        
+        $googleMapsLink = $this->generateGoogleMapsLink($delivery->getRoute()->getName(), $delivery->getDestinations());
+
         return "
             <html>
             <body>
@@ -292,10 +575,9 @@ class DeliveryController
                 <p>Dear {$volunteerName},</p>
                 <p>A new delivery has been assigned to you. Please find the details below:</p>
                 <ul>
-                    <li><strong>Route Name:</strong> {$delivery->getRouteName()}</li>
-                    <li><strong>Destination:</strong> {$delivery->getDestination()}</li>
-                    <li><strong>Recipient Type:</strong> {$delivery->getRecipientType()}</li>
+                    <li><strong>Route Name:</strong> {$delivery->getRoute()->getName()}</li>
                     <li><strong>Status:</strong> {$delivery->getStatus()}</li>
+                    <li><strong>Destinations:</strong> " . implode(", ", array_map(function($dest) { return $dest->getAddress(); }, $delivery->getDestinations()->toArray())) . "</li>
                 </ul>
                 <p>You can view the route on Google Maps <a href=\"{$googleMapsLink}\">here</a>.</p>
                 <p>Thank you for your continued support in helping us reduce waste and assist those in need.</p>
@@ -308,15 +590,14 @@ class DeliveryController
 
     private function generateEmailAltBody($delivery, $volunteerName)
     {
-        $googleMapsLink = $this->generateGoogleMapsLink($delivery->getRouteName(), $delivery->getDestination());
-        
+        $googleMapsLink = $this->generateGoogleMapsLink($delivery->getRoute()->getName(), $delivery->getDestinations());
+
         return "
             Dear {$volunteerName},\n
             A new delivery has been assigned to you. Please find the details below:\n
-            Route Name: {$delivery->getRouteName()}\n
-            Destination: {$delivery->getDestination()}\n
-            Recipient Type: {$delivery->getRecipientType()}\n
+            Route Name: {$delivery->getRoute()->getName()}\n
             Status: {$delivery->getStatus()}\n
+            Destinations: " . implode(", ", array_map(function($dest) { return $dest->getAddress(); }, $delivery->getDestinations()->toArray())) . "\n
             \n
             You can view the route on Google Maps here: {$googleMapsLink}\n
             \n
@@ -327,9 +608,12 @@ class DeliveryController
         ";
     }
 
-    private function generateGoogleMapsLink($routeName, $destination)
+    private function generateGoogleMapsLink($routeName, $destinations)
     {
-        return "https://www.google.com/maps/dir/?api=1&origin={$routeName}&destination={$destination}&travelmode=driving";
+        $destinationAddresses = array_map(function($dest) { return urlencode($dest->getAddress()); }, $destinations->toArray());
+        $destinationParams = implode("&waypoints=", $destinationAddresses);
+
+        return "https://www.google.com/maps/dir/?api=1&origin=" . urlencode($routeName) . "&destination=" . end($destinationAddresses) . "&waypoints={$destinationParams}&travelmode=driving";
     }
 }
 ?>

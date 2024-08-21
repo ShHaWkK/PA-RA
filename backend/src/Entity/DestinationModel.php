@@ -42,6 +42,12 @@ class DestinationModel
     #[ORM\OneToMany(targetEntity: DeliveryModel::class, mappedBy: "destination", cascade: ["persist", "remove"])]
     private $deliveries;
 
+    #[ORM\Column(type: "datetime", options: ["default" => "CURRENT_TIMESTAMP"])]
+    private $created_at;
+
+    #[ORM\Column(type: "datetime", options: ["default" => "CURRENT_TIMESTAMP", "onUpdate" => "CURRENT_TIMESTAMP"])]
+    private $updated_at;
+
     public function __construct()
     {
         $this->deliveries = new ArrayCollection();
@@ -131,6 +137,28 @@ class DestinationModel
         return $this;
     }
 
+    #[ORM\PreUpdate]
+    public function setCreatedAt($value): void
+    {
+        $this->created_at = $value;
+    }
+
+    public function getCreatedAt(): ?\DateTimeInterface
+    {
+        return $this->created_at;
+    }
+
+    public function getUpdatedAt(): ?\DateTimeInterface
+    {
+        return $this->updated_at;
+    }
+
+    #[ORM\PreUpdate]
+    public function setUpdatedAt(): void
+    {
+        $this->updated_at = new \DateTime();
+    }
+
     /**
      * @return Collection|DeliveryModel[]
      */
@@ -159,6 +187,20 @@ class DestinationModel
         }
 
         return $this;
+    }
+
+    public function jsonSerialize(): array
+    {
+        return [
+            'id' => $this->id,
+            'route_id' => $this->route ? $this->route->getId() : null,
+            'address' => $this->address,
+            'recipient_type' => $this->recipient_type,
+            'delivery_date' => $this->delivery_date ? $this->delivery_date->format('Y-m-d H:i:s') : null,
+            'status' => $this->status,
+            'comment' => $this->comment,
+            'warehouse_id' => $this->warehouse ? $this->warehouse->getId() : null,
+        ];
     }
 }
 ?>

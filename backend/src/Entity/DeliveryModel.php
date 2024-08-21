@@ -124,5 +124,22 @@ class DeliveryModel
     {
         $this->created_at = $value;
     }
+
+    public function jsonSerialize(): array
+    {
+        return [
+            'id' => $this->id,
+            'destination_id' => $this->destination ? $this->destination->getId() : null,
+            'destination' => $this->getDestination()->jsonSerialize(),
+            'product_id' => $this->product ? $this->product->getId() : null,
+            'product'=> $this->getProduct()->jsonSerialize(),
+            'quantity' => $this->quantity,
+            'status' => $this->status,
+            'comment' => $this->comment,
+            'created_at' => $this->created_at?->format('Y-m-d H:i:s'),
+            'updated_at' => $this->updated_at?->format('Y-m-d H:i:s'),
+        ];
+    }
+
 }
 ?>
