@@ -36,7 +36,8 @@ class DeliveryController
         try {
             switch ($method) {
                 case 'POST':
-                     return $this->createRoute($input);
+                    return $this->createRoute($input);
+
                 case 'PATCH':
                     if (isset($uriParts[1])) {
                         $id = (int) $uriParts[1];
@@ -62,53 +63,100 @@ class DeliveryController
                     }
                     http_response_code(400);
                     return ['error' => 'ID not specified'];
-                    break;
+
                 case 'GET':
                     if (isset($uriParts[1])) {
                         $id = (int) $uriParts[1];
 
-                        // Récupérer une route par ID
                         if (isset($uriParts[2]) && $uriParts[2] === 'route') {
                             return $this->getRouteById($id);
                         }
 
-                        // Récupérer une livraison par ID
                         if (isset($uriParts[2]) && $uriParts[2] === 'delivery') {
                             return $this->getDeliveryById($id);
                         }
 
-                        // Récupérer une destination par ID
                         if (isset($uriParts[2]) && $uriParts[2] === 'destination') {
                             return $this->getDestinationById($id);
                         }
 
-                        // Exemple d'URL : /routes/1
                         return $this->getRouteById($id);
                     } else {
-                        // Récupérer toutes les routes avec éventuellement des query parameters
                         return $this->getAllRoutes($_GET);
                     }
+
                 case 'PUT':
                     if (isset($uriParts[1])) {
-                        return $this->updateDelivery((int) $uriParts[1], $input);
+                        $id = (int) $uriParts[1];
+
+                        if (isset($uriParts[2]) && $uriParts[2] === 'route') {
+                            $route = $this->entityManager->getRepository(RouteModel::class)->find($id);
+                            if ($route) {
+                                return $this->updateEntityFields($route, $input);
+                            } else {
+                                http_response_code(404);
+                                return ['error' => 'Route not found'];
+                            }
+                        }
+
+                        if (isset($uriParts[2]) && $uriParts[2] === 'delivery') {
+                            $delivery = $this->entityManager->getRepository(DeliveryModel::class)->find($id);
+                            if ($delivery) {
+                                return $this->updateEntityFields($delivery, $input);
+                            } else {
+                                http_response_code(404);
+                                return ['error' => 'Delivery not found'];
+                            }
+                        }
+
+                        if (isset($uriParts[2]) && $uriParts[2] === 'destination') {
+                            $destination = $this->entityManager->getRepository(DestinationModel::class)->find($id);
+                            if ($destination) {
+                                return $this->updateEntityFields($destination, $input);
+                            } else {
+                                http_response_code(404);
+                                return ['error' => 'Destination not found'];
+                            }
+                        }
+
+                        http_response_code(400);
+                        return ['error' => 'Invalid operation'];
                     }
                     http_response_code(400);
-                    return ['error' => 'Delivery ID not specified'];
+                    return ['error' => 'ID not specified'];
+
                 case 'DELETE':
                     if (isset($uriParts[1])) {
-                        return $this->deleteDelivery((int) $uriParts[1]);
+                        $id = (int) $uriParts[1];
+
+                        if (isset($uriParts[2]) && $uriParts[2] === 'route') {
+                            return $this->deleteRoute($id);
+                        }
+
+                        if (isset($uriParts[2]) && $uriParts[2] === 'delivery') {
+                            return $this->removeDeliveryFromDestination($id);
+                        }
+
+                        if (isset($uriParts[2]) && $uriParts[2] === 'destination') {
+                            return $this->removeDestinationFromRoute($id);
+                        }
+
+                        http_response_code(400);
+                        return ['error' => 'Invalid operation'];
                     }
                     http_response_code(400);
-                    return ['error' => 'Delivery ID not specified'];
+                    return ['error' => 'ID not specified'];
+
                 default:
                     http_response_code(405);
-                    return ['error' => 'Method Not Allowed'];
+                    return ['error' => 'Method not allowed'];
             }
         } catch (\Exception $e) {
             error_log("Exception in processRequest: " . $e->getMessage());
             throw $e;
         }
     }
+
 
     public function createRoute(array $data): array
     {
@@ -548,92 +596,135 @@ class DeliveryController
         }
     }
 
-    public function updateDelivery($id, $data)
+    public function updateEntityFields(object $entity, array $data): array
     {
         try {
-            $delivery = $this->entityManager->find(DeliveryModel::class, $id);
-            if (!$delivery) {
-                http_response_code(404);
-                return ['error' => 'Delivery not found'];
-            }
-
-            if (isset($data['route_id'])) {
-                $route = $this->entityManager->find(RouteModel::class, $data['route_id']);
-                if (!$route) {
-                    http_response_code(404);
-                    return ['error' => 'Route not found'];
+            // Vérification des champs de la route
+            if ($entity instanceof RouteModel) {
+                if (isset($data['name'])) {
+                    $entity->setName($data['name']);
                 }
-                $delivery->setRoute($route);
-            }
-            if (isset($data['status'])) {
-                $delivery->setStatus($data['status']);
-            }
-            if (isset($data['warehouse_id'])) {
-                $warehouse = $this->entityManager->find(WarehouseModel::class, $data['warehouse_id']);
-                if (!$warehouse) {
-                    http_response_code(404);
-                    return ['error' => 'Warehouse not found'];
+                if (isset($data['vehicle_id'])) {
+                    $vehicle = $this->entityManager->getRepository(VehicleModel::class)->find($data['vehicle_id']);
+                    if ($vehicle) {
+                        $entity->setVehicle($vehicle);
+                    } else {
+                        http_response_code(404);
+                        return ['error' => 'Vehicle not found'];
+                    }
                 }
-                $delivery->setWarehouse($warehouse);
-            }
-            if (isset($data['vehicle_id'])) {
-                $vehicle = $this->entityManager->find(VehicleModel::class, $data['vehicle_id']);
-                if (!$vehicle) {
-                    http_response_code(404);
-                    return ['error' => 'Vehicle not found'];
+                if (isset($data['driver_id'])) {
+                    $driver = $this->entityManager->getRepository(UserModel::class)->find($data['driver_id']);
+                    if ($driver) {
+                        $entity->setDriver($driver);
+                    } else {
+                        http_response_code(404);
+                        return ['error' => 'Driver not found'];
+                    }
                 }
-                $delivery->setVehicle($vehicle);
-            }
-            if (isset($data['comment'])) {
-                $delivery->setComment($data['comment']);
-            }
-            $delivery->setUpdatedAt(new \DateTime("now"));
-
-            // Gestion des destinations
-            if (isset($data['destinations'])) {
-                foreach ($delivery->getDestinations() as $destination) {
-                    $this->entityManager->remove($destination);
+                if (isset($data['start_time'])) {
+                    $entity->setStartTime(new \DateTime($data['start_time']));
                 }
-                foreach ($data['destinations'] as $destinationData) {
-                    $destination = new DestinationModel();
-                    $destination->setAddress($destinationData['address']);
-                    $destination->setRecipientType($destinationData['recipient_type']);
-                    $destination->setDelivery($delivery);
-                    $this->entityManager->persist($destination);
+                if (isset($data['end_time'])) {
+                    $entity->setEndTime(new \DateTime($data['end_time']));
+                }
+                if (isset($data['status'])) {
+                    $entity->setStatus($data['status']);
                 }
             }
 
+            // Vérification des champs de la livraison
+            if ($entity instanceof DeliveryModel) {
+                if (isset($data['product_id'])) {
+                    $product = $this->entityManager->getRepository(ProductModel::class)->find($data['product_id']);
+                    if ($product) {
+                        $entity->setProduct($product);
+                    } else {
+                        http_response_code(404);
+                        return ['error' => 'Product not found'];
+                    }
+                }
+                if (isset($data['quantity'])) {
+                    $entity->setQuantity($data['quantity']);
+                }
+                if (isset($data['status'])) {
+                    $entity->setStatus($data['status']);
+                }
+                if (isset($data['comment'])) {
+                    $entity->setComment($data['comment']);
+                }
+            }
+
+            // Vérification des champs de la destination
+            if ($entity instanceof DestinationModel) {
+                if (isset($data['address'])) {
+                    $entity->setAddress($data['address']);
+                }
+                if (isset($data['recipient_type'])) {
+                    $entity->setRecipientType($data['recipient_type']);
+                }
+                if (isset($data['delivery_date'])) {
+                    $entity->setDeliveryDate(new \DateTime($data['delivery_date']));
+                }
+                if (isset($data['status'])) {
+                    $entity->setStatus($data['status']);
+                }
+                if (isset($data['comment'])) {
+                    $entity->setComment($data['comment']);
+                }
+                if (isset($data['warehouse_id'])) {
+                    $warehouse = $this->entityManager->getRepository(WarehouseModel::class)->find($data['warehouse_id']);
+                    if ($warehouse) {
+                        $entity->setWarehouse($warehouse);
+                    } else {
+                        http_response_code(404);
+                        return ['error' => 'Warehouse not found'];
+                    }
+                }
+            }
+
+            // Mise à jour des timestamps
+            $entity->setUpdatedAt(new \DateTime());
+
+            // Persister les changements dans la base de données
             $this->entityManager->flush();
 
-            return ['id' => $delivery->getId(), 'message' => 'Delivery updated successfully'];
+            return [
+                'id' => $entity->getId(),
+                'message' => 'Entity updated successfully',
+            ];
         } catch (\Exception $e) {
-            error_log("Exception in updateDelivery: " . $e->getMessage());
-            throw $e;
+            error_log("Exception in updateEntityFields: " . $e->getMessage());
+            http_response_code(500);
+            return ['error' => 'An error occurred while updating the entity'];
         }
     }
 
-    public function deleteDelivery($id)
+    public function deleteRoute(int $id): array
     {
         try {
-            $delivery = $this->entityManager->find(DeliveryModel::class, $id);
-            if (!$delivery) {
+            // Trouver la route par son ID
+            $route = $this->entityManager->getRepository(RouteModel::class)->find($id);
+
+            if (!$route) {
                 http_response_code(404);
-                return ['error' => 'Delivery not found'];
+                return ['error' => 'Route not found'];
             }
 
-            foreach ($delivery->getDestinations() as $destination) {
-                $this->entityManager->remove($destination);
-            }
-
-            $this->entityManager->remove($delivery);
+            // Supprimer la route
+            $this->entityManager->remove($route);
             $this->entityManager->flush();
 
-            return ['message' => 'Delivery deleted successfully'];
+            return [
+                'message' => 'Route deleted successfully',
+            ];
         } catch (\Exception $e) {
-            error_log("Exception in deleteDelivery: " . $e->getMessage());
-            throw $e;
+            error_log("Exception in deleteRoute: " . $e->getMessage());
+            http_response_code(500);
+            return ['error' => 'An error occurred while deleting the route'];
         }
     }
+
 
     public function getAllDeliveries()
     {
