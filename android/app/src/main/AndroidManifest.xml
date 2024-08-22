@@ -138,6 +138,8 @@
         <activity android:name=".MyRegistrationsActivity" />
         <activity android:name=".MyProposalsActivity" />
         <activity android:name=".ServiceDetailsActivity" />
+        <activity android:name=".PlanningActivity" />
+
 
 
 

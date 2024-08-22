@@ -1,5 +1,5 @@
 <?php
-// Path: backend/src/Controller/ServiceRegistrationController.php
+// Path: backend/src/Controller/ServiceScheduleController.php
 namespace Controller;
 
 use Doctrine\ORM\EntityManager;
@@ -7,20 +7,19 @@ use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
-use Service\ServiceRegistrationService;
+use Service\ServiceScheduleService;
 
-class ServiceRegistrationController
+class ServiceScheduleController
 {
     private $entityManager;
     private $serializer;
-    private $serviceRegistrationService;
+    private $serviceScheduleService;
 
     public function __construct(EntityManager $entityManager)
     {
         $this->entityManager = $entityManager;
-        $this->serviceRegistrationService = new ServiceRegistrationService($entityManager);
+        $this->serviceScheduleService = new ServiceScheduleService($entityManager);
 
-        // Configurer le normalizer pour le format des dates
         $normalizers = [
             new DateTimeNormalizer(['datetime_format' => 'Y-m-d H:i:s']),
             new ObjectNormalizer()
@@ -64,7 +63,7 @@ class ServiceRegistrationController
         }
     }
 
-    private function getScheduleByUser($userId)
+    public function getScheduleByUser($userId)
     {
         try {
             $schedules = $this->serviceScheduleService->getScheduleByUser($userId);
@@ -74,84 +73,56 @@ class ServiceRegistrationController
             }
             return json_decode($this->serializer->serialize($schedules, 'json'), true);
         } catch (\Exception $e) {
-            error_log("Exception in getScheduleByUser: " . $e->getMessage());
+            error_log("Detailed Error in getScheduleByUser: " . $e->getMessage());
             http_response_code(500);
-            return ['error' => 'Internal Server Error'];
+            return ['error' => 'Error retrieving schedules for user ID: ' . $userId];
         }
     }
-    private function createRegistration($data)
+    private function createSchedule($data)
     {
         try {
-            if (!isset($data['service_id']) || !isset($data['user_id'])) {
-                http_response_code(400);
-                return ['error' => 'Missing required fields for registration'];
-            }
-
-            $registration = $this->serviceRegistrationService->createRegistration($data);
-
-            return ['id' => $registration->getId(), 'message' => 'Registration created successfully'];
+            $schedule = $this->serviceScheduleService->createSchedule($data);
+            return ['id' => $schedule->getId(), 'message' => 'Schedule created successfully'];
         } catch (\Exception $e) {
-            error_log("Exception in createRegistration: " . $e->getMessage());
+            error_log("Exception in createSchedule: " . $e->getMessage());
             http_response_code(400);
             return ['error' => $e->getMessage()];
         }
     }
 
-    private function getRegistration($id)
+    private function getAllSchedules()
     {
         try {
-            $registration = $this->serviceRegistrationService->getRegistration($id);
-            if (!$registration) {
-                http_response_code(404);
-                return ['error' => 'Registration not found'];
-            }
-            return json_decode($this->serializer->serialize($registration, 'json'), true);
+            $schedules = $this->serviceScheduleService->getAllSchedules();
+            return json_decode($this->serializer->serialize($schedules, 'json'), true);
         } catch (\Exception $e) {
-            error_log("Exception in getRegistration: " . $e->getMessage());
+            error_log("Exception in getAllSchedules: " . $e->getMessage());
             http_response_code(500);
             return ['error' => 'Internal Server Error'];
         }
     }
 
-    private function updateRegistration($id, $data)
+    private function updateSchedule($id, $data)
     {
         try {
-            if (empty($data)) {
-                http_response_code(400);
-                return ['error' => 'No fields to update'];
-            }
-
-            $registration = $this->serviceRegistrationService->updateRegistration($id, $data);
-
-            return ['id' => $registration->getId(), 'message' => 'Registration updated successfully'];
+            $schedule = $this->serviceScheduleService->updateSchedule($id, $data);
+            return ['id' => $schedule->getId(), 'message' => 'Schedule updated successfully'];
         } catch (\Exception $e) {
-            error_log("Exception in updateRegistration: " . $e->getMessage());
+            error_log("Exception in updateSchedule: " . $e->getMessage());
             http_response_code(400);
             return ['error' => $e->getMessage()];
         }
     }
 
-    private function deleteRegistration($id)
+    private function deleteSchedule($id)
     {
         try {
-            $this->serviceRegistrationService->deleteRegistration($id);
-            return ['message' => 'Registration deleted successfully'];
+            $this->serviceScheduleService->deleteSchedule($id);
+            return ['message' => 'Schedule deleted successfully'];
         } catch (\Exception $e) {
-            error_log("Exception in deleteRegistration: " . $e->getMessage());
+            error_log("Exception in deleteSchedule: " . $e->getMessage());
             http_response_code(400);
             return ['error' => $e->getMessage()];
-        }
-    }
-
-    private function getAllRegistrations()
-    {
-        try {
-            $registrations = $this->serviceRegistrationService->getAllRegistrations();
-            return json_decode($this->serializer->serialize($registrations, 'json'), true);
-        } catch (\Exception $e) {
-            error_log("Exception in getAllRegistrations: " . $e->getMessage());
-            http_response_code(500);
-            return ['error' => 'Internal Server Error'];
         }
     }
 }

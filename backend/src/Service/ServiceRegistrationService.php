@@ -120,3 +120,4 @@ class ServiceRegistrationService
         return $this->entityManager->getRepository(ServiceRegistrationModel::class)->findBy(['user_id' => $userId]);
     }
 }
+?>

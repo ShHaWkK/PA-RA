@@ -13,8 +13,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.nomoreswaste.LoginActivity
 import com.example.nomorewaste.AvailabilitiesActivity
-import com.example.nomorewaste.PlanningsActivity
 import com.example.nomorewaste.InventoryActivity
+import com.example.nomorewaste.PlanningsActivity
 import com.example.nomorewaste.ProductManagementActivity
 import com.example.nomorewaste.RecipesActivity
 import com.example.nomorewaste.ServiceActivity
