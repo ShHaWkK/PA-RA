@@ -121,5 +121,34 @@ class EmailService
             error_log("Message could not be sent. Mailer Error: {$this->mailer->ErrorInfo}");
         }
     }
+
+    public function sendRegistrationConfirmationEmail(UserModel $user, ServiceModel $service)
+    {
+        try {
+            $this->mailer->setFrom('morewaste1@gmail.com', 'No More Waste');
+            $this->mailer->addAddress($user->getEmail());
+            $this->mailer->isHTML(true);
+            $this->mailer->Subject = 'NO MORE WASTE - Confirmation de votre inscription';
+
+            $this->mailer->Body = 
+                'Cher ' . $user->getFirstName() . ',<br><br>' .
+                'Nous vous confirmons votre inscription à notre service "' . $service->getName() . '".<br><br>' .
+                'Détails de votre inscription :<br>' .
+                '<ul>' .
+                '<li>Service : ' . $service->getName() . '</li>' .
+                '<li>Date de début : ' . $service->getStartSchedule()->format('Y-m-d H:i:s') . '</li>' .
+                '<li>Lieu : ' . $service->getLocation() . '</li>' .
+                '</ul><br>' .
+                'Merci pour votre engagement auprès de NO MORE WASTE.<br><br>' .
+                'Cordialement,<br>L\'équipe NO MORE WASTE';
+
+            $this->mailer->send();
+        } catch (Exception $e) {
+            error_log("Message could not be sent. Mailer Error: {$this->mailer->ErrorInfo}");
+        }
+    }
+
+    
+
 }
 ?>
