@@ -1,5 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools">
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.example.nomorewaste">
 
     <uses-permission android:name="android.permission.INTERNET" />
 
@@ -138,11 +139,8 @@
         <activity android:name=".MyRegistrationsActivity" />
         <activity android:name=".MyProposalsActivity" />
         <activity android:name=".ServiceDetailsActivity" />
-        <activity android:name=".PlanningActivity" />
-
-
-
-
+        <activity android:name=".CollectionsActivity" />
+        <activity android:name=".CollectionDetailsActivity" />
 
     </application>
 </manifest>

@@ -47,6 +47,7 @@ use Controller\ProductNotificationController;
 use Service\PDFService;
 use Service\JWTService;
 use Service\EmailService;
+use Service\ExcelService;
 use Middleware\JWTMiddleware;
 
 use PHPMailer\PHPMailer\PHPMailer;
@@ -82,6 +83,9 @@ $mailer->Username = 'morewaste1@gmail.com';
 $mailer->Password = 'vhpewmlkxxrpnioj';
 $mailer->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
 $mailer->Port = 587;
+
+// Instancie ExcelService
+$excelService = new ExcelService();
 
 // Instancie EmailService
 $emailService = new EmailService($mailer);
@@ -156,7 +160,10 @@ try {
         $controller = new $controllerClass($entityManager, $emailService);
     } elseif ($controllerClass === MessageController::class) {
         $controller = new $controllerClass($entityManager);
-    } elseif ($route === 'scripts') {
+    } elseif ($controllerClass === CollectionController::class) {
+        $controller = new $controllerClass($entityManager, $excelService, $emailService);
+    }
+    elseif ($route === 'scripts') {
         if (isset($uriParts[1]) && $uriParts[1] === 'remove_unverified_users') {
             include __DIR__ . '/Scripts/remove_unverified_users.php';
             exit();

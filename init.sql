@@ -86,7 +86,7 @@ CREATE TABLE IF NOT EXISTS products (
 );
 
 -- Table des notifications de produits (product_notifications)
-CREATE TABLE IF NOT EXISTS product_notifications (
+CREATE TABLE product_notifications (
     id INT AUTO_INCREMENT PRIMARY KEY,
     company_id INT NOT NULL,
     product_id INT NOT NULL,
@@ -99,7 +99,6 @@ CREATE TABLE IF NOT EXISTS product_notifications (
     FOREIGN KEY (company_id) REFERENCES companies(id) ON DELETE CASCADE,
     FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
 );
-
 -- Table des véhicules (vehicles)
 CREATE TABLE IF NOT EXISTS vehicles (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -119,6 +118,7 @@ CREATE TABLE IF NOT EXISTS collections (
     vehicle_id INT NOT NULL,
     collection_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     is_completed BOOLEAN NOT NULL DEFAULT FALSE,
+    excel_path TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (volunteer_id) REFERENCES users(id),
