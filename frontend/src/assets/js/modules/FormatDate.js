@@ -6,3 +6,36 @@ export function formatDateToFrench(dateString) {
     const year = date.getFullYear();
     return `${day}/${month}/${year}`;
 }
+
+export function parseDate(dateString) {
+    // Split the date and time parts
+    const [datePart, timePart] = dateString.split(' ');
+    const [day, month, year] = datePart.split('-');
+    const [hours, minutes, seconds] = timePart.split(':');
+
+    // Construct a date string in ISO format (YYYY-MM-DDTHH:MM:SS)
+    const isoDateString = `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
+    return new Date(isoDateString);
+}
+
+export function extractDateTime(dateTimeStr) {
+    // Décomposer la chaîne en date et heure
+    const [date, time] = dateTimeStr.split(' ');
+
+    // Extraire la date (format JJ-MM-AAAA)
+    const [day, month, year] = date.split('-');
+    const formattedDate = `${day}-${month}-${year}`;
+
+    // Extraire l'heure (format HH:MM:SS)
+    return {
+        dateOnly: formattedDate,
+        timeOnly: time,
+    };
+}
+
+// Exemple d'utilisation
+// const dateTimeStr = '20-08-2024 17:00:32';
+// // const { dateOnly, timeOnly } = extractDateTime(dateTimeStr);
+//
+// console.log('Date:', dateOnly); // Affiche la date
+// console.log('Time:', timeOnly); // Affiche l'heure

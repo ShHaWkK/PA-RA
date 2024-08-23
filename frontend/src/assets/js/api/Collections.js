@@ -102,8 +102,6 @@ async function getCollections(queryParameters = {}) {
             }
         });
 
-        console.log("URL générée:", url.toString());
-
         // Effectuer la requête GET
         const response = await fetch(url, {
             method: 'GET',
