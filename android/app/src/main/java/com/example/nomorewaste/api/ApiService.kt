@@ -116,4 +116,7 @@ interface ApiService {
    @POST("collections/{id}/send_excel")
    fun sendCollectionExcelEmail(@Path("id") collectionId: Int, @Query("email") email: String): Call<Void>
 
+    @POST("/collection_requests")
+    fun createCollectionRequest(@Body requestData: Map<String, Any>): Call<Void>
+
 }

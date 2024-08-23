@@ -1,0 +1,33 @@
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <Spinner
+        android:id="@+id/spinner_product"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Sélectionnez un produit"/>
+
+    <EditText
+        android:id="@+id/edit_text_date"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Date de collecte souhaitée"
+        android:focusable="false"
+        android:clickable="true"/>
+
+    <EditText
+        android:id="@+id/edit_text_address"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Adresse"/>
+
+    <Button
+        android:id="@+id/button_submit_request"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Soumettre la demande de collecte"/>
+</LinearLayout>

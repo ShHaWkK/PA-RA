@@ -54,6 +54,11 @@
         android:layout_height="wrap_content"
         android:text="Services" />
 
+    <Button
+        android:id="@+id/button_collections"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Collectes" />
 
     <Button
         android:id="@+id/button_inventory"
