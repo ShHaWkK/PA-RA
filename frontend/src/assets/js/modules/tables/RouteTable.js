@@ -4,6 +4,7 @@ import {
     populateVolunteerDetailsInModal
 } from "../modals/CollectionModals.js";
 import {formatDateToFrench, extractDateTime, parseDate} from "../FormatDate.js";
+import {populateDestinationsModal} from "../modals/DistributionModals.js";
 
 export async function populateRouteTable(queryParameters) {
     try {
@@ -126,8 +127,8 @@ export async function populateRouteTable(queryParameters) {
             viewDestinationsButton.value = route.id;
             viewDestinationsButton.addEventListener('click', (e) => {
                 e.preventDefault();
-                populateCollectedDestinationsModal(collection.id);
-                document.getElementById('collectedDestinationsDetailsModal').style.display = 'block';
+                populateDestinationsModal(route.id);
+                document.getElementById('destinationsDetailsModal').style.display = 'block';
             });
             destinationsCell.appendChild(viewDestinationsButton);
             row.appendChild(destinationsCell);

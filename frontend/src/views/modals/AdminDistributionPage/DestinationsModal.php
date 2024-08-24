@@ -1,10 +1,10 @@
-<div id="routeDestinationsModal" class="modal">
+<div id="destinationsDetailsModal" class="modal">
     <div class="modal-content">
         <span class="close" id="closeRouteDestinationsButton">&times;</span>
-        <div id="modalBodyDestinations">
+        <div id="modalBodyDestinationsDetails">
         </div>
         <?php
-        $loaderId = 'loadingDestinations';
+        $loaderId = 'loadingDestinationsDetails';
         include ($_SERVER['DOCUMENT_ROOT'] . '/views/includes/Loader.php'); ?>
     </div>
 </div>

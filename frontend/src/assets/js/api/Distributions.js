@@ -117,6 +117,42 @@ async function getAllRoutes(queryParams = {}) {
     }
 }
 
+async function getRouteDestinations(routeId) {
+    try {
+        // Construire l'URL de la requête
+        const response = await fetch(`${apiEndpoint}/routes/${routeId}/route-destinations`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+
+        console.log("Response status:", response.status);
+
+        // Vérifier si la réponse est correcte
+        if (!response.ok) {
+            if (response.status === 404) {
+                return { message: `Route with ID ${routeId} not found` };
+            }
+            throw new Error('Failed to get route destinations');
+        }
+
+        const jsonResponse = await response.json();
+        console.log("Response body JSON:", jsonResponse);
+
+        // Vérifier si les destinations existent
+        if (!jsonResponse || jsonResponse.length === 0) {
+            return { error: 'No destinations found for this route' };
+        }
+
+        return jsonResponse;
+
+    } catch (error) {
+        console.error('Error getting route destinations:', error.message);
+        throw error; // Propager l'erreur pour permettre une gestion ultérieure
+    }
+}
+
 async function getRouteById(routeId) {
     try {
         const response = await fetch(`${apiEndpoint}/routes/${routeId}`, {
@@ -217,4 +253,5 @@ export {
     getDestinationById,
     getDeliveryById,
     deleteRoute,
+    getRouteDestinations
 };
