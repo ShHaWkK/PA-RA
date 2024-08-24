@@ -7,6 +7,9 @@ then
     exit 1
 fi
 
+# Naviguer vers le répertoire où les Dockerfiles sont situés
+cd "$(dirname "$0")"
+
 # Construire l'image backend
 if [ -d "./backend" ] && [ -f "./backend/Dockerfile" ]; then
     echo "Building backend image..."
