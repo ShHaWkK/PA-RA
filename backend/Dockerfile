@@ -1,3 +1,4 @@
+# path : /var/www/html/backend/Dockerfile
 # Utilise l'image officielle de PHP avec Apache
 FROM php:8.2-apache
 

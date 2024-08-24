@@ -118,5 +118,21 @@ interface ApiService {
 
     @POST("/collection_requests")
     fun createCollectionRequest(@Body requestData: Map<String, Any>): Call<Void>
+    @GET("product_notifications")
+    fun getAllProductNotifications(): Call<List<ProductNotification>>
 
+    @GET("product_notifications/{id}")
+    fun getProductNotification(@Path("id") id: Int): Call<ProductNotification>
+
+    @PUT("product_notifications/{id}")
+    fun updateProductNotification(
+        @Path("id") id: Int,
+        @Body updateData: Map<String, Any>
+    ): Call<Void>
+
+    @POST("product_notifications")
+    fun createProductNotification(@Body requestData: Map<String, Any>): Call<ProductNotification>
+
+    @DELETE("product_notifications/{id}")
+    fun deleteProductNotification(@Path("id") id: Int): Call<Void>
 }

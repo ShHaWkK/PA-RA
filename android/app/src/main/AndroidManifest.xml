@@ -141,6 +141,7 @@
         <activity android:name=".ServiceDetailsActivity" />
         <activity android:name=".CollectionsActivity" />
         <activity android:name=".CollectionDetailsActivity" />
+        <activity android:name=".ProductNotificationActivity" />
 
     </application>
 </manifest>
