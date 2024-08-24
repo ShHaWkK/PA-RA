@@ -279,7 +279,7 @@ async function populateModifyCollectionForm() {
 
     try {
         if (!selectedCollectionId) {
-            alert("Veuillez sélectionner une collection.");
+            alert("Veuillez sélectionner une collecte.");
             return;
         }
 

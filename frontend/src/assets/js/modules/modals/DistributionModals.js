@@ -1,5 +1,8 @@
-import {getDeliveriesByDestination, getRouteDestinations} from "../../api/Distributions.js";
+import {getDeliveriesByDestination, getRouteById, getRouteDestinations, updateRoute} from "../../api/Distributions.js";
 import {formatDateToFrench} from "../FormatDate.js";
+import {getAllVehicles} from "../../api/Vehicle.js";
+import {getAllUsers} from "../../api/Users.js";
+import {populateRouteTable} from "../tables/RouteTable.js";
 
 export async function populateDestinationsModal(routeID) {
     // Afficher le loader
@@ -177,6 +180,117 @@ export async function populateDeliveriesModal(destinationID) {
     }
 }
 
+async function populateEditRouteForm() {
+    const selectedRadio = document.querySelector('input[name="RouteSelection"]:checked');
+    const selectedRouteId = selectedRadio ? selectedRadio.value : null;
+
+    // Afficher la modale de modification
+    const editRouteModal = document.getElementById("editRouteModal");
+    editRouteModal.style.display = "block";
+
+    // Masquer le formulaire et afficher le loader
+    document.getElementById('editRouteForm').classList.add('hidden');
+    document.getElementById('loadingEditRoute').classList.remove('hidden');
+
+    try {
+        // Récupérer les données de la route
+        const routeData = await getRouteById(selectedRouteId);
+
+        // Peupler les sélecteurs de véhicules et de chauffeurs
+        await populateVehicleSelector();
+        await populateVolunteerSelector();
+
+        // Pré-remplir les champs du formulaire avec les données existantes de la route
+        document.getElementById('routeNameInput').value = routeData.route.name || '';
+        document.getElementById('vehicleSelect').value = routeData.route.vehicle.id || '';
+        document.getElementById('driverSelect').value = routeData.route.driver.id || '';
+        document.getElementById('statusSelect').value = routeData.route.status || '';
+
+        // Masquer le loader et afficher le formulaire
+        document.getElementById('loadingEditRoute').classList.add('hidden');
+        document.getElementById('editRouteForm').classList.remove('hidden');
+    } catch (error) {
+        console.error('Erreur lors du pré-remplissage du formulaire de modification de la route:', error);
+    }
+}
+
+async function populateVehicleSelector() {
+    try {
+
+        console.log("we atre in populateVehicle");
+
+        const vehicleSelect = document.getElementById('vehicleSelect');
+        vehicleSelect.innerHTML = ''; // Vider les options existantes
+
+        const vehicles = await getAllVehicles(); // Récupérer tous les véhicules depuis l'API
+
+        vehicles.forEach(vehicle => {
+            const option = document.createElement('option');
+            option.value = vehicle.id;
+            option.textContent = vehicle.licensePlate; // Afficher la plaque d'immatriculation du véhicule
+            vehicleSelect.appendChild(option);
+        });
+    } catch (error) {
+        console.error('Erreur lors du peuplement du sélecteur de véhicules:', error);
+    }
+}
+
+async function populateVolunteerSelector() {
+    try {
+        const volunteerSelect = document.getElementById('driverSelect');
+        volunteerSelect.innerHTML = ''; // Vider les options existantes
+
+        const volunteers = await getAllUsers('volunteer', 'approved'); // Récupérer les bénévoles depuis l'API
+
+        volunteers.forEach(volunteer => {
+            const option = document.createElement('option');
+            option.value = volunteer.id;
+            option.textContent = `${volunteer.first_name} ${volunteer.last_name}`; // Nom complet du bénévole
+            volunteerSelect.appendChild(option);
+        });
+    } catch (error) {
+        console.error('Erreur lors du peuplement du sélecteur de bénévoles:', error);
+    }
+}
+
+async function editRoute(routeID) {
+    // Afficher le loader et masquer le formulaire
+    document.getElementById('loadingEditRoute').classList.remove('hidden');
+    document.getElementById('editRouteForm').classList.add('hidden');
+
+    // Récupérer les valeurs du formulaire
+    const name = document.getElementById('routeNameInput').value;
+    const vehicleId = parseInt(document.getElementById('vehicleSelect').value);
+    const driverId = parseInt(document.getElementById('driverSelect').value);
+    const status = document.getElementById('statusSelect').value;
+
+    // Créer un objet contenant les données de la route
+    const routeData = {
+        name,
+        vehicle_id: vehicleId,
+        driver_id: driverId,
+        status
+    };
+
+    try {
+        // Appeler la fonction pour mettre à jour la route avec les nouvelles données
+        const result = await updateRoute(routeID, routeData);
+
+        // Vérifier le résultat et agir en conséquence
+        if (result && result.message) {
+            alert("Route modifiée avec succès");
+            document.getElementById('editRouteModal').style.display = 'none';
+            await populateRouteTable();
+        }
+    } catch (error) {
+        console.error('Erreur lors de la modification de la route:', error.message);
+        alert('Erreur lors de la modification de la route. Veuillez réessayer.');
+    } finally {
+        // Cacher le loader
+        document.getElementById('loadingEditRoute').classList.add('hidden');
+    }
+}
+
 document.addEventListener('DOMContentLoaded', async function() {
     const destinationsModal = document.getElementById("destinationsDetailsModal");
     const destinationsSpan = document.getElementById("closeRouteDestinationsButton");
@@ -191,4 +305,49 @@ document.addEventListener('DOMContentLoaded', async function() {
     deliveriesSpan.onclick = function () {
         deliveriesModal.style.display = "none";
     }
+
+    const editRouteModal = document.getElementById("editRouteModal");
+    const editRouteSpan = document.getElementById("closeEditRouteModal");
+    const editRouteForm = document.getElementById("editRouteForm");
+    const editRouteButton = document.getElementById("modifyRouteButton");
+
+    editRouteButton.onclick = function () {
+        // Récupérer l'ID de la route depuis le checkbox sélectionné
+        const selectedCheckbox = document.querySelector('input[name="RouteSelection"]:checked');
+        const selectedRouteID = selectedCheckbox ? selectedCheckbox.value : null;
+
+        if (!selectedRouteID) {
+            alert("Veuillez sélectionner une route.");
+            return;
+        }
+
+        document.getElementById("editRouteModal").style.display = "block"
+        populateEditRouteForm(selectedRouteID);
+    }
+
+    editRouteSpan.onclick = function () {
+        populateEditRouteForm();
+    };
+
+
+    editRouteSpan.onclick = function () {
+        editRouteModal.style.display = "none";
+    };
+
+    editRouteForm.onsubmit = async function (event) {
+        event.preventDefault();
+
+        // Récupérer l'ID de la route depuis le checkbox sélectionné
+        const selectedCheckbox = document.querySelector('input[name="RouteSelection"]:checked');
+        const selectedRouteID = selectedCheckbox ? selectedCheckbox.value : null;
+
+        if (!selectedRouteID) {
+            alert("Veuillez sélectionner une route.");
+            return;
+        }
+
+        await editRoute(selectedRouteID);
+    };
+
+
 });

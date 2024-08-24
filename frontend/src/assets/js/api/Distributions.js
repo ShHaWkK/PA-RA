@@ -245,7 +245,7 @@ async function getDeliveryById(deliveryId) {
 
 async function deleteRoute(id) {
     try {
-        const response = await fetch(`http://localhost/routes/${id}/route`, {
+        const response = await fetch(`${apiEndpoint}/routes/${id}/route`, {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
@@ -277,6 +277,71 @@ async function deleteRoute(id) {
     }
 }
 
+async function updateRoute(routeId, routeData) {
+    try {
+        const response = await fetch(`${apiEndpoint}/routes/${routeId}/route`, {
+            method: 'PUT', // ou 'PATCH' selon votre API
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(routeData)
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            console.error('Erreur lors de la mise à jour de la route:', error);
+            return;
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error('Exception lors de la mise à jour de la route:', error);
+    }
+}
+
+async function updateDestination(destinationId, destinationData) {
+    try {
+        const response = await fetch(`${apiEndpoint}/destinations/${destinationId}/destination`, {
+            method: 'PUT', // ou 'PATCH' selon votre API
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(destinationData)
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            console.error('Erreur lors de la mise à jour de la destination:', error);
+            return;
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error('Exception lors de la mise à jour de la destination:', error);
+    }
+}
+
+async function updateDelivery(deliveryId, deliveryData) {
+    try {
+        const response = await fetch(`${apiEndpoint}/deliveries/${deliveryId}/delivery`, {
+            method: 'PUT', // ou 'PATCH' selon votre API
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(deliveryData)
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            console.error('Erreur lors de la mise à jour de la livraison:', error);
+            return;
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error('Exception lors de la mise à jour de la livraison:', error);
+    }
+}
 
 export {
     createRoute,
@@ -290,5 +355,8 @@ export {
     getDeliveryById,
     deleteRoute,
     getRouteDestinations,
-    getDeliveriesByDestination
+    getDeliveriesByDestination,
+    updateRoute,
+    updateDelivery,
+    updateDestination
 };
