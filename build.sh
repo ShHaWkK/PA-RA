@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# Donner les permissions d'exécution aux Dockerfiles si nécessaire
+chmod +x backend/Dockerfile
+chmod +x frontend/Dockerfile
+
 # Construire l'image backend
 echo "Building backend image..."
 docker build -t backend-image -f backend/Dockerfile ./backend
