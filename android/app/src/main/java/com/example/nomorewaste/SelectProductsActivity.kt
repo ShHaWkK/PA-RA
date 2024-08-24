@@ -1,5 +1,6 @@
 package com.example.nomorewaste
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import android.widget.Toast
@@ -9,7 +10,9 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.nomorewaste.api.ApiService
 import com.example.nomorewaste.api.Product
 import com.example.nomorewaste.api.ProductAdapter
+import com.example.nomorewaste.api.Recipe
 import com.example.nomorewaste.api.RetrofitClient
+import com.example.nomorewaste.api.SuggestRecipesRequest
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -39,10 +42,7 @@ class SelectProductsActivity : AppCompatActivity() {
             if (selectedProducts.isEmpty()) {
                 Toast.makeText(this, "Aucun produit sélectionné", Toast.LENGTH_SHORT).show()
             } else {
-                selectedProducts.forEach { product ->
-                    Toast.makeText(this, "Produit sélectionné : ${product.name}", Toast.LENGTH_SHORT).show()
-                }
-                // Vous pouvez ajouter votre logique ici pour traiter les produits sélectionnés
+                suggestMenu(selectedProducts)
             }
         }
     }
@@ -66,5 +66,35 @@ class SelectProductsActivity : AppCompatActivity() {
                 Toast.makeText(this@SelectProductsActivity, "Échec de la connexion : ${t.message}", Toast.LENGTH_SHORT).show()
             }
         })
+    }
+
+    private fun suggestMenu(selectedProducts: List<Product>) {
+        // Créer une map des produits par code-barres, en utilisant !! pour forcer le non-null
+        val productsMap = selectedProducts.associateBy { it.barcode!! }
+
+        // Créer une requête SuggestRecipesRequest avec la map des produits
+        val request = SuggestRecipesRequest(productsMap)
+
+        apiService.suggestRecipes(request).enqueue(object : Callback<List<Recipe>> {
+            override fun onResponse(call: Call<List<Recipe>>, response: Response<List<Recipe>>) {
+                if (response.isSuccessful) {
+                    val suggestedRecipes = response.body() ?: emptyList()
+                    showSuggestedRecipes(suggestedRecipes)
+                } else {
+                    Toast.makeText(this@SelectProductsActivity, "Erreur lors de la suggestion du menu", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onFailure(call: Call<List<Recipe>>, t: Throwable) {
+                Toast.makeText(this@SelectProductsActivity, "Échec de la connexion : ${t.message}", Toast.LENGTH_SHORT).show()
+            }
+        })
+    }
+
+
+    private fun showSuggestedRecipes(recipes: List<Recipe>) {
+        val intent = Intent(this, SuggestMenuActivity::class.java)
+        intent.putParcelableArrayListExtra("recipes", ArrayList(recipes))
+        startActivity(intent)
     }
 }

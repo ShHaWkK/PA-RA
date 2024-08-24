@@ -29,7 +29,7 @@ interface ApiService {
     @GET("warehouses/{id}/capacity")
     fun getWarehouseCapacity(@Path("id") warehouseId: Int): Call<CapacityData>
 
-    @GET("recipes")
+    @GET("recipe")
     fun getRecipes(): Call<List<Recipe>>
 
     @POST("recipe/suggest")

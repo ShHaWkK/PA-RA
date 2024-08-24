@@ -15,6 +15,7 @@ import com.example.nomorewaste.*
 import com.example.nomorewaste.api.ApiService
 import com.example.nomorewaste.api.RetrofitClient
 import com.example.nomorewaste.api.User
+import com.example.nomorewaste.SelectProductsActivity
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
