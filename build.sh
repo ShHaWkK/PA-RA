@@ -7,7 +7,7 @@ then
     exit 1
 fi
 
-# Vérification des chemins avant de construire les images
+# Construire l'image backend
 if [ -d "./backend" ] && [ -f "./backend/Dockerfile" ]; then
     echo "Building backend image..."
     docker build -t backend-image -f backend/Dockerfile ./backend
@@ -16,6 +16,7 @@ else
     exit 1
 fi
 
+# Construire l'image frontend
 if [ -d "./frontend" ] && [ -f "./frontend/Dockerfile" ]; then
     echo "Building frontend image..."
     docker build -t frontend-image -f frontend/Dockerfile ./frontend
