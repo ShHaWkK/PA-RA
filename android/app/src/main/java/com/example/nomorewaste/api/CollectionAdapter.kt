@@ -8,7 +8,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.nomorewaste.R
 
 class CollectionAdapter(
-    private val collections: List<Collection>,
+    private var collections: List<Collection>,
     private val onItemClicked: (Collection) -> Unit
 ) : RecyclerView.Adapter<CollectionAdapter.CollectionViewHolder>() {
 
@@ -24,6 +24,11 @@ class CollectionAdapter(
     }
 
     override fun getItemCount() = collections.size
+
+    fun updateData(newCollections: List<Collection>) {
+        collections = newCollections
+        notifyDataSetChanged()
+    }
 
     inner class CollectionViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val dateTextView: TextView = itemView.findViewById(R.id.text_view_date)

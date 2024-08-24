@@ -5,84 +5,75 @@ import android.os.Bundle
 import android.widget.*
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import com.example.nomorewaste.viewmodel.CollectionViewModel
+import com.example.nomorewaste.viewmodel.CollectionRequestViewModel
 import java.util.*
 
 class RequestCollectionActivity : AppCompatActivity() {
 
-    private val collectionViewModel: CollectionViewModel by viewModels()
+    private val collectionRequestViewModel: CollectionRequestViewModel by viewModels()
     private lateinit var productSpinner: Spinner
-    private lateinit var dateEditText: EditText
+    private lateinit var quantityEditText: EditText
     private lateinit var addressEditText: EditText
+    private lateinit var dateEditText: EditText
     private lateinit var submitButton: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_request_collection)
 
+        // Initialize views
         productSpinner = findViewById(R.id.spinner_product)
-        dateEditText = findViewById(R.id.edit_text_date)
+        quantityEditText = findViewById(R.id.edit_text_quantity)
         addressEditText = findViewById(R.id.edit_text_address)
+        dateEditText = findViewById(R.id.edit_text_date) // Correctly initialize date EditText
         submitButton = findViewById(R.id.button_submit_request)
 
-        // Charger la liste des produits dans le Spinner
-        loadProductsIntoSpinner()
+        setupProductSpinner()
 
-        // Configurer le DatePicker pour la sélection de la date
-        setupDatePicker()
-
-        // Récupération de l'ID de l'entreprise à partir de SharedPreferences
-        val sharedPreferences = getSharedPreferences("user_prefs", MODE_PRIVATE)
-        val companyId = sharedPreferences.getInt("company_id", -1)
+        dateEditText.setOnClickListener {
+            showDatePicker()
+        }
 
         submitButton.setOnClickListener {
-            val product = productSpinner.selectedItem as? String
-            val date = dateEditText.text.toString()
+            val productId = productSpinner.selectedItemId.toInt()
+            val quantity = quantityEditText.text.toString().toIntOrNull()
             val address = addressEditText.text.toString()
+            val date = dateEditText.text.toString()
 
-            if (product != null && date.isNotEmpty() && address.isNotEmpty() && companyId != -1) {
+            if (quantity != null && address.isNotBlank() && date.isNotBlank()) {
                 val requestData = mapOf(
-                    "product" to product,
-                    "collection_date" to date,
+                    "product_id" to productId,
+                    "notified_quantity" to quantity,
                     "address" to address,
-                    "company_id" to companyId
+                    "wished_collection_date" to date
                 )
-
-                collectionViewModel.createCollectionRequest(requestData)
-
-                collectionViewModel.error.observe(this) { error ->
-                    if (error != null) {
-                        Toast.makeText(this, "Error: $error", Toast.LENGTH_SHORT).show()
-                    } else {
-                        Toast.makeText(this, "Demande de collecte soumise avec succès", Toast.LENGTH_SHORT).show()
-                        finish()
-                    }
-                }
+                collectionRequestViewModel.createCollectionRequest(requestData)
             } else {
-                Toast.makeText(this, "Veuillez remplir tous les champs", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Please fill all fields correctly", Toast.LENGTH_SHORT).show()
             }
         }
     }
 
-    private fun loadProductsIntoSpinner() {
-        // Simuler un appel d'API ou charger depuis la base de données
-        val products = listOf("Produit A", "Produit B", "Produit C")
+    private fun showDatePicker() {
+        val calendar = Calendar.getInstance()
+        val datePickerDialog = DatePickerDialog(
+            this,
+            { _, year, month, dayOfMonth ->
+                val date = "$year-${month + 1}-$dayOfMonth"
+                dateEditText.setText(date)
+            },
+            calendar.get(Calendar.YEAR),
+            calendar.get(Calendar.MONTH),
+            calendar.get(Calendar.DAY_OF_MONTH)
+        )
+        datePickerDialog.show()
+    }
+
+    private fun setupProductSpinner() {
+        // Mock data, replace with API data
+        val products = listOf("Product A", "Product B", "Product C")
         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, products)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         productSpinner.adapter = adapter
-    }
-
-    private fun setupDatePicker() {
-        val calendar = Calendar.getInstance()
-        val year = calendar.get(Calendar.YEAR)
-        val month = calendar.get(Calendar.MONTH)
-        val day = calendar.get(Calendar.DAY_OF_MONTH)
-
-        dateEditText.setOnClickListener {
-            DatePickerDialog(this, { _, selectedYear, selectedMonth, selectedDay ->
-                val selectedDate = "$selectedYear-${selectedMonth + 1}-$selectedDay"
-                dateEditText.setText(selectedDate)
-            }, year, month, day).show()
-        }
     }
 }

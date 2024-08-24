@@ -28,14 +28,7 @@ class CollectionViewModel : ViewModel() {
         apiService.getAllCollections().enqueue(object : Callback<List<Collection>> {
             override fun onResponse(call: Call<List<Collection>>, response: Response<List<Collection>>) {
                 if (response.isSuccessful) {
-                    val collections = response.body()?.map { collection ->
-                        collection.copy(
-                            volunteerName = collection.volunteerName ?: "Unknown Volunteer",
-                            vehicleLicensePlate = collection.vehicleLicensePlate ?: "Unknown Vehicle",
-                            collectionDate = collection.collectionDate ?: "Unknown Date"
-                        )
-                    } ?: emptyList()
-                    _collections.postValue(collections)
+                    _collections.postValue(response.body())
                 } else {
                     _error.postValue("Error: ${response.message()}")
                 }
@@ -62,23 +55,4 @@ class CollectionViewModel : ViewModel() {
             }
         })
     }
-
-    fun createCollectionRequest(requestData: Map<String, Any>) {
-        apiService.createCollectionRequest(requestData).enqueue(object : Callback<Void> {
-            override fun onResponse(call: Call<Void>, response: Response<Void>) {
-                if (response.isSuccessful) {
-                    _error.postValue(null)
-                } else {
-                    _error.postValue("Error: ${response.message()}")
-                }
-            }
-
-            override fun onFailure(call: Call<Void>, t: Throwable) {
-                _error.postValue("Failure: ${t.message}")
-            }
-        })
-    }
-
-
-    // Other functions omitted for brevity
 }
