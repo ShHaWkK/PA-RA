@@ -153,6 +153,42 @@ async function getRouteDestinations(routeId) {
     }
 }
 
+async function getDeliveriesByDestination(destinationId) {
+    try {
+        // Construire l'URL de la requête
+        const response = await fetch(`${apiEndpoint}/routes/${destinationId}/destination-deliveries`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+
+        console.log("Response status:", response.status);
+
+        // Vérifier si la réponse est correcte
+        if (!response.ok) {
+            if (response.status === 404) {
+                return { message: `Destination with ID ${destinationId} not found` };
+            }
+            throw new Error('Failed to get deliveries for the destination');
+        }
+
+        const jsonResponse = await response.json();
+        console.log("Response body JSON:", jsonResponse);
+
+        // Vérifier si les livraisons existent
+        if (!jsonResponse || jsonResponse.length === 0) {
+            return { error: 'No deliveries found for this destination' };
+        }
+
+        return jsonResponse;
+
+    } catch (error) {
+        console.error('Error getting deliveries for destination:', error.message);
+        throw error; // Propager l'erreur pour permettre une gestion ultérieure
+    }
+}
+
 async function getRouteById(routeId) {
     try {
         const response = await fetch(`${apiEndpoint}/routes/${routeId}`, {
@@ -253,5 +289,6 @@ export {
     getDestinationById,
     getDeliveryById,
     deleteRoute,
-    getRouteDestinations
+    getRouteDestinations,
+    getDeliveriesByDestination
 };

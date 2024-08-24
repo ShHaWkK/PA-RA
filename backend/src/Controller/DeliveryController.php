@@ -81,7 +81,11 @@ class DeliveryController
                         }
 
                         if (isset($uriParts[2]) && $uriParts[2] === 'route-destinations') {
-                            return $this->getRouteDestinations($id);
+                            return $this->getDestinationsByRoute($id);
+                        }
+
+                        if (isset($uriParts[2]) && $uriParts[2] === 'destination-deliveries') {
+                            return $this->getDeliveriesByDestination($id);
                         }
 
                         return $this->getRouteById($id);
@@ -548,7 +552,7 @@ class DeliveryController
         }
     }
 
-    private function getRouteDestinations(int $routeId)
+    private function getDestinationsByRoute(int $routeId)
     {
         // Récupérer l'objet RouteModel à partir de l'ID
         $route = $this->entityManager->getRepository(RouteModel::class)->find($routeId);
@@ -575,6 +579,45 @@ class DeliveryController
         }
 
         return $serializedDestinations;
+    }
+
+    public function getDeliveriesByDestination(int $destinationId): array
+    {
+        try {
+            // Récupérer l'objet DestinationModel à partir de l'ID
+            $destination = $this->entityManager->getRepository(DestinationModel::class)->find($destinationId);
+
+            // Vérifier si la destination existe
+            if (!$destination) {
+                http_response_code(404);
+                return ['message' => "Destination with ID $destinationId not found"];
+            }
+
+            // Récupérer les livraisons associées à cette destination
+            $deliveries = $destination->getDeliveries();
+
+            // Vérifier si les livraisons existent
+            if ($deliveries->isEmpty()) {
+                http_response_code(404);
+                return ['error' => 'No deliveries found for this destination'];
+            }
+
+            // Sérialiser les livraisons
+            $serializedDeliveries = [];
+            foreach ($deliveries as $delivery) {
+                $serializedDeliveries[] = $delivery->jsonSerialize();
+            }
+
+            return $serializedDeliveries;
+
+        } catch (\Exception $e) {
+            // Log de l'exception pour débogage
+            error_log("Exception in getDeliveriesByDestination: " . $e->getMessage());
+
+            // Retourner une réponse d'erreur avec le message de l'exception
+            http_response_code(500);
+            return ['error' => 'An error occurred while retrieving deliveries'];
+        }
     }
 
     public function getRouteById(int $id): array

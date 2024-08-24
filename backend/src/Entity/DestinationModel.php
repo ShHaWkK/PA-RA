@@ -200,8 +200,9 @@ class DestinationModel
             'status' => $this->status,
             'comment' => $this->comment,
             'warehouse_id' => $this->warehouse ? $this->warehouse->getId() : null,
-            'warehouse_name' => $this->warehouse ?$this->warehouse->getName() : null,
+            'warehouse_name' => $this->warehouse ? $this->warehouse->getName() : null,
         ];
     }
+
 }
 ?>
