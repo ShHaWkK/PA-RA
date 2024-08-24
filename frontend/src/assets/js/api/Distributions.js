@@ -93,6 +93,7 @@ async function removeDestinationFromRoute(destinationId) {
 
 async function getAllRoutes(queryParams = {}) {
     try {
+        console.log(`Request URL: ${apiEndpoint}/routes?${queryParams}`);
         const queryString = new URLSearchParams(queryParams).toString();
         const response = await fetch(`${apiEndpoint}/routes?${queryString}`, {
             method: 'GET',
@@ -183,10 +184,8 @@ async function deleteRoute(id) {
             // Si la réponse n'est pas OK, vérifier le code de réponse
             if (response.status === 404) {
                 console.error('Route not found');
-                alert('Route non trouvée');
             } else {
                 console.error('Failed to delete the route');
-                alert('Échec de la suppression de la route');
             }
             return;
         }
@@ -198,7 +197,6 @@ async function deleteRoute(id) {
             alert(`Erreur: ${result.error}`);
         } else {
             console.log(result.message);
-            alert('Route supprimée avec succès');
             // Ici, vous pouvez également ajouter du code pour mettre à jour l'interface utilisateur, par exemple, rafraîchir la liste des routes
         }
     } catch (error) {

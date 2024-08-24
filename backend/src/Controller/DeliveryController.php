@@ -453,41 +453,52 @@ class DeliveryController
     public function getAllRoutes(array $queryParameters): array
     {
         try {
-            // Création d'un tableau pour stocker les critères de recherche
-            $criteria = [];
+            $queryBuilder = $this->entityManager->getRepository(RouteModel::class)->createQueryBuilder('r');
 
-            // Vérification des paramètres de requête et ajout des critères correspondants
+            // Filtrer par date de début (start_date)
             if (isset($queryParameters['start_date'])) {
-                $criteria['start_time'] = ['>=', new \DateTime($queryParameters['start_date'])];
+                $startDate = \DateTime::createFromFormat('Y-m-d', $queryParameters['start_date']);
+                if ($startDate) {
+                    $endStartDate = clone $startDate;
+                    $endStartDate->modify('+1 day'); // Fin de la journée
+                    $queryBuilder->andWhere('r.start_time >= :start_date')
+                        ->andWhere('r.start_time < :end_start_date')
+                        ->setParameter('start_date', $startDate->format('Y-m-d'))
+                        ->setParameter('end_start_date', $endStartDate->format('Y-m-d'));
+                } else {
+                    error_log("Invalid start date format: " . $queryParameters['start_date']);
+                }
             }
 
+            // Filtrer par date de fin (end_date)
             if (isset($queryParameters['end_date'])) {
-                $criteria['end_time'] = ['<=', new \DateTime($queryParameters['end_date'])];
+                $endDate = \DateTime::createFromFormat('Y-m-d', $queryParameters['end_date']);
+                if ($endDate) {
+                    $endEndDate = clone $endDate;
+                    $endEndDate->modify('+1 day'); // Fin de la journée
+                    $queryBuilder->andWhere('r.start_time >= :start_date')
+                        ->andWhere('r.start_time < :end_end_date')
+                        ->setParameter('start_date', $endDate->format('Y-m-d'))
+                        ->setParameter('end_end_date', $endEndDate->format('Y-m-d'));
+                } else {
+                    error_log("Invalid end date format: " . $queryParameters['end_date']);
+                }
             }
 
+            // Autres critères de recherche
             if (isset($queryParameters['vehicle_id'])) {
-                $criteria['vehicle'] = $queryParameters['vehicle_id'];
+                $queryBuilder->andWhere('r.vehicle = :vehicle_id')
+                    ->setParameter('vehicle_id', $queryParameters['vehicle_id']);
             }
 
             if (isset($queryParameters['driver_id'])) {
-                $criteria['driver'] = $queryParameters['driver_id'];
+                $queryBuilder->andWhere('r.driver = :driver_id')
+                    ->setParameter('driver_id', $queryParameters['driver_id']);
             }
 
             if (isset($queryParameters['status'])) {
-                $criteria['status'] = $queryParameters['status'];
-            }
-
-            // Construire la requête Doctrine en fonction des critères
-            $queryBuilder = $this->entityManager->getRepository(RouteModel::class)->createQueryBuilder('r');
-
-            foreach ($criteria as $field => $value) {
-                if (is_array($value)) {
-                    $queryBuilder->andWhere("r.$field " . $value[0] . " :$field")
-                        ->setParameter($field, $value[1]);
-                } else {
-                    $queryBuilder->andWhere("r.$field = :$field")
-                        ->setParameter($field, $value);
-                }
+                $queryBuilder->andWhere('r.status = :status')
+                    ->setParameter('status', $queryParameters['status']);
             }
 
             // Exécution de la requête

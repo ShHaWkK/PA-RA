@@ -7,7 +7,18 @@ import {formatDateToFrench, extractDateTime, parseDate} from "../FormatDate.js";
 
 export async function populateRouteTable(queryParameters) {
     try {
-        document.getElementById('loadingBodyGeneral').classList.remove('hidden');
+        const loader = document.getElementById('loadingBodyGeneral')
+        loader.classList.remove('hidden');
+
+        // Sélectionner le conteneur back-office-content
+        const backOfficeContent = document.querySelector('.distribution-table');
+        if (!backOfficeContent) {
+            console.error('Back office content container not found.');
+            return;
+        }
+
+        // Effacer le contenu existant du tableau avant de faire l'appel API
+        backOfficeContent.innerHTML = '';
 
         // Appel de la fonction pour obtenir toutes les routes avec les paramètres de requête
         const responseJson = await getAllRoutes(queryParameters);
@@ -17,17 +28,13 @@ export async function populateRouteTable(queryParameters) {
 
         if (!routes || routes.length === 0) {
             console.log('No routes found');
+            backOfficeContent.innerHTML = '<p>No product collections set for this date.</p>'; // Afficher un message si aucune notification
+            if (loader) {
+                loader.classList.add('hidden');
+                console.log('Loader hidden.');
+            }
             return;
         }
-
-        const backOfficeContent = document.querySelector('.distribution-table table');
-        if (!backOfficeContent) {
-            console.error('Distribution table container not found.');
-            return;
-        }
-
-        // Effacer le contenu existant du tableau
-        backOfficeContent.innerHTML = '';
 
         // Créer le tableau et son header
         const thead = document.createElement('thead');

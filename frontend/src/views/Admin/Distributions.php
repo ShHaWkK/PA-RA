@@ -30,8 +30,9 @@
 
             <select name="completion" id="completionSelector">
                 <option value="">All</option>
-                <option value="true">Completed</option>
-                <option value="false">Ongoing</option>
+                <option value="in_progress">In progress</option>
+                <option value="pending">Pending</option>
+                <option value="completed">Completed</option>
             </select>
         </div>
 
