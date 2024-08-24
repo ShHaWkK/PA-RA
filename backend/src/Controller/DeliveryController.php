@@ -80,6 +80,10 @@ class DeliveryController
                             return $this->getDestinationById($id);
                         }
 
+                        if (isset($uriParts[2]) && $uriParts[2] === 'route-destinations') {
+                            return $this->getRouteDestinations($id);
+                        }
+
                         return $this->getRouteById($id);
                     } else {
                         return $this->getAllRoutes($_GET);
@@ -368,7 +372,7 @@ class DeliveryController
     {
         try {
             // Vérifiez que les champs requis sont présents
-            if (!isset($data['address']) || !isset($data['recipient_type'])) {
+            if (!isset($data['address']) || !isset($data['recipient_type']) || !isset($data['warehouse_id'])) {
                 http_response_code(400);
                 return ['error' => 'Missing required fields for new destination'];
             }
@@ -382,15 +386,30 @@ class DeliveryController
                 return ['error' => 'Route not found'];
             }
 
+            // Récupération de l'entité WarehouseModel à partir de l'id fourni
+            $warehouse = $this->entityManager->getRepository(WarehouseModel::class)
+                ->find($data['warehouse_id']);
+
+            if (!$warehouse) {
+                http_response_code(404);
+                return ['error' => 'Warehouse not found'];
+            }
+
             // Création d'une nouvelle instance de DestinationModel
             $destination = new DestinationModel();
             $destination->setAddress($data['address']);
             $destination->setRecipientType($data['recipient_type']);
+            $destination->setWarehouse($warehouse);
             $destination->setRoute($route);
             $destination->setStatus('pending'); // Statut par défaut
-            $destination->setDeliveryDate(new \DateTime()); // Date de livraison par défaut
+            $destination->setDeliveryDate(isset($data['delivery_date']) ? new \DateTime($data['delivery_date']) : new \DateTime()); // Date de livraison, ou la date courante par défaut
             $destination->setCreatedAt(new \DateTime());
             $destination->setUpdatedAt(new \DateTime());
+
+            // Ajout du commentaire s'il est présent dans les données
+            if (isset($data['comment'])) {
+                $destination->setComment($data['comment']);
+            }
 
             // Ajout de la destination à la collection de destinations de la route
             $route->addDestination($destination);
@@ -527,6 +546,35 @@ class DeliveryController
             http_response_code(500);
             return ['error' => 'An error occurred while retrieving the routes'];
         }
+    }
+
+    private function getRouteDestinations(int $routeId)
+    {
+        // Récupérer l'objet RouteModel à partir de l'ID
+        $route = $this->entityManager->getRepository(RouteModel::class)->find($routeId);
+
+        // Vérifier si la route existe
+        if (!$route) {
+            http_response_code(404);
+            return ['message' => "Route with ID $routeId not found"];
+        }
+
+        // Récupérer les destinations associées à cette route
+        $destinations = $route->getDestinations();
+
+        // Vérifier si les destinations existent
+        if ($destinations->isEmpty()) {
+            http_response_code(404);
+            return ['error' => 'No destinations found for this route'];
+        }
+
+        // Sérialiser les destinations
+        $serializedDestinations = [];
+        foreach ($destinations as $destination) {
+            $serializedDestinations[] = $destination->jsonSerialize();
+        }
+
+        return $serializedDestinations;
     }
 
     public function getRouteById(int $id): array

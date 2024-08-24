@@ -1,11 +1,12 @@
-import {deleteRoute} from "../api/Distributions.js";
-import {populateRouteTable} from "../modules/tables/RouteTable.js";
+import { deleteRoute } from "../api/Distributions.js";
+import { populateRouteTable } from "../modules/tables/RouteTable.js";
 
-function populateDistributionDate(){
+function populateDistributionDate() {
     // Récupérer la date actuelle
     const today = new Date();
-    console.log("today",today);
+    console.log("today", today);
 
+    // Formater la date en 'YYYY-MM-DD' et la définir comme valeur par défaut
     document.getElementById('distributionDate').value = today.toISOString().split('T')[0];
 }
 
@@ -19,7 +20,7 @@ async function deleteRoutes() {
     }
 
     // Afficher la boîte de confirmation
-    const isConfirmed = confirm("Etes-vous sûr de vouloir supprimer cette collecte ? Cette action est définitive.");
+    const isConfirmed = confirm("Etes-vous sûr de vouloir supprimer cette route ? Cette action est définitive.");
 
     if (!isConfirmed) {
         return;
@@ -27,11 +28,12 @@ async function deleteRoutes() {
 
     try {
         await deleteRoute(selectedDistributionId);
-        alert("Route supprimée avec succés");
-        window.location.reload();
+        alert("Route supprimée avec succès");
+        // Rafraîchir le tableau après la suppression
+        populateRouteTable();
     } catch (error) {
         console.error("Error deleting the Distribution:", error.message);
-        alert("An error occurred while deleting the Distribution.");
+        alert("Une erreur est survenue lors de la suppression de la route.");
     }
 }
 
@@ -64,22 +66,24 @@ function handleTableUpdate() {
     populateRouteTable(queryString);
 }
 
-document.addEventListener('DOMContentLoaded',
-    function (){
-        populateDistributionDate();
-        document.getElementById('distributionDate').addEventListener('change', handleTableUpdate);
+document.addEventListener('DOMContentLoaded', function() {
+    populateDistributionDate();
 
-        document.getElementById('allDistributionDates').addEventListener('click', function () {
-            // Appeler handleTableUpdate avec des paramètres par défaut
-            populateRouteTable();
-        });
+    // Attacher les gestionnaires d'événements
+    document.getElementById('distributionDate').addEventListener('change', handleTableUpdate);
+    document.getElementById('completionSelector').addEventListener('change', handleTableUpdate);
 
-        document.getElementById('completionSelector').addEventListener('change', handleTableUpdate);
-
-        // Ajouter l'event listener au bouton
-        document.getElementById('deleteRouteButton').addEventListener('click',function (){
-            deleteRoutes();
-        })
-
+    // Événement pour afficher toutes les dates
+    document.getElementById('allDistributionDates').addEventListener('click', function() {
+        // Réinitialiser les filtres et appeler la fonction pour peupler le tableau
+        document.getElementById('distributionDate').value = '';
+        document.getElementById('completionSelector').value = '';
         populateRouteTable();
     });
+
+    // Ajouter l'event listener au bouton de suppression
+    document.getElementById('deleteRouteButton').addEventListener('click', deleteRoutes);
+
+    // Appeler initialement pour peupler le tableau
+    populateRouteTable();
+});

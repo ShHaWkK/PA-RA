@@ -102,6 +102,8 @@ async function getCollections(queryParameters = {}) {
             }
         });
 
+        console.log(url);
+
         // Effectuer la requête GET
         const response = await fetch(url, {
             method: 'GET',

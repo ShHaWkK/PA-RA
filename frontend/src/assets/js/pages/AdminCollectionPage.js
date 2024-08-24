@@ -1,13 +1,16 @@
-import {populateCollectionTable} from "/assets/js/modules/tables/CollectionTable.js";
-import {deleteCollection} from "../api/Collections.js";
+import { populateCollectionTable } from "/assets/js/modules/tables/CollectionTable.js";
+import { deleteCollection } from "../api/Collections.js";
 
-function populateCollectionDate(){
+let allDates = true;
+
+function populateCollectionDate() {
     // Récupérer la date actuelle
     const today = new Date();
 
     // Formater la date en 'YYYY-MM-DD'
+    const formattedDate = today.toISOString().split('T')[0];
     // Mettre la date du jour comme valeur par défaut de l'input
-    document.getElementById('collectionDate').value = today.toISOString().split('T')[0];
+    document.getElementById('collectionDate').value = formattedDate;
 }
 
 async function deleteCollections() {
@@ -28,47 +31,49 @@ async function deleteCollections() {
 
     try {
         await deleteCollection(selectedCollectionId);
-        alert("Collecte supprimée avec succés");
+        alert("Collecte supprimée avec succès");
+        // Rafraîchir le tableau après la suppression
         populateCollectionTable();
     } catch (error) {
         console.error("Error deleting the collection:", error.message);
-        alert("An error occurred while deleting the collection.");
+        alert("Une erreur est survenue lors de la suppression de la collecte.");
     }
 }
 
 // Fonction pour gérer la mise à jour du tableau
 function handleTableUpdate() {
     // Récupérer les valeurs des éléments de formulaire
-    const selectedDate = document.getElementById('collectionDate').value;
+    const selectedDate = allDates ? null : document.getElementById('collectionDate').value;
     const selectedCompletion = document.getElementById('completionSelector').value;
 
     console.log('Selected Date:', selectedDate);
     console.log('Selected Completion:', selectedCompletion);
 
-    // Appeler la fonction pour mettre à jour le tableau
-    if (selectedCompletion !== null) {
-        populateCollectionTable(selectedDate, selectedCompletion);
-    }
-    else{
-        populateCollectionTable(selectedDate);
-    }
+    // Appeler la fonction pour mettre à jour le tableau avec les filtres
+    populateCollectionTable(selectedDate, selectedCompletion);
 }
 
-document.addEventListener('DOMContentLoaded',
-    function (){
-        document.getElementById('collectionDate').addEventListener('change', handleTableUpdate);
+document.addEventListener('DOMContentLoaded', function() {
+    populateCollectionDate();
 
-        document.getElementById('allCollectionDates').addEventListener('click', function () {
-            // Appeler handleTableUpdate avec des paramètres par défaut
-            populateCollectionTable();
-        });
+    // Événement de changement sur la date
+    document.getElementById('collectionDate').addEventListener('change', function() {
+        allDates = false;
+        handleTableUpdate();
+    });
 
-        document.getElementById('completionSelector').addEventListener('change', handleTableUpdate);
-
-        // Ajouter l'event listener au bouton
-        document.getElementById('deleteCollectionButton').addEventListener('click',function (){
-            deleteCollections();
-        })
-
+    // Événement pour afficher toutes les dates
+    document.getElementById('allCollectionDates').addEventListener('click', function() {
+        allDates = true;
         populateCollectionTable();
     });
+
+    // Événement de changement sur le sélecteur de complétion
+    document.getElementById('completionSelector').addEventListener('change', handleTableUpdate);
+
+    // Ajouter l'event listener au bouton de suppression
+    document.getElementById('deleteCollectionButton').addEventListener('click', deleteCollections);
+
+    // Appeler initialement pour peupler le tableau
+    populateCollectionTable();
+});
