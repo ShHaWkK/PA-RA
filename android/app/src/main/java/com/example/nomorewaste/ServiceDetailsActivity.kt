@@ -43,7 +43,6 @@ class ServiceDetailsActivity : AppCompatActivity() {
         serviceId = intent.getIntExtra("service_id", 0)
         registrationId = intent.getIntExtra("registration_id", 0)
 
-        // Récupération de l'ID de l'utilisateur à partir de SharedPreferences
         val sharedPreferences = getSharedPreferences("NoMoreWastePrefs", MODE_PRIVATE)
         userId = sharedPreferences.getInt("USER_ID", -1)
 
@@ -65,27 +64,34 @@ class ServiceDetailsActivity : AppCompatActivity() {
             override fun onResponse(call: Call<List<ServiceRegistration>>, response: Response<List<ServiceRegistration>>) {
                 if (response.isSuccessful) {
                     val registrations = response.body()
+                    Log.d("ServiceDetails", "Received registrations: $registrations")
                     registrations?.let {
-                        val registration = it.find { it.serviceId == serviceId }
+                        val registration = it.find { it.serviceId == serviceId }  // Utilisez le nouveau calcul pour serviceId
                         registration?.let { reg ->
                             registrationId = reg.id
                             Log.d("ServiceDetails", "Found Registration ID: $registrationId")
                             loadServiceDetails()
                         } ?: run {
+                            Log.d("ServiceDetails", "No registration found for service ID: $serviceId")
                             Toast.makeText(this@ServiceDetailsActivity, "Aucune inscription trouvée pour ce service", Toast.LENGTH_SHORT).show()
                         }
+                    } ?: run {
+                        Log.d("ServiceDetails", "No registrations found for user ID: $userId")
+                        Toast.makeText(this@ServiceDetailsActivity, "Erreur lors de la récupération des inscriptions", Toast.LENGTH_SHORT).show()
                     }
                 } else {
-                    Log.e("ServiceDetails", "Erreur lors de la récupération des inscriptions de l'utilisateur")
+                    Log.e("ServiceDetails", "Erreur lors de la récupération des inscriptions de l'utilisateur, code: ${response.code()}")
                     Toast.makeText(this@ServiceDetailsActivity, "Erreur lors de la récupération des inscriptions", Toast.LENGTH_SHORT).show()
                 }
             }
 
             override fun onFailure(call: Call<List<ServiceRegistration>>, t: Throwable) {
                 Log.e("ServiceDetails", "Échec de la connexion : ${t.message}")
+                Toast.makeText(this@ServiceDetailsActivity, "Erreur de connexion", Toast.LENGTH_SHORT).show()
             }
         })
     }
+
 
     private fun loadServiceDetails() {
         apiService.getServiceById(serviceId).enqueue(object : Callback<Service> {
@@ -100,19 +106,14 @@ class ServiceDetailsActivity : AppCompatActivity() {
                         serviceCapacity.text = "Place Restantes : ${it.remainingCapacity}"
                     }
                 } else {
-                    Toast.makeText(
-                        this@ServiceDetailsActivity,
-                        "Erreur de chargement des détails du service",
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    Log.e("ServiceDetails", "Erreur de chargement des détails du service, code: ${response.code()}")
+                    Toast.makeText(this@ServiceDetailsActivity, "Erreur de chargement des détails du service", Toast.LENGTH_SHORT).show()
                 }
             }
 
             override fun onFailure(call: Call<Service>, t: Throwable) {
-                Log.e(
-                    "ServiceDetails",
-                    "Erreur lors du chargement des détails du service : ${t.message}"
-                )
+                Log.e("ServiceDetails", "Erreur lors du chargement des détails du service : ${t.message}")
+                Toast.makeText(this@ServiceDetailsActivity, "Erreur de connexion", Toast.LENGTH_SHORT).show()
             }
         })
     }
@@ -122,36 +123,23 @@ class ServiceDetailsActivity : AppCompatActivity() {
             apiService.unsubscribeFromService(registrationId).enqueue(object : Callback<Void> {
                 override fun onResponse(call: Call<Void>, response: Response<Void>) {
                     if (response.isSuccessful) {
-                        Toast.makeText(
-                            this@ServiceDetailsActivity,
-                            "Désinscription réussie",
-                            Toast.LENGTH_SHORT
-                        ).show()
+                        Toast.makeText(this@ServiceDetailsActivity, "Désinscription réussie", Toast.LENGTH_SHORT).show()
                         finish() // Close activity after successful unsubscription
                     } else {
-                        Toast.makeText(
-                            this@ServiceDetailsActivity,
-                            "Erreur de désinscription",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                        Log.e(
-                            "Unsubscribe",
-                            "Failed to unsubscribe: ${response.errorBody()?.string()}"
-                        )
+                        Log.e("Unsubscribe", "Failed to unsubscribe: ${response.errorBody()?.string()}")
+                        Toast.makeText(this@ServiceDetailsActivity, "Erreur de désinscription. Code: ${response.code()}", Toast.LENGTH_SHORT).show()
                     }
                 }
 
                 override fun onFailure(call: Call<Void>, t: Throwable) {
-                    Toast.makeText(
-                        this@ServiceDetailsActivity,
-                        "Échec de la connexion : ${t.message}",
-                        Toast.LENGTH_SHORT
-                    ).show()
                     Log.e("Unsubscribe", "Network failure: ${t.message}", t)
+                    Toast.makeText(this@ServiceDetailsActivity, "Échec de la connexion : ${t.message}", Toast.LENGTH_SHORT).show()
                 }
             })
         } else {
             Toast.makeText(this, "Impossible de trouver l'inscription", Toast.LENGTH_SHORT).show()
+            Log.e("Unsubscribe", "Registration ID is zero, cannot unsubscribe.")
         }
     }
 }
+

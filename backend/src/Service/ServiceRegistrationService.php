@@ -32,12 +32,12 @@ class ServiceRegistrationService
             throw new \Exception('User not found');
         }
     
-        // Vérifiez si l'utilisateur est déjà inscrit à un autre service ayant un conflit d'horaires
+        // Check if the user is already registered for another service with a conflicting schedule
         $conflictingRegistrations = $this->entityManager->getRepository(ServiceRegistrationModel::class)
             ->createQueryBuilder('r')
             ->join('r.service', 's')
             ->where('r.user_id = :user_id')
-            ->andWhere(':start_time BETWEEN s.startSchedule AND s.endSchedule')
+            ->andWhere(':start_time BETWEEN s.start_schedule AND s.end_schedule')
             ->setParameter('user_id', $data['user_id'])
             ->setParameter('start_time', $service->getStartSchedule())
             ->getQuery()
@@ -47,37 +47,37 @@ class ServiceRegistrationService
             throw new \Exception('You are already registered for another service at the same time.');
         }
     
-        // Vérifiez si l'utilisateur est déjà inscrit à ce service
+        // Check if the user is already registered for this service
         $existingRegistration = $this->entityManager->getRepository(ServiceRegistrationModel::class)
-            ->findOneBy(['service_id' => $data['service_id'], 'user_id' => $data['user_id']]);
+            ->findOneBy(['service' => $service, 'user_id' => $data['user_id']]);
     
         if ($existingRegistration) {
             throw new \Exception('User is already registered for this service');
         }
     
-        // Vérifiez s'il reste des places disponibles
+        // Check if there are slots available
         if ($service->getCurrentRegistrations() >= $service->getCapacity()) {
             throw new \Exception('No more slots available for this service');
         }
     
-        // Créer l'inscription
+        // Create the registration
         $registration = new ServiceRegistrationModel();
-        $registration->setServiceId($data['service_id']);
+        $registration->setService($service);
         $registration->setUserId($data['user_id']);
         $registration->setRegistrationDate(new \DateTime());
         $registration->setCreatedAt(new \DateTime());
         $registration->setUpdatedAt(new \DateTime());
     
-        // Sauvegarde l'inscription
+        // Persist the registration
         $this->entityManager->persist($registration);
     
-        // Met à jour le nombre d'inscriptions actuelles
+        // Update the current registrations count
         $service->setCurrentRegistrations($service->getCurrentRegistrations() + 1);
     
-        // Sauvegarde tous les changements
+        // Save all changes
         $this->entityManager->flush();
     
-        // Envoi d'un email de confirmation après la création réussie de l'inscription
+        // Send a confirmation email after successful registration creation
         $this->emailService->sendRegistrationConfirmationEmail($user, $service);
     
         return $registration;
@@ -96,7 +96,12 @@ class ServiceRegistrationService
         }
 
         if (isset($data['service_id'])) {
-            $registration->setServiceId($data['service_id']);
+            $service = $this->entityManager->find(ServiceModel::class, $data['service_id']);
+            if ($service) {
+                $registration->setService($service);
+            } else {
+                throw new \Exception('Service not found');
+            }
         }
 
         if (isset($data['user_id'])) {
@@ -112,19 +117,34 @@ class ServiceRegistrationService
 
     public function deleteRegistration($id)
     {
-        $registration = $this->entityManager->find(ServiceRegistrationModel::class, $id);
-        if (!$registration) {
-            throw new \Exception('Registration not found');
+        try {
+            $registration = $this->entityManager->find(ServiceRegistrationModel::class, $id);
+            if (!$registration) {
+                throw new \Exception('Registration not found');
+            }
+    
+            $service = $registration->getService();
+            if ($service) {
+                $service->setCurrentRegistrations($service->getCurrentRegistrations() - 1);
+                $this->entityManager->persist($service); // Assurez-vous que les modifications sur le service sont persistées
+            }
+    
+            $this->entityManager->remove($registration);
+            $this->entityManager->flush();
+    
+            // Send notification email about unsubscription
+            $user = $this->entityManager->find(UserModel::class, $registration->getUserId());
+            if ($user && $service) {
+                $this->emailService->sendUnsubscribeNotificationEmail($user, $service);
+            }
+    
+            return ['message' => 'Registration deleted successfully'];
+        } catch (\Exception $e) {
+            error_log("Exception in deleteRegistration: " . $e->getMessage());
+            throw new \Exception('Error deleting registration: ' . $e->getMessage());
         }
-
-        $service = $this->entityManager->find(ServiceModel::class, $registration->getServiceId());
-        if ($service) {
-            $service->setCurrentRegistrations($service->getCurrentRegistrations() - 1);
-        }
-
-        $this->entityManager->remove($registration);
-        $this->entityManager->flush();
     }
+    
 
     public function getAllRegistrations()
     {
@@ -133,7 +153,8 @@ class ServiceRegistrationService
 
     public function getRegistrationsByServiceId($serviceId)
     {
-        return $this->entityManager->getRepository(ServiceRegistrationModel::class)->findBy(['service_id' => $serviceId]);
+        $service = $this->entityManager->find(ServiceModel::class, $serviceId);
+        return $this->entityManager->getRepository(ServiceRegistrationModel::class)->findBy(['service' => $service]);
     }
 
     public function getRegistrationsByUser($userId)

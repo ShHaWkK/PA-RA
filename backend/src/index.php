@@ -147,7 +147,11 @@ if (!array_key_exists($route, $controllerMap)) {
 // Instancie le contrôleur approprié
 $controllerClass = $controllerMap[$route];
 try {
-    if ($controllerClass === ServiceProposalController::class) {
+    if ($controllerClass === ServiceRegistrationController::class) {
+        $controller = new $controllerClass($entityManager, $emailService);
+    } elseif ($controllerClass === ServiceScheduleController::class) {
+        $controller = new $controllerClass($entityManager, $emailService);
+    } else if ($controllerClass === ServiceProposalController::class) {
         // Pass both EntityManager and EmailService to ServiceProposalController
         $controller = new $controllerClass($entityManager, $emailService);
     }elseif ($controllerClass === DeliveryController::class || $controllerClass === PlannedRouteController::class) {

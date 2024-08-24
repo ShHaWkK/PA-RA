@@ -8,6 +8,7 @@ use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
 use Service\ServiceRegistrationService;
+use Service\EmailService;
 
 class ServiceRegistrationController
 {
@@ -15,11 +16,10 @@ class ServiceRegistrationController
     private $serializer;
     private $serviceRegistrationService;
 
-    public function __construct(EntityManager $entityManager)
+    public function __construct(EntityManager $entityManager, EmailService $emailService)
     {
         $this->entityManager = $entityManager;
-        $this->serviceRegistrationService = new ServiceRegistrationService($entityManager);
-
+        $this->serviceRegistrationService = new ServiceRegistrationService($entityManager, $emailService);
         // Configurer le normalizer pour le format des dates
         $normalizers = [
             new DateTimeNormalizer(['datetime_format' => 'Y-m-d H:i:s']),
@@ -141,11 +141,11 @@ class ServiceRegistrationController
     }
 
     
-    private function getRegistrationsByUser($userId)
+    public function getRegistrationsByUser($userId)
     {
         try {
             $registrations = $this->serviceRegistrationService->getRegistrationsByUser($userId);
-            if (!$registrations) {
+            if (!$registrations || count($registrations) === 0) {
                 http_response_code(404);
                 return ['error' => 'No registrations found for this user'];
             }
@@ -156,5 +156,6 @@ class ServiceRegistrationController
             return ['error' => 'Internal Server Error'];
         }
     }
+    
 }
 ?>

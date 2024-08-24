@@ -51,7 +51,12 @@ class MyRegistrationsActivity : AppCompatActivity() {
                         val registrations = response.body()
                         registrations?.let {
                             for (registration in it) {
-                                loadServiceDetails(registration)
+                                val service = registration.service // assurez-vous d'accéder correctement à l'objet service
+                                if (service != null && service.id > 0) {
+                                    loadServiceDetails(registration) // Passer l'objet registration au lieu de service
+                                } else {
+                                    Log.e("MyRegistrations", "Service ID invalide : ${service?.id ?: "null"}")
+                                }
                             }
                         }
                     } else {
@@ -68,23 +73,32 @@ class MyRegistrationsActivity : AppCompatActivity() {
         }
     }
 
-    private fun loadServiceDetails(registration: ServiceRegistration) {
-        apiService.getServiceById(registration.serviceId).enqueue(object : Callback<Service> {
-            override fun onResponse(call: Call<Service>, response: Response<Service>) {
-                if (response.isSuccessful) {
-                    val service = response.body()
-                    service?.let {
-                        services.add(it)
-                        adapter.notifyDataSetChanged()
-                    }
-                } else {
-                    Log.e("MyRegistrations", "Failed to load service details")
-                }
-            }
 
-            override fun onFailure(call: Call<Service>, t: Throwable) {
-                Log.e("MyRegistrations", "Error loading service details: ${t.message}")
-            }
-        })
+
+    private fun loadServiceDetails(registration: ServiceRegistration) {
+        val serviceId = registration.service?.id ?: -1
+        if (serviceId != -1) {
+            apiService.getServiceById(serviceId).enqueue(object : Callback<Service> {
+                override fun onResponse(call: Call<Service>, response: Response<Service>) {
+                    if (response.isSuccessful) {
+                        val service = response.body()
+                        service?.let {
+                            services.add(it)
+                            adapter.notifyDataSetChanged()
+                        }
+                    } else {
+                        Log.e("MyRegistrations", "Failed to load service details")
+                    }
+                }
+
+                override fun onFailure(call: Call<Service>, t: Throwable) {
+                    Log.e("MyRegistrations", "Error loading service details: ${t.message}")
+                }
+            })
+        } else {
+            Log.e("MyRegistrations", "Service ID invalide : $serviceId")
+        }
     }
+
+
 }

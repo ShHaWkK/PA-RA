@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -8,12 +9,16 @@
     <TextView
         android:id="@+id/service_name"
         style="@style/TitleTextStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:text="Nom du Service : "
         android:textColor="@color/primary_text_color"/>
 
     <TextView
         android:id="@+id/service_description"
         style="@style/LabelTextStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:text="Description : "
         android:textColor="@color/secondary_text_color"
         android:layout_marginTop="8dp"/>
@@ -21,6 +26,8 @@
     <TextView
         android:id="@+id/service_start_time"
         style="@style/LabelTextStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:text="Start Time"
         android:textColor="@color/secondary_text_color"
         android:layout_marginTop="8dp"/>
@@ -28,6 +35,8 @@
     <TextView
         android:id="@+id/service_end_time"
         style="@style/LabelTextStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:text="End Time"
         android:textColor="@color/secondary_text_color"
         android:layout_marginTop="8dp"/>
@@ -35,6 +44,8 @@
     <TextView
         android:id="@+id/service_capacity"
         style="@style/LabelTextStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:text="Place restante : "
         android:textColor="@color/secondary_text_color"
         android:layout_marginTop="8dp"/>
@@ -42,6 +53,8 @@
     <Button
         android:id="@+id/button_unsubscribe"
         style="@style/ButtonStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
         android:text="Se désinscrire"
         android:backgroundTint="@color/button_color"

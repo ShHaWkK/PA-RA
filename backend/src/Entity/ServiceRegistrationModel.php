@@ -3,6 +3,7 @@
 namespace Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Entity\ServiceModel;
 
 #[ORM\Entity]
 #[ORM\Table(name: "service_registrations")]
@@ -13,8 +14,10 @@ class ServiceRegistrationModel
     #[ORM\Column(type: "integer")]
     private $id;
 
-    #[ORM\Column(type: "integer")]
-    private $service_id;
+    // Remplacez la colonne integer par une association ManyToOne
+    #[ORM\ManyToOne(targetEntity: "Entity\ServiceModel")]
+    #[ORM\JoinColumn(name: "service_id", referencedColumnName: "id", onDelete: "CASCADE")]
+    private $service;
 
     #[ORM\Column(type: "integer")]
     private $user_id;
@@ -28,21 +31,21 @@ class ServiceRegistrationModel
     #[ORM\Column(type: "datetime", options: ["default" => "CURRENT_TIMESTAMP", "onUpdate" => "CURRENT_TIMESTAMP"])]
     private $updated_at;
 
-    // Getters and setters for each property...
+    // Getters et setters pour chaque propriété...
 
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getServiceId(): ?int
+    public function getService(): ?ServiceModel
     {
-        return $this->service_id;
+        return $this->service;
     }
 
-    public function setServiceId(int $service_id): self
+    public function setService(ServiceModel $service): self
     {
-        $this->service_id = $service_id;
+        $this->service = $service;
         return $this;
     }
 

@@ -125,6 +125,23 @@ class EmailService
         }
     }
 
+    public function sendUnsubscribeNotificationEmail(UserModel $user, ServiceModel $service)
+{
+    try {
+        $this->mailer->setFrom('morewaste1@gmail.com', 'No More Waste');
+        $this->mailer->addAddress($email);
+        $this->mailer->isHTML(true);
+        $this->mailer->Subject = 'Désinscription de service';
+        $this->mailer->Body = 'Vous avez été désinscrit du service ' . $service->getName()
+            . '. Merci pour votre participation.';
+            'Cordialement,<br>L\'équipe NO MORE WASTE';
+        $this->mailer->send();
+    } catch (Exception $e) {
+        error_log("Message could not be sent. Mailer Error: {$this->mailer->ErrorInfo}");
+    }
+}
+
+
     public function sendRegistrationConfirmationEmail(UserModel $user, ServiceModel $service)
     {
         try {
