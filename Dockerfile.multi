@@ -1,17 +1,25 @@
-# Dockerfile.multi
-FROM ubuntu:latest
+# Utiliser une image PHP de base
+FROM php:8.1-apache
 
-# Installez Docker CLI
+# Installer les dépendances PHP et les outils nécessaires
 RUN apt-get update && apt-get install -y \
-    docker.io \
+    git \
+    unzip \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Copiez le script de construction personnalisé dans le conteneur
-COPY build.sh /build.sh
+# Copier les fichiers de votre application dans le conteneur
+COPY ./backend /var/www/html
 
-# Rendre le script exécutable
-RUN chmod +x /build.sh
+# Configurer les permissions et les dossiers
+RUN chown -R www-data:www-data /var/www/html \
+    && chmod -R 755 /var/www/html
 
-# Commande d'entrée pour exécuter le script
-ENTRYPOINT ["/build.sh"]
+# Activer les modules Apache nécessaires
+RUN a2enmod rewrite
+
+# Exposer le port 80
+EXPOSE 80
+
+# Démarrer Apache
+CMD ["apache2-foreground"]
