@@ -6,6 +6,9 @@ import {
 import {formatDateToFrench, extractDateTime, parseDate} from "../FormatDate.js";
 import {populateDestinationsModal} from "../modals/DistributionModals.js";
 
+export let selectedRouteId;
+
+
 export async function populateRouteTable(queryParameters) {
     try {
         const loader = document.getElementById('loadingBodyGeneral')
@@ -146,6 +149,21 @@ export async function populateRouteTable(queryParameters) {
 
         backOfficeContent.appendChild(tbody);
         document.getElementById('loadingBodyGeneral').classList.add('hidden');
+
+        // Fonction pour mettre à jour selectedRouteId
+        function updateSelectedRouteId() {
+            const selectedRadio = document.querySelector('input[name="RouteSelection"]:checked');
+            if (selectedRadio) {
+                selectedRouteId = selectedRadio.value;
+                console.log('Table : Selected Route ID:', selectedRouteId);
+            }
+        }
+
+        // Ajouter un écouteur d'événement à chaque bouton radio
+        const radioButtons = document.querySelectorAll('input[name="RouteSelection"]');
+        radioButtons.forEach(radio => {
+            radio.addEventListener('change', updateSelectedRouteId);
+        });
 
     } catch (error) {
         console.error('Error in populateRouteTable:', error.message);

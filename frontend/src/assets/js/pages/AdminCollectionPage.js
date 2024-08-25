@@ -54,7 +54,7 @@ function handleTableUpdate() {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-    populateCollectionDate();
+    // populateCollectionDate();
 
     // Événement de changement sur la date
     document.getElementById('collectionDate').addEventListener('change', function() {

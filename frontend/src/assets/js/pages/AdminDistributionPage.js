@@ -1,5 +1,6 @@
-import { deleteRoute } from "../api/Distributions.js";
-import { populateRouteTable } from "../modules/tables/RouteTable.js";
+import {deleteRoute, removeDestinationFromRoute} from "../api/Distributions.js";
+import { populateRouteTable, selectedRouteId } from "../modules/tables/RouteTable.js";
+import {populateDestinationsModal} from "../modules/modals/DistributionModals.js";
 
 function populateDistributionDate() {
     // Récupérer la date actuelle
@@ -19,6 +20,9 @@ async function deleteRoutes() {
         return;
     }
 
+    selectedRouteId = selectedDistributionId;
+    console.log("selectedRouteId",selectedRouteId);
+
     // Afficher la boîte de confirmation
     const isConfirmed = confirm("Etes-vous sûr de vouloir supprimer cette route ? Cette action est définitive.");
 
@@ -30,7 +34,37 @@ async function deleteRoutes() {
         await deleteRoute(selectedDistributionId);
         alert("Route supprimée avec succès");
         // Rafraîchir le tableau après la suppression
-        populateRouteTable();
+        await populateRouteTable();
+    } catch (error) {
+        console.error("Error deleting the Distribution:", error.message);
+        alert("Une erreur est survenue lors de la suppression de la route.");
+    }
+}
+
+
+async function deleteDestinations() {
+    const selectedDestination = document.querySelector('input[name="destinationSelection"]:checked');
+    const selectedDestinationId = selectedDestination ? selectedDestination.value : null;
+
+    if (!selectedDestinationId) {
+        alert("Veuillez sélectionner au moins une destination à supprimer.");
+        return;
+    }
+
+    // Afficher la boîte de confirmation
+    const isConfirmed = confirm("Etes-vous sûr de vouloir supprimer cette route ? Cette action est définitive.");
+
+    if (!isConfirmed) {
+        return;
+    }
+
+    try {
+        console.log("selectedDestinationsID",selectedDestinationId);
+        await removeDestinationFromRoute(selectedDestinationId);
+        alert("Destination supprimée avec succès");
+        // Rafraîchir le tableau après la suppression
+        console.log("selectedRouteID",selectedRouteId);
+        await populateDestinationsModal(selectedRouteId);
     } catch (error) {
         console.error("Error deleting the Distribution:", error.message);
         alert("Une erreur est survenue lors de la suppression de la route.");
@@ -67,7 +101,7 @@ function handleTableUpdate() {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-    populateDistributionDate();
+    // populateDistributionDate();
 
     // Attacher les gestionnaires d'événements
     document.getElementById('distributionDate').addEventListener('change', handleTableUpdate);
@@ -81,8 +115,10 @@ document.addEventListener('DOMContentLoaded', function() {
         populateRouteTable();
     });
 
-    // Ajouter l'event listener au bouton de suppression
+    // Ajouter l'event listener aux boutons de suppression
     document.getElementById('deleteRouteButton').addEventListener('click', deleteRoutes);
+
+    document.getElementById('deleteDestinationInModalButton').addEventListener('click', deleteDestinations);
 
     // Appeler initialement pour peupler le tableau
     populateRouteTable();

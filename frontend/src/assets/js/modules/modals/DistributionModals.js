@@ -2,9 +2,12 @@ import {getDeliveriesByDestination, getRouteById, getRouteDestinations, updateRo
 import {formatDateToFrench} from "../FormatDate.js";
 import {getAllVehicles} from "../../api/Vehicle.js";
 import {getAllUsers} from "../../api/Users.js";
-import {populateRouteTable} from "../tables/RouteTable.js";
+import {populateRouteTable, selectedRouteId} from "../tables/RouteTable.js";
+
+export let selectedDestinationId;
 
 export async function populateDestinationsModal(routeID) {
+    console.log("routeID",routeID);
     // Afficher le loader
     document.getElementById('loadingDestinationsDetails').classList.remove('hidden');
 
@@ -27,7 +30,6 @@ export async function populateDestinationsModal(routeID) {
 
         // Effacer le contenu existant du modal
         modalContent.innerHTML = '';
-        modalContent.innerHTML= `<h2> Destinations </h2>`
 
         if (!destinations || destinations.length === 0) {
             modalContent.textContent = 'No destinations found for this route.';
@@ -86,6 +88,23 @@ export async function populateDestinationsModal(routeID) {
 
         // Afficher la fenêtre modale
         document.getElementById('destinationsDetailsModal').style.display = 'block';
+
+        // Fonction pour mettre à jour selectedRouteId
+        function updateSelectedDestinationId() {
+            const selectedRadio = document.querySelector('input[name="destinationSelection"]:checked');
+            if (selectedRadio) {
+                selectedDestinationId = selectedRadio.value;
+                console.log('Modals : Selected Route ID:', selectedRouteId);
+                console.log('Modals : Selected Destination ID:', selectedDestinationId);
+            }
+        }
+
+        // Ajouter un écouteur d'événement à chaque bouton radio
+        const radioButtons = document.querySelectorAll('input[name="destinationSelection"]');
+        radioButtons.forEach(radio => {
+            radio.addEventListener('change', updateSelectedDestinationId);
+        });
+
 
     } catch (error) {
         console.error('Error populating destinations modal:', error.message);
