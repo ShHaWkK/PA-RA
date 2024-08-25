@@ -18,7 +18,7 @@
         <h1>Stocks</h1>
 
         <label for="warehouseSelect"><h2>Warehouse:</h2></label>
-        <select name="warehouse" id="warehouseSelect"></select>
+        <select name="warehouse" id="warehouseSelect" class="warehouseSelect"></select>
 
         <div class="row">
             <button class="add-button" id="addStockButton"> Nouveau Stock </button>

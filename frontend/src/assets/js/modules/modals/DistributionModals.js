@@ -1,6 +1,6 @@
 import {
     addDestinationToRoute,
-    getDeliveriesByDestination,
+    getDeliveriesByDestination, getDestinationById,
     getRouteById,
     getRouteDestinations,
     updateRoute
@@ -433,13 +433,91 @@ async function handleDestinationFormSubmission(event) {
 
         document.getElementById('loadingBodyAddDestination').classList.add('hidden');
         document.getElementById('addDestinationForm').classList.remove('hidden');
-        
+
     } catch (error) {
         console.error('Error submitting form:', error.message);
         document.getElementById('loadingBodyAddDestination').classList.add('hidden');
         document.getElementById('addDestinationForm').classList.remove('hidden');
         alert('Une erreur s\'est produite lors de l\'envoi du formulaire.');
     }
+}
+
+
+// Fenêtre de modification de destination
+async function populateEditDestinationModalData() {
+    const formElement = document.getElementById('editDestinationForm');
+    const loadingIndicator = document.getElementById('loadingEditDestination');
+    const productContainer = document.getElementById('productContainer');
+
+    // Show loading indicator and hide form
+    formElement.classList.add('hidden');
+    loadingIndicator.classList.remove('hidden');
+
+    try {
+        // Récupérer les données de la destination
+        const destinationData = await getDestinationById(selectedDestinationId);
+        if (!destinationData || !destinationData.destination) {
+            throw new Error('Destination data not found');
+        }
+
+        // Pré-remplir les champs du formulaire avec les données existantes de la destination
+        const { address, recipient_type, comment, warehouse_id } = destinationData.destination;
+        document.getElementById('destination-edit-address').value = address ?? '';
+        document.getElementById('destination-edit-recipientType').value = recipient_type ?? '';
+        document.getElementById('destination-edit-comment').value = comment ?? '';
+        document.getElementById('destination-edit-warehouseSelect').value = warehouse_id ?? '';
+
+        // Récupérer les livraisons associées à la destination
+        const deliveriesData = await getDeliveriesByDestination(selectedDestinationId);
+        if (deliveriesData.message || deliveriesData.error) {
+            console.warn(deliveriesData.message || deliveriesData.error);
+            productContainer.innerHTML = '<p>Aucune livraison trouvée.</p>';
+        } else {
+            // Clear previous products and populate new ones
+            productContainer.innerHTML = '';
+            deliveriesData.forEach((delivery, index) => {
+                addProductToForm(delivery, index);
+            });
+        }
+    } catch (error) {
+        console.error('Error populating destination data:', error.message);
+        alert('Une erreur est survenue lors du chargement des données de la destination. Veuillez réessayer plus tard.');
+    } finally {
+        // Hide loading indicator and show form
+        loadingIndicator.classList.add('hidden');
+        formElement.classList.remove('hidden');
+    }
+}
+
+// Add product fields to the form
+function addProductToForm(delivery, index) {
+    console.log("addProductToForm");
+
+    const productItem = document.createElement('div');
+    productItem.className = 'product-item';
+    productItem.innerHTML = `
+            <h4>Produit ${index}</h4>
+            <div class="form-group">
+                <label for="productSelect_${index}">Produit :</label>
+                <select name="product[]" id="productSelect_${index}" required></select>
+            </div>
+            <div class="form-group">
+                <label for="quantity_${index}">Quantité :</label>
+                <input type="number" name="quantity[]" id="quantity_${index}" min="1" required>
+            </div>
+            <div class="form-group">
+                <label for="status_${index}">Statut :</label>
+                <select name="status[]" id="status_${index}" required>
+                    <option value="pending" ${delivery.status === 'pending' ? 'selected' : ''}>En attente</option>
+                    <option value="completed" ${delivery.status === 'completed' ? 'selected' : ''}>Complétée</option>
+                </select>
+            </div>
+        `;
+
+    // Populate product selector
+    populateProductSelector(`productSelect_${index}`);
+
+    productContainer.appendChild(productItem);
 }
 
 document.addEventListener('DOMContentLoaded', async function() {
@@ -520,10 +598,34 @@ document.addEventListener('DOMContentLoaded', async function() {
     //Section dynamique d'ajout des deliveries dans la fenêtre modale des destinations
     addDeliveryButton.addEventListener('click', function () {
         populateDeliveryContainer();
-        });
+    });
 
-        await populateProductSelector('productSelect_0');
+    await populateProductSelector('productSelect_0');
 
     addDestinationForm.addEventListener('submit', handleDestinationFormSubmission);
+
+    // Fenêtre de modification de la destination
+    const editDestinationModal = document.getElementById('editDestinationModal');
+    const closeEditDestinationModal = document.getElementById('closeEditDestinationModal');
+    const addProductButton = document.getElementById('addProductButton');
+    const saveChangesButton = document.getElementById('saveChangesButton');
+    const productContainer = document.getElementById('productContainer');
+    const editDestinationForm = document.getElementById('editDestinationForm');
+    const editDestinationButton = document.getElementById("modifyDestinationInModalButton");
+    let productIndex = 0;
+
+    editDestinationButton.addEventListener('click',function (){
+        if (!selectedDestinationId) {
+            alert('Destination ID is required.');
+            return;
+        }
+
+        populateEditDestinationModalData(selectedDestinationId);
+        editDestinationModal.style.display = 'block';
+    })
+
+    closeEditDestinationModal.onclick = () => {
+        editDestinationModal.style.display = 'none';
+    };
 
 });

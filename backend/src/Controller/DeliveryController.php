@@ -127,6 +127,17 @@ class DeliveryController
                             }
                         }
 
+                        if (isset($uriParts[2]) && $uriParts[2] === 'destination-deliveries') {
+                            $destination = $this->entityManager->getRepository(DestinationModel::class)->find($id);
+                            if ($destination) {
+                                return $this->updateDestinationAndDeliveries($id,$input);
+                            } else {
+                                http_response_code(404);
+                                return ['error' => 'Destination not found'];
+                            }
+                        }
+
+
                         http_response_code(400);
                         return ['error' => 'Invalid operation'];
                     }
@@ -831,6 +842,117 @@ class DeliveryController
             error_log("Exception in updateEntityFields: " . $e->getMessage());
             http_response_code(500);
             return ['error' => 'An error occurred while updating the entity'];
+        }
+    }
+
+    public function updateDestinationAndDeliveries(int $destinationId, array $data): array
+    {
+        try {
+            // Récupération de l'entité DestinationModel à partir de l'id fourni
+            $destination = $this->entityManager->getRepository(DestinationModel::class)->find($destinationId);
+
+            if (!$destination) {
+                http_response_code(404);
+                return ['error' => 'Destination not found'];
+            }
+
+            // Mise à jour des champs de la destination
+            if (isset($data['address'])) {
+                $destination->setAddress($data['address']);
+            }
+            if (isset($data['recipient_type'])) {
+                $destination->setRecipientType($data['recipient_type']);
+            }
+            if (isset($data['delivery_date'])) {
+                $destination->setDeliveryDate(new \DateTime($data['delivery_date']));
+            }
+            if (isset($data['status'])) {
+                $destination->setStatus($data['status']);
+            }
+            if (isset($data['comment'])) {
+                $destination->setComment($data['comment']);
+            }
+            if (isset($data['warehouse_id'])) {
+                $warehouse = $this->entityManager->getRepository(WarehouseModel::class)->find($data['warehouse_id']);
+                if ($warehouse) {
+                    $destination->setWarehouse($warehouse);
+                } else {
+                    http_response_code(404);
+                    return ['error' => 'Warehouse not found'];
+                }
+            }
+
+            // Mise à jour des livraisons associées
+            if (isset($data['deliveries']) && is_array($data['deliveries'])) {
+                foreach ($data['deliveries'] as $deliveryData) {
+                    if (isset($deliveryData['id'])) {
+                        // Récupération de la livraison à mettre à jour
+                        $delivery = $this->entityManager->getRepository(DeliveryModel::class)->find($deliveryData['id']);
+
+                        if ($delivery && $delivery->getDestination() === $destination) {
+                            // Mise à jour des champs de la livraison
+                            if (isset($deliveryData['product_id'])) {
+                                $product = $this->entityManager->getRepository(ProductModel::class)->find($deliveryData['product_id']);
+                                if ($product) {
+                                    $delivery->setProduct($product);
+                                } else {
+                                    http_response_code(404);
+                                    return ['error' => 'Product not found'];
+                                }
+                            }
+                            if (isset($deliveryData['quantity'])) {
+                                $delivery->setQuantity($deliveryData['quantity']);
+                            }
+                            if (isset($deliveryData['status'])) {
+                                $delivery->setStatus($deliveryData['status']);
+                            }
+                            if (isset($deliveryData['comment'])) {
+                                $delivery->setComment($deliveryData['comment']);
+                            }
+                        }
+                    } else {
+                        // Création d'une nouvelle livraison si l'ID n'est pas fourni
+                        $delivery = new DeliveryModel();
+                        $delivery->setDestination($destination);
+
+                        if (isset($deliveryData['product_id'])) {
+                            $product = $this->entityManager->getRepository(ProductModel::class)->find($deliveryData['product_id']);
+                            if ($product) {
+                                $delivery->setProduct($product);
+                            } else {
+                                http_response_code(404);
+                                return ['error' => 'Product not found'];
+                            }
+                        }
+                        if (isset($deliveryData['quantity'])) {
+                            $delivery->setQuantity($deliveryData['quantity']);
+                        }
+                        if (isset($deliveryData['status'])) {
+                            $delivery->setStatus($deliveryData['status']);
+                        }
+                        if (isset($deliveryData['comment'])) {
+                            $delivery->setComment($deliveryData['comment']);
+                        }
+
+                        $this->entityManager->persist($delivery);
+                    }
+                }
+            }
+
+            // Mise à jour des timestamps
+            $destination->setUpdatedAt(new \DateTime());
+
+            // Persister les changements dans la base de données
+            $this->entityManager->flush();
+
+            return [
+                'id' => $destination->getId(),
+                'message' => 'Destination and deliveries updated successfully',
+            ];
+        } catch (\Exception $e) {
+            error_log("Exception in updateDestinationAndDeliveries: " . $e->getMessage());
+            http_response_code(500);
+            return ['error' => 'An error occurred while updating the destination and deliveries'];
         }
     }
 

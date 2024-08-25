@@ -8,10 +8,16 @@ import { populateProductSelector, getSelectedStockId,applyWithdraw , addStockSub
 export var selectedWarehouseId;
 export var selectedWarehouseAvailableVolume;
 
-async function populateWarehouseSelector() {
+async function populateWarehouseSelector(selectorId) {
     try {
         const warehouses = await getAllWarehouses();
-        const warehouseSelect = document.getElementById('warehouseSelect');
+        let warehouseSelect;
+        
+        if(!selectorId) {
+            warehouseSelect = document.getElementById('warehouseSelect');
+        }else{
+            warehouseSelect = document.getElementById(selectorId);
+        }
 
         // Clear any existing options in the select element
         warehouseSelect.innerHTML = '';

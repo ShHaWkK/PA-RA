@@ -209,7 +209,7 @@ async function getRouteById(routeId) {
 
 async function getDestinationById(destinationId) {
     try {
-        const response = await fetch(`${apiEndpoint}/destinations/${destinationId}`, {
+        const response = await fetch(`${apiEndpoint}/destinations/${destinationId}/destination`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -342,6 +342,28 @@ async function updateDelivery(deliveryId, deliveryData) {
         console.error('Exception lors de la mise à jour de la livraison:', error);
     }
 }
+
+async function updateDestinationAndDeliveries(destinationId, data) {
+    try {
+        const response = await fetch(`${apiEndpoint}/destinations/${destinationId}/update`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data),
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to update destination and deliveries');
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error('Error updating destination and deliveries:', error.message);
+        throw error;
+    }
+}
+
 
 export {
     createRoute,

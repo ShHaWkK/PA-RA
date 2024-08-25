@@ -22,7 +22,7 @@
 
                 <div class="form-group">
                     <label for="warehouseSelect">Entrepôt</label>
-                    <select name="warehouse" id="warehouseSelect" required></select>
+                    <select name="warehouse" id="warehouseSelect" class="warehouseSelect" required></select>
                 </div>
 
                 <div class="form-group">
