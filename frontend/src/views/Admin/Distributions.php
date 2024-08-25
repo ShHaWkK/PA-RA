@@ -58,7 +58,9 @@
         <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/AdminCollectionPage/VehicleDetailsModal.php'); ?>
         <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/AdminDistributionPage/DestinationsModal.php'); ?>
         <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/AdminDistributionPage/DeliveriesModal.php'); ?>
-        <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/AdminDistributionPage/editRouteModal.php'); ?>
+        <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/AdminDistributionPage/EditRouteModal.php'); ?>
+        <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/AdminDistributionPage/AssignDestinationToRoute.php'); ?>
+
 
         <!-- Script pour gérer les interactions avec la page -->
         <script type="module" src="/assets/js/pages/AdminDistributionPage.js"></script>

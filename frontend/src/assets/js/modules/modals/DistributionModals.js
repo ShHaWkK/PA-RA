@@ -1,8 +1,15 @@
-import {getDeliveriesByDestination, getRouteById, getRouteDestinations, updateRoute} from "../../api/Distributions.js";
+import {
+    addDestinationToRoute,
+    getDeliveriesByDestination,
+    getRouteById,
+    getRouteDestinations,
+    updateRoute
+} from "../../api/Distributions.js";
 import {formatDateToFrench} from "../FormatDate.js";
 import {getAllVehicles} from "../../api/Vehicle.js";
 import {getAllUsers} from "../../api/Users.js";
 import {populateRouteTable, selectedRouteId} from "../tables/RouteTable.js";
+import {getAllProducts} from "../../api/Products.js";
 
 export let selectedDestinationId;
 
@@ -230,6 +237,8 @@ async function populateEditRouteForm() {
         document.getElementById('editRouteForm').classList.remove('hidden');
     } catch (error) {
         console.error('Erreur lors du pré-remplissage du formulaire de modification de la route:', error);
+        document.getElementById('loadingEditRoute').classList.add('hidden');
+        document.getElementById('editRouteForm').classList.remove('hidden');
     }
 }
 
@@ -310,6 +319,130 @@ async function editRoute(routeID) {
     }
 }
 
+async function populateProductSelector(selectorId) {
+    try {
+        // Récupérer tous les produits via une API ou une fonction dédiée
+        const products = await getAllProducts();
+
+        // Vider le sélecteur de produits spécifié
+        const productSelector = document.getElementById(selectorId);
+        productSelector.innerHTML = '';
+
+        // Remplir le sélecteur de produits avec les données récupérées
+        products.forEach(product => {
+            const option = document.createElement('option');
+            option.value = product.id;
+            option.textContent = product.name;
+            productSelector.appendChild(option);
+        });
+
+    } catch (error) {
+        console.error(`Erreur lors de la récupération des produits pour ${selectorId}:`, error.message);
+    }
+}
+
+async function populateDeliveryContainer(){
+    const deliveryContainer = document.getElementById('deliveryContainer');
+    const deliveryItems = deliveryContainer.getElementsByClassName('delivery-item');
+    const newIndex = deliveryItems.length;
+
+    // Créer un nouvel élément de livraison
+    const newDeliveryItem = document.createElement('div');
+    newDeliveryItem.className = 'delivery-item';
+    newDeliveryItem.innerHTML = `
+        <h3>Produit ${newIndex}</h3>
+
+        <div class="form-group">
+            <label for="productSelect_${newIndex}">Produit :</label>
+            <select name="product[]" id="productSelect_${newIndex}" required>
+                <!-- Options à remplir dynamiquement -->
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="quantity_${newIndex}">Quantité :</label>
+            <input type="number" name="quantity[]" id="quantity_${newIndex}" min="1" required>
+        </div>
+        <div class="form-group">
+            <label for="status_${newIndex}">Statut :</label>
+            <select name="status[]" id="status_${newIndex}" required>
+                <option value="pending">En attente</option>
+                <option value="completed">Complétée</option>
+            </select>
+        </div>
+    `;
+    // Ajouter le nouvel élément au container
+    deliveryContainer.appendChild(newDeliveryItem);
+
+    // Appeler populateProductSelector avec l'ID du nouveau sélecteur créé
+    populateProductSelector(`productSelect_${newIndex}`);
+}
+
+async function handleDestinationFormSubmission(event) {
+    event.preventDefault();
+    // Afficher le loader et masquer le formulaire
+    document.getElementById('loadingBodyAddDestination').classList.remove('hidden');
+    document.getElementById('addDestinationForm').classList.add('hidden');
+
+    try {
+        // Récupération des données du formulaire principal
+        const address = document.getElementById('address').value;
+        const recipientType = document.getElementById('recipientType').value;
+        const warehouseId = document.getElementById('warehouseSelect').value;
+        const comment = document.getElementById('comment').value;
+        const deliveryDate = new Date().toISOString().split('T')[0]; // Par défaut à la date actuelle
+
+        // Récupération des données des livraisons
+        const deliveries = [];
+        const deliveryItems = document.querySelectorAll('.delivery-item');
+
+        deliveryItems.forEach((item, index) => {
+            const productId = item.querySelector(`#productSelect_${index}`).value;
+            const quantity = item.querySelector(`#quantity_${index}`).value;
+            const status = item.querySelector(`#status_${index}`).value;
+
+            deliveries.push({
+                product_id: parseInt(productId),
+                quantity: parseInt(quantity),
+                status: status
+            });
+        });
+
+        // Création du JSON body
+        const jsonBody = {
+            address: address,
+            recipient_type: recipientType,
+            warehouse_id: parseInt(warehouseId),
+            comment: comment,
+            delivery_date: deliveryDate,
+            deliveries: deliveries
+        };
+
+        console.log('JSON body:', JSON.stringify(jsonBody, null, 2));
+        console.log("selectedRouteId",selectedRouteId);
+
+        const result = await addDestinationToRoute(selectedRouteId, jsonBody);
+
+        if (result && result.message) {
+            alert("destination ajoutée avec succès");
+            document.getElementById('addDestinationModal').style.display = 'none';
+            await populateDestinationsModal();
+        }
+
+        console.log('Form submitted successfully:');
+
+        document.getElementById('loadingBodyAddDestination').classList.add('hidden');
+        document.getElementById('addDestinationForm').classList.remove('hidden');
+
+        alert('Destination ajoutée avec succès !');
+
+    } catch (error) {
+        console.error('Error submitting form:', error.message);
+        document.getElementById('loadingBodyAddDestination').classList.add('hidden');
+        document.getElementById('addDestinationForm').classList.remove('hidden');
+        alert('Une erreur s\'est produite lors de l\'envoi du formulaire.');
+    }
+}
+
 document.addEventListener('DOMContentLoaded', async function() {
     const destinationsModal = document.getElementById("destinationsDetailsModal");
     const destinationsSpan = document.getElementById("closeRouteDestinationsButton");
@@ -325,6 +458,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         deliveriesModal.style.display = "none";
     }
 
+    // Fenêtre de modification de route
     const editRouteModal = document.getElementById("editRouteModal");
     const editRouteSpan = document.getElementById("closeEditRouteModal");
     const editRouteForm = document.getElementById("editRouteForm");
@@ -368,5 +502,29 @@ document.addEventListener('DOMContentLoaded', async function() {
         await editRoute(selectedRouteID);
     };
 
+    // Fenêtre d'ajout de destination
+    const addDestinationModal = document.getElementById("addDestinationModal");
+    const closeDestinationSpan = document.getElementById("closeAddDestinationModal");
+    const addDestinationForm = document.getElementById("addDestinationForm");
+    const addDestinationButton = document.getElementById("addDestinationInModalButton");
+    const addDeliveryButton = document.getElementById("addDeliveryButton");
+
+
+    addDestinationButton.onclick = function () {
+        addDestinationModal.style.display = "block"
+    }
+
+    closeDestinationSpan.onclick = function () {
+        addDestinationModal.style.display = "none";
+    };
+
+    //Section dynamique d'ajout des deliveries dans la fenêtre modale des destinations
+    addDeliveryButton.addEventListener('click', function () {
+        populateDeliveryContainer();
+        });
+
+        await populateProductSelector('productSelect_0');
+
+    addDestinationForm.addEventListener('submit', handleDestinationFormSubmission);
 
 });

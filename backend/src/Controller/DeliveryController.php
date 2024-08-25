@@ -376,7 +376,7 @@ class DeliveryController
     {
         try {
             // Vérifiez que les champs requis sont présents
-            if (!isset($data['address']) || !isset($data['recipient_type']) || !isset($data['warehouse_id'])) {
+            if (!isset($data['address']) || !isset($data['recipient_type']) || !isset($data['warehouse_id']) || !isset($data['deliveries'])) {
                 http_response_code(400);
                 return ['error' => 'Missing required fields for new destination'];
             }
@@ -406,13 +406,45 @@ class DeliveryController
             $destination->setWarehouse($warehouse);
             $destination->setRoute($route);
             $destination->setStatus('pending'); // Statut par défaut
-            $destination->setDeliveryDate(isset($data['delivery_date']) ? new \DateTime($data['delivery_date']) : new \DateTime()); // Date de livraison, ou la date courante par défaut
+            $destination->setDeliveryDate(isset($data['delivery_date']) ? new \DateTime($data['delivery_date']) : new \DateTime()); // Date de livraison par défaut
             $destination->setCreatedAt(new \DateTime());
             $destination->setUpdatedAt(new \DateTime());
 
             // Ajout du commentaire s'il est présent dans les données
             if (isset($data['comment'])) {
                 $destination->setComment($data['comment']);
+            }
+
+            // Traitement des livraisons associées à cette destination
+            foreach ($data['deliveries'] as $deliveryData) {
+                if (!isset($deliveryData['product_id']) || !isset($deliveryData['quantity']) || !isset($deliveryData['status'])) {
+                    http_response_code(400);
+                    return ['error' => 'Missing required fields for delivery'];
+                }
+
+                // Récupération de l'entité ProductModel à partir de l'id fourni
+                $product = $this->entityManager->getRepository(ProductModel::class)
+                    ->find($deliveryData['product_id']);
+
+                if (!$product) {
+                    http_response_code(404);
+                    return ['error' => 'Product not found'];
+                }
+
+                // Création d'une nouvelle instance de DeliveryModel
+                $delivery = new DeliveryModel();
+                $delivery->setDestination($destination);
+                $delivery->setProduct($product);
+                $delivery->setQuantity($deliveryData['quantity']);
+                $delivery->setStatus($deliveryData['status']);
+                $delivery->setCreatedAt(new \DateTime());
+                $delivery->setUpdatedAt(new \DateTime());
+
+                // Ajout de la livraison à la collection de livraisons de la destination
+                $destination->addDelivery($delivery);
+
+                // Persistance de la nouvelle livraison en base de données
+                $this->entityManager->persist($delivery);
             }
 
             // Ajout de la destination à la collection de destinations de la route
@@ -425,7 +457,7 @@ class DeliveryController
             // Retourne la réponse avec les détails de la destination ajoutée
             return [
                 'id' => $destination->getId(),
-                'message' => 'Destination added successfully',
+                'message' => 'Destination and associated deliveries added successfully',
             ];
         } catch (\Exception $e) {
             // Log de l'exception pour débogage
@@ -433,7 +465,7 @@ class DeliveryController
 
             // Retourne une réponse d'erreur avec le message de l'exception
             http_response_code(500);
-            return ['error' => 'An error occurred while adding the destination'];
+            return ['error' => 'An error occurred while adding the destination and deliveries'];
         }
     }
 
