@@ -342,6 +342,7 @@ async function populateProductSelector(selectorId) {
 }
 
 async function populateDeliveryContainer(){
+    console.log("populate container : selectedRouteId",selectedRouteId);
     const deliveryContainer = document.getElementById('deliveryContainer');
     const deliveryItems = deliveryContainer.getElementsByClassName('delivery-item');
     const newIndex = deliveryItems.length;
@@ -366,7 +367,7 @@ async function populateDeliveryContainer(){
             <label for="status_${newIndex}">Statut :</label>
             <select name="status[]" id="status_${newIndex}" required>
                 <option value="pending">En attente</option>
-                <option value="completed">Complétée</option>
+                <option value="delivered">Livré</option>
             </select>
         </div>
     `;
@@ -425,16 +426,14 @@ async function handleDestinationFormSubmission(event) {
         if (result && result.message) {
             alert("destination ajoutée avec succès");
             document.getElementById('addDestinationModal').style.display = 'none';
-            await populateDestinationsModal();
+            await populateDestinationsModal(selectedRouteId);
         }
 
         console.log('Form submitted successfully:');
 
         document.getElementById('loadingBodyAddDestination').classList.add('hidden');
         document.getElementById('addDestinationForm').classList.remove('hidden');
-
-        alert('Destination ajoutée avec succès !');
-
+        
     } catch (error) {
         console.error('Error submitting form:', error.message);
         document.getElementById('loadingBodyAddDestination').classList.add('hidden');

@@ -130,9 +130,19 @@ export async function populateRouteTable(queryParameters) {
             viewDestinationsButton.value = route.id;
             viewDestinationsButton.addEventListener('click', (e) => {
                 e.preventDefault();
+
+                // On coche le radioButton correspondant à la route sélectionnée
+                const container = e.target.closest('tr');
+                const radioButton = container.querySelector('input[type="radio"][name="RouteSelection"]');
+                if (radioButton) {
+                    radioButton.checked = true;
+                }
+                selectedRouteId = route.id;
+
                 populateDestinationsModal(route.id);
                 document.getElementById('destinationsDetailsModal').style.display = 'block';
             });
+
             destinationsCell.appendChild(viewDestinationsButton);
             row.appendChild(destinationsCell);
 

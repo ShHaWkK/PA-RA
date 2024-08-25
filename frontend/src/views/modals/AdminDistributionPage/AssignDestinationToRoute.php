@@ -50,7 +50,7 @@
                                 <label for="status_0">Statut :</label>
                                 <select name="status[]" id="status_0" required>
                                     <option value="pending">En attente</option>
-                                    <option value="completed">Complétée</option>
+                                    <option value="delivered">Livré</option>
                                 </select>
                             </div>
                         </div>
