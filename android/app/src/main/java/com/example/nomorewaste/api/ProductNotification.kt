@@ -5,8 +5,8 @@ import com.google.gson.annotations.SerializedName
 
 data class ProductNotification(
     val id: Int,
-    val company: Company?, // Nested object parsed from JSON
-    val product: Product?, // Nested object parsed from JSON
+    val company: Company?,
+    val product: Product?,
     @SerializedName("notified_quantity")
     val notifiedQuantity: Int,
     val address: String,

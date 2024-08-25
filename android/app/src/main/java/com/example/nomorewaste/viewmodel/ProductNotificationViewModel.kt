@@ -1,12 +1,13 @@
+// ProductNotificationViewModel.kt
 package com.example.nomorewaste.viewmodel
 
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.nomorewaste.api.ApiService
 import com.example.nomorewaste.api.ProductNotification
 import com.example.nomorewaste.api.RetrofitClient
+import com.example.nomorewaste.api.UpdateProductNotificationRequest
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -25,8 +26,6 @@ class ProductNotificationViewModel : ViewModel() {
         apiService.getAllProductNotifications().enqueue(object : Callback<List<ProductNotification>> {
             override fun onResponse(call: Call<List<ProductNotification>>, response: Response<List<ProductNotification>>) {
                 if (response.isSuccessful) {
-                    val rawJson = response.body().toString() // Log raw JSON response here
-                    Log.d("Raw JSON Response", rawJson)
                     _productNotifications.postValue(response.body())
                 } else {
                     _error.postValue("Error: ${response.message()}")
@@ -37,11 +36,10 @@ class ProductNotificationViewModel : ViewModel() {
                 _error.postValue("Failure: ${t.message}")
             }
         })
-
-
     }
 
-    fun updateProductNotification(id: Int, updateData: Map<String, Any>) {
+    fun updateProductNotification(id: Int, notifiedQuantity: Int, isCollected: Boolean) {
+        val updateData = UpdateProductNotificationRequest(notified_quantity = notifiedQuantity, is_collected = isCollected)
         apiService.updateProductNotification(id, updateData).enqueue(object : Callback<Void> {
             override fun onResponse(call: Call<Void>, response: Response<Void>) {
                 if (response.isSuccessful) {

@@ -1,5 +1,6 @@
 package com.example.nomorewaste.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -7,6 +8,7 @@ import com.example.nomorewaste.api.ApiService
 import com.example.nomorewaste.api.Collection
 import com.example.nomorewaste.api.CollectionDetails
 import com.example.nomorewaste.api.RetrofitClient
+import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -15,7 +17,7 @@ class CollectionViewModel : ViewModel() {
 
     private val apiService: ApiService = RetrofitClient.getClient().create(ApiService::class.java)
 
-    private val _collections = MutableLiveData<List<Collection>>()
+    private val _collections = MutableLiveData<List<Collection>>()  // Specify the type as List<Collection>
     val collections: LiveData<List<Collection>> get() = _collections
 
     private val _collectionDetails = MutableLiveData<CollectionDetails>()
@@ -23,6 +25,12 @@ class CollectionViewModel : ViewModel() {
 
     private val _error = MutableLiveData<String>()
     val error: LiveData<String> get() = _error
+
+    private val _exportResponse = MutableLiveData<ResponseBody>()
+    val exportResponse: LiveData<ResponseBody> get() = _exportResponse
+
+    private val _sendEmailSuccess = MutableLiveData<Boolean>()
+    val sendEmailSuccess: LiveData<Boolean> get() = _sendEmailSuccess
 
     fun loadAllCollections() {
         apiService.getAllCollections().enqueue(object : Callback<List<Collection>> {
@@ -55,4 +63,38 @@ class CollectionViewModel : ViewModel() {
             }
         })
     }
+
+    fun exportCollectionToExcel(collectionId: Int) {
+        apiService.exportCollectionToExcel(collectionId).enqueue(object : Callback<ResponseBody> {
+            override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
+                if (response.isSuccessful) {
+                    _exportResponse.postValue(response.body())
+                } else {
+                    _error.postValue("Error exporting collection: ${response.message()}")
+                }
+            }
+
+            override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
+                _error.postValue("Failure: ${t.message}")
+            }
+        })
+    }
+
+    fun sendCollectionExcelEmail(collectionId: Int, email: String) {
+        apiService.sendCollectionExcelEmail(collectionId, email).enqueue(object : Callback<Void> {
+            override fun onResponse(call: Call<Void>, response: Response<Void>) {
+                if (response.isSuccessful) {
+                    _sendEmailSuccess.postValue(true)
+                } else {
+                    // Log error response for debugging
+                    _error.postValue("Error sending Excel email: ${response.message()} - ${response.errorBody()?.string()}")
+                }
+            }
+
+            override fun onFailure(call: Call<Void>, t: Throwable) {
+                _error.postValue("Failure: ${t.message}")
+            }
+        })
+    }
+
 }

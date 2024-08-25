@@ -1,6 +1,5 @@
 package com.example.nomorewaste
 
-import ProductNotificationAdapter
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.viewModels
@@ -9,6 +8,7 @@ import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.nomorewaste.viewmodel.ProductNotificationViewModel
+
 class ProductNotificationActivity : AppCompatActivity() {
 
     private val viewModel: ProductNotificationViewModel by viewModels()
@@ -22,20 +22,15 @@ class ProductNotificationActivity : AppCompatActivity() {
         recyclerView = findViewById(R.id.recycler_view_notifications)
         recyclerView.layoutManager = LinearLayoutManager(this)
 
-        // Initialize the adapter with an empty list initially
         adapter = ProductNotificationAdapter(emptyList()) { notification, updatedQuantity, isCollected ->
-            val updateData = mapOf(
-                "notified_quantity" to updatedQuantity,
-                "is_collected" to isCollected
-            )
-            viewModel.updateProductNotification(notification.id, updateData)
+            viewModel.updateProductNotification(notification.id, updatedQuantity, isCollected)
+            Toast.makeText(this, "Details updated", Toast.LENGTH_SHORT).show()
         }
-        recyclerView.adapter = adapter  // Attach the adapter to RecyclerView
+        recyclerView.adapter = adapter
 
-        // Observe changes in product notifications
         viewModel.productNotifications.observe(this, Observer { notifications ->
             if (notifications != null) {
-                adapter.updateData(notifications) // Update the adapter with new data
+                adapter.updateData(notifications)
             }
         })
 
@@ -45,6 +40,6 @@ class ProductNotificationActivity : AppCompatActivity() {
             }
         })
 
-        viewModel.loadAllProductNotifications() // Load the product notifications
+        viewModel.loadAllProductNotifications()
     }
 }

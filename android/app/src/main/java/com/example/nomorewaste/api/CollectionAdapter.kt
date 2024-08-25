@@ -1,15 +1,18 @@
-package com.example.nomorewaste.api
+package com.example.nomorewaste
 
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.example.nomorewaste.R
+import com.example.nomorewaste.api.Collection
 
 class CollectionAdapter(
     private var collections: List<Collection>,
-    private val onItemClicked: (Collection) -> Unit
+    private val onExportClick: (Collection) -> Unit,
+    private val onSendEmailClick: (Collection) -> Unit,
+    private val onViewNotificationsClick: () -> Unit
 ) : RecyclerView.Adapter<CollectionAdapter.CollectionViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CollectionViewHolder {
@@ -35,6 +38,8 @@ class CollectionAdapter(
         private val volunteerTextView: TextView = itemView.findViewById(R.id.text_view_volunteer)
         private val vehicleTextView: TextView = itemView.findViewById(R.id.text_view_vehicle)
         private val completedTextView: TextView = itemView.findViewById(R.id.text_view_completed)
+        private val exportButton: Button = itemView.findViewById(R.id.button_export_excel)
+        private val sendEmailButton: Button = itemView.findViewById(R.id.button_send_excel_email)
 
         fun bind(collection: Collection) {
             dateTextView.text = collection.collectionDate ?: "Unknown Date"
@@ -42,8 +47,16 @@ class CollectionAdapter(
             vehicleTextView.text = collection.vehicleLicensePlate ?: "Unknown Vehicle"
             completedTextView.text = if (collection.isCompleted) "Yes" else "No"
 
+            exportButton.setOnClickListener {
+                onExportClick(collection)
+            }
+
+            sendEmailButton.setOnClickListener {
+                onSendEmailClick(collection)
+            }
+
             itemView.setOnClickListener {
-                onItemClicked(collection)
+                onViewNotificationsClick()
             }
         }
     }

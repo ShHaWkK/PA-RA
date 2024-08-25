@@ -21,11 +21,10 @@ class RequestCollectionActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_request_collection)
 
-        // Initialize views
         productSpinner = findViewById(R.id.spinner_product)
         quantityEditText = findViewById(R.id.edit_text_quantity)
         addressEditText = findViewById(R.id.edit_text_address)
-        dateEditText = findViewById(R.id.edit_text_date) // Correctly initialize date EditText
+        dateEditText = findViewById(R.id.edit_text_date)
         submitButton = findViewById(R.id.button_submit_request)
 
         setupProductSpinner()
@@ -70,7 +69,7 @@ class RequestCollectionActivity : AppCompatActivity() {
     }
 
     private fun setupProductSpinner() {
-        // Mock data, replace with API data
+        // Replacez par les données de l'API réelle
         val products = listOf("Product A", "Product B", "Product C")
         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, products)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
