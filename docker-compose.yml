@@ -35,7 +35,6 @@ services:
       - db  
     entrypoint: ["/bin/sh", "-c", "composer install && apache2-foreground"]
 
-
   frontend:
     build:
       context: ./frontend
@@ -49,7 +48,9 @@ services:
       - ./frontend/src:/var/www/html
 
   db:
-    image: mysql:latest
+    build:
+      context: .
+      dockerfile: Dockerfile.db
     container_name: db
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
@@ -57,10 +58,10 @@ services:
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
       MYSQL_DATABASE: ${MYSQL_DATABASE}
     ports:
-      - "3306:3306"  
+      - "3306:3306"
     volumes:
       - db_data:/var/lib/mysql
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    privileged: true
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 10s

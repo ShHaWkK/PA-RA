@@ -1,0 +1,14 @@
+# Utiliser l'image officielle MySQL
+FROM mysql:latest
+
+# Définir les variables d'environnement nécessaires pour MySQL
+ENV MYSQL_ROOT_PASSWORD=rootpassword
+ENV MYSQL_DATABASE=no_more_waste
+ENV MYSQL_USER=user
+ENV MYSQL_PASSWORD=password
+
+# Copier le script d'initialisation SQL dans le répertoire approprié
+COPY ./init.sql /docker-entrypoint-initdb.d/
+
+# Exposer le port 3306 pour MySQL
+EXPOSE 3306
