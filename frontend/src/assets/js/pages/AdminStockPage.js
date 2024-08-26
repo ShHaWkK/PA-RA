@@ -8,11 +8,11 @@ import { populateProductSelector, getSelectedStockId,applyWithdraw , addStockSub
 export var selectedWarehouseId;
 export var selectedWarehouseAvailableVolume;
 
-async function populateWarehouseSelector(selectorId) {
+export async function populateWarehouseSelector(selectorId) {
     try {
         const warehouses = await getAllWarehouses();
         let warehouseSelect;
-        
+
         if(!selectorId) {
             warehouseSelect = document.getElementById('warehouseSelect');
         }else{

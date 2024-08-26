@@ -33,7 +33,6 @@
             <h3>Produits</h3>
             <div id="productContainer"></div>
 
-            <button type="button" id="addProductButton">Ajouter un Produit</button>
             <button type="submit" id="saveChangesButton">Enregistrer</button>
         </form>
         <?php

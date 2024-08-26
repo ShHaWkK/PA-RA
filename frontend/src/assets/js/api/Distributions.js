@@ -345,8 +345,10 @@ async function updateDelivery(deliveryId, deliveryData) {
 
 async function updateDestinationAndDeliveries(destinationId, data) {
     try {
-        const response = await fetch(`${apiEndpoint}/destinations/${destinationId}/update`, {
-            method: 'PATCH',
+        console.log(data);
+
+        const response = await fetch(`${apiEndpoint}/destinations/${destinationId}/destination-deliveries`, {
+            method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
             },
@@ -380,5 +382,6 @@ export {
     getDeliveriesByDestination,
     updateRoute,
     updateDelivery,
-    updateDestination
+    updateDestination,
+    updateDestinationAndDeliveries
 };

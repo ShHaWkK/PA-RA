@@ -2,7 +2,7 @@ import {
     addDestinationToRoute,
     getDeliveriesByDestination, getDestinationById,
     getRouteById,
-    getRouteDestinations,
+    getRouteDestinations, updateDestinationAndDeliveries,
     updateRoute
 } from "../../api/Distributions.js";
 import {formatDateToFrench} from "../FormatDate.js";
@@ -10,6 +10,7 @@ import {getAllVehicles} from "../../api/Vehicle.js";
 import {getAllUsers} from "../../api/Users.js";
 import {populateRouteTable, selectedRouteId} from "../tables/RouteTable.js";
 import {getAllProducts} from "../../api/Products.js";
+import {populateWarehouseSelector} from "../../pages/AdminStockPage.js"
 
 export let selectedDestinationId;
 
@@ -341,9 +342,9 @@ async function populateProductSelector(selectorId) {
     }
 }
 
-async function populateDeliveryContainer(){
+async function populateDeliveryContainer(containerId){
     console.log("populate container : selectedRouteId",selectedRouteId);
-    const deliveryContainer = document.getElementById('deliveryContainer');
+    const deliveryContainer = document.getElementById(containerId);
     const deliveryItems = deliveryContainer.getElementsByClassName('delivery-item');
     const newIndex = deliveryItems.length;
 
@@ -442,7 +443,6 @@ async function handleDestinationFormSubmission(event) {
     }
 }
 
-
 // Fenêtre de modification de destination
 async function populateEditDestinationModalData() {
     const formElement = document.getElementById('editDestinationForm');
@@ -454,6 +454,8 @@ async function populateEditDestinationModalData() {
     loadingIndicator.classList.remove('hidden');
 
     try {
+        await populateWarehouseSelector("destination-edit-warehouseSelect");
+
         // Récupérer les données de la destination
         const destinationData = await getDestinationById(selectedDestinationId);
         if (!destinationData || !destinationData.destination) {
@@ -490,7 +492,7 @@ async function populateEditDestinationModalData() {
 }
 
 // Add product fields to the form
-function addProductToForm(delivery, index) {
+async function addProductToForm(delivery, index) {
     console.log("addProductToForm");
 
     const productItem = document.createElement('div');
@@ -498,26 +500,104 @@ function addProductToForm(delivery, index) {
     productItem.innerHTML = `
             <h4>Produit ${index}</h4>
             <div class="form-group">
-                <label for="productSelect_${index}">Produit :</label>
-                <select name="product[]" id="productSelect_${index}" required></select>
+                <label for="productSelectEdit_${index}">Produit :</label>
+                <select name="product[]" id="productSelectEdit_${index}" required></select>
             </div>
             <div class="form-group">
                 <label for="quantity_${index}">Quantité :</label>
-                <input type="number" name="quantity[]" id="quantity_${index}" min="1" required>
+                <input type="number" name="quantity[]" id="quantityEdit_${index}" min="1" required>
             </div>
             <div class="form-group">
                 <label for="status_${index}">Statut :</label>
                 <select name="status[]" id="status_${index}" required>
                     <option value="pending" ${delivery.status === 'pending' ? 'selected' : ''}>En attente</option>
-                    <option value="completed" ${delivery.status === 'completed' ? 'selected' : ''}>Complétée</option>
+                    <option value="pending" ${delivery.status === 'in_route' ? 'selected' : ''}>En route</option>
+                    <option value="completed" ${delivery.status === 'delivered' ? 'selected' : ''}>Complétée</option>
                 </select>
             </div>
         `;
 
-    // Populate product selector
-    populateProductSelector(`productSelect_${index}`);
-
+    // Ajout de l'élément au DOM avant manipulation
     productContainer.appendChild(productItem);
+
+    console.log("delivery product_id", delivery.product_id);
+    console.log("delivery product", delivery.product.name);
+
+    // peupler le selector de produit dans la modale
+    await populateProductSelector(`productSelectEdit_${index}`);
+
+    // Affecter la valeur du produit correspondant au selector
+    document.getElementById(`productSelectEdit_${index}`).value = delivery.product_id ?? '';
+
+    document.getElementById(`quantityEdit_${index}`).value = delivery.quantity ?? '';
+}
+
+async function handleEditDestinationFormSubmission(event) {
+    event.preventDefault();
+
+    // Afficher le loader et masquer le formulaire
+    document.getElementById('loadingEditDestination').classList.remove('hidden');
+    document.getElementById('editDestinationForm').classList.add('hidden');
+
+    try {
+        // Récupération des données du formulaire principal
+        const address = document.getElementById('destination-edit-address').value;
+        const recipientType = document.getElementById('destination-edit-recipientType').value;
+        const warehouseId = document.getElementById('destination-edit-warehouseSelect').value;
+        const comment = document.getElementById('destination-edit-comment').value;
+        const deliveryDate = new Date().toISOString().split('T')[0]; // Par défaut à la date actuelle
+
+        // Récupération des données des livraisons
+        const deliveries = [];
+        const productItems = document.querySelectorAll('#productContainer .product-item');
+
+        productItems.forEach((item, index) => {
+            const productId = item.querySelector(`#productSelectEdit_${index}`).value;
+            const quantity = item.querySelector(`#quantityEdit_${index}`).value;
+            const status = item.querySelector(`#status_${index}`).value;
+
+            deliveries.push({
+                id: index + 1, // Remplacez par l'ID réel si nécessaire
+                product_id: parseInt(productId),
+                quantity: parseInt(quantity),
+                status: status,
+                comment: '' // Ajoutez un champ de commentaire si nécessaire
+            });
+        });
+
+        // Création du JSON body
+        const jsonBody = {
+            address: address,
+            recipient_type: recipientType,
+            warehouse_id: parseInt(warehouseId),
+            comment: comment,
+            delivery_date: deliveryDate,
+            deliveries: deliveries
+        };
+
+        console.log('JSON body for update:', JSON.stringify(jsonBody, null, 2));
+        console.log("Destination ID:", selectedDestinationId);
+
+        const result = await updateDestinationAndDeliveries(selectedDestinationId, jsonBody);
+
+        if (result && result.message) {
+            alert("Destination mise à jour avec succès");
+            document.getElementById('editDestinationModal').style.display = 'none';
+            await populateDestinationsModal(selectedRouteId); // Mettre à jour la liste des destinations
+        }
+
+        console.log('Form updated successfully:');
+
+        // Réafficher le formulaire et masquer le loader
+        document.getElementById('loadingEditDestination').classList.add('hidden');
+        document.getElementById('editDestinationForm').classList.remove('hidden');
+
+    } catch (error) {
+        console.error('Error updating destination:', error.message);
+        document.getElementById('loadingEditDestination').classList.add('hidden');
+        document.getElementById('editDestinationForm').classList.remove('hidden');
+        alert('Une erreur s\'est produite lors de la mise à jour de la destination.');
+    }
 }
 
 document.addEventListener('DOMContentLoaded', async function() {
@@ -597,7 +677,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     //Section dynamique d'ajout des deliveries dans la fenêtre modale des destinations
     addDeliveryButton.addEventListener('click', function () {
-        populateDeliveryContainer();
+        populateDeliveryContainer('deliveryContainer');
     });
 
     await populateProductSelector('productSelect_0');
@@ -607,8 +687,6 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Fenêtre de modification de la destination
     const editDestinationModal = document.getElementById('editDestinationModal');
     const closeEditDestinationModal = document.getElementById('closeEditDestinationModal');
-    const addProductButton = document.getElementById('addProductButton');
-    const saveChangesButton = document.getElementById('saveChangesButton');
     const productContainer = document.getElementById('productContainer');
     const editDestinationForm = document.getElementById('editDestinationForm');
     const editDestinationButton = document.getElementById("modifyDestinationInModalButton");
@@ -627,5 +705,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     closeEditDestinationModal.onclick = () => {
         editDestinationModal.style.display = 'none';
     };
+
+    editDestinationForm.addEventListener('submit',handleEditDestinationFormSubmission);
 
 });
