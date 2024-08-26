@@ -27,9 +27,14 @@ services:
       SMTP_PASSWORD: ${SMTP_PASSWORD}
       EMAIL_FROM: ${EMAIL_FROM}
       GOOGLE_MAPS_API_KEY: ${GOOGLE_MAPS_API_KEY}
+    deploy:
+      resources:
+        limits:
+          memory: 512M
     depends_on:
       - db  
     entrypoint: ["/bin/sh", "-c", "composer install && apache2-foreground"]
+
 
   frontend:
     build:
