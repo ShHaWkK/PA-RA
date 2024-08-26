@@ -30,7 +30,7 @@ COPY ./backend /var/www/html
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
 # Installer les dépendances PHP via Composer
-RUN composer install --no-interaction --prefer-dist
+RUN cd /var/www/html && composer install --no-interaction --prefer-dist
 
 # Configurer les permissions et les dossiers
 RUN chown -R www-data:www-data /var/www/html \
@@ -74,3 +74,9 @@ COPY ./init.sql /docker-entrypoint-initdb.d/
 
 # Exposer le port 3306 pour MySQL
 EXPOSE 3306
+
+# Réinitialiser le point d'entrée pour MySQL
+ENTRYPOINT ["docker-entrypoint.sh"]
+
+# Démarrer MySQL
+CMD ["mysqld"]
