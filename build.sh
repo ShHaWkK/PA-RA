@@ -45,7 +45,7 @@ echo "Running frontend container..."
 docker run -d --name frontend-container -p 3000:80 frontend-image
 
 echo "Running database container..."
-docker run -d --name db-container -e MYSQL_ROOT_PASSWORD=rootpassword -e MYSQL_DATABASE=your_database_name -e MYSQL_USER=your_user -e MYSQL_PASSWORD=your_password -p 3306:3306 db-image
+docker run -d --name db-container -e MYSQL_ROOT_PASSWORD=rootpassword -e MYSQL_DATABASE=no_more_waste -e MYSQL_USER=user -e MYSQL_PASSWORD=password -p 3306:3306 db-image
 
 # Afficher les conteneurs en cours d'exécution
 docker ps
