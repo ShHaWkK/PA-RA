@@ -65,9 +65,9 @@ FROM mysql:latest as db
 
 # Configuration des variables d'environnement MySQL
 ENV MYSQL_ROOT_PASSWORD=rootpassword
-ENV MYSQL_DATABASE=your_database_name
-ENV MYSQL_USER=your_user
-ENV MYSQL_PASSWORD=your_password
+ENV MYSQL_DATABASE=no_more_waste
+ENV MYSQL_USER=user
+ENV MYSQL_PASSWORD=password
 
 # Copier le script d'initialisation SQL dans le conteneur
 COPY ./init.sql /docker-entrypoint-initdb.d/
