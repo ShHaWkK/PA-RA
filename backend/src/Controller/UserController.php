@@ -470,5 +470,38 @@ class UserController
             return false;
         }
     }
+    public function getTicketsByUser($userId)
+    {
+        try {
+            $user = $this->entityManager->getRepository(UserModel::class)->find($userId);
+            if (!$user) {
+                http_response_code(404);
+                return ['error' => 'User not found'];
+            }
+
+            $tickets = $this->entityManager->getRepository(TicketModel::class)->findBy(['created_by' => $user]);
+
+            $ticketData = [];
+            foreach ($tickets as $ticket) {
+                $ticketData[] = [
+                    'id' => $ticket->getId(),
+                    'type' => $ticket->getType(),
+                    'description' => $ticket->getDescription(),
+                    'status' => $ticket->getStatus(),
+                    'createdAt' => $ticket->getCreatedAt()->format('Y-m-d H:i:s'),
+                    'updatedAt' => $ticket->getUpdatedAt()->format('Y-m-d H:i:s'),
+                    'assignedTo' => $ticket->getAssignedTo() ? $ticket->getAssignedTo()->getId() : null,
+                    'attachments' => $ticket->getAttachments()
+                ];
+            }
+
+            return $ticketData;
+        } catch (\Exception $e) {
+            error_log("Exception in getTicketsByUser: " . $e->getMessage());
+            http_response_code(500);
+            return ['error' => 'Internal Server Error'];
+        }
+    }
+
 }
 ?>

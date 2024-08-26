@@ -3,7 +3,6 @@ namespace Controller;
 
 use Entity\TicketModel;
 use Entity\UserModel;
-use Entity\MessageModel;
 use Doctrine\ORM\EntityManager;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
@@ -35,13 +34,13 @@ class TicketController
     {
         try {
             error_log("TicketController - processRequest called with method: $method");
-    
+
             if (isset($uriParts[1]) && $uriParts[1] === 'messages') {
                 // Redirect to MessageController
                 $messageController = new MessageController($this->entityManager);
                 return $messageController->processRequest($method, array_slice($uriParts, 1), $input);
             }
-    
+
             switch ($method) {
                 case 'POST':
                     return $this->createTicket($input);
@@ -89,72 +88,68 @@ class TicketController
             return new JsonResponse(['error' => 'Internal Server Error']);
         }
     }
-    
 
-
-    
-
- public function createTicket($data)
+    public function createTicket($data)
     {
         try {
             error_log("Data received for creating ticket: " . json_encode($data));
-
+    
+            // Validation des champs requis
             if (!isset($data['type']) || !isset($data['description']) || !isset($data['status']) || !isset($data['created_by'])) {
                 http_response_code(400);
                 return new JsonResponse(['error' => 'Missing required fields for new ticket']);
             }
-
+    
             $ticket = new TicketModel();
             $ticket->setType($data['type']);
             $ticket->setDescription($data['description']);
             $ticket->setStatus($data['status']);
             $ticket->setCreatedBy($this->entityManager->find(UserModel::class, $data['created_by']));
-            
+    
             if (isset($data['assigned_to'])) {
                 $ticket->setAssignedTo($this->entityManager->find(UserModel::class, $data['assigned_to']));
             }
-
+    
             if (isset($data['attachments'])) {
-                if (is_string($data['attachments'])) {
-                    $attachments = json_decode($data['attachments'], true);
-                    if (json_last_error() !== JSON_ERROR_NONE) {
-                        http_response_code(400);
-                        return new JsonResponse(['error' => 'Invalid JSON in attachments']);
-                    }
-                } else {
-                    $attachments = $data['attachments'];
+                $attachments = is_string($data['attachments']) ? json_decode($data['attachments'], true) : $data['attachments'];
+                if (json_last_error() !== JSON_ERROR_NONE) {
+                    http_response_code(400);
+                    return new JsonResponse(['error' => 'Invalid JSON in attachments']);
                 }
                 $ticket->setAttachments($attachments);
             } else {
-                $ticket->setAttachments(null);
+                $ticket->setAttachments([]);
             }
-
+    
             $ticket->setCreatedAt(new \DateTime("now"));
             $ticket->setUpdatedAt(new \DateTime("now"));
-
+    
             $this->entityManager->persist($ticket);
             $this->entityManager->flush();
-
+    
             // Envoyer un email de confirmation
             $user = $ticket->getCreatedBy();
             $this->sendConfirmationEmail($user->getEmail(), $ticket);
-
-            $response = json_encode(['id' => $ticket->getId(), 'message' => 'Ticket created successfully']);
-            error_log("Response: " . $response);
-            return new JsonResponse(['id' => $ticket->getId(), 'message' => 'Ticket created successfully']);
+    
+            // Réponse correcte avec l'ID du ticket
+            $response = new JsonResponse(['id' => $ticket->getId(), 'message' => 'Ticket created successfully']);
+            $response->send();
+            exit();
+            
         } catch (\Exception $e) {
             error_log("Exception in createTicket: " . $e->getMessage());
             http_response_code(500);
             return new JsonResponse(['error' => 'Internal Server Error']);
         }
     }
-
+    
     private function sendConfirmationEmail($email, $ticket)
     {
         $subject = "Confirmation de création de ticket";
         $body = "Votre ticket a bien été pris en compte. Un administrateur va traiter votre demande sous peu.\n\nDétails du ticket:\n\nID: {$ticket->getId()}\nType: {$ticket->getType()}\nDescription: {$ticket->getDescription()}";
         $this->emailService->sendEmail($email, $subject, $body);
     }
+
 
 
     //------------------------ Obtenir un ticket ------------------------//

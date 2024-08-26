@@ -14,10 +14,21 @@ class TicketAPI:
         try:
             response = requests.post(f"{TicketAPI.BASE_URL}/tickets", json=data)
             response.raise_for_status()
-            return response.json()
+
+            # Vérification du format de la réponse
+            result = response.json()
+            if 'id' not in result or 'message' not in result:
+                logging.error(f"Unexpected response format: {result}")
+                return {"error": "Unexpected response format from API"}
+
+            return result
         except requests.exceptions.RequestException as e:
             logging.error(f"Failed to create ticket: {e}")
             return {"error": str(e)}
+        except ValueError as e:
+            logging.error(f"Failed to parse JSON response: {e}")
+            return {"error": "Invalid JSON format"}
+
 
     @staticmethod
     def get_ticket(ticket_id):
@@ -61,26 +72,24 @@ class TicketAPI:
 
     @staticmethod
     def get_tickets_by_user(user_id):
-        try:
-            logging.debug(f"Requesting tickets for user ID: {user_id}")
-            response = requests.get(f"{TicketAPI.BASE_URL}/users/{user_id}/tickets")
-            response.raise_for_status()
-            
-            logging.debug(f"Raw response content: {response.content}")  # Ajoutez cette ligne pour voir le contenu brut
-            
-            # Vérifiez si le contenu de la réponse est vide
-            if not response.content:
-                logging.error("Empty response received from the API")
-                return {"error": "Empty response from API"}
-            
-            return response.json()
-        except requests.exceptions.RequestException as e:
-            logging.error(f"Failed to get tickets by user: {e}")
-            return {"error": str(e)}
-        except ValueError as e:
-            logging.error(f"Failed to parse JSON response: {e}")
-            return {"error": "Invalid JSON format"}
+            try:
+                logging.debug(f"Requesting tickets for user ID: {user_id}")
+                response = requests.get(f"{TicketAPI.BASE_URL}/users/{user_id}/tickets")
+                response.raise_for_status()
 
+                logging.debug(f"Raw response content: {response.content}")
+
+                if not response.content:
+                    logging.error("Empty response received from the API")
+                    return {"error": "Empty response from API"}
+
+                return response.json()
+            except requests.exceptions.RequestException as e:
+                logging.error(f"Failed to get tickets by user: {e}")
+                return {"error": str(e)}
+            except ValueError as e:
+                logging.error(f"Failed to parse JSON response: {e}")
+                return {"error": "Invalid JSON format"}
 
     @staticmethod
     def search_tickets(criteria):

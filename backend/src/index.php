@@ -188,21 +188,19 @@ $input = json_decode(file_get_contents('php://input'), true);
 error_log("Données d'entrée: " . json_encode($input));
 
 try {
-    // Vérifier les routes nécessitant une vérification JWT
     $requiresAuth = in_array($route, ['admin', 'volunteer', 'merchant']);
     if ($requiresAuth) {
         $decodedToken = $jwtMiddleware->verifyToken();
         $response = $controller->processRequest($_SERVER['REQUEST_METHOD'], $uriParts, $input, $decodedToken);
     } else {
-        // Ajout de la vérification des tickets d'un utilisateur spécifique
         if ($route === 'users' && isset($uriParts[2]) && $uriParts[2] === 'tickets') {
             $userId = (int) $uriParts[1];
             $response = $controller->getTicketsByUser($userId);
         } else if ($route === 'tickets' && isset($uriParts[2]) && $uriParts[2] === 'messages') {
             $ticketId = (int) $uriParts[1];
             error_log("Redirection vers MessageController pour ticketId: $ticketId");
-            $controller = new MessageController($entityManager, $emailService);
-            $response = $controller->processRequest($_SERVER['REQUEST_METHOD'], $uriParts, $input); // Redirige vers MessageController
+            $controller = new MessageController($entityManager);
+            $response = $controller->processRequest($_SERVER['REQUEST_METHOD'], $uriParts, $input);
         } else {
             $response = $controller->processRequest($_SERVER['REQUEST_METHOD'], $uriParts, $input);
         }

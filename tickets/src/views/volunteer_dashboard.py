@@ -80,48 +80,71 @@ class VolunteerView:
             self.tickets_treeview.delete(item)
         response = self.ticket_system.get_tickets_by_user(self.user_data['id'])
         logging.debug(f"Tickets fetched from API: {json.dumps(response, indent=2)}")
-        try:
-            tickets = json.loads(response) if isinstance(response, str) else response
-        except json.JSONDecodeError as e:
-            logging.error(f"Failed to decode JSON response: {e}")
-            messagebox.showerror("Erreur", "Erreur de format de réponse JSON.")
+
+        if 'error' in response:
+            messagebox.showerror("Erreur", response['error'])
             return
 
-        if isinstance(tickets, dict) and 'error' in tickets:
-            messagebox.showerror("Erreur", tickets['error'])
+        if isinstance(response, list):
+            tickets = response
         else:
-            for ticket in tickets:
-                logging.debug(f"Processing ticket: {ticket.get('id')}, {ticket.get('description')}")
-                if isinstance(ticket, dict):  # Ensure each ticket is a dict
-                    ticket_id = ticket.get('id', '')
-                    description = ticket.get('description', '')
-                    status = ticket.get('status', '')
-                    admin_id = ticket.get('assignedTo', '') if ticket.get('assignedTo') is not None else ''
-                    created_at = ticket.get('createdAt', '').get('date', '') if isinstance(ticket.get('createdAt'), dict) else ticket.get('createdAt')
-                    updated_at = ticket.get('updatedAt', '').get('date', '') if isinstance(ticket.get('updatedAt'), dict) else ticket.get('updatedAt')
-                    self.tickets_treeview.insert("", tk.END, values=(ticket_id, description, status, admin_id, created_at, updated_at))
-                    logging.debug(f"Inserted ticket into Treeview: ID={ticket_id}, Description={description}, Status={status}, Admin ID={admin_id}, Created At={created_at}, Updated At={updated_at}")
+            logging.error("Unexpected response format: not a list")
+            tickets = []
 
+        for ticket in tickets:
+            logging.debug(f"Processing ticket: {ticket.get('id')}, {ticket.get('description')}")
+            if isinstance(ticket, dict):
+                ticket_id = ticket.get('id', '')
+                description = ticket.get('description', '')
+                status = ticket.get('status', '')
+                admin_id = ticket.get('assignedTo', '') if ticket.get('assignedTo') is not None else ''
+                created_at = ticket.get('createdAt', '')
+                updated_at = ticket.get('updatedAt', '')
+                self.tickets_treeview.insert("", tk.END, values=(ticket_id, description, status, admin_id, created_at, updated_at))
+                logging.debug(f"Inserted ticket into Treeview: ID={ticket_id}, Description={description}, Status={status}, Admin ID={admin_id}, Created At={created_at}, Updated At={updated_at}")
+
+  # Create a new ticket              
     def create_ticket(self):
         title = simpledialog.askstring("Créer un Ticket", "Entrez le titre du ticket :")
         description = simpledialog.askstring("Créer un Ticket", "Entrez la description du ticket :")
-        if title and description:
-            ticket_data = {
-                'type': 'benevole',
-                'description': description,
-                'status': 'open',
-                'created_by': self.user_data['id'],
-                'attachments': []
-            }
-            response = self.ticket_system.create_ticket(ticket_data)
-            logging.debug(f"Create Ticket Response: {response}")
-            if response and 'id' in response:
-                messagebox.showinfo("Succès", "Ticket créé avec succès !")
-                self.populate_tickets()
-            else:
-                messagebox.showerror("Erreur", "Échec de la création du ticket.")
-        else:
+        
+        if not title or not description:
             messagebox.showwarning("Attention", "Le titre et la description ne doivent pas être vides.")
+            return
+
+        # Demande à l'utilisateur s'il veut ajouter une pièce jointe
+        add_attachment = messagebox.askyesno("Ajouter une pièce jointe", "Voulez-vous ajouter une pièce jointe au ticket ?")
+
+        attachments = []
+        if add_attachment:
+            file_path = filedialog.askopenfilename(
+                title="Sélectionnez le fichier à joindre",
+                filetypes=(("Tous les fichiers", "*.*"), ("Fichiers texte", "*.txt"), ("Images", "*.png;*.jpg;*.jpeg"))
+            )
+            if file_path:
+                try:
+                    with open(file_path, "rb") as file:
+                        attachments = [{'filename': file_path.split('/')[-1], 'content': file.read()}]
+                except Exception as e:
+                    logging.error(f"Failed to read attachment file: {e}")
+                    messagebox.showerror("Erreur", "Erreur lors de la lecture du fichier joint.")
+
+        ticket_data = {
+            'type': 'benevole',
+            'description': description,
+            'status': 'open',
+            'created_by': self.user_data['id'],
+            'attachments': attachments
+        }
+
+        response = self.ticket_system.create_ticket(ticket_data)
+        logging.debug(f"Create Ticket Response: {response}")
+        
+        if response and 'id' in response:
+            messagebox.showinfo("Succès", "Ticket créé avec succès !, vous avez reçu un email de confirmation.")
+            self.populate_tickets()
+        else:
+            messagebox.showerror("Erreur", "Échec de la création du ticket.")
 
     def close_ticket(self):
         selected = self.tickets_treeview.selection()
