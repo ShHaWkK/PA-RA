@@ -24,7 +24,7 @@ services:
     ports:
       - "3000:80"  
     environment:
-      - API_URL=https://nomorewaste-4fddade4.koyeb.app/api 
+      - API_URL=https://magic-brunhilda-nomorewaste-8ca62428.koyeb.app/api 
     volumes:
       - ./frontend/src:/var/www/html
 
