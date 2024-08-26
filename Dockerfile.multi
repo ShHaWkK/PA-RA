@@ -1,24 +1,76 @@
-FROM php:8.1-apache
+# Utilisation de l'image PHP 8.1 avec Apache pour l'image de base
+FROM php:8.1-apache as base
 
-# Installer les dépendances PHP et les outils nécessaires
+# Installation des dépendances PHP et des outils nécessaires
 RUN apt-get update && apt-get install -y \
     git \
     unzip \
+    libfreetype6-dev \
+    libjpeg62-turbo-dev \
+    libpng-dev \
+    zip \
+    libzip-dev \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Copier les fichiers de votre application dans le conteneur
+# Configuration et installation des extensions PHP requises
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg && \
+    docker-php-ext-install gd zip pdo_mysql
+
+# Activer les modules Apache nécessaires
+RUN a2enmod rewrite
+
+# --- Backend build stage ---
+FROM base as backend
+
+# Copier les fichiers de votre application backend dans le conteneur
 COPY ./backend /var/www/html
+
+# Installer Composer
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+
+# Installer les dépendances PHP via Composer
+RUN composer install --no-interaction --prefer-dist
 
 # Configurer les permissions et les dossiers
 RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 755 /var/www/html
 
-# Activer les modules Apache nécessaires
-RUN a2enmod rewrite
+# Crée le répertoire public/plannings avec les permissions appropriées
+RUN mkdir -p /var/www/html/public/plannings && chmod -R 777 /var/www/html/public/plannings
 
 # Exposer le port 80
 EXPOSE 80
 
 # Démarrer Apache
 CMD ["apache2-foreground"]
+
+# --- Frontend build stage ---
+FROM base as frontend
+
+# Copier les fichiers de l'application frontend dans le répertoire de travail du conteneur
+COPY ./frontend/src /var/www/html
+
+# Configurer les permissions appropriées
+RUN chown -R www-data:www-data /var/www/html
+
+# Exposer le port 80
+EXPOSE 80
+
+# Démarrer Apache
+CMD ["apache2-foreground"]
+
+# --- Database build stage ---
+FROM mysql:latest as db
+
+# Configuration des variables d'environnement MySQL
+ENV MYSQL_ROOT_PASSWORD=rootpassword
+ENV MYSQL_DATABASE=your_database_name
+ENV MYSQL_USER=your_user
+ENV MYSQL_PASSWORD=your_password
+
+# Copier le script d'initialisation SQL dans le conteneur
+COPY ./init.sql /docker-entrypoint-initdb.d/
+
+# Exposer le port 3306 pour MySQL
+EXPOSE 3306
