@@ -10,8 +10,23 @@ services:
       - ./backend:/var/www/html
     ports:
       - "8081:80"  
-    env_file:
-      - .env 
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      DATABASE_URL: mysql://${MYSQL_USER}:${MYSQL_PASSWORD}@db/${MYSQL_DATABASE}
+      MYSQL_DRIVER: pdo_mysql
+      MYSQL_PORT: 3306
+      MYSQL_HOST: db
+      JWT_SECRET: ${JWT_SECRET}
+      API_ENDPOINT: http://localhost:80
+      SENDGRID_API_KEY: ${SENDGRID_API_KEY}
+      SMTP_HOST: smtp.gmail.com
+      SMTP_USER: ${SMTP_USER}
+      SMTP_PASSWORD: ${SMTP_PASSWORD}
+      EMAIL_FROM: ${EMAIL_FROM}
+      GOOGLE_MAPS_API_KEY: ${GOOGLE_MAPS_API_KEY}
     depends_on:
       - db  
     entrypoint: ["/bin/sh", "-c", "composer install && apache2-foreground"]
@@ -24,7 +39,7 @@ services:
     ports:
       - "3000:80"  
     environment:
-      - API_URL=https://magic-brunhilda-nomorewaste-8ca62428.koyeb.app/api 
+      API_URL: https://magic-brunhilda-nomorewaste-8ca62428.koyeb.app/api 
     volumes:
       - ./frontend/src:/var/www/html
 
