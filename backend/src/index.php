@@ -198,12 +198,14 @@ try {
             $response = $controller->getTicketsByUser($userId);
         } else if ($route === 'tickets' && isset($uriParts[1]) && $uriParts[1] === 'assign' && isset($uriParts[2])) {
             $ticketId = (int)$uriParts[2];
-            $controller = new TicketController($entityManager, $emailService);
             $response = $controller->assignAdminToTicket($ticketId, $input);
         } else if ($route === 'tickets' && isset($uriParts[2]) && $uriParts[2] === 'messages') {
             $ticketId = (int) $uriParts[1];
             error_log("Redirection vers MessageController pour ticketId: $ticketId");
-            $controller = new MessageController($entityManager);
+
+            // Correction ici : passez les deux arguments nécessaires
+            $controller = new MessageController($entityManager, $emailService);
+
             $response = $controller->processRequest($_SERVER['REQUEST_METHOD'], $uriParts, $input);
         } else {
             $response = $controller->processRequest($_SERVER['REQUEST_METHOD'], $uriParts, $input);
