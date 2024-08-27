@@ -17,7 +17,7 @@ class ChatView:
 
     def setup_ui(self):
         self.master.title("Chat")
-        self.master.geometry("600x400")
+        self.master.geometry("800x600")
 
         self.chat_frame = tk.Frame(self.master)
         self.chat_frame.pack(fill=tk.BOTH, expand=True)
@@ -74,13 +74,12 @@ class ChatView:
                 self.chat_text.insert(tk.END, "Il n'y a aucun message dans ce ticket.\n")
             else:
                 for msg in response:
-                    # Vérifiez si 'author' est une chaîne de caractères ou un dictionnaire
                     if isinstance(msg.get('author'), dict):
                         author_name = f"{msg['author'].get('firstName', 'Unknown')} {msg['author'].get('lastName', '')}".strip()
                     else:
                         author_name = msg.get('author', 'Unknown')
 
-                    # Vérifiez si 'recipient' est une chaîne de caractères ou un dictionnaire
+
                     if isinstance(msg.get('recipient'), dict):
                         recipient_name = f"{msg['recipient'].get('firstName', 'Unknown')} {msg['recipient'].get('lastName', '')}".strip()
                     else:
