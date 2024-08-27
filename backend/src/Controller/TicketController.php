@@ -60,18 +60,20 @@ class TicketController
                     } else {
                         return $this->getAllTickets();
                     }
-                case 'PUT':
-                    if (isset($uriParts[0]) && isset($uriParts[1])) {
-                        if ($uriParts[1] === 'assign') {
-                            return $this->assignAdminToTicket((int)$uriParts[0], $input);
-                        } elseif ($uriParts[1] === 'close') {
-                            return $this->closeTicket((int)$uriParts[0], $input);
-                        } else {
-                            return $this->updateTicket((int)$uriParts[0], $input);
+                    case 'PUT':
+                        if (isset($uriParts[0]) && $uriParts[0] === 'tickets' && isset($uriParts[2]) && $uriParts[2] === 'close') {
+                            // L'ID du ticket est dans $uriParts[1]
+                            return $this->closeTicket((int)$uriParts[1], $input);
+                        } elseif (isset($uriParts[0]) && isset($uriParts[1])) {
+                            if ($uriParts[1] === 'assign') {
+                                return $this->assignAdminToTicket((int)$uriParts[0], $input);
+                            } else {
+                                return $this->updateTicket((int)$uriParts[0], $input);
+                            }
                         }
-                    }
-                    http_response_code(400);
-                    return new JsonResponse(['error' => 'Invalid request format for PUT method']);
+                        http_response_code(400);
+                        return new JsonResponse(['error' => 'Invalid request format for PUT method']);
+                    
                 case 'DELETE':
                     if (isset($uriParts[0])) {
                         return $this->deleteTicket((int)$uriParts[0]);
@@ -442,28 +444,58 @@ class TicketController
     public function closeTicket($ticketId, $data)
     {
         try {
+            error_log("Attempting to close ticket with ID: $ticketId. Input data: " . json_encode($data));
+    
+            // Recherche du ticket
             $ticket = $this->entityManager->find(TicketModel::class, $ticketId);
             if (!$ticket) {
-                http_response_code(404);
-                return json_encode(['error' => 'Ticket not found']);
+                error_log("Ticket not found with ID: $ticketId");
+                $this->jsonResponse(404, 'Ticket not found');
+                exit();  
             }
-
-            if ($ticket->getCreatedBy()->getId() !== $data['user_id'] && !$data['is_admin']) {
-                http_response_code(403);
-                return json_encode(['error' => 'Unauthorized action']);
+    
+            // Vérification des permissions utilisateur
+            $userId = $data['user_id'] ?? null;
+            $isAdmin = $data['is_admin'] ?? false;
+            if (!$userId || ($ticket->getCreatedBy()->getId() !== $userId && !$isAdmin)) {
+                error_log("Unauthorized action attempted by user ID: $userId");
+                $this->jsonResponse(403, 'Unauthorized action');
+                exit();  
             }
-
-            $ticket->setStatus('closed');
+    
+            // Vérification de la présence du champ 'status'
+            if (!isset($data['status']) || $data['status'] !== 'closed') {
+                error_log("Invalid request: missing or incorrect status field");
+                $this->jsonResponse(400, 'Invalid request: missing or incorrect status field');
+                exit();  
+            }
+    
+            // Fermeture du ticket
+            $ticket->setStatus($data['status']);
             $ticket->setUpdatedAt(new \DateTime("now"));
             $this->entityManager->flush();
-
-            return json_encode(['id' => $ticket->getId(), 'message' => 'Ticket closed successfully']);
+    
+            error_log("Ticket closed successfully with ID: $ticketId");
+    
+            $this->jsonResponse(200, 'Ticket closed successfully', ['id' => $ticket->getId()]);
+            exit();  
+    
         } catch (\Exception $e) {
             error_log("Exception in closeTicket: " . $e->getMessage());
-            http_response_code(500);
-            return json_encode(['error' => 'Internal Server Error']);
+            $this->jsonResponse(500, 'Internal Server Error');
+            exit();  
         }
     }
+    
+    
+    // Méthode utilitaire pour générer des réponses JSON
+    private function jsonResponse($statusCode, $message, $data = [])
+    {
+        http_response_code($statusCode);
+        return new JsonResponse(array_merge(['message' => $message], $data));
+    }
+    
+    
 
 
     public function reassignTicket($ticketId, $data)
