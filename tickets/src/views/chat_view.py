@@ -1,7 +1,6 @@
 import tkinter as tk
 from tkinter import messagebox
 from src.api.ticket_api import TicketAPI
-import json
 import logging
 
 class ChatView:
@@ -14,6 +13,7 @@ class ChatView:
         self.message_system = TicketAPI()
 
         self.setup_ui()
+        self.check_ticket_status()
 
     def setup_ui(self):
         self.master.title("Chat")
@@ -34,9 +34,31 @@ class ChatView:
         self.send_button = tk.Button(self.entry_frame, text="Envoyer", command=self.send_message)
         self.send_button.pack(side=tk.RIGHT)
 
-        self.populate_messages()
+    def check_ticket_status(self):
+        ticket_info = self.message_system.get_ticket(self.ticket_id)
+        logging.debug(f"Ticket info fetched: {ticket_info}")
 
-    def populate_messages(self):
+        if 'error' in ticket_info:
+            self.disable_chat(ticket_info['error'])
+            return
+
+        if not ticket_info.get('chat_enabled', True):
+            self.disable_chat(ticket_info.get('message', 'Chat is disabled'))
+        elif ticket_info.get('chat_read_only', False):
+            self.populate_messages(read_only=True)
+        else:
+            self.populate_messages()
+
+    def disable_chat(self, reason):
+        self.chat_text.config(state=tk.NORMAL)
+        self.chat_text.delete(1.0, tk.END)
+        self.chat_text.insert(tk.END, reason)
+        self.chat_text.config(state=tk.DISABLED)
+
+        self.message_entry.config(state=tk.DISABLED)
+        self.send_button.config(state=tk.DISABLED)
+
+    def populate_messages(self, read_only=False):
         response = self.message_system.get_ticket_messages(self.ticket_id)
         logging.debug(f"Raw messages fetched: {response}")
 
@@ -47,9 +69,34 @@ class ChatView:
         if isinstance(response, list):
             self.chat_text.config(state=tk.NORMAL)
             self.chat_text.delete(1.0, tk.END)
-            for msg in response:
-                self.chat_text.insert(tk.END, f"{msg['author']}: {msg['content']}\n")
+
+            if not response:
+                self.chat_text.insert(tk.END, "Il n'y a aucun message dans ce ticket.\n")
+            else:
+                for msg in response:
+                    # Vérifiez si 'author' est une chaîne de caractères ou un dictionnaire
+                    if isinstance(msg.get('author'), dict):
+                        author_name = f"{msg['author'].get('firstName', 'Unknown')} {msg['author'].get('lastName', '')}".strip()
+                    else:
+                        author_name = msg.get('author', 'Unknown')
+
+                    # Vérifiez si 'recipient' est une chaîne de caractères ou un dictionnaire
+                    if isinstance(msg.get('recipient'), dict):
+                        recipient_name = f"{msg['recipient'].get('firstName', 'Unknown')} {msg['recipient'].get('lastName', '')}".strip()
+                    else:
+                        recipient_name = msg.get('recipient', 'Unknown')
+
+                    content = msg.get('content', '')
+                    self.chat_text.insert(tk.END, f"{author_name} to {recipient_name}: {content}\n")
+
             self.chat_text.config(state=tk.DISABLED)
+
+            if not read_only:
+                self.message_entry.config(state=tk.NORMAL)
+                self.send_button.config(state=tk.NORMAL)
+            else:
+                self.message_entry.config(state=tk.DISABLED)
+                self.send_button.config(state=tk.DISABLED)
         else:
             logging.error(f"Unexpected response format: {response}")
             messagebox.showerror("Erreur", "Format de réponse inattendu.")

@@ -52,28 +52,26 @@ class TicketController
                             return $this->searchAdminByName($input['name']);
                         } elseif ($uriParts[1] === 'admins') {
                             return $this->getAllAdmins();
-                        } elseif ($uriParts[2] === 'tickets') {
+                        } elseif (isset($uriParts[2]) && $uriParts[2] === 'tickets') {
                             return $this->getTicketsByUser((int)$uriParts[1]);
                         } else {
-                            return $this->getTicket((int)$uriParts[0]);
+                            return $this->getTicket((int)$uriParts[1]);
                         }
                     } else {
                         return $this->getAllTickets();
                     }
-                    case 'PUT':
-                        if (isset($uriParts[0]) && $uriParts[0] === 'tickets' && isset($uriParts[2]) && $uriParts[2] === 'close') {
-                            // L'ID du ticket est dans $uriParts[1]
-                            return $this->closeTicket((int)$uriParts[1], $input);
-                        } elseif (isset($uriParts[0]) && isset($uriParts[1])) {
-                            if ($uriParts[1] === 'assign') {
-                                return $this->assignAdminToTicket((int)$uriParts[0], $input);
-                            } else {
-                                return $this->updateTicket((int)$uriParts[0], $input);
-                            }
+                case 'PUT':
+                    if (isset($uriParts[0]) && isset($uriParts[1])) {
+                        if ($uriParts[1] === 'assign') {
+                            return $this->assignAdminToTicket((int)$uriParts[0], $input);
+                        } elseif ($uriParts[1] === 'close') {
+                            return $this->closeTicket((int)$uriParts[0], $input);
+                        } else {
+                            return $this->updateTicket((int)$uriParts[0], $input);
                         }
-                        http_response_code(400);
-                        return new JsonResponse(['error' => 'Invalid request format for PUT method']);
-                    
+                    }
+                    http_response_code(400);
+                    return new JsonResponse(['error' => 'Invalid request format for PUT method']);
                 case 'DELETE':
                     if (isset($uriParts[0])) {
                         return $this->deleteTicket((int)$uriParts[0]);
@@ -90,6 +88,7 @@ class TicketController
             return new JsonResponse(['error' => 'Internal Server Error']);
         }
     }
+    
     public function createTicket($data)
     {
         try {
@@ -157,19 +156,92 @@ class TicketController
     public function getTicket($id)
     {
         try {
+            // Récupération du ticket à partir de l'ID
             $ticket = $this->entityManager->find(TicketModel::class, $id);
+    
+            // Vérification si le ticket existe
             if (!$ticket) {
+                echo json_encode(['error' => 'Ticket not found']);
                 http_response_code(404);
-                return json_encode(['error' => 'Ticket not found']);
+                exit();
             }
-            return json_decode($this->serializer->serialize($ticket, 'json'), true);
+    
+            // Vérification si le ticket est assigné et s'il est fermé
+            $isAssigned = $ticket->getAssignedTo() !== null;
+            $isClosed = $ticket->getStatus() === 'closed';
+    
+            // Préparation des données importantes du ticket
+            $response = [
+                'id' => $ticket->getId(),
+                'type' => $ticket->getType(),
+                'description' => $ticket->getDescription(),
+                'status' => $ticket->getStatus(),
+                'createdBy' => [
+                    'id' => $ticket->getCreatedBy()->getId(),
+                    'firstName' => $ticket->getCreatedBy()->getFirstName(),
+                    'lastName' => $ticket->getCreatedBy()->getLastName(),
+                    'email' => $ticket->getCreatedBy()->getEmail(),
+                    'phoneNumber' => $ticket->getCreatedBy()->getPhoneNumber(),
+                    'role' => $ticket->getCreatedBy()->getRole(),
+                ],
+                'assignedTo' => $ticket->getAssignedTo() ? [
+                    'id' => $ticket->getAssignedTo()->getId(),
+                    'firstName' => $ticket->getAssignedTo()->getFirstName(),
+                    'lastName' => $ticket->getAssignedTo()->getLastName(),
+                    'email' => $ticket->getAssignedTo()->getEmail(),
+                    'phoneNumber' => $ticket->getAssignedTo()->getPhoneNumber(),
+                    'role' => $ticket->getAssignedTo()->getRole(),
+                ] : null,
+                'createdAt' => $ticket->getCreatedAt()->format('Y-m-d H:i:s'),
+                'updatedAt' => $ticket->getUpdatedAt()->format('Y-m-d H:i:s'),
+                'attachments' => $ticket->getAttachments(),
+                'messages' => array_map(function($message) {
+                    return [
+                        'id' => $message->getId(),
+                        'content' => $message->getContent(),
+                        'createdAt' => $message->getCreatedAt()->format('Y-m-d H:i:s'),
+                        'author' => [
+                            'id' => $message->getAuthor()->getId(),
+                            'firstName' => $message->getAuthor()->getFirstName(),
+                            'lastName' => $message->getAuthor()->getLastName(),
+                            'email' => $message->getAuthor()->getEmail(),
+                        ],
+                        'recipient' => $message->getRecipient() ? [
+                            'id' => $message->getRecipient()->getId(),
+                            'firstName' => $message->getRecipient()->getFirstName(),
+                            'lastName' => $message->getRecipient()->getLastName(),
+                            'email' => $message->getRecipient()->getEmail(),
+                        ] : null
+                    ];
+                }, $ticket->getMessages()->toArray())
+            ];
+    
+            // Détermination du statut du chat
+            if ($isClosed) {
+                $response['message'] = 'Votre ticket est fermé';
+                $response['chat_enabled'] = true; 
+                $response['chat_read_only'] = true; 
+            } elseif (!$isAssigned) {
+                $response['message'] = 'Le ticket est en cours d\'assignation et cela sera traité sous peu';
+                $response['chat_enabled'] = false; 
+            } else {
+                $response['chat_enabled'] = true;
+                $response['chat_read_only'] = false; 
+            }
+    
+            // Retourne la réponse encodée en JSON
+            echo json_encode($response);
+            exit();
+    
         } catch (\Exception $e) {
             error_log("Exception in getTicket: " . $e->getMessage());
+            echo json_encode(['error' => 'Internal Server Error']);
             http_response_code(500);
-            return json_encode(['error' => 'Internal Server Error']);
+            exit();
         }
     }
-
+    
+    
     //------------------------ Mettre à jour un ticket ------------------------//
 
     public function updateTicket($id, $data)
@@ -444,57 +516,28 @@ class TicketController
     public function closeTicket($ticketId, $data)
     {
         try {
-            error_log("Attempting to close ticket with ID: $ticketId. Input data: " . json_encode($data));
-    
-            // Recherche du ticket
             $ticket = $this->entityManager->find(TicketModel::class, $ticketId);
             if (!$ticket) {
-                error_log("Ticket not found with ID: $ticketId");
-                $this->jsonResponse(404, 'Ticket not found');
-                exit();  
+                http_response_code(404);
+                return new JsonResponse(['error' => 'Ticket not found']);
             }
     
-            // Vérification des permissions utilisateur
-            $userId = $data['user_id'] ?? null;
-            $isAdmin = $data['is_admin'] ?? false;
-            if (!$userId || ($ticket->getCreatedBy()->getId() !== $userId && !$isAdmin)) {
-                error_log("Unauthorized action attempted by user ID: $userId");
-                $this->jsonResponse(403, 'Unauthorized action');
-                exit();  
+            if ($ticket->getCreatedBy()->getId() !== $data['user_id'] && !$data['is_admin']) {
+                http_response_code(403);
+                return new JsonResponse(['error' => 'Unauthorized action']);
             }
     
-            // Vérification de la présence du champ 'status'
-            if (!isset($data['status']) || $data['status'] !== 'closed') {
-                error_log("Invalid request: missing or incorrect status field");
-                $this->jsonResponse(400, 'Invalid request: missing or incorrect status field');
-                exit();  
-            }
-    
-            // Fermeture du ticket
-            $ticket->setStatus($data['status']);
+            $ticket->setStatus('closed');
             $ticket->setUpdatedAt(new \DateTime("now"));
             $this->entityManager->flush();
     
-            error_log("Ticket closed successfully with ID: $ticketId");
-    
-            $this->jsonResponse(200, 'Ticket closed successfully', ['id' => $ticket->getId()]);
-            exit();  
-    
+            return new JsonResponse(['id' => $ticket->getId(), 'message' => 'Ticket closed successfully']);
         } catch (\Exception $e) {
             error_log("Exception in closeTicket: " . $e->getMessage());
-            $this->jsonResponse(500, 'Internal Server Error');
-            exit();  
+            http_response_code(500);
+            return new JsonResponse(['error' => 'Internal Server Error']);
         }
     }
-    
-    
-    // Méthode utilitaire pour générer des réponses JSON
-    private function jsonResponse($statusCode, $message, $data = [])
-    {
-        http_response_code($statusCode);
-        return new JsonResponse(array_merge(['message' => $message], $data));
-    }
-    
     
 
 

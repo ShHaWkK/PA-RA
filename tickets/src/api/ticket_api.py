@@ -34,10 +34,45 @@ class TicketAPI:
         try:
             response = TicketAPI.SESSION.get(f"{TicketAPI.BASE_URL}/tickets/{ticket_id}")
             response.raise_for_status()
-            return response.json()
+
+            # Vérifiez si la réponse est vide ou non au format JSON
+            if not response.content.strip():
+                logging.error("Réponse vide reçue de l'API")
+                return {"error": "Le ticket est en cours d'assignation et cela sera traité sous peu"}
+
+            try:
+                ticket_data = response.json()
+
+                # Vérifier si la réponse JSON est valide et contient les informations nécessaires
+                if not ticket_data:
+                    return {"error": "Le ticket est en cours d'assignation et cela sera traité sous peu"}
+
+                # Scénario: Ticket fermé
+                if ticket_data.get('status') == 'closed':
+                    ticket_data['message'] = 'Votre ticket est fermé'
+                    ticket_data['chat_enabled'] = True  # Chat visible mais en lecture seule
+                    ticket_data['chat_read_only'] = True
+
+                # Scénario: Ticket non assigné
+                elif ticket_data.get('assignedTo') is None:
+                    ticket_data['error'] = "Le ticket est en cours d'assignation et cela sera traité sous peu"
+                    ticket_data['chat_enabled'] = False
+
+                # Scénario: Ticket ouvert et assigné
+                else:
+                    ticket_data['chat_enabled'] = True
+                    ticket_data['chat_read_only'] = False  # Chat complètement fonctionnel
+
+                return ticket_data
+
+            except ValueError as e:
+                logging.error(f"Échec de l'analyse de la réponse JSON: {e}")
+                return {"error": "Le ticket est en cours d'assignation et cela sera traité sous peu"}
+
         except requests.exceptions.RequestException as e:
-            logging.error(f"Failed to get ticket: {e}")
+            logging.error(f"Échec de la récupération du ticket: {e}")
             return {"error": str(e)}
+
 
     @staticmethod
     def update_ticket(ticket_id, data):
@@ -144,6 +179,7 @@ class TicketAPI:
         except requests.exceptions.RequestException as e:
             logging.error(f"Failed to close ticket: {e}")
             return {"error": str(e)}
+
 
     @staticmethod
     def login(data):
