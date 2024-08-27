@@ -30,13 +30,13 @@ class TicketController
         $this->serializer = new Serializer($normalizers, $encoders);
     }
 
+
     public function processRequest($method, $uriParts, $input)
     {
         try {
             error_log("TicketController - processRequest called with method: $method");
 
             if (isset($uriParts[1]) && $uriParts[1] === 'messages') {
-                // Redirect to MessageController
                 $messageController = new MessageController($this->entityManager);
                 return $messageController->processRequest($method, array_slice($uriParts, 1), $input);
             }
@@ -61,7 +61,7 @@ class TicketController
                         return $this->getAllTickets();
                     }
                 case 'PUT':
-                    if (isset($uriParts[1])) {
+                    if (isset($uriParts[0]) && isset($uriParts[1])) {
                         if ($uriParts[1] === 'assign') {
                             return $this->assignAdminToTicket((int)$uriParts[0], $input);
                         } elseif ($uriParts[1] === 'close') {
@@ -71,7 +71,7 @@ class TicketController
                         }
                     }
                     http_response_code(400);
-                    return new JsonResponse(['error' => 'Ticket ID not specified']);
+                    return new JsonResponse(['error' => 'Invalid request format for PUT method']);
                 case 'DELETE':
                     if (isset($uriParts[0])) {
                         return $this->deleteTicket((int)$uriParts[0]);
@@ -88,7 +88,6 @@ class TicketController
             return new JsonResponse(['error' => 'Internal Server Error']);
         }
     }
-
     public function createTicket($data)
     {
         try {
@@ -313,32 +312,43 @@ class TicketController
     public function assignAdminToTicket($ticketId, $data)
     {
         try {
+            // Vérifiez que l'ID du ticket est valide
             $ticket = $this->entityManager->find(TicketModel::class, $ticketId);
             if (!$ticket) {
                 http_response_code(404);
-                return json_encode(['error' => 'Ticket not found']);
+                echo json_encode(['error' => 'Ticket not found']);
+                exit();
             }
     
+            // Vérifiez que l'ID de l'admin est valide
             $admin = $this->entityManager->find(UserModel::class, $data['admin_id']);
             if (!$admin) {
                 http_response_code(404);
-                return json_encode(['error' => 'Admin not found']);
+                echo json_encode(['error' => 'Admin not found']);
+                exit();
             }
     
+            // Attribuez l'admin au ticket
             $ticket->setAssignedTo($admin);
             $ticket->setUpdatedAt(new \DateTime("now"));
             $this->entityManager->flush();
     
-            // Envoyer un courriel à l'administrateur
+            // Envoyez un email de confirmation
             $this->sendAssignmentEmail($admin->getEmail(), $ticket);
     
-            return json_encode(['id' => $ticket->getId(), 'message' => 'Admin assigned to ticket successfully']);
+            // Retournez la réponse JSON
+            http_response_code(200);
+            echo json_encode(['id' => $ticket->getId(), 'message' => 'Admin assigned to ticket successfully']);
+            exit();
+            
         } catch (\Exception $e) {
             error_log("Exception in assignAdminToTicket: " . $e->getMessage());
             http_response_code(500);
-            return json_encode(['error' => 'Internal Server Error']);
+            echo json_encode(['error' => 'Internal Server Error']);
+            exit();
         }
     }
+    
     
     public function searchAdminByName($name)
     {

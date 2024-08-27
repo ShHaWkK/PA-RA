@@ -196,6 +196,10 @@ try {
         if ($route === 'users' && isset($uriParts[2]) && $uriParts[2] === 'tickets') {
             $userId = (int) $uriParts[1];
             $response = $controller->getTicketsByUser($userId);
+        } else if ($route === 'tickets' && isset($uriParts[1]) && $uriParts[1] === 'assign' && isset($uriParts[2])) {
+            $ticketId = (int)$uriParts[2];
+            $controller = new TicketController($entityManager, $emailService);
+            $response = $controller->assignAdminToTicket($ticketId, $input);
         } else if ($route === 'tickets' && isset($uriParts[2]) && $uriParts[2] === 'messages') {
             $ticketId = (int) $uriParts[1];
             error_log("Redirection vers MessageController pour ticketId: $ticketId");
