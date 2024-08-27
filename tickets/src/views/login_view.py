@@ -43,6 +43,8 @@ class LoginApp:
 
         response = TicketAPI.login(login_data)
         if response and 'error' not in response:
+            # Store user data locally if needed
+            self.root.withdraw()
             if response['role'] == 'admin':
                 open_admin_dashboard(self.root, response)
             elif response['role'] == 'volunteer':

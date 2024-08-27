@@ -8,14 +8,14 @@ load_dotenv()
 
 class TicketAPI:
     BASE_URL = os.getenv("API_ENDPOINT")
+    SESSION = requests.Session()
 
     @staticmethod
     def create_ticket(data):
         try:
-            response = requests.post(f"{TicketAPI.BASE_URL}/tickets", json=data)
+            response = TicketAPI.SESSION.post(f"{TicketAPI.BASE_URL}/tickets", json=data)
             response.raise_for_status()
 
-            # Vérification du format de la réponse
             result = response.json()
             if 'id' not in result or 'message' not in result:
                 logging.error(f"Unexpected response format: {result}")
@@ -29,11 +29,10 @@ class TicketAPI:
             logging.error(f"Failed to parse JSON response: {e}")
             return {"error": "Invalid JSON format"}
 
-
     @staticmethod
     def get_ticket(ticket_id):
         try:
-            response = requests.get(f"{TicketAPI.BASE_URL}/tickets/{ticket_id}")
+            response = TicketAPI.SESSION.get(f"{TicketAPI.BASE_URL}/tickets/{ticket_id}")
             response.raise_for_status()
             return response.json()
         except requests.exceptions.RequestException as e:
@@ -43,7 +42,7 @@ class TicketAPI:
     @staticmethod
     def update_ticket(ticket_id, data):
         try:
-            response = requests.put(f"{TicketAPI.BASE_URL}/tickets/{ticket_id}", json=data)
+            response = TicketAPI.SESSION.put(f"{TicketAPI.BASE_URL}/tickets/{ticket_id}", json=data)
             response.raise_for_status()
             return response.json()
         except requests.exceptions.RequestException as e:
@@ -53,7 +52,7 @@ class TicketAPI:
     @staticmethod
     def delete_ticket(ticket_id):
         try:
-            response = requests.delete(f"{TicketAPI.BASE_URL}/tickets/{ticket_id}")
+            response = TicketAPI.SESSION.delete(f"{TicketAPI.BASE_URL}/tickets/{ticket_id}")
             response.raise_for_status()
             return response.json()
         except requests.exceptions.RequestException as e:
@@ -63,7 +62,7 @@ class TicketAPI:
     @staticmethod
     def get_all_tickets():
         try:
-            response = requests.get(f"{TicketAPI.BASE_URL}/tickets")
+            response = TicketAPI.SESSION.get(f"{TicketAPI.BASE_URL}/tickets")
             response.raise_for_status()
             return response.json()
         except requests.RequestException as e:
@@ -72,29 +71,27 @@ class TicketAPI:
 
     @staticmethod
     def get_tickets_by_user(user_id):
-            try:
-                logging.debug(f"Requesting tickets for user ID: {user_id}")
-                response = requests.get(f"{TicketAPI.BASE_URL}/users/{user_id}/tickets")
-                response.raise_for_status()
+        try:
+            logging.debug(f"Requesting tickets for user ID: {user_id}")
+            response = TicketAPI.SESSION.get(f"{TicketAPI.BASE_URL}/users/{user_id}/tickets")
+            response.raise_for_status()
 
-                logging.debug(f"Raw response content: {response.content}")
+            if not response.content:
+                logging.error("Empty response received from the API")
+                return {"error": "Empty response from API"}
 
-                if not response.content:
-                    logging.error("Empty response received from the API")
-                    return {"error": "Empty response from API"}
-
-                return response.json()
-            except requests.exceptions.RequestException as e:
-                logging.error(f"Failed to get tickets by user: {e}")
-                return {"error": str(e)}
-            except ValueError as e:
-                logging.error(f"Failed to parse JSON response: {e}")
-                return {"error": "Invalid JSON format"}
+            return response.json()
+        except requests.exceptions.RequestException as e:
+            logging.error(f"Failed to get tickets by user: {e}")
+            return {"error": str(e)}
+        except ValueError as e:
+            logging.error(f"Failed to parse JSON response: {e}")
+            return {"error": "Invalid JSON format"}
 
     @staticmethod
     def search_tickets(criteria):
         try:
-            response = requests.get(f"{TicketAPI.BASE_URL}/tickets/search", params=criteria)
+            response = TicketAPI.SESSION.get(f"{TicketAPI.BASE_URL}/tickets/search", params=criteria)
             response.raise_for_status()
             return response.json()
         except requests.exceptions.RequestException as e:
@@ -104,7 +101,7 @@ class TicketAPI:
     @staticmethod
     def auto_assign_ticket(ticket_id):
         try:
-            response = requests.put(f"{TicketAPI.BASE_URL}/tickets/assign/{ticket_id}")
+            response = TicketAPI.SESSION.put(f"{TicketAPI.BASE_URL}/tickets/assign/{ticket_id}")
             response.raise_for_status()
             return response.json()
         except requests.exceptions.RequestException as e:
@@ -114,12 +111,16 @@ class TicketAPI:
     @staticmethod
     def get_ticket_messages(ticket_id):
         try:
-            response = requests.get(f"{TicketAPI.BASE_URL}/tickets/{ticket_id}/messages")
+            response = TicketAPI.SESSION.get(f"{TicketAPI.BASE_URL}/tickets/{ticket_id}/messages")
             response.raise_for_status()
-            if response.content:
-                return response.json()
+            
+            messages = response.json()
+            if isinstance(messages, list):
+                logging.debug(f"Messages fetched: {messages}")
+                return messages
             else:
-                return []
+                logging.error(f"Unexpected response format: {messages}")
+                return {"error": "Unexpected response format"}
         except requests.exceptions.RequestException as e:
             logging.error(f"Failed to get ticket messages: {e}")
             return {"error": str(e)}
@@ -127,7 +128,7 @@ class TicketAPI:
     @staticmethod
     def add_message(ticket_id, message_data):
         try:
-            response = requests.post(f"{TicketAPI.BASE_URL}/tickets/{ticket_id}/messages", json=message_data)
+            response = TicketAPI.SESSION.post(f"{TicketAPI.BASE_URL}/tickets/{ticket_id}/messages", json=message_data)
             response.raise_for_status()
             return response.json()
         except requests.exceptions.RequestException as e:
@@ -137,7 +138,7 @@ class TicketAPI:
     @staticmethod
     def close_ticket(ticket_id, data):
         try:
-            response = requests.put(f"{TicketAPI.BASE_URL}/tickets/{ticket_id}/close", json=data)
+            response = TicketAPI.SESSION.put(f"{TicketAPI.BASE_URL}/tickets/{ticket_id}/close", json=data)
             response.raise_for_status()
             return response.json()
         except requests.exceptions.RequestException as e:
@@ -147,9 +148,14 @@ class TicketAPI:
     @staticmethod
     def login(data):
         try:
-            response = requests.post(f"{TicketAPI.BASE_URL}/login", json=data)
+            response = TicketAPI.SESSION.post(f"{TicketAPI.BASE_URL}/login", json=data)
             response.raise_for_status()
-            return response.json()
+
+            user_info = response.json()
+            if 'user_id' in user_info:
+                TicketAPI.SESSION.headers.update({'User-ID': str(user_info['user_id'])})
+                logging.info(f"User logged in with ID: {user_info['user_id']}")
+            return user_info
         except requests.exceptions.RequestException as e:
             logging.error(f"Failed to login: {e}")
             return {"error": str(e)}
@@ -157,7 +163,7 @@ class TicketAPI:
     @staticmethod
     def get_all_admins():
         try:
-            response = requests.get(f"{TicketAPI.BASE_URL}/admins")
+            response = TicketAPI.SESSION.get(f"{TicketAPI.BASE_URL}/admins")
             response.raise_for_status()
             return response.json()
         except requests.exceptions.RequestException as e:
@@ -167,7 +173,7 @@ class TicketAPI:
     @staticmethod
     def reassign_ticket(ticket_id, data):
         try:
-            response = requests.put(f"{TicketAPI.BASE_URL}/tickets/{ticket_id}/reassign", json=data)
+            response = TicketAPI.SESSION.put(f"{TicketAPI.BASE_URL}/tickets/{ticket_id}/reassign", json=data)
             response.raise_for_status()
             return response.json()
         except requests.exceptions.RequestException as e:
@@ -177,7 +183,7 @@ class TicketAPI:
     @staticmethod
     def search_admin_by_name(name):
         try:
-            response = requests.get(f"{TicketAPI.BASE_URL}/admins/search", params={'name': name})
+            response = TicketAPI.SESSION.get(f"{TicketAPI.BASE_URL}/admins/search", params={'name': name})
             response.raise_for_status()
             return response.json()
         except requests.exceptions.RequestException as e:
@@ -187,7 +193,7 @@ class TicketAPI:
     @staticmethod
     def assign_admin_to_ticket(ticket_id, data):
         try:
-            response = requests.put(f"{TicketAPI.BASE_URL}/tickets/assign/{ticket_id}", json=data)
+            response = TicketAPI.SESSION.put(f"{TicketAPI.BASE_URL}/tickets/assign/{ticket_id}", json=data)
             response.raise_for_status()
             return response.json()
         except requests.exceptions.RequestException as e:

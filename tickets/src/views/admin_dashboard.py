@@ -23,7 +23,7 @@ class AdminView:
         self.user_data = user_data
         self.ticket_system = TicketAPI()
         self.admins = self.fetch_admins()
-        self.selected_admin_id = None  # Added to store selected admin ID
+        self.selected_admin_id = None
         self.admin_id_to_name = {admin['id']: f"{admin['firstName']} {admin['lastName']}" for admin in self.admins}
         
         # Setup the UI components
@@ -74,7 +74,7 @@ class AdminView:
         self.assign_ticket_button = tk.Button(self.button_frame, text="Assigner un Admin", command=self.assign_ticket)
         self.assign_ticket_button.pack(side=tk.LEFT, padx=5)
 
-        self.open_chat_button = tk.Button(self.button_frame, text="Ouvrir Chat", command=self.open_chat_on_ticket_click)
+        self.open_chat_button = tk.Button(self.button_frame, text="Ouvrir Chat", command=self.open_chat_for_selected_ticket)
         self.open_chat_button.pack(side=tk.LEFT, padx=5)
 
     def format_date(self, date_str):
@@ -140,7 +140,7 @@ class AdminView:
         else:
             messagebox.showwarning("Attention", "Aucun administrateur sélectionné.")
 
-    def open_chat_on_ticket_click(self):
+    def open_chat_for_selected_ticket(self):
         selected_items = self.tickets_treeview.selection()
         if selected_items:
             item = selected_items[0]
@@ -148,19 +148,25 @@ class AdminView:
             if ticket_info:
                 try:
                     ticket_id = int(ticket_info[0])
+                    # Get the current user's ID (admin or volunteer)
+                    current_user_id = self.user_data['id']
+                    # Fetch the created_by or recipient user ID depending on the user's role
                     created_by = int(ticket_info[4]) if ticket_info[4] else None
-                    self.open_chat_with_user(ticket_id, created_by)
+                    recipient_id = created_by if created_by != current_user_id else None  # Assuming recipient ID logic
+                    self.open_chat_for_ticket(ticket_id, current_user_id, recipient_id)
                 except ValueError:
                     messagebox.showerror("Erreur", "ID invalide. L'ID doit être un entier.")
+        else:
+            messagebox.showwarning("Attention", "Veuillez sélectionner un ticket pour ouvrir le chat.")
 
-    def open_chat_with_user(self, ticket_id, created_by):
+    def open_chat_for_ticket(self, ticket_id, author_id, recipient_id):
         try:
-            self.ticket_id = int(ticket_id)
-            self.created_by = int(created_by) if created_by is not None else 0
             chat_window = tk.Toplevel(self.master)
-            chat_view = ChatView(chat_window, self.created_by, self.user_data['id'], self.ticket_id)
+            # Pass all required arguments to ChatView
+            chat_view = ChatView(chat_window, author_id, recipient_id, ticket_id)
         except ValueError:
             messagebox.showerror("Erreur", "L'ID doit être un entier.")
+
 
     def populate_tickets(self):
         for item in self.tickets_treeview.get_children():

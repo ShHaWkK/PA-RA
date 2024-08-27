@@ -43,7 +43,6 @@ class VolunteerView:
         self.tickets_treeview.heading("Admin ID", text="ID de l'Admin")
         self.tickets_treeview.heading("Created At", text="Créé le")
         self.tickets_treeview.heading("Updated At", text="Mis à jour le")
-        self.tickets_treeview.bind("<ButtonRelease-1>", self.open_chat_on_ticket_click)
         self.populate_tickets()
 
         self.button_frame = tk.Frame(self.main_frame)
@@ -55,55 +54,56 @@ class VolunteerView:
         self.close_ticket_button = tk.Button(self.button_frame, text="Fermer le Ticket", command=self.close_ticket)
         self.close_ticket_button.pack(side=tk.LEFT, padx=5)
 
-    def open_chat_on_ticket_click(self, event):
-        item = self.tickets_treeview.selection()[0]
-        ticket_info = self.tickets_treeview.item(item, "values")
-        if ticket_info:
-            try:
-                ticket_id = int(ticket_info[0])
-                admin_id = int(ticket_info[3]) if ticket_info[3] else None
-                self.open_chat_with_admin(ticket_id, admin_id)
-            except ValueError:
-                messagebox.showerror("Erreur", "ID invalide. L'ID doit être un entier.")
-
-    def open_chat_with_admin(self, ticket_id, admin_id):
-        try:
-            self.ticket_id = int(ticket_id)
-            self.admin_id = int(admin_id) if admin_id is not None else 0
-            chat_window = tk.Toplevel(self.master)
-            chat_view = ChatView(chat_window, self.user_data['id'], self.admin_id, self.ticket_id)
-        except ValueError:
-            messagebox.showerror("Erreur", "L'ID doit être un entier.")
+        self.open_chat_button = tk.Button(self.button_frame, text="Ouvrir Chat", command=self.open_chat_for_selected_ticket)
+        self.open_chat_button.pack(side=tk.LEFT, padx=5)
 
     def populate_tickets(self):
         for item in self.tickets_treeview.get_children():
             self.tickets_treeview.delete(item)
         response = self.ticket_system.get_tickets_by_user(self.user_data['id'])
-        logging.debug(f"Tickets fetched from API: {json.dumps(response, indent=2)}")
 
         if 'error' in response:
             messagebox.showerror("Erreur", response['error'])
             return
 
-        if isinstance(response, list):
-            tickets = response
-        else:
-            logging.error("Unexpected response format: not a list")
-            tickets = []
+        tickets = response if isinstance(response, list) else []
 
         for ticket in tickets:
-            logging.debug(f"Processing ticket: {ticket.get('id')}, {ticket.get('description')}")
-            if isinstance(ticket, dict):
-                ticket_id = ticket.get('id', '')
-                description = ticket.get('description', '')
-                status = ticket.get('status', '')
-                admin_id = ticket.get('assignedTo', '') if ticket.get('assignedTo') is not None else ''
-                created_at = ticket.get('createdAt', '')
-                updated_at = ticket.get('updatedAt', '')
-                self.tickets_treeview.insert("", tk.END, values=(ticket_id, description, status, admin_id, created_at, updated_at))
-                logging.debug(f"Inserted ticket into Treeview: ID={ticket_id}, Description={description}, Status={status}, Admin ID={admin_id}, Created At={created_at}, Updated At={updated_at}")
+            ticket_id = ticket.get('id', '')
+            description = ticket.get('description', '')
+            status = ticket.get('status', '')
+            admin_id = ticket.get('assignedTo', '') if ticket.get('assignedTo') is not None else ''
+            created_at = ticket.get('createdAt', '')
+            updated_at = ticket.get('updatedAt', '')
+            self.tickets_treeview.insert("", tk.END, values=(ticket_id, description, status, admin_id, created_at, updated_at))
 
-  # Create a new ticket              
+    def open_chat_for_selected_ticket(self):
+            selected_items = self.tickets_treeview.selection()
+            if selected_items:
+                item = selected_items[0]
+                ticket_info = self.tickets_treeview.item(item, "values")
+                if ticket_info:
+                    try:
+                        ticket_id = int(ticket_info[0])
+                        # Get the current user's ID (admin or volunteer)
+                        current_user_id = self.user_data['id']
+                        # Fetch the created_by or recipient user ID depending on the user's role
+                        admin_id = int(ticket_info[3]) if ticket_info[3] else None
+                        recipient_id = admin_id if admin_id != current_user_id else None  # Assuming recipient ID logic
+                        self.open_chat_for_ticket(ticket_id, current_user_id, recipient_id)
+                    except ValueError:
+                        messagebox.showerror("Erreur", "ID invalide. L'ID doit être un entier.")
+            else:
+                messagebox.showwarning("Attention", "Veuillez sélectionner un ticket pour ouvrir le chat.")
+
+    def open_chat_for_ticket(self, ticket_id, author_id, recipient_id):
+            try:
+                chat_window = tk.Toplevel(self.master)
+                # Pass all required arguments to ChatView
+                chat_view = ChatView(chat_window, author_id, recipient_id, ticket_id)
+            except ValueError:
+                messagebox.showerror("Erreur", "L'ID doit être un entier.")
+
     def create_ticket(self):
         title = simpledialog.askstring("Créer un Ticket", "Entrez le titre du ticket :")
         description = simpledialog.askstring("Créer un Ticket", "Entrez la description du ticket :")
@@ -112,7 +112,6 @@ class VolunteerView:
             messagebox.showwarning("Attention", "Le titre et la description ne doivent pas être vides.")
             return
 
-        # Demande à l'utilisateur s'il veut ajouter une pièce jointe
         add_attachment = messagebox.askyesno("Ajouter une pièce jointe", "Voulez-vous ajouter une pièce jointe au ticket ?")
 
         attachments = []
@@ -141,7 +140,7 @@ class VolunteerView:
         logging.debug(f"Create Ticket Response: {response}")
         
         if response and 'id' in response:
-            messagebox.showinfo("Succès", "Ticket créé avec succès !, vous avez reçu un email de confirmation.")
+            messagebox.showinfo("Succès", "Ticket créé avec succès ! Vous avez reçu un email de confirmation.")
             self.populate_tickets()
         else:
             messagebox.showerror("Erreur", "Échec de la création du ticket.")

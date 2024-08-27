@@ -11,7 +11,7 @@ class ChatView:
         self.recipient_id = recipient_id
         self.ticket_id = ticket_id
 
-        self.message_system = TicketAPI()  # Use TicketAPI instead of MessageAPI
+        self.message_system = TicketAPI()
 
         self.setup_ui()
 
@@ -44,21 +44,14 @@ class ChatView:
             messagebox.showerror("Erreur", response['error'])
             return
 
-        try:
-            messages = json.loads(response) if isinstance(response, str) else response
-        except json.JSONDecodeError as e:
-            logging.error(f"Failed to decode JSON response: {e}")
-            messagebox.showerror("Erreur", "Erreur de format de réponse JSON.")
-            return
-
-        if isinstance(messages, list):
+        if isinstance(response, list):
             self.chat_text.config(state=tk.NORMAL)
             self.chat_text.delete(1.0, tk.END)
-            for msg in messages:
+            for msg in response:
                 self.chat_text.insert(tk.END, f"{msg['author']}: {msg['content']}\n")
             self.chat_text.config(state=tk.DISABLED)
         else:
-            logging.error(f"Unexpected response format: {messages}")
+            logging.error(f"Unexpected response format: {response}")
             messagebox.showerror("Erreur", "Format de réponse inattendu.")
 
     def send_message(self):
