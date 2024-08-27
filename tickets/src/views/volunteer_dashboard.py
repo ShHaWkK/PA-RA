@@ -2,6 +2,7 @@ import os
 import requests
 import logging
 from dotenv import load_dotenv
+import base64 
 import json
 import tkinter as tk
 from tkinter import ttk, messagebox, simpledialog, filedialog
@@ -105,17 +106,29 @@ class VolunteerView:
                 messagebox.showerror("Erreur", "L'ID doit être un entier.")
 
     def create_ticket(self):
-        title = simpledialog.askstring("Créer un Ticket", "Entrez le titre du ticket :")
-        description = simpledialog.askstring("Créer un Ticket", "Entrez la description du ticket :")
-        
-        if not title or not description:
-            messagebox.showwarning("Attention", "Le titre et la description ne doivent pas être vides.")
-            return
+        # Créer une nouvelle fenêtre de dialogue pour la création de ticket
+        create_window = tk.Toplevel(self.master)
+        create_window.title("Créer un Ticket")
+        create_window.geometry("400x300")
 
-        add_attachment = messagebox.askyesno("Ajouter une pièce jointe", "Voulez-vous ajouter une pièce jointe au ticket ?")
+        # Champ pour entrer la description du ticket
+        tk.Label(create_window, text="Description du Ticket:").pack(pady=5)
+        description_entry = tk.Text(create_window, height=5, width=40)
+        description_entry.pack(pady=5)
 
+        # Sélection du type de ticket
+        tk.Label(create_window, text="Type de Ticket:").pack(pady=5)
+        ticket_type_var = tk.StringVar()
+        ticket_type_combobox = ttk.Combobox(
+            create_window, textvariable=ticket_type_var,
+            values=['adhesion', 'collecte', 'stock', 'tournee', 'benevole', 'service'],
+            state="readonly"
+        )
+        ticket_type_combobox.pack(pady=5)
+
+        # Ajouter des pièces jointes
         attachments = []
-        if add_attachment:
+        def add_attachment():
             file_path = filedialog.askopenfilename(
                 title="Sélectionnez le fichier à joindre",
                 filetypes=(("Tous les fichiers", "*.*"), ("Fichiers texte", "*.txt"), ("Images", "*.png;*.jpg;*.jpeg"))
@@ -123,28 +136,50 @@ class VolunteerView:
             if file_path:
                 try:
                     with open(file_path, "rb") as file:
-                        attachments = [{'filename': file_path.split('/')[-1], 'content': file.read()}]
+                        file_content = file.read()
+                        # Encoder le contenu du fichier en Base64
+                        encoded_content = base64.b64encode(file_content).decode('utf-8')
+                        attachments.append({'filename': os.path.basename(file_path), 'content': encoded_content})
                 except Exception as e:
                     logging.error(f"Failed to read attachment file: {e}")
                     messagebox.showerror("Erreur", "Erreur lors de la lecture du fichier joint.")
 
-        ticket_data = {
-            'type': 'benevole',
-            'description': description,
-            'status': 'open',
-            'created_by': self.user_data['id'],
-            'attachments': attachments
-        }
+        add_attachment_button = tk.Button(create_window, text="Ajouter une pièce jointe", command=add_attachment)
+        add_attachment_button.pack(pady=10)
 
-        response = self.ticket_system.create_ticket(ticket_data)
-        logging.debug(f"Create Ticket Response: {response}")
-        
-        if response and 'id' in response:
-            messagebox.showinfo("Succès", "Ticket créé avec succès ! Vous avez reçu un email de confirmation.")
-            self.populate_tickets()
-        else:
-            messagebox.showerror("Erreur", "Échec de la création du ticket.")
+        # Bouton pour créer le ticket
+        def submit_ticket():
+            description = description_entry.get("1.0", tk.END).strip()
+            ticket_type = ticket_type_var.get()
 
+            if not description or not ticket_type:
+                messagebox.showwarning("Attention", "La description et le type de ticket ne doivent pas être vides.")
+                return
+
+            ticket_data = {
+                'type': ticket_type,
+                'description': description,
+                'status': 'open',
+                'created_by': self.user_data['id'],
+                'attachments': attachments
+            }
+
+            response = self.ticket_system.create_ticket(ticket_data)
+            logging.debug(f"Create Ticket Response: {response}")
+
+            if response and 'id' in response:
+                messagebox.showinfo("Succès", "Ticket créé avec succès ! Vous avez reçu un email de confirmation.")
+                self.populate_tickets()
+                create_window.destroy()
+            else:
+                messagebox.showerror("Erreur", "Échec de la création du ticket.")
+
+        submit_button = tk.Button(create_window, text="Créer", command=submit_ticket)
+        submit_button.pack(pady=10)
+
+        # Fenêtre modale
+        create_window.grab_set()
+        self.master.wait_window(create_window)
     def close_ticket(self):
         selected = self.tickets_treeview.selection()
         if selected:
