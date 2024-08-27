@@ -46,6 +46,12 @@
                                 <label for="quantity_0">Quantité :</label>
                                 <input type="number" name="quantity[]" id="quantity_0" min="1" required>
                             </div>
+
+                            <div class="form-group">
+                                <label for="comment_0}">Commentaire :</label>
+                                <input type="text" name="comment[]" id="comment_0}">
+                            </div>
+
                             <div class="form-group">
                                 <label for="status_0">Statut :</label>
                                 <select name="status[]" id="status_0" required>

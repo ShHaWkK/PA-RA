@@ -320,7 +320,7 @@ async function editRoute(routeID) {
     }
 }
 
-async function populateProductSelector(selectorId) {
+export async function populateProductSelector(selectorId) {
     try {
         // Récupérer tous les produits via une API ou une fonction dédiée
         const products = await getAllProducts();

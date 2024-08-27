@@ -33,7 +33,7 @@
         ?>
 
         <h2> Sélectionner l'entrepot</h2>
-<!--        <select name="warehouse" id="warehouseSelect"></select>-->
+        <!--        <select name="warehouse" id="warehouseSelect"></select>-->
         <div class="warehouse-table">
         </div>
         <?php
@@ -42,7 +42,7 @@
         ?>
 
         <h2> Sélectionner le véhicule</h2>
-<!--        <select name="vehicle" id="vehicleSelect"></select>-->
+        <!--        <select name="vehicle" id="vehicleSelect"></select>-->
         <div class="vehicle-table">
         </div>
         <?php

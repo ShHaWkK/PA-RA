@@ -109,6 +109,15 @@ switch ($request) {
             exit;
         }
         break;
+    case '/Admin/Distributions/NewDistribution':
+        if ($jwtToken) {
+            requireAuth($jwtToken, 'admin');
+            require __DIR__ . '/views/Admin/NewDistribution.php';
+        } else {
+            require __DIR__ . '/views/Login/Login.php';
+            exit;
+        }
+        break;
     case '/Admin/Services':
         if ($jwtToken) {
             requireAuth($jwtToken, 'admin');

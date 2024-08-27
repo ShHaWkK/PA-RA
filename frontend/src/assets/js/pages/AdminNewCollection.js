@@ -1,45 +1,8 @@
 import {populateProductNotificationTable} from "../modules/tables/ProductNotificationTable.js";
 import {populateDriverTable} from "../modules/tables/VolunteerTable.js";
-import {getAllVehicles} from "../api/Vehicle.js";
 import {populateVehicleTable} from "../modules/tables/VehicleTable.js";
 import {populateWarehouseTable} from "../modules/tables/WarehouseTable.js";
 import {assignProductsToCollection, createCollection} from "../api/Collections.js";
-
-function populateCollectionDate(){
-    // Récupérer la date actuelle
-    const today = new Date();
-
-    // Formater la date en 'YYYY-MM-DD'
-    // Mettre la date du jour comme valeur par défaut de l'input
-    document.getElementById('collectionDate').value = today.toISOString().split('T')[0];
-}
-
-async function populateVehicleSelector() {
-    try {
-        const vehicles = await getAllVehicles();
-        const vehicleSelect = document.getElementById('vehicleSelect');
-
-        // Clear any existing options in the select element
-        vehicleSelect.innerHTML = '';
-
-        // Add a default "Choose a vehicle" option
-        const defaultOption = document.createElement('option');
-        defaultOption.text = 'Choose a vehicle';
-        defaultOption.value = '';
-        vehicleSelect.add(defaultOption);
-
-        // Populate the select element with vehicles
-        vehicles.forEach(vehicle => {
-            const option = document.createElement('option');
-            option.text = vehicle.name;
-            option.value = vehicle.id;
-            vehicleSelect.add(option);
-        });
-    } catch (error) {
-        console.error('Error populating vehicle selector:', error.message);
-        alert(error.message);
-    }
-}
 
 async function handleCollectionSubmission(message) {
 
@@ -75,37 +38,37 @@ async function handleCollectionSubmission(message) {
         console.log("content exist");
         content[0].classList.add('hidden');
     }
-        if (loader){
+    if (loader){
         loader.classList.remove('hidden');
         console.log("loader exist");
-        }
+    }
 
-        // Créer les données de la collecte
-        const collectionData = {
-            volunteer_id: parseInt(selectedVolunteer.value, 10),
-            vehicle_id: parseInt(selectedVehicle.value, 10),
-            collection_date: new Date().toISOString()
-        };
+    // Créer les données de la collecte
+    const collectionData = {
+        volunteer_id: parseInt(selectedVolunteer.value, 10),
+        vehicle_id: parseInt(selectedVehicle.value, 10),
+        collection_date: new Date().toISOString()
+    };
 
-        // Créer la collecte
-        const collection = await createCollection(collectionData);
-        if (collection){
-            console.log("collection created");
-        }
+    // Créer la collecte
+    const collection = await createCollection(collectionData);
+    if (collection){
+        console.log("collection created");
+    }
 
-        // Assigner les produits à la collecte
-        const assigned_products = await assignProductsToCollection(parseInt(collection.id,10), selectedProducts);
-        if (assigned_products){
-            console.log("products assigned successfully");
-        }
+    // Assigner les produits à la collecte
+    const assigned_products = await assignProductsToCollection(parseInt(collection.id,10), selectedProducts);
+    if (assigned_products){
+        console.log("products assigned successfully");
+    }
 
-        // Indiquer le succès de l'opération
-        alert('Collection and product assignments successful.');
+    // Indiquer le succès de l'opération
+    alert('Collection and product assignments successful.');
 
-        content[0].classList.remove('hidden');
-        loader.classList.add('hidden');
+    content[0].classList.remove('hidden');
+    loader.classList.add('hidden');
 
-        window.location.href = '/Admin/Collections';
+    window.location.href = '/Admin/Collections';
 }
 
 async function handleNotificationTableUpdate() {

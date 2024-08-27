@@ -195,7 +195,7 @@ CREATE TABLE IF NOT EXISTS destinations (
                                             id INT AUTO_INCREMENT PRIMARY KEY,
                                             route_id INT NOT NULL,
                                             address VARCHAR(255) NOT NULL,
-                                            recipient_type ENUM('association', 'individual') NOT NULL,
+                                            recipient_type ENUM('association', 'individual', 'company') NOT NULL,
                                             delivery_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                                             status ENUM('pending', 'in_route', 'delivered') NOT NULL DEFAULT 'pending',
                                             comment TEXT,

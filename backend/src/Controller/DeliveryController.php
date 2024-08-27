@@ -137,7 +137,6 @@ class DeliveryController
                             }
                         }
 
-
                         http_response_code(400);
                         return ['error' => 'Invalid operation'];
                     }
@@ -210,7 +209,7 @@ class DeliveryController
             $route->setVehicle($vehicle);
             $route->setDriver($driver);
             $route->setStatus('pending'); // Statut par défaut
-            $route->setStartTime(new \DateTime()); // Heure de début par défaut
+            $route->setStartTime(new \DateTime($data['date']));
             $route->setCreatedAt(new \DateTime());
             $route->setUpdatedAt(new \DateTime());
 
