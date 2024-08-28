@@ -2,16 +2,18 @@ import {getAllWarehouses} from "../../api/Warehouse.js";
 import {formatDateToFrench} from "../FormatDate.js";
 
 export async function populateWarehouseTable(queryParameters) {
-    try {
-        // Afficher le loader
-        document.getElementById('loadingBodyWarehouse').classList.remove('hidden');
+    const loader = document.getElementById('loadingBodyWarehouse');
+    // Sélectionner le conteneur où la table sera insérée
+    const tableContainer = document.querySelector('.warehouse-table');
 
-        // Sélectionner le conteneur où la table sera insérée
-        const tableContainer = document.querySelector('.warehouse-table');
+    try {
         if (!tableContainer) {
             console.error('Warehouse table container not found.');
             return;
         }
+
+        tableContainer.classList.add('hidden');
+        loader.classList.remove('hidden');
 
         // Récupérer les entrepôts
         const warehouses = await getAllWarehouses(queryParameters);
@@ -61,16 +63,13 @@ export async function populateWarehouseTable(queryParameters) {
 
             // Créer les cellules de données pour chaque champ
             const nameCell = document.createElement('td');
-            const nameLink = document.createElement('a');
-            nameLink.href = "#";
-            nameLink.textContent = warehouse.name;
-            nameLink.setAttribute('data-id', warehouse.id);
-            nameLink.addEventListener('click', (e) => {
+            nameCell.textContent = warehouse.name;
+            nameCell.setAttribute('data-id', warehouse.id);
+            nameCell.addEventListener('click', (e) => {
                 e.preventDefault();
                 // populateWarehouseDetailsInModal(warehouse.id);
                 document.getElementById('warehouseDetailModal').style.display = 'block';
             });
-            nameCell.appendChild(nameLink);
 
             const addressCell = document.createElement('td');
             addressCell.textContent = warehouse.address;
@@ -124,6 +123,7 @@ export async function populateWarehouseTable(queryParameters) {
         console.error('Error in populateWarehouseTable:', error.message);
     } finally {
         // Retirer le loader
-        document.getElementById('loadingBodyWarehouse').classList.add('hidden');
+        loader.classList.add('hidden');
+        tableContainer.classList.remove('hidden');
     }
 }

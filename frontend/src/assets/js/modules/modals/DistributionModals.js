@@ -639,7 +639,6 @@ document.addEventListener('DOMContentLoaded', async function() {
         populateEditRouteForm();
     };
 
-
     editRouteSpan.onclick = function () {
         editRouteModal.style.display = "none";
     };

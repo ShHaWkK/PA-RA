@@ -82,6 +82,15 @@ switch ($request) {
             exit;
         }
         break;
+    case '/Admin/Warehouses':
+        if ($jwtToken) {
+            requireAuth($jwtToken, 'admin');
+            require __DIR__ . '/views//Admin/Warehouses.php';
+        } else {
+            require __DIR__ . '/views/Login/Login.php';
+            exit;
+        }
+        break;
     case '/Admin/Collections':
         if ($jwtToken) {
             requireAuth($jwtToken, 'admin');

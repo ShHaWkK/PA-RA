@@ -12,6 +12,7 @@
     <ul>
         <li><a href="/Admin/Volunteers">Volunteers</a></li>
         <li><a href="/Admin/Merchants">Merchants</a></li>
+        <li><a href="/Admin/Warehouses">Entrepots</a></li>
         <li><a href="/Admin/Stocks">Stocks</a></li>
         <li><a href="/Admin/Collections">Collectes</a></li>
         <li><a href="/Admin/Distributions">Distributions</a></li>

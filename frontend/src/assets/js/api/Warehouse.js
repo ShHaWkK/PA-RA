@@ -19,7 +19,9 @@ async function createWarehouse(warehouseData) {
 
 async function getWarehouse(warehouseId) {
     try {
-        const response = await fetch(apiEndpoint + '/warehouses/' + warehouseId, {
+        console.log(warehouseId);
+        const url =apiEndpoint + '/warehouses/' + warehouseId;
+        const response = await fetch(url,{
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json'
@@ -28,6 +30,9 @@ async function getWarehouse(warehouseId) {
         if (!response.ok) {
             throw new Error('Failed to get warehouse');
         }
+
+        console.log("url",url);
+
         return await response.json();
     } catch (error) {
         console.error('Error getting warehouse:', error.message);
