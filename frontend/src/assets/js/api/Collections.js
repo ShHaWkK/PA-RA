@@ -271,6 +271,8 @@ async function getCollectionExcel(collectionId) {
                 break;
             case 500:
                 throw new Error('Internal Server Error: Error occurred while retrieving the file.');
+            case 400:
+                throw new Error('Not Found: Collection or file not found');
             default:
                 throw new Error(`HTTP Error: ${response.status}`);
         }

@@ -1,7 +1,7 @@
 import { getCollections } from '/assets/js/api/Collections.js';
 import { populateVolunteerDetailsInModal, populateVehicleDetailsInModal, populateCollectedProductsModal } from "../modals/CollectionModals.js";
 import { formatDateToFrench } from "../FormatDate.js";
-import {getCollectionExcel} from "../../api/Collections.js";
+import {exportCollectionToExcel, getCollectionExcel} from "../../api/Collections.js";
 
 export async function populateCollectionTable(date, completion) {
     // Afficher le loader
@@ -127,6 +127,20 @@ export async function populateCollectionTable(date, completion) {
                 }
             });
             excelCell.appendChild(viewExcelButton);
+
+            const resendExcelButton = document.createElement('button');
+            resendExcelButton.textContent = 'Resend';
+            resendExcelButton.value = collection.id;
+            resendExcelButton.addEventListener('click', async (e) => {
+                e.preventDefault();
+                try {
+                    const result = await exportCollectionToExcel(collection.id);
+                } catch (error) {
+                    alert(error.message);
+                }
+                alert("Fichier excel renvoyé avec succès");
+            });
+            excelCell.appendChild(resendExcelButton);
 
             // Créer les autres cellules de données
             const collectionDateCell = document.createElement('td');

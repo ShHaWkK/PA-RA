@@ -1,4 +1,4 @@
-import {getAllRoutes} from "../../api/Distributions.js";
+import {exportRouteToExcel, getAllRoutes, getRouteExcel} from "../../api/Distributions.js";
 import {
     populateVehicleDetailsInModal,
     populateVolunteerDetailsInModal
@@ -44,7 +44,7 @@ export async function populateRouteTable(queryParameters) {
         const thead = document.createElement('thead');
         const headerRow = document.createElement('tr');
 
-        const headers = ['', 'Name', 'Driver', 'Vehicle', 'Date', 'Start Time','End Time', 'Status', 'Destinations', 'Created At', 'Updated At'];
+        const headers = ['', 'Name', 'Driver', 'Vehicle', 'Date', 'Start Time','End Time', 'Status', 'Destinations', 'Excel file', 'Created At', 'Updated At'];
         headers.forEach(headerText => {
             const th = document.createElement('th');
             th.textContent = headerText;
@@ -145,6 +145,36 @@ export async function populateRouteTable(queryParameters) {
 
             destinationsCell.appendChild(viewDestinationsButton);
             row.appendChild(destinationsCell);
+
+            const excelCell = document.createElement('td');
+            const viewExcelButton = document.createElement('button');
+            viewExcelButton.textContent = 'Download';
+            viewExcelButton.value = route.id;
+            viewExcelButton.addEventListener('click', async (e) => {
+                e.preventDefault();
+                try {
+                    const result = await getRouteExcel(route.id);
+                } catch (error) {
+                    alert(error.message);
+                }
+            });
+            excelCell.appendChild(viewExcelButton);
+
+            const resendExcelButton = document.createElement('button');
+            resendExcelButton.textContent = 'Resend';
+            resendExcelButton.value = route.id;
+            resendExcelButton.addEventListener('click', async (e) => {
+                e.preventDefault();
+                try {
+                    const result = await exportRouteToExcel(route.id);
+                } catch (error) {
+                    alert(error.message);
+                }
+                alert("Fichier excel renvoyé avec succès");
+            });
+            excelCell.appendChild(resendExcelButton);
+            row.appendChild(excelCell);
+
 
             const createdAtCell = document.createElement('td');
             createdAtCell.textContent = route.created_at ? formatDateToFrench(parseDate(route.created_at)) : 'N/A';

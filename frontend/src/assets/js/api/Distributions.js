@@ -366,6 +366,63 @@ async function updateDestinationAndDeliveries(destinationId, data) {
     }
 }
 
+async function getRouteExcel(routeId) {
+    const url = `${apiEndpoint}/routes/${routeId}/get-excel`;
+
+    const response = await fetch(url, {
+        method: 'GET'
+    });
+
+    if (!response.ok) {
+        switch (response.status) {
+            case 404:
+                const errorData = await response.json();
+                if (errorData.error.includes('not found')) {
+                    throw new Error('Not Found: Route or file not found.');
+                }
+                break;
+            case 500:
+                throw new Error('Internal Server Error: Error occurred while retrieving the file.');
+            case 400:
+                throw new Error('Not Found: Collection or file not found');
+            default:
+                throw new Error(`HTTP Error: ${response.status}`);
+        }
+    }
+
+    const fileBlob = await response.blob();
+    const fileURL = URL.createObjectURL(fileBlob);
+    const link = document.createElement('a');
+    link.href = fileURL;
+    link.download = `route_${routeId}.xlsx`; // Nom du fichier à télécharger
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+async function exportRouteToExcel(routeId) {
+    const url = `${apiEndpoint}/deliveries/generateExcel/${routeId}`;
+
+    const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    });
+
+    if (!response.ok) {
+        switch (response.status) {
+            case 400:
+                throw new Error('Bad Request: The request was invalid.');
+            case 404:
+                throw new Error('Not Found: Collection not found or other resources.');
+            default:
+                throw new Error(`HTTP Error: ${response.status}`);
+        }
+    }
+
+    return response.json();
+}
 
 export {
     createRoute,
@@ -383,5 +440,7 @@ export {
     updateRoute,
     updateDelivery,
     updateDestination,
-    updateDestinationAndDeliveries
+    updateDestinationAndDeliveries,
+    getRouteExcel,
+    exportRouteToExcel
 };
