@@ -63,6 +63,6 @@ class UserCompanyModel
         $this->role = $role;
         return $this;
     }
-    
+
 }
 ?>

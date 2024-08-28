@@ -79,6 +79,7 @@ function addVolunteerSubmitEvent() {
         } else {
             console.log('Volontaire inscrit avec succès');
             alert('Volontaire inscrit avec succès');
+            window.location.reload();
         }
     });
 }
