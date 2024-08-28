@@ -150,7 +150,7 @@ if (!array_key_exists($route, $controllerMap)) {
 $controllerClass = $controllerMap[$route];
 try {
     if ($controllerClass === DeliveryController::class || $controllerClass === PlannedRouteController::class) {
-        $controller = new $controllerClass($entityManager, $pdfService);
+        $controller = new $controllerClass($entityManager, $pdfService, $excelService, $emailService);
     } elseif ($controllerClass === LoginController::class) {
         $controller = new $controllerClass($entityManager, $jwtService);
     } elseif ($controllerClass === UserController::class) {

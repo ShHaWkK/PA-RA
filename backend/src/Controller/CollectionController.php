@@ -32,18 +32,18 @@ class CollectionController
         try {
             switch ($method) {
                 case 'POST':
-                if ( isset($uriParts[2]) ) {
-                    if($uriParts[2] === 'send_excel')
-                    {
-                        return $this->sendCollectionExcelEmail($uriParts[1],$uriParts[3]);
+                    if ( isset($uriParts[2]) ) {
+                        if($uriParts[2] === 'send_excel')
+                        {
+                            return $this->sendCollectionExcelEmail($uriParts[1],$uriParts[3]);
+                        }
+                        elseif ($uriParts[2] === 'export')
+                        {
+                            return $this->exportCollectionToExcel($uriParts[1]);
+                        }
+                    }else {
+                        return $this->createCollection($input);
                     }
-                    elseif ($uriParts[2] === 'export')
-                    {
-                        return $this->exportCollectionToExcel($uriParts[1]);
-                    }
-                }else {
-                    return $this->createCollection($input);
-                }
                 case 'GET':
                     if (isset($uriParts[1])) {
                         if (isset($uriParts[2])) {

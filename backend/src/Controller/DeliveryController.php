@@ -21,10 +21,14 @@ class DeliveryController
     private $entityManager;
     private $serializer;
     private $pdfService;
+    private $excelService;
+    private $emailService;
 
-    public function __construct(EntityManager $entityManager, PDFService $pdfService)
+    public function __construct(EntityManager $entityManager, PDFService $pdfService,$excelService, $emailService)
     {
         $this->entityManager = $entityManager;
+        $this->excelService = $excelService;
+        $this->emailService = $emailService;
         $this->pdfService = $pdfService;
         $normalizers = [new ObjectNormalizer()];
         $encoders = [new JsonEncoder()];
@@ -36,7 +40,36 @@ class DeliveryController
         try {
             switch ($method) {
                 case 'POST':
-                    return $this->createRoute($input);
+                    if (isset($uriParts[1])) {
+                        switch ($uriParts[1]) {
+                            case 'generateExcel':
+                                if (isset($uriParts[2])) {
+                                    return $this->exportRouteToExcel($uriParts[2]);
+                                } else {
+                                    http_response_code(400);
+                                    return ['error' => 'ID not specified'];
+                                }
+                            case 'sendExcelByMail':
+                                if (isset($uriParts[2])) {
+                                    return $this->sendRouteExcelEmail($uriParts[2],$uriParts[3]);
+                                } else {
+                                    http_response_code(400);
+                                    return ['error' => 'ID not specified'];
+                                }
+                            case 'generatePDF':
+                                if (isset($uriParts[2])) {
+                                    return $this->generateDeliveryPDF($uriParts[2]);
+                                } else {
+                                    http_response_code(400);
+                                    return ['error' => 'ID not specified'];
+                                }
+                            default:
+                                return $this->createRoute($input);
+                        }
+                    } else {
+                        http_response_code(400);
+                        return ['error' => 'Invalid URI'];
+                    }
 
                 case 'PATCH':
                     if (isset($uriParts[1])) {
@@ -1001,6 +1034,181 @@ class DeliveryController
         }
     }
 
+    private function getRouteData(int $routeId): array
+    {
+        // Récupérer la route
+        $route = $this->entityManager->find(RouteModel::class, $routeId);
+
+        if (!$route) {
+            http_response_code(404);
+            throw new \Exception("Route with ID $routeId not found.");
+        }
+
+        // Structurer les données de la route
+        $routeData = [
+            'name' => $route->getName(),
+            'vehicle' => $route->getVehicle()->getLicensePlate(),
+            'driver' => $route->getDriver()->getFirstName() . ' ' . $route->getDriver()->getLastName(),
+            'start_time' => $route->getStartTime(),
+            'end_time' => $route->getEndTime(),
+            'status' => $route->getStatus(),
+            'destinations' => []
+        ];
+
+        // Récupérer les destinations associées à la route
+        $destinations = $this->entityManager->getRepository(DestinationModel::class)
+            ->findBy(['route' => $route]);
+
+        foreach ($destinations as $destination) {
+            $destinationData = [
+                'address' => $destination->getAddress(),
+                'recipient_type' => $destination->getRecipientType(),
+                'delivery_date' => $destination->getDeliveryDate(),
+                'status' => $destination->getStatus(),
+                'deliveries' => []
+            ];
+
+            // Récupérer les livraisons associées à la destination
+            $deliveries = $this->entityManager->getRepository(DeliveryModel::class)
+                ->findBy(['destination' => $destination]);
+
+            foreach ($deliveries as $delivery) {
+                $deliveryData = [
+                    'product' => $delivery->getProduct()->getName(),
+                    'quantity' => $delivery->getQuantity(),
+                    'status' => $delivery->getStatus(),
+                    'comment' => $delivery->getComment()
+                ];
+
+                $destinationData['deliveries'][] = $deliveryData;
+            }
+
+            $routeData['destinations'][] = $destinationData;
+        }
+
+        return $routeData;
+    }
+
+    public function exportRouteToExcel(int $routeId): array
+    {
+        try {
+            // Récupérer les données structurées de la route
+            $routeData = $this->getRouteData($routeId);
+
+            // Générer le fichier Excel et récupérer le chemin du fichier
+            $excelFilePath = $this->excelService->generateDeliveryRouteExcel($routeData);
+
+            // Mettre à jour le modèle de route avec le chemin du fichier Excel
+            $route = $this->entityManager->find(RouteModel::class, $routeId);
+            $route->setExcelPath($excelFilePath);
+            $this->entityManager->flush();
+
+            // Optionnel : Envoyer le fichier par email
+            $recipient_email = $route->getDriver()->getEmail();
+            $this->sendRouteExcelEmail($routeId, $recipient_email);
+
+            return ['message' => 'Excel file successfully generated.'];
+
+        } catch (\Exception $e) {
+            error_log("Exception dans exportRouteToExcel: " . $e->getMessage());
+            return [
+                'message' => 'Une erreur est survenue lors de la génération du fichier Excel.',
+                'error' => $e->getMessage()
+            ];
+        }
+    }
+
+    public function getRouteExcel(int $routeId): array
+    {
+        try {
+            // Récupérer la route
+            $route = $this->entityManager->find(RouteModel::class, $routeId);
+
+            if (!$route) {
+                http_response_code(404);
+                return ["Route with ID $routeId not found."];
+            }
+
+            // Récupérer le chemin relatif du fichier Excel
+            $relativeFilePath = $route->getExcelPath();
+
+            if (!$relativeFilePath) {
+                http_response_code(400);
+                return ["Invalid file path. No file path associated with route ID $routeId."];
+            }
+
+            // Obtenir le contenu du fichier et d'autres informations depuis le service
+            $fileData = $this->excelService->getFileContent($relativeFilePath);
+
+            if (isset($fileData['error'])) {
+                http_response_code(404);
+                return [$fileData['error']];
+            }
+
+            // Définir les headers pour le téléchargement
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            header('Content-Disposition: attachment; filename="' . $fileData['filename'] . '"');
+            header('Content-Length: ' . $fileData['size']);
+
+            // Envoyer le contenu du fichier
+            echo $fileData['content'];
+            exit;
+
+        } catch (Exception $e) {
+            http_response_code(500);
+            return ["An error occurred while retrieving the Excel file.", 'error' => $e->getMessage()];
+        }
+    }
+
+    public function sendRouteExcelEmail($routeId, $recipientEmail)
+    {
+        try {
+            // Récupérer la collection à partir de l'ID
+            $route = $this->entityManager->find(RouteModel::class, $routeId);
+            if (!$route) {
+                http_response_code(404);
+                throw new \Exception("Collection with ID $routeId not found.");
+            }
+
+            if($recipientEmail === null){
+                $recipientEmail = $route->getDriver()->getEmail();
+            }
+
+            $relativeFilePath = $route->getExcelPath();
+
+            $fileData = $this->excelService->getFileContent($relativeFilePath);
+
+            // Vérifier si le contenu du fichier est disponible
+            if (!isset($fileData['content']) || empty($fileData['content'])) {
+                http_response_code(404);
+                throw new \Exception("Excel file content not found or empty at path: $relativeFilePath.");
+            }
+
+            $routeDate = $route->getStartTime();
+            if (!$routeDate) {
+                http_response_code(404);
+                throw new \Exception("Delivery date is not set.");
+            }
+            $formattedDate = $routeDate->format('d-m-Y');
+
+            $subject = "Votre fichier Excel de livraison du {$formattedDate}";
+            $body = "Ci-joint votre fichier excel de livraison du {$formattedDate}.";
+
+            $fileName = basename($relativeFilePath);
+
+            $result = $this->emailService->sendExcelFile($recipientEmail, $subject, $body, $fileName, $fileData['content']);
+
+            if (!$result) {
+                http_response_code(400);
+                throw new \Exception("Failed to send email to $recipientEmail.");
+            }
+
+            return ['message' => 'Mail successfully sent'];
+        } catch (\Exception $e) {
+            error_log("Exception in sendCollectionExcelEmail: " . $e->getMessage());
+            return ['error' => $e->getMessage()];
+        }
+    }
 
     public function generateDeliveryPDF($id)
     {
@@ -1020,39 +1228,6 @@ class DeliveryController
         } catch (\Exception $e) {
             error_log("Exception in generateDeliveryPDF: " . $e->getMessage());
             throw $e;
-        }
-    }
-
-    private function sendEmailNotification($delivery, $email, $volunteerName)
-    {
-        $mail = new PHPMailer(true);
-
-        try {
-            $mail->isSMTP();
-            $mail->Host = 'smtp.gmail.com';
-            $mail->SMTPAuth = true;
-            $mail->Username = 'morewaste1@gmail.com';
-            $mail->Password = 'vhpewmlkxxrpnioj';
-            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-            $mail->Port = 587;
-
-            $mail->setFrom('morewaste1@gmail.com', 'No More Waste');
-            $mail->addAddress($email, $volunteerName);
-
-            $pdf = $this->pdfService->createPDF($delivery);
-
-            $mail->addStringAttachment($pdf, 'delivery_details.pdf');
-
-            $mail->isHTML(true);
-            $mail->Subject = 'New Delivery Assigned';
-            $mail->Body    = $this->generateEmailBody($delivery, $volunteerName);
-            $mail->AltBody = $this->generateEmailAltBody($delivery, $volunteerName);
-
-            $mail->send();
-            return true;
-        } catch (Exception $e) {
-            error_log("Message could not be sent. Mailer Error: {$mail->ErrorInfo}");
-            return false;
         }
     }
 
@@ -1107,5 +1282,6 @@ class DeliveryController
 
         return "https://www.google.com/maps/dir/?api=1&origin=" . urlencode($routeName) . "&destination=" . end($destinationAddresses) . "&waypoints={$destinationParams}&travelmode=driving";
     }
+
 }
 ?>

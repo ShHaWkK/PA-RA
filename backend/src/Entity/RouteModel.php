@@ -44,6 +44,9 @@ class RouteModel
     #[ORM\OneToMany(mappedBy: "route", targetEntity: DestinationModel::class, cascade: ["persist", "remove"])]
     private $destinations;
 
+    #[ORM\Column(type: "text", nullable: true)]
+    private ?string $excel_path = null;
+
     public function __construct()
     {
         $this->destinations = new ArrayCollection();
@@ -172,6 +175,17 @@ class RouteModel
             }
         }
 
+        return $this;
+    }
+
+    public function getExcelPath(): ?string
+    {
+        return $this->excel_path;
+    }
+
+    public function setExcelPath(?string $excel_path): self
+    {
+        $this->excel_path = $excel_path;
         return $this;
     }
 

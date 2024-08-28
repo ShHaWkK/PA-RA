@@ -8,12 +8,10 @@
 
             <label for="vehicleSelect">Véhicule affecté :</label>
             <select id="vehicleSelect" name="vehicle_id" required>
-                <!-- Options will be populated dynamically -->
             </select>
 
             <label for="driverSelect">Chauffeur affecté :</label>
             <select id="driverSelect" name="driver_id" required>
-                <!-- Options will be populated dynamically -->
             </select>
 
             <label for="statusSelect">Statut :</label>

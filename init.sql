@@ -184,6 +184,7 @@ CREATE TABLE IF NOT EXISTS routes (
                                       start_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                                       end_time TIMESTAMP,
                                       status ENUM('pending', 'in_progress', 'completed', 'canceled') NOT NULL DEFAULT 'pending',
+                                      excel_path TEXT,
                                       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                                       updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                                       FOREIGN KEY (vehicle_id) REFERENCES vehicles(id) ON DELETE CASCADE,
