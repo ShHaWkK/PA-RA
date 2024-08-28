@@ -23,13 +23,16 @@ class DeliveryController
     private $pdfService;
     private $excelService;
     private $emailService;
+    private $googleMapsService;
 
-    public function __construct(EntityManager $entityManager, PDFService $pdfService,$excelService, $emailService)
+
+    public function __construct(EntityManager $entityManager, PDFService $pdfService,$excelService, $emailService, $googleMapsService)
     {
         $this->entityManager = $entityManager;
         $this->excelService = $excelService;
         $this->emailService = $emailService;
         $this->pdfService = $pdfService;
+        $this->googleMapsService = $googleMapsService;
         $normalizers = [new ObjectNormalizer()];
         $encoders = [new JsonEncoder()];
         $this->serializer = new Serializer($normalizers, $encoders);
@@ -64,7 +67,8 @@ class DeliveryController
                                     return ['error' => 'ID not specified'];
                                 }
                             default:
-                                return $this->createRoute($input);
+                                return $this->testGoogleMaps();
+//                                return $this->createRoute($input);
                         }
                     } else {
                         http_response_code(400);
@@ -119,6 +123,10 @@ class DeliveryController
 
                         if (isset($uriParts[2]) && $uriParts[2] === 'destination-deliveries') {
                             return $this->getDeliveriesByDestination($id);
+                        }
+
+                        if (isset($uriParts[2]) && $uriParts[2] === 'get-excel') {
+                            return $this->getRouteExcel($id);
                         }
 
                         return $this->getRouteById($id);
@@ -1281,6 +1289,35 @@ class DeliveryController
         $destinationParams = implode("&waypoints=", $destinationAddresses);
 
         return "https://www.google.com/maps/dir/?api=1&origin=" . urlencode($routeName) . "&destination=" . end($destinationAddresses) . "&waypoints={$destinationParams}&travelmode=driving";
+    }
+
+    private function testGoogleMaps()
+    {
+        $addresses = [
+            "10 Rue de Rivoli, 75001 Paris, France",
+            "1 Avenue des Champs-Élysées, 75008 Paris, France",
+            "3 Rue de la Paix, 75002 Paris, France",
+            "5 Boulevard Montmartre, 75002 Paris, France",
+            "15 Rue de la République, 69001 Lyon, France",
+            "25 Rue de la Liberté, 69003 Lyon, France",
+            "50 Rue du Faubourg Saint-Antoine, 75011 Paris, France",
+            "12 Rue de la Gare, 69007 Lyon, France",
+            "100 Rue de la République, 13002 Marseille, France",
+            "20 Place de la Bourse, 33000 Bordeaux, France"
+        ];
+
+        $host = getenv('MYSQL_HOST');
+        error_log(print_r("host",true));
+        error_log(print_r($host,true));
+
+        $apiKey = getenv('GOOGLE_MAPS_API_KEY');
+        error_log(print_r("apikey",true));
+        error_log(print_r($apiKey,true));
+
+        $optimizedRoute = $this->googleMapsService->getOptimizedRoute($addresses, $apiKey);
+
+        // Traiter et afficher $optimizedRoute selon vos besoins
+        print_r($optimizedRoute);
     }
 
 }

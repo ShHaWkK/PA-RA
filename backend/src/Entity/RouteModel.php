@@ -47,6 +47,9 @@ class RouteModel
     #[ORM\Column(type: "text", nullable: true)]
     private ?string $excel_path = null;
 
+    #[ORM\Column(type: "text", nullable: true)]
+    private ?string $pdf_path = null;
+
     public function __construct()
     {
         $this->destinations = new ArrayCollection();
@@ -189,6 +192,17 @@ class RouteModel
         return $this;
     }
 
+    public function getPdfPath(): ?string
+    {
+        return $this->pdf_path;
+    }
+
+    public function setPdfPath(?string $pdf_path): self
+    {
+        $this->pdf_path = $pdf_path;
+        return $this;
+    }
+
     public function jsonSerialize(): array
     {
         return [
@@ -206,7 +220,5 @@ class RouteModel
             })->toArray(),
         ];
     }
-
-
 }
 ?>

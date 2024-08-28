@@ -48,6 +48,7 @@ use Service\PDFService;
 use Service\JWTService;
 use Service\EmailService;
 use Service\ExcelService;
+use Service\GoogleMapsService;
 use Middleware\JWTMiddleware;
 
 use PHPMailer\PHPMailer\PHPMailer;
@@ -69,7 +70,7 @@ $requestUri = parse_url($requestUri, PHP_URL_PATH);
 $uriParts = explode('/', trim($requestUri, '/'));
 
 // Google Maps API Key
-$googleMapsApiKey = 'AIzaSyA0nZoj1xey1WSaaA_BdLH5CRca48aYQC0';
+$googleMapsApiKey = getenv('GOOGLE_MAPS_API_KEY');
 
 // Instancie le service PDF
 $pdfService = new PDFService($googleMapsApiKey);
@@ -89,6 +90,8 @@ $mailer->Port = 587;
 
 // Instancie EmailService
 $emailService = new EmailService($mailer);
+
+$googleMapsService = new GoogleMapsService();
 
 $controllerMap = [
     'users' => UserController::class,
@@ -150,7 +153,7 @@ if (!array_key_exists($route, $controllerMap)) {
 $controllerClass = $controllerMap[$route];
 try {
     if ($controllerClass === DeliveryController::class || $controllerClass === PlannedRouteController::class) {
-        $controller = new $controllerClass($entityManager, $pdfService, $excelService, $emailService);
+        $controller = new $controllerClass($entityManager, $pdfService, $excelService, $emailService, $googleMapsService);
     } elseif ($controllerClass === LoginController::class) {
         $controller = new $controllerClass($entityManager, $jwtService);
     } elseif ($controllerClass === UserController::class) {

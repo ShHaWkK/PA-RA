@@ -127,6 +127,7 @@ CREATE TABLE collections (
                              created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                              updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                              excel_path TEXT,
+                             pdf_path TEXT,
                              FOREIGN KEY (volunteer_id) REFERENCES users(id),
                              FOREIGN KEY (vehicle_id) REFERENCES vehicles(id)
 );
@@ -185,6 +186,7 @@ CREATE TABLE IF NOT EXISTS routes (
                                       end_time TIMESTAMP,
                                       status ENUM('pending', 'in_progress', 'completed', 'canceled') NOT NULL DEFAULT 'pending',
                                       excel_path TEXT,
+                                      pdf_path TEXT,
                                       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                                       updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                                       FOREIGN KEY (vehicle_id) REFERENCES vehicles(id) ON DELETE CASCADE,
