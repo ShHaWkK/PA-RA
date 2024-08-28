@@ -48,6 +48,9 @@ class UserModel implements \JsonSerializable
     #[ORM\Column(type: "datetime", options: ["default" => "CURRENT_TIMESTAMP", "onUpdate" => "CURRENT_TIMESTAMP"])]
     private $updated_at;
 
+    #[ORM\Column(type: "text", nullable: true)]
+    private ?string $file_path = null;
+
     #[ORM\ManyToMany(targetEntity: SkillModel::class, inversedBy: "users")]
     #[ORM\JoinTable(name: "user_skills",
         joinColumns: [new ORM\JoinColumn(name: "user_id", referencedColumnName: "id")],
@@ -303,6 +306,17 @@ class UserModel implements \JsonSerializable
             }
         }
 
+        return $this;
+    }
+
+    public function getFilePath(): ?string
+    {
+        return $this->file_path;
+    }
+
+    public function setFilePath(?string $file_path): self
+    {
+        $this->file_path = $file_path;
         return $this;
     }
 

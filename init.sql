@@ -18,6 +18,7 @@ CREATE TABLE IF NOT EXISTS users (
                                      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                                      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                                      verification_code VARCHAR(6),
+                                     file_path TEXT,
                                      is_verified BOOLEAN DEFAULT FALSE
 );
 

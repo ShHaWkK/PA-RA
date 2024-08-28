@@ -27,6 +27,7 @@ class UserController
     private $skillService;
     private $availabilityService;
     private $emailService;
+    private $publicDir;
 
     public function __construct(EntityManager $entityManager, EmailService $emailService)
     {
@@ -44,6 +45,7 @@ class UserController
         $this->skillService = new SkillService($entityManager);
         $this->availabilityService = new AvailabilityService($entityManager);
         $this->emailService = $emailService;
+        $this->publicDir = __DIR__ . '/../../public';
     }
 
 
@@ -54,8 +56,11 @@ class UserController
                 if (isset($uriParts[1])) {
                     switch ($uriParts[1]) {
                         case 'registerVolunteer':
+                            // Gérer la requête multipart/form-data pour extraire le JSON et le fichier
+                            $input = $this->handleMultipartRequest();
                             return $this->registerVolunteer($input);
                         case 'registerMerchant':
+                            $input = $this->handleMultipartRequest();
                             return $this->registerMerchant($input);
                         case 'addAvailability':
                             return $this->addAvailability($input);
@@ -135,38 +140,88 @@ class UserController
         }
     }
 
+    private function handleMultipartRequest()
+    {
+        $input = [];
+
+        // Récupérer et décoder les données JSON du champ 'json_data'
+        if (isset($_POST['json_data'])) {
+            $jsonData = json_decode($_POST['json_data'], true);
+            if (json_last_error() === JSON_ERROR_NONE) {
+                $input = $jsonData;
+            } else {
+                http_response_code(400);
+                die(json_encode(['error' => 'Invalid JSON data']));
+            }
+        }
+
+        // Gérer le fichier uploadé dans 'file_data'
+        if (isset($_FILES['file_data']) && $_FILES['file_data']['error'] === UPLOAD_ERR_OK) {
+            $pdfFile = $_FILES['file_data'];
+            $uploadDir = $this->publicDir . '/UserFiles';
+
+            // Assurer que le répertoire existe
+            if (!is_dir($uploadDir)) {
+                mkdir($uploadDir, 0777, true);
+            }
+
+            // Générer un nom de fichier unique
+            $filename = uniqid() . '.pdf';
+            $filePath = $uploadDir . '/' . $filename;
+
+            // Déplacer le fichier uploadé vers le répertoire de destination
+            if (move_uploaded_file($pdfFile['tmp_name'], $filePath)) {
+                // Ajouter le chemin du fichier au tableau d'entrée
+                $input['file_path'] = '/UserFiles/' . $filename;
+            } else {
+                http_response_code(500);
+                die(json_encode(['error' => 'Failed to save the uploaded file']));
+            }
+        }
+
+        return $input;
+    }
+
     private function registerVolunteer($data)
     {
         $this->entityManager->beginTransaction();
-    
+
         try {
+            // Validation des champs requis
             if (!isset($data['first_name']) || !isset($data['last_name']) || !isset($data['email']) || !isset($data['phone_number']) || !isset($data['password'])) {
                 http_response_code(400);
                 return ['error' => 'Missing required fields'];
             }
-    
-            // Check if the email already exists
+
+            // Vérification si l'email existe déjà
             $existingUser = $this->entityManager->getRepository(UserModel::class)->findOneBy(['email' => $data['email']]);
             if ($existingUser) {
                 http_response_code(409);
                 return ['error' => 'Email already exists'];
             }
-    
-            // Generate verification code
+
+            // Générer un code de vérification
             $verificationCode = rand(100000, 999999);
             $data['verification_code'] = $verificationCode;
             $data['is_verified'] = false;
-    
+
+            // Créer et persister l'utilisateur
             $user = $this->userService->addUser($data, 'volunteer');
+
+            // Affecter le chemin du fichier s'il est présent
+            if (isset($data['file_path'])) {
+                $user->setFilePath($data['file_path']);
+            }
+
             $this->entityManager->persist($user);
             $this->entityManager->flush();
-    
-            // Handle skills assignment (if any)
+
+            // Assigner les compétences si elles sont présentes
             if (isset($data['skills'])) {
                 $this->skillService->addSkills($user, $data['skills']);
             }
-    
-            // Handle availabilities assignment
+
+            // Assigner les disponibilités si présentes
             if (isset($data['availabilities'])) {
                 foreach ($data['availabilities'] as $availabilityData) {
                     if (!isset($availabilityData['day_of_week']) || !isset($availabilityData['start_time']) || !isset($availabilityData['end_time'])) {
@@ -177,24 +232,23 @@ class UserController
                     $this->availabilityService->addAvailability($availabilityData);
                 }
             }
-    
-            $this->entityManager->flush();
+
+            // Commit transaction
             $this->entityManager->commit();
-    
-            // Send verification email
+
+            // Envoyer l'email de vérification
             $this->emailService->sendVerificationEmail($data['email'], $verificationCode);
-    
+
             return ['id' => $user->getId(), 'message' => 'Volunteer registered successfully. Verification code sent.'];
-    
+
         } catch (\Exception $e) {
+            // Rollback transaction en cas d'erreur
             $this->entityManager->rollback();
             error_log("Exception in registerVolunteer: " . $e->getMessage());
             http_response_code(500);
             return ['error' => 'Internal Server Error'];
         }
     }
-
-
 
     private function registerMerchant($data)
     {
@@ -221,6 +275,12 @@ class UserController
 
             // Création de l'utilisateur
             $user = $this->userService->addUser($data, 'merchant');
+
+            // Affecter le chemin du fichier s'il est présent
+            if (isset($data['file_path'])) {
+                $user->setFilePath($data['file_path']);
+            }
+
             $this->entityManager->persist($user);
             $this->entityManager->flush();
 
