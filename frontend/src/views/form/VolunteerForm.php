@@ -8,7 +8,8 @@
 </head>
 <body>
 
-<form id="registrationForm" class="hidden">
+<form id="registrationForm" class="hidden" enctype="multipart/form-data">
+    <!-- Champs existants -->
     <div>
         <label for="first_name"><?php echo htmlspecialchars($data['first_name_label']); ?></label>
         <input type="text" id="first_name" name="first_name" required>
@@ -29,6 +30,15 @@
         <label for="password"><?php echo htmlspecialchars($data['password_label2']); ?></label>
         <input type="password" id="password" name="password" required>
     </div>
+
+    <!-- Ajout du champ pour l'upload de fichier PDF -->
+    <div>
+        <label for="resume"><?php echo htmlspecialchars($data['resume_label']); ?></label>
+        <input type="file" id="resume" name="resume" accept="application/pdf" required>
+        <p><?php echo htmlspecialchars($data['resume_help']); ?></p>
+    </div>
+
+    <!-- Champs existants -->
     <div id="skillsTable">
         <table>
             <thead>
@@ -56,6 +66,7 @@
                 <th><?php echo htmlspecialchars($data['start_time_label']); ?></th>
                 <th><?php echo htmlspecialchars($data['end_time_label']); ?></th>
             </tr>
+            <!-- Disponibilités pour chaque jour de la semaine -->
             <tr>
                 <td><input type="checkbox" name="availabilities[0][selected]" value="1"></td>
                 <td><input type="text" name="availabilities[0][day_of_week]" value="Monday" readonly></td>
@@ -100,7 +111,10 @@
             </tr>
         </table>
     </div>
+
     <div>
         <button type="submit"><?php echo htmlspecialchars($data['submit_button2']); ?></button>
     </div>
 </form>
+</body>
+</html>

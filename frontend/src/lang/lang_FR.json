@@ -68,7 +68,11 @@
     "header_home": "Accueil",
     "header_merchant_signup": "Inscription Commerçant",
     "header_volunteer_signup": "Devenez Bénévole !",
-    "header_contact": "Contact", 
+    "header_contact": "Contact",
+    "resume_label": "Télécharger votre CV (PDF uniquement)",
+    "resume_help": "Veuillez télécharger un fichier PDF contenant votre CV. La taille maximale du fichier est de 5 Mo.",
+    "license_label": "Télécharger votre licence commerciale (PDF uniquement)",
+    "license_help": "Veuillez télécharger un fichier PDF de votre licence commerciale valide. La taille maximale du fichier est de 5 Mo.",
 
     "error_message": "Désolé, la page que vous recherchez n'existe pas.",
     "go_home": "Retour à l'accueil"
