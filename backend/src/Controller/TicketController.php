@@ -34,50 +34,62 @@ class TicketController
     public function processRequest($method, $uriParts, $input)
     {
         try {
-            error_log("TicketController - processRequest called with method: $method");
-
+            error_log("TicketController - processRequest called with method: $method, URI parts: " . json_encode($uriParts));
+    
+            // Vérifiez d'abord les contrôleurs de messages
             if (isset($uriParts[1]) && $uriParts[1] === 'messages') {
                 $messageController = new MessageController($this->entityManager);
                 return $messageController->processRequest($method, array_slice($uriParts, 1), $input);
             }
-
+    
+            // Route en fonction de la méthode HTTP
             switch ($method) {
                 case 'POST':
                     return $this->createTicket($input);
+    
                 case 'GET':
                     if (isset($uriParts[1])) {
                         if ($uriParts[1] === 'search') {
                             return $this->searchTickets($input);
                         } elseif ($uriParts[1] === 'search_admin') {
-                            return $this->searchAdminByName($input['name']);
+                            return $this->searchAdminByName($input['name'] ?? '');
                         } elseif ($uriParts[1] === 'admins') {
                             return $this->getAllAdmins();
-                        } elseif (isset($uriParts[2]) && $uriParts[2] === 'tickets') {
-                            return $this->getTicketsByUser((int)$uriParts[1]);
+                        } elseif (is_numeric($uriParts[1])) {
+                            if (isset($uriParts[2]) && $uriParts[2] === 'tickets') {
+                                return $this->getTicketsByUser((int)$uriParts[1]);
+                            } else {
+                                return $this->getTicket((int)$uriParts[1]);
+                            }
                         } else {
-                            return $this->getTicket((int)$uriParts[1]);
+                            http_response_code(400);
+                            return new JsonResponse(['error' => 'Invalid request for GET method']);
                         }
                     } else {
                         return $this->getAllTickets();
                     }
+    
                 case 'PUT':
-                    if (isset($uriParts[0]) && isset($uriParts[1])) {
-                        if ($uriParts[1] === 'assign') {
-                            return $this->assignAdminToTicket((int)$uriParts[0], $input);
-                        } elseif ($uriParts[1] === 'close') {
-                            return $this->closeTicket((int)$uriParts[0], $input);
+                    if (isset($uriParts[1]) && is_numeric($uriParts[1])) {
+                        $ticketId = (int)$uriParts[1];
+                        if (isset($uriParts[2]) && $uriParts[2] === 'assign') {
+                            return $this->assignAdminToTicket($ticketId, $input);
+                        } elseif (isset($uriParts[2]) && $uriParts[2] === 'close') {
+                            return $this->closeTicket($ticketId, $input);
                         } else {
-                            return $this->updateTicket((int)$uriParts[0], $input);
+                            return $this->updateTicket($ticketId, $input);
                         }
                     }
                     http_response_code(400);
                     return new JsonResponse(['error' => 'Invalid request format for PUT method']);
+    
                 case 'DELETE':
-                    if (isset($uriParts[0])) {
-                        return $this->deleteTicket((int)$uriParts[0]);
+                    if (isset($uriParts[1]) && is_numeric($uriParts[1])) {
+                        return $this->deleteTicket((int)$uriParts[1]);
                     }
                     http_response_code(400);
-                    return new JsonResponse(['error' => 'Ticket ID not specified']);
+                    return new JsonResponse(['error' => 'Ticket ID not specified for DELETE']);
+    
                 default:
                     http_response_code(405);
                     return new JsonResponse(['error' => 'Method Not Allowed']);
@@ -88,6 +100,7 @@ class TicketController
             return new JsonResponse(['error' => 'Internal Server Error']);
         }
     }
+    
     
     public function createTicket($data)
     {
@@ -519,23 +532,28 @@ class TicketController
             $ticket = $this->entityManager->find(TicketModel::class, $ticketId);
             if (!$ticket) {
                 http_response_code(404);
-                return new JsonResponse(['error' => 'Ticket not found']);
+                echo json_encode(['error' => 'Ticket not found']);
+                exit();
             }
     
+            // Vérification d'autorisation
             if ($ticket->getCreatedBy()->getId() !== $data['user_id'] && !$data['is_admin']) {
                 http_response_code(403);
-                return new JsonResponse(['error' => 'Unauthorized action']);
+                echo json_encode(['error' => 'Unauthorized action']);
+                exit();  
             }
     
             $ticket->setStatus('closed');
             $ticket->setUpdatedAt(new \DateTime("now"));
             $this->entityManager->flush();
     
-            return new JsonResponse(['id' => $ticket->getId(), 'message' => 'Ticket closed successfully']);
+            echo json_encode(['id' => $ticket->getId(), 'message' => 'Ticket closed successfully']);
+            exit();  
         } catch (\Exception $e) {
             error_log("Exception in closeTicket: " . $e->getMessage());
             http_response_code(500);
-            return new JsonResponse(['error' => 'Internal Server Error']);
+            echo json_encode(['error' => 'Internal Server Error']);
+            exit();  
         }
     }
     

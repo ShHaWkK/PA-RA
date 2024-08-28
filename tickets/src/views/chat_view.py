@@ -62,31 +62,29 @@ class ChatView:
         response = self.message_system.get_ticket_messages(self.ticket_id)
         logging.debug(f"Raw messages fetched: {response}")
 
-        if 'error' in response:
-            messagebox.showerror("Erreur", response['error'])
-            return
-
-        if isinstance(response, list):
+        if isinstance(response, dict) and 'message' in response and response['message'] == "Il n'y a aucun message dans ce ticket.":
+            self.chat_text.config(state=tk.NORMAL)
+            self.chat_text.delete(1.0, tk.END)
+            self.chat_text.insert(tk.END, "Il n'y a aucun message dans ce ticket.\n")
+            self.chat_text.config(state=tk.DISABLED)
+        elif isinstance(response, list):
             self.chat_text.config(state=tk.NORMAL)
             self.chat_text.delete(1.0, tk.END)
 
-            if not response:
-                self.chat_text.insert(tk.END, "Il n'y a aucun message dans ce ticket.\n")
-            else:
-                for msg in response:
-                    if isinstance(msg.get('author'), dict):
-                        author_name = f"{msg['author'].get('firstName', 'Unknown')} {msg['author'].get('lastName', '')}".strip()
-                    else:
-                        author_name = msg.get('author', 'Unknown')
+            for msg in response:
+                if isinstance(msg.get('author'), dict):
+                    author_name = f"{msg['author'].get('firstName', 'Unknown')} {msg['author'].get('lastName', '')}".strip()
+                else:
+                    author_name = msg.get('author', 'Unknown')
 
 
-                    if isinstance(msg.get('recipient'), dict):
-                        recipient_name = f"{msg['recipient'].get('firstName', 'Unknown')} {msg['recipient'].get('lastName', '')}".strip()
-                    else:
-                        recipient_name = msg.get('recipient', 'Unknown')
+                if isinstance(msg.get('recipient'), dict):
+                    recipient_name = f"{msg['recipient'].get('firstName', 'Unknown')} {msg['recipient'].get('lastName', '')}".strip()
+                else:
+                    recipient_name = msg.get('recipient', 'Unknown')
 
-                    content = msg.get('content', '')
-                    self.chat_text.insert(tk.END, f"{author_name} to {recipient_name}: {content}\n")
+                content = msg.get('content', '')
+                self.chat_text.insert(tk.END, f"{author_name} to {recipient_name}: {content}\n")
 
             self.chat_text.config(state=tk.DISABLED)
 
@@ -98,7 +96,10 @@ class ChatView:
                 self.send_button.config(state=tk.DISABLED)
         else:
             logging.error(f"Unexpected response format: {response}")
-            messagebox.showerror("Erreur", "Format de réponse inattendu.")
+            self.chat_text.config(state=tk.NORMAL)
+            self.chat_text.delete(1.0, tk.END)
+            self.chat_text.insert(tk.END, "Erreur lors du chargement des messages.\n")
+            self.chat_text.config(state=tk.DISABLED)
 
     def send_message(self):
         content = self.message_entry.get()

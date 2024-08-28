@@ -39,16 +39,17 @@ class AdminView:
     def setup_ui(self):
         self.master.title("Espace Administrateur")
         self.master.geometry("800x600")
+        self.master.configure(bg='#E8F4E5')  # Thème de fond
 
-        self.main_frame = tk.Frame(self.master)
+        self.main_frame = tk.Frame(self.master, bg='#E8F4E5')
         self.main_frame.pack(fill=tk.BOTH, expand=True)
 
-        self.header_frame = tk.Frame(self.main_frame)
+        self.header_frame = tk.Frame(self.main_frame, bg='#3B6E22')
         self.header_frame.pack(fill=tk.X)
-        self.header_label = tk.Label(self.header_frame, text="Admin Dashboard", font=("Arial", 18))
+        self.header_label = tk.Label(self.header_frame, text="Admin Dashboard", font=("Arial", 18), bg='#3B6E22', fg='white')
         self.header_label.pack(pady=10)
 
-        self.tickets_frame = tk.Frame(self.main_frame)
+        self.tickets_frame = tk.Frame(self.main_frame, bg='#E8F4E5')
         self.tickets_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
         self.tickets_treeview = ttk.Treeview(self.tickets_frame, columns=("ID", "Type", "Description", "Status", "Created By", "Admin Name", "Created At", "Updated At"), show="headings")
         self.tickets_treeview.pack(fill=tk.BOTH, expand=True)
@@ -62,20 +63,40 @@ class AdminView:
         self.tickets_treeview.heading("Updated At", text="Mis à jour le")
         self.populate_tickets()
 
-        self.button_frame = tk.Frame(self.main_frame)
+        self.button_frame = tk.Frame(self.main_frame, bg='#E8F4E5')
         self.button_frame.pack(fill=tk.X, pady=10)
 
-        self.create_ticket_button = tk.Button(self.button_frame, text="Créer un Ticket", command=self.create_ticket)
+        self.create_ticket_button = tk.Button(self.button_frame, text="Créer un Ticket", command=self.create_ticket, bg='#4CAF50', fg='white')
         self.create_ticket_button.pack(side=tk.LEFT, padx=5)
 
-        self.close_ticket_button = tk.Button(self.button_frame, text="Fermer le Ticket", command=self.close_ticket)
+        self.close_ticket_button = tk.Button(self.button_frame, text="Fermer le Ticket", command=self.close_ticket, bg='#F44336', fg='white')
         self.close_ticket_button.pack(side=tk.LEFT, padx=5)
 
-        self.assign_ticket_button = tk.Button(self.button_frame, text="Assigner un Admin", command=self.assign_ticket)
+        self.assign_ticket_button = tk.Button(self.button_frame, text="Assigner un Admin", command=self.assign_ticket, bg='#FF9800', fg='white')
         self.assign_ticket_button.pack(side=tk.LEFT, padx=5)
 
-        self.open_chat_button = tk.Button(self.button_frame, text="Ouvrir Chat", command=self.open_chat_for_selected_ticket)
+        self.open_chat_button = tk.Button(self.button_frame, text="Ouvrir Chat", command=self.open_chat_for_selected_ticket, bg='#2196F3', fg='white')
         self.open_chat_button.pack(side=tk.LEFT, padx=5)
+
+    def show_loader(self, message="Chargement..."):
+        """Afficher un loader dynamique."""
+        self.loader_window = tk.Toplevel(self.master)
+        self.loader_window.title(message)
+        self.loader_window.geometry("300x100")
+        self.loader_window.configure(bg='#E8F4E5')
+        
+        # Barre de progression
+        self.progress = ttk.Progressbar(self.loader_window, orient=tk.HORIZONTAL, length=250, mode='indeterminate')
+        self.progress.pack(pady=20)
+        self.progress.start()  # Démarre l'animation de la barre de progression
+
+        self.loader_window.update()  # Mise à jour de la fenêtre pour afficher immédiatement le loader
+
+    def hide_loader(self):
+        """Fermer la fenêtre de chargement."""
+        if hasattr(self, 'loader_window'):
+            self.progress.stop()  # Arrête l'animation de la barre de progression
+            self.loader_window.destroy()
 
     def format_date(self, date_str):
         if date_str:
@@ -102,8 +123,10 @@ class AdminView:
 
         self.admin_selection_window = tk.Toplevel(self.master)
         self.admin_selection_window.title("Sélectionner un Admin")
+        self.admin_selection_window.geometry("300x150")
+        self.admin_selection_window.configure(bg='#E8F4E5')
 
-        tk.Label(self.admin_selection_window, text="Sélectionnez un administrateur:").pack(pady=10)
+        tk.Label(self.admin_selection_window, text="Sélectionnez un administrateur:", bg='#E8F4E5').pack(pady=10)
 
         self.selected_admin = StringVar(self.admin_selection_window)
         self.selected_admin.set(f"{self.admins[0]['firstName']} {self.admins[0]['lastName']}")
@@ -130,7 +153,11 @@ class AdminView:
         if self.selected_admin_id:
             update_data = {'admin_id': self.selected_admin_id}
             logging.debug(f"Assigning admin with ID {self.selected_admin_id} to ticket ID {ticket_id}")
+            
+            self.show_loader("Assignation de l'admin...")  # Affiche le loader dynamique
             response = self.ticket_system.assign_admin_to_ticket(ticket_id, update_data)
+            self.hide_loader()  # Masque le loader une fois le processus terminé
+            
             logging.debug(f"Assign Admin to Ticket Response: {response}")
             if response and 'id' in response:
                 messagebox.showinfo("Succès", "Admin assigné avec succès au ticket!")
@@ -148,11 +175,9 @@ class AdminView:
             if ticket_info:
                 try:
                     ticket_id = int(ticket_info[0])
-                    # Get the current user's ID (admin or volunteer)
                     current_user_id = self.user_data['id']
-                    # Fetch the created_by or recipient user ID depending on the user's role
                     created_by = int(ticket_info[4]) if ticket_info[4] else None
-                    recipient_id = created_by if created_by != current_user_id else None  # Assuming recipient ID logic
+                    recipient_id = created_by if created_by != current_user_id else None
                     self.open_chat_for_ticket(ticket_id, current_user_id, recipient_id)
                 except ValueError:
                     messagebox.showerror("Erreur", "ID invalide. L'ID doit être un entier.")
@@ -162,11 +187,20 @@ class AdminView:
     def open_chat_for_ticket(self, ticket_id, author_id, recipient_id):
         try:
             chat_window = tk.Toplevel(self.master)
-            # Pass all required arguments to ChatView
             chat_view = ChatView(chat_window, author_id, recipient_id, ticket_id)
-        except ValueError:
-            messagebox.showerror("Erreur", "L'ID doit être un entier.")
 
+            self.show_loader("Chargement des messages...")  # Affiche le loader dynamique
+            messages = self.ticket_system.get_ticket_messages(ticket_id)
+            self.hide_loader()  # Masque le loader une fois le chargement terminé
+            
+            if 'message' in messages and messages['message'] == "Il n'y a aucun message dans ce ticket.":
+                messagebox.showinfo("Information", "Il n'y a aucun message dans ce ticket.")
+                logging.info("Il n'y a aucun message dans ce ticket.")
+            else:
+                chat_view.populate_messages(messages)
+        except ValueError:
+            self.hide_loader()  # Assurez-vous de masquer le loader en cas d'erreur
+            messagebox.showerror("Erreur", "L'ID doit être un entier.")
 
     def populate_tickets(self):
         for item in self.tickets_treeview.get_children():
@@ -209,7 +243,11 @@ class AdminView:
                 'created_by': self.user_data['id'],
                 'attachments': []
             }
+            
+            self.show_loader("Création du ticket...")  # Affiche le loader dynamique
             response = self.ticket_system.create_ticket(ticket_data)
+            self.hide_loader()  # Masque le loader une fois le processus terminé
+            
             logging.debug(f"Create Ticket Response: {response}")
             if response and 'id' in response:
                 messagebox.showinfo("Succès", "Ticket créé avec succès !")
@@ -225,13 +263,40 @@ class AdminView:
             ticket_info = self.tickets_treeview.item(selected[0], 'values')
             ticket_id = int(ticket_info[0])
             update_data = {'status': 'closed', 'user_id': self.user_data['id'], 'is_admin': True}
+            
+            self.show_loader("Fermeture du ticket...")  # Affiche le loader dynamique
             response = self.ticket_system.update_ticket(ticket_id, update_data)
+            self.hide_loader()  # Masque le loader une fois le processus terminé
+            
             logging.debug(f"Close Ticket Response: {response}")
             if response and 'id' in response:
                 messagebox.showinfo("Succès", "Ticket fermé avec succès!")
                 self.populate_tickets()
             else:
                 messagebox.showerror("Erreur", "Échec de la fermeture du ticket.")
+        else:
+            messagebox.showwarning("Attention", "Veuillez sélectionner un ticket.")
+
+    def delete_ticket(self):
+        selected = self.tickets_treeview.selection()
+        if selected:
+            ticket_info = self.tickets_treeview.item(selected[0], 'values')
+            ticket_id = int(ticket_info[0])
+            status = ticket_info[2]
+            if status != 'closed':
+                messagebox.showwarning("Attention", "Seuls les tickets fermés peuvent être supprimés.")
+                return
+            
+            self.show_loader("Suppression du ticket...")  # Affiche le loader dynamique
+            response = self.ticket_system.delete_ticket(ticket_id)
+            self.hide_loader()  # Masque le loader une fois le processus terminé
+            
+            logging.debug(f"Delete Ticket Response: {response}")
+            if response and 'message' in response:
+                messagebox.showinfo("Succès", "Ticket supprimé avec succès!")
+                self.populate_tickets()
+            else:
+                messagebox.showerror("Erreur", "Échec de la suppression du ticket.")
         else:
             messagebox.showwarning("Attention", "Veuillez sélectionner un ticket.")
 
