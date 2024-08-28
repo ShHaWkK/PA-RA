@@ -15,10 +15,10 @@ function addMerchantSubmitEvent() {
 
         // Si une nouvelle entreprise est ajoutée, ne pas inclure le sélecteur d'entreprise
         if (isNewCompany) {
-            delete userData.company_selector;
+            delete userData.company_id;
         }
 
-        console.log("userData",userData);
+        console.log("userData",JSON.stringify(userData));
 
         try {
             const result = await registerMerchant(userData);
@@ -78,3 +78,5 @@ document.addEventListener('DOMContentLoaded', function() {
     addCompanyCheckboxEvent();
     addMerchantSubmitEvent();
 });
+
+export {addMerchantSubmitEvent};

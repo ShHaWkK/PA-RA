@@ -91,34 +91,6 @@ function handlePending(){
     });
 }
 
-// Fonction pour supprimer les utilisateurs sélectionnés
-async function deleteUsers() {
-    const checkedCheckboxes = document.querySelectorAll('#volunteerTable input[type="checkbox"]:checked');
-    const userIds = Array.from(checkedCheckboxes).map(checkbox => checkbox.value);
-
-    if (userIds.length === 0) {
-        alert("Veuillez sélectionner au moins un utilisateur à supprimer.");
-        return;
-    }
-
-    try {
-        for (const userId of userIds) {
-            await deleteUser(userId);
-        }
-        // Rafraîchir le tableau des bénévoles après la suppression
-        if (volunteerStatusSelect) {
-            populateVolunteerTable();
-        }
-        if (merchantStatusSelect) {
-            populateMerchantTable();
-        }
-        alert("The selected users have been successfully deleted.\n");
-    } catch (error) {
-        console.error("Error deleting users:", error.message);
-        alert("An error occurred while deleting users.");
-    }
-}
-
 // Appel de la fonction au chargement de la page ou lorsque nécessaire
 document.addEventListener('DOMContentLoaded',
     function (){

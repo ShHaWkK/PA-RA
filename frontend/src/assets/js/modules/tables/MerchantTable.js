@@ -10,14 +10,9 @@ export async function populateMerchantTable(status) {
     // On affiche le Loader
     document.getElementById('loadingBodyGeneral').classList.remove('hidden');
 
-    const users = await getAllUsers('merchant', status);
+    document.querySelector('.merchant-table').innerHTML = '';
 
-    if (!users || users.length === 0) {
-        console.log('No merchants found');
-        document.querySelector('.merchant-table').innerHTML = '';
-        document.getElementById('loadingBodyGeneral').classList.add('hidden');
-        return;
-    }
+    const users = await getAllUsers('merchant', status);
 
     // On enlève le Loader
     document.getElementById('loadingBodyGeneral').classList.add('hidden');

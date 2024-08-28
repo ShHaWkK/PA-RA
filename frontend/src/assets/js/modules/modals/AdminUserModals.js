@@ -2,7 +2,7 @@ import {modifyUser, getUser, deleteUser, getUserAvailabilities, getUserSkills, g
 import {selectedUserId,populateVolunteerTable} from "/assets/js/modules/tables/VolunteerTable.js";
 import {selectedUserIdMerchant,populateMerchantTable} from "/assets/js/modules/tables/MerchantTable.js";
 import {addVolunteerSubmitEvent, populateSkillTable} from "/assets/js/pages/VolunteerSignUp.js";
-import {addMerchantSubmitEvent} from "/assets/js/pages/MerchantSignUp.js";
+import "/assets/js/pages/MerchantSignUp.js";
 
 // Fonction pour pré-remplir le formulaire avec les données de l'utilisateur
 async function populateModifyUserForm(userId) {
@@ -27,10 +27,11 @@ async function populateModifyUserForm(userId) {
 
 // Fonction pour supprimer les utilisateurs sélectionnés
 async function deleteUsers(type) {
+    let checkedCheckboxes;
     if (type == 'merchant'){
-        const checkedCheckboxes = document.querySelectorAll('#merchantTable input[type="checkbox"]:checked');
+        checkedCheckboxes = document.querySelectorAll('#merchantTable input[type="checkbox"]:checked');
     }else {
-        const checkedCheckboxes = document.querySelectorAll('#volunteerTable input[type="checkbox"]:checked');
+        checkedCheckboxes = document.querySelectorAll('#volunteerTable input[type="checkbox"]:checked');
     }
 
     const userIds = Array.from(checkedCheckboxes).map(checkbox => checkbox.value);
@@ -40,17 +41,12 @@ async function deleteUsers(type) {
         return;
     }
 
-    try {
         for (const userId of userIds) {
             await deleteUser(userId);
         }
-        // Rafraîchir le tableau des bénévoles après la suppression
-        await populateVolunteerTable();
+
         alert("The selected users have been successfully deleted.\n");
-    } catch (error) {
-        console.error("Error deleting users:", error.message);
-        alert("An error occurred while deleting users.");
-    }
+        window.location.reload();
 }
 
 // Fonction pour afficher les compétences dans la fenêtre modale
@@ -283,8 +279,6 @@ document.addEventListener('DOMContentLoaded',
                     addMerchantModal.style.display = "none";
                 }
             }
-
-            addMerchantSubmitEvent();
 
             // Fenêtre modale de suppression d'un bénévole
             var deleteModal = document.getElementById("deleteVolunteerModal");

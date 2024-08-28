@@ -10,14 +10,14 @@ export async function populateVolunteerTable(status) {
     // On affiche le Loader
     document.getElementById('loadingBodyGeneral').classList.remove('hidden');
 
-    const users = await getAllUsers('volunteer', status);
-
-    if (!users || users.length === 0) {
-        console.log('No volunteers found');
-        document.querySelector('.volunteer-table').innerHTML = '';
-        document.getElementById('loadingBodyGeneral').classList.add('hidden');
+    const backOfficeContent = document.querySelector('.volunteer-table');
+    if (!backOfficeContent) {
+        console.error('Back office content container not found.');
         return;
     }
+    backOfficeContent.innerHTML = '';
+
+    const users = await getAllUsers('volunteer', status);
 
     // On enlève le Loader
     document.getElementById('loadingBodyGeneral').classList.add('hidden');
@@ -109,7 +109,6 @@ export async function populateVolunteerTable(status) {
     table.appendChild(tbody);
 
     // Sélectionner le conteneur back-office-content et y attacher le tableau
-    const backOfficeContent = document.querySelector('.volunteer-table');
     if (backOfficeContent) {
         backOfficeContent.innerHTML = ''; // Effacer le contenu existant si nécessaire
         backOfficeContent.appendChild(table);

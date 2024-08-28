@@ -12,17 +12,17 @@
 }
 
 /* Body Styling */
-body {
-    background-color: #f0f4f3;
-    color: #333;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-height: 100vh;
-    padding: 20px;
-    animation: fadeIn 1s ease-in-out;
-}
+/*body {*/
+/*    background-color: #f0f4f3;*/
+/*    color: #333;*/
+/*    display: flex;*/
+/*    flex-direction: column;*/
+/*    align-items: center;*/
+/*    justify-content: center;*/
+/*    min-height: 100vh;*/
+/*    padding: 20px;*/
+/*    animation: fadeIn 1s ease-in-out;*/
+/*}*/
 
 /* Header Styling */
 header {
