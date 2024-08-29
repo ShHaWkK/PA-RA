@@ -8,7 +8,6 @@
 </head>
 <body>
 
-
 <form id="merchantForm">
     <div>
         <label for="first_name"><?php echo htmlspecialchars($data['first_name_label']); ?></label>
@@ -31,6 +30,13 @@
         <input type="password" id="password" name="password" required>
     </div>
 
+    <!-- Ajout du champ pour l'upload de fichier PDF -->
+    <div>
+        <label for="business_license"><?php echo htmlspecialchars($data['license_label']); ?></label>
+        <input type="file" id="business_license" name="business_license" accept="application/pdf" required>
+        <p><?php echo htmlspecialchars($data['license_help']); ?></p>
+    </div>
+
     <!-- Company Selector -->
     <div id="company_selector_section">
         <label for="company_selector">Sélectionnez votre entreprise</label>
@@ -40,7 +46,7 @@
     </div>
 
     <!-- Checkbox to show company creation fields -->
-    <div>
+    <div class="row">
         <label for="new_company_checkbox">Votre entreprise ne figure pas dans la liste ?</label>
         <input type="checkbox" id="new_company_checkbox" name="new_company_checkbox">
     </div>
@@ -69,3 +75,6 @@
         <button type="submit"><?php echo htmlspecialchars($data['submit_button2']); ?></button>
     </div>
 </form>
+
+</body>
+</html>

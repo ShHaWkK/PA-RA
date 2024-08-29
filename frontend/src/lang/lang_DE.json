@@ -68,7 +68,11 @@
     "header_home": "Startseite",
     "header_merchant_signup": "Händler Registrierung",
     "header_volunteer_signup": "Freiwilliger Werden!",
-    "header_contact": "Kontakt", 
+    "header_contact": "Kontakt",
+    "resume_label": "Laden Sie Ihren Lebenslauf hoch (nur PDF)",
+    "resume_help": "Bitte laden Sie eine PDF-Datei mit Ihrem Lebenslauf hoch. Die maximale Dateigröße beträgt 5 MB.",
+    "license_label": "Laden Sie Ihre Geschäftslizenz hoch (nur PDF)",
+    "license_help": "Bitte laden Sie eine PDF-Datei Ihrer gültigen Geschäftslizenz hoch. Die maximale Dateigröße beträgt 5 MB.",
 
     "error_message": "Entschuldigung, die von Ihnen gesuchte Seite existiert nicht.",
     "go_home":  "Zurück zur Startseite"

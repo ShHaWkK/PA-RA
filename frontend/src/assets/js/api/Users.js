@@ -1,24 +1,31 @@
 // Fichier user.js - contenant les fonctions pour interagir avec l'API User
 
-// Fonction pour enregistrer un nouveau bénévole
-async function registerVolunteer(userData) {
+// Fonction pour enregistrer un nouveau bénévole avec un fichier PDF
+async function registerVolunteer(userData, file) {
+    const formData = new FormData();
+
+    // Ajoute les données utilisateur au formulaire
+    formData.append('json_data', JSON.stringify(userData));
+
+    // Ajoute le fichier PDF si présent
+    if (file) {
+        formData.append('file_data', file);
+    }
+
+    // Envoie la requête multipart
     return await fetch(apiEndpoint + '/users/registerVolunteer', {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(userData)
-    })
+        body: formData,
+        mode: 'no-cors'
+    });
 }
 
-// Fonction pour enregistrer un nouveau commerçant
-async function registerMerchant(userData) {
+// Fonction pour enregistrer un nouveau commerçant avec un fichier PDF
+async function registerMerchant(formData) {
     return await fetch(apiEndpoint + '/users/registerMerchant', {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(userData)
+        body: formData, // Ne définissez pas l'en-tête Content-Type
+        credentials: 'include' // Inclure les cookies et les en-têtes d'authentification
     });
 }
 

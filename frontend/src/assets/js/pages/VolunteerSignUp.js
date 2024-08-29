@@ -14,10 +14,10 @@ function addVolunteerSubmitEvent() {
         const formData = new FormData(this);
         const jsonData = {};
 
-        // Convertir FormData en objet JSON, en ignorant les disponibilités
+        // Convertir FormData en objet JSON, en ignorant les disponibilités et les compétences
         formData.forEach((value, key) => {
             if (key.includes('availabilities') || key.includes('skills')) {
-                // Ignorer les clés de disponibilités
+                // Ignorer les clés de disponibilités et compétences
                 return;
             }
             if (jsonData[key]) {
@@ -64,22 +64,32 @@ function addVolunteerSubmitEvent() {
 
         console.log(jsonData);
 
-        const result = await registerVolunteer(jsonData);
+        // Extraire le fichier du formulaire
+        const file = formData.get('resume'); // Remplacez 'resume' par l'ID de votre champ de fichier si différent
+        console.log("file",file);
 
-        if (!result.ok) {
-            switch (result.status) {
-                case 409:
-                    alert("Un utilisateur avec cet e-mail existe déjà");
-                    break;
-                default:
-                    console.log('Échec de l\'inscription du volontaire');
-                    alert('Échec de l\'inscription du volontaire');
-                    break;
+        try {
+            // Appel à la fonction d'inscription du volontaire avec les données utilisateur et le fichier
+            const result = await registerVolunteer(jsonData, file);
+
+            if (!result.ok) {
+                switch (result.status) {
+                    case 409:
+                        alert("Un utilisateur avec cet e-mail existe déjà");
+                        break;
+                    default:
+                        console.log('Échec de l\'inscription du volontaire');
+                        alert('Échec de l\'inscription du volontaire');
+                        break;
+                }
+            } else {
+                console.log('Volontaire inscrit avec succès');
+                alert('Volontaire inscrit avec succès');
+                window.location.reload();
             }
-        } else {
-            console.log('Volontaire inscrit avec succès');
-            alert('Volontaire inscrit avec succès');
-            window.location.reload();
+        } catch (error) {
+            console.error('Error during form submission:', error.message);
+            alert('Une erreur est survenue. Veuillez réessayer.');
         }
     });
 }

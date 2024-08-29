@@ -1,37 +1,47 @@
 import { registerMerchant } from "../api/Users.js";
 import { getAllCompanies } from "../api/Companies.js";
 
+
 function addMerchantSubmitEvent() {
     const form = document.getElementById('merchantForm');
 
     form.addEventListener('submit', async function(event) {
         event.preventDefault();
 
-        const formData = new FormData(event.target);
-        const userData = Object.fromEntries(formData.entries());
+        const formData = new FormData(form);
 
-        // Vérifiez si l'utilisateur a choisi d'ajouter une nouvelle entreprise
-        const isNewCompany = document.getElementById('new_company_checkbox').checked;
-
-        // Si une nouvelle entreprise est ajoutée, ne pas inclure le sélecteur d'entreprise
-        if (isNewCompany) {
-            delete userData.company_id;
+        // Ajoutez un log pour vérifier le contenu de FormData
+        for (const [key, value] of formData.entries()) {
+            console.log(`${key}: ${value}`);
         }
 
-        console.log("userData",JSON.stringify(userData));
+        const userData = {};
+        formData.forEach((value, key) => {
+            if (key !== 'business_license') {
+                userData[key] = value;
+            }
+        });
+
+        formData.append('json_data', JSON.stringify(userData));
+
+        const fileInput = document.getElementById('business_license');
+        const file = fileInput.files[0];
+        if (file) {
+            formData.append('file_data', file);
+        }
 
         try {
-            const result = await registerMerchant(userData);
+            const result = await registerMerchant(formData);
 
             if (!result.ok) {
                 let errorMessage = 'Échec de l\'inscription du marchand';
                 if (result.status === 409) {
                     errorMessage = "Un utilisateur avec cet e-mail ou SIRET existe déjà";
                 }
-                alert(errorMessage); // Afficher le message d'erreur
+                alert(errorMessage);
             } else {
                 alert('Marchand inscrit avec succès');
-                window.location.reload(); // Recharger la page peut être amélioré par une meilleure gestion d'état
+                window.location.reload();
             }
         } catch (error) {
             console.error('Error during form submission:', error.message);
