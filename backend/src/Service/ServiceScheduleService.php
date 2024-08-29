@@ -20,7 +20,7 @@ class ServiceScheduleService
         try {
             $query = $this->entityManager->createQuery(
                 'SELECT ss FROM Entity\ServiceScheduleModel ss
-                 JOIN Entity\ServiceRegistrationModel sr WITH ss.service = sr.service_id
+                 JOIN Entity\ServiceRegistrationModel sr WITH ss.service = sr.service
                  WHERE sr.user_id = :userId'
             )->setParameter('userId', $userId);
          
@@ -36,6 +36,7 @@ class ServiceScheduleService
             throw new \Exception("Error retrieving schedules for user ID: " . $userId);
         }
     }
+    
     
     
     public function getAllSchedules()

@@ -1,5 +1,6 @@
 package com.example.nomorewaste.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -42,19 +43,25 @@ class ProductNotificationViewModel : ViewModel() {
 
     fun updateProductNotification(id: Int, notifiedQuantity: Int, isCollected: Boolean, volunteerId: Int) {
         val updateData = UpdateProductNotificationRequest(notifiedQuantity = notifiedQuantity, isCollected = isCollected)
+        Log.d("ProductNotificationViewModel", "Sending update request for ID: $id with data: $updateData")
+
         apiService.updateProductNotification(id, updateData).enqueue(object : Callback<Void> {
             override fun onResponse(call: Call<Void>, response: Response<Void>) {
                 if (response.isSuccessful) {
+                    Log.d("ProductNotificationViewModel", "Update successful for ID: $id")
                     _successMessage.postValue("Product notification updated successfully!")
                     loadProductNotificationsForVolunteer(volunteerId) // Rafraîchir la liste après mise à jour
                 } else {
+                    Log.e("ProductNotificationViewModel", "Error updating notification: ${response.message()}")
                     _error.postValue("Error updating notification: ${response.message()}")
                 }
             }
 
             override fun onFailure(call: Call<Void>, t: Throwable) {
+                Log.e("ProductNotificationViewModel", "Failure: ${t.message}")
                 _error.postValue("Failure: ${t.message}")
             }
         })
     }
+
 }

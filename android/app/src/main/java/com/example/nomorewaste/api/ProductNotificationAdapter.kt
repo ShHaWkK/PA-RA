@@ -28,13 +28,15 @@ class ProductNotificationAdapter(
             companyNameTextView.text = notification.company?.name ?: "Unknown Company"
             addressTextView.text = notification.address
             quantityNumberPicker.minValue = 0
-            quantityNumberPicker.maxValue = 100 // Adjust as needed
+            quantityNumberPicker.maxValue = 100
             quantityNumberPicker.value = notification.notifiedQuantity
 
             collectedCheckBox.isChecked = notification.isCollected
 
             updateButton.setOnClickListener {
-                onUpdateClickListener(notification, quantityNumberPicker.value, collectedCheckBox.isChecked)
+                val updatedQuantity = quantityNumberPicker.value
+                val updatedIsCollected = collectedCheckBox.isChecked
+                onUpdateClickListener(notification, updatedQuantity, updatedIsCollected)
             }
         }
     }
