@@ -3,6 +3,8 @@
 namespace Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\ArrayCollection;
 
 #[ORM\Entity]
 #[ORM\Table(name: "companies")]
@@ -116,7 +118,7 @@ class CompanyModel
         return $this;
     }
 
-    public function getHasStock(): bool
+    public function getHasStock(): ?bool
     {
         return $this->has_stock;
     }
@@ -169,12 +171,12 @@ class CompanyModel
             'address' => $this->getAddress(),
             'contact_info' => $this->getContactInfo(),
             'siret' => $this->getSiret(),
-            'renewal_date' => $this->getRenewalDate()->format('Y-m-d'),
+            'renewal_date' => $this->getRenewalDate()?->format('Y-m-d'),
             'renewal_status' => $this->getRenewalStatus(),
-            'has_stock' => $this->getHasStock(),
+            'has_stock' => $this->getHasStock() !== null ? $this->getHasStock() : null,
             'last_notified' => $this->getLastNotified()?->format('Y-m-d H:i:s'),
-            'created_at' => $this->getCreatedAt()->format('Y-m-d H:i:s'),
-            'updated_at' => $this->getUpdatedAt()->format('Y-m-d H:i:s'),
+            'created_at' => $this->getCreatedAt()?->format('Y-m-d H:i:s'),
+            'updated_at' => $this->getUpdatedAt()?->format('Y-m-d H:i:s'),
         ];
     }
 }

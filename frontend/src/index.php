@@ -73,6 +73,15 @@ switch ($request) {
             exit;
         }
         break;
+    case '/Admin/Companies':
+        if ($jwtToken) {
+            requireAuth($jwtToken, 'admin');
+            require __DIR__ . '/views/Admin/Companies.php';
+        } else {
+            require __DIR__ . '/views/Login/Login.php';
+            exit;
+        }
+        break;
     case '/Admin/Stocks':
         if ($jwtToken) {
             requireAuth($jwtToken, 'admin');

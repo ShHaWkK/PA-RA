@@ -93,7 +93,7 @@ class CompanyController
                 http_response_code(404);
                 return ['error' => 'Company not found'];
             }
-            return json_decode($this->serializer->serialize($company, 'json'), true);
+            return $company->jsonSerialize();
         } catch (\Exception $e) {
             error_log("Exception in getCompany: " . $e->getMessage());
             throw $e;
@@ -168,7 +168,13 @@ class CompanyController
         try {
             $companyRepository = $this->entityManager->getRepository(CompanyModel::class);
             $companies = $companyRepository->findAll();
-            return json_decode($this->serializer->serialize($companies, 'json'), true);
+            $serializedCompanies = [];
+            foreach ($companies as $company) {
+                $serializedCompanies[] = $company->jsonSerialize();
+            }
+
+            return $serializedCompanies;
+
         } catch (\Exception $e) {
             error_log("Exception in getAllCompanies: " . $e->getMessage());
             throw $e;
