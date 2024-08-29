@@ -29,7 +29,6 @@ class ProductNotificationActivity : AppCompatActivity() {
 
         adapter = ProductNotificationAdapter(emptyList()) { notification, updatedQuantity, isCollected ->
             viewModel.updateProductNotification(notification.id, updatedQuantity, isCollected, volunteerId)
-            Toast.makeText(this, "Détails mis à jour", Toast.LENGTH_SHORT).show()
         }
         recyclerView.adapter = adapter
 
@@ -42,6 +41,12 @@ class ProductNotificationActivity : AppCompatActivity() {
         viewModel.error.observe(this, Observer { errorMessage ->
             if (errorMessage != null) {
                 Toast.makeText(this, errorMessage, Toast.LENGTH_SHORT).show()
+            }
+        })
+
+        viewModel.successMessage.observe(this, Observer { successMessage ->
+            if (successMessage != null) {
+                Toast.makeText(this, successMessage, Toast.LENGTH_SHORT).show()
             }
         })
 

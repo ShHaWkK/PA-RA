@@ -47,6 +47,7 @@ class RequestCollectionActivity : AppCompatActivity() {
                     "wished_collection_date" to date
                 )
                 collectionRequestViewModel.createCollectionRequest(requestData)
+                Toast.makeText(this, "Demande de collecte soumise avec succès", Toast.LENGTH_SHORT).show()
             } else {
                 Toast.makeText(this, "Please fill all fields correctly", Toast.LENGTH_SHORT).show()
             }

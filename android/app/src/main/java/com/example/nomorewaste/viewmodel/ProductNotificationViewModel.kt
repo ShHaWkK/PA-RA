@@ -21,6 +21,9 @@ class ProductNotificationViewModel : ViewModel() {
     private val _error = MutableLiveData<String>()
     val error: LiveData<String> get() = _error
 
+    private val _successMessage = MutableLiveData<String>()
+    val successMessage: LiveData<String> get() = _successMessage
+
     fun loadProductNotificationsForVolunteer(volunteerId: Int) {
         apiService.getProductNotificationsForVolunteer(volunteerId).enqueue(object : Callback<List<ProductNotification>> {
             override fun onResponse(call: Call<List<ProductNotification>>, response: Response<List<ProductNotification>>) {
@@ -42,6 +45,7 @@ class ProductNotificationViewModel : ViewModel() {
         apiService.updateProductNotification(id, updateData).enqueue(object : Callback<Void> {
             override fun onResponse(call: Call<Void>, response: Response<Void>) {
                 if (response.isSuccessful) {
+                    _successMessage.postValue("Product notification updated successfully!")
                     loadProductNotificationsForVolunteer(volunteerId) // Rafraîchir la liste après mise à jour
                 } else {
                     _error.postValue("Error updating notification: ${response.message()}")
@@ -53,5 +57,4 @@ class ProductNotificationViewModel : ViewModel() {
             }
         })
     }
-
 }
