@@ -12,44 +12,46 @@ import com.example.nomorewaste.api.ProductNotification
 
 class ProductNotificationAdapter(
     private var productNotifications: List<ProductNotification>,
-    private val onUpdateClick: (ProductNotification, Int, Boolean) -> Unit
-) : RecyclerView.Adapter<ProductNotificationAdapter.NotificationViewHolder>() {
+    private val onUpdateClickListener: (ProductNotification, Int, Boolean) -> Unit
+) : RecyclerView.Adapter<ProductNotificationAdapter.ViewHolder>() {
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): NotificationViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_notification, parent, false)
-        return NotificationViewHolder(view)
+    inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        private val productNameTextView: TextView = itemView.findViewById(R.id.text_view_product_name)
+        private val companyNameTextView: TextView = itemView.findViewById(R.id.text_view_company_name)
+        private val addressTextView: TextView = itemView.findViewById(R.id.text_view_address)
+        private val quantityNumberPicker: NumberPicker = itemView.findViewById(R.id.number_picker_quantity)
+        private val collectedCheckBox: CheckBox = itemView.findViewById(R.id.checkbox_collected)
+        private val updateButton: Button = itemView.findViewById(R.id.button_update)
+
+        fun bind(notification: ProductNotification) {
+            productNameTextView.text = notification.product?.name ?: "Unknown Product"
+            companyNameTextView.text = notification.company?.name ?: "Unknown Company"
+            addressTextView.text = notification.address
+            quantityNumberPicker.minValue = 0
+            quantityNumberPicker.maxValue = 100 // Adjust as needed
+            quantityNumberPicker.value = notification.notifiedQuantity
+
+            collectedCheckBox.isChecked = notification.isCollected
+
+            updateButton.setOnClickListener {
+                onUpdateClickListener(notification, quantityNumberPicker.value, collectedCheckBox.isChecked)
+            }
+        }
     }
 
-    override fun onBindViewHolder(holder: NotificationViewHolder, position: Int) {
-        val notification = productNotifications[position]
-        holder.bind(notification, onUpdateClick)
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_notification, parent, false)
+        return ViewHolder(view)
+    }
+
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        holder.bind(productNotifications[position])
     }
 
     override fun getItemCount(): Int = productNotifications.size
 
-    fun updateData(newNotifications: List<ProductNotification>) {
-        productNotifications = newNotifications
+    fun updateData(newProductNotifications: List<ProductNotification>) {
+        this.productNotifications = newProductNotifications
         notifyDataSetChanged()
-    }
-
-    class NotificationViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        private val productName: TextView = itemView.findViewById(R.id.text_view_product_name)
-        private val numberPicker: NumberPicker = itemView.findViewById(R.id.number_picker_quantity)
-        private val checkBoxCollected: CheckBox = itemView.findViewById(R.id.checkbox_collected)
-        private val updateButton: Button = itemView.findViewById(R.id.button_update)
-
-        fun bind(notification: ProductNotification, onUpdateClick: (ProductNotification, Int, Boolean) -> Unit) {
-            productName.text = notification.product?.name ?: "Unknown Product"
-
-            numberPicker.minValue = 0
-            numberPicker.maxValue = 100
-            numberPicker.value = notification.notifiedQuantity
-
-            checkBoxCollected.isChecked = notification.isCollected
-
-            updateButton.setOnClickListener {
-                onUpdateClick(notification, numberPicker.value, checkBoxCollected.isChecked)
-            }
-        }
     }
 }

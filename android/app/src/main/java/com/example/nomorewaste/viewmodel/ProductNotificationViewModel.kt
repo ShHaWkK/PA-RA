@@ -1,4 +1,3 @@
-// ProductNotificationViewModel.kt
 package com.example.nomorewaste.viewmodel
 
 import androidx.lifecycle.LiveData
@@ -22,8 +21,8 @@ class ProductNotificationViewModel : ViewModel() {
     private val _error = MutableLiveData<String>()
     val error: LiveData<String> get() = _error
 
-    fun loadAllProductNotifications() {
-        apiService.getAllProductNotifications().enqueue(object : Callback<List<ProductNotification>> {
+    fun loadProductNotificationsForVolunteer(volunteerId: Int) {
+        apiService.getProductNotificationsForVolunteer(volunteerId).enqueue(object : Callback<List<ProductNotification>> {
             override fun onResponse(call: Call<List<ProductNotification>>, response: Response<List<ProductNotification>>) {
                 if (response.isSuccessful) {
                     _productNotifications.postValue(response.body())
@@ -38,12 +37,12 @@ class ProductNotificationViewModel : ViewModel() {
         })
     }
 
-    fun updateProductNotification(id: Int, notifiedQuantity: Int, isCollected: Boolean) {
-        val updateData = UpdateProductNotificationRequest(notified_quantity = notifiedQuantity, is_collected = isCollected)
+    fun updateProductNotification(id: Int, notifiedQuantity: Int, isCollected: Boolean, volunteerId: Int) {
+        val updateData = UpdateProductNotificationRequest(notifiedQuantity = notifiedQuantity, isCollected = isCollected)
         apiService.updateProductNotification(id, updateData).enqueue(object : Callback<Void> {
             override fun onResponse(call: Call<Void>, response: Response<Void>) {
                 if (response.isSuccessful) {
-                    loadAllProductNotifications() // Refresh the list after update
+                    loadProductNotificationsForVolunteer(volunteerId) // Rafraîchir la liste après mise à jour
                 } else {
                     _error.postValue("Error updating notification: ${response.message()}")
                 }
@@ -54,4 +53,5 @@ class ProductNotificationViewModel : ViewModel() {
             }
         })
     }
+
 }

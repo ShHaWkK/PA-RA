@@ -1,6 +1,8 @@
 package com.example.nomorewaste.api
 
+import com.google.gson.annotations.SerializedName
+
 data class UpdateProductNotificationRequest(
-    val notified_quantity: Int,
-    val is_collected: Boolean
+    @SerializedName("notified_quantity") val notifiedQuantity: Int,
+    @SerializedName("is_collected") val isCollected: Boolean
 )

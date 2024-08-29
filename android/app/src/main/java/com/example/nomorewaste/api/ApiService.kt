@@ -120,15 +120,15 @@ interface ApiService {
     @GET("product_notifications/{id}")
     fun getProductNotification(@Path("id") id: Int): Call<ProductNotification>
 
-    @PUT("product_notifications/{id}")
-    fun updateProductNotification(
-        @Path("id") id: Int,
-        @Body updateData: UpdateProductNotificationRequest
-    ): Call<Void>
     @POST("product_notifications")
     fun createProductNotification(@Body requestData: Map<String, Any>): Call<ProductNotification>
 
     @DELETE("product_notifications/{id}")
     fun deleteProductNotification(@Path("id") id: Int): Call<Void>
+
+   @GET("product_notifications")
+   fun getProductNotificationsForVolunteer(@Query("user_id") user_id: Int): Call<List<ProductNotification>>
+   @PUT("product_notifications/{id}")
+   fun updateProductNotification(@Path("id") id: Int, @Body request: UpdateProductNotificationRequest): Call<Void>
 }
 
