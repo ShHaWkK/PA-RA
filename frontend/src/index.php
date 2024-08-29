@@ -49,8 +49,26 @@ switch ($request) {
     case '/Merchant/SignUp':
         require __DIR__ . '/views/SignUp/MerchantSignUp.php';
         break;
+    case '/Merchant/Merchants':
+        if ($jwtToken) {
+            requireAuth($jwtToken, 'merchant');
+            require __DIR__ . '/views/Merchant/Merchant.php';
+        } else {
+            require __DIR__ . '/views/Login/Login.php';
+            exit;
+        }
+        break;
     case '/Volunteer/SignUp':
         require __DIR__ . '/views/SignUp/VolunteerSignUp.php';
+        break;
+    case '/Volunteer/Volunteers':
+        if ($jwtToken) {
+            requireAuth($jwtToken, 'volunteer');
+            require __DIR__ . '/views/Volunteer/Volunteer.php';
+        } else {
+            require __DIR__ . '/views/Login/Login.php';
+            exit;
+        }
         break;
     case '/Login':
         require __DIR__ . '/views/Login/Login.php';

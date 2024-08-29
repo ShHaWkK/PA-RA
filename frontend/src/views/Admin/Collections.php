@@ -18,7 +18,6 @@
     <div class="back-office-content">
         <h1>Tableau de Bord des Collectes</h1>
 
-
         <div class="row">
             <label for="collectionDate">Collection date:</label>
             <input type="date" id="collectionDate" name="collection-date"/>

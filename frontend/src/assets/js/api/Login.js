@@ -15,6 +15,8 @@ async function login(email, password) {
             throw new Error('Invalid email or password');
         } else if (response.status === 400) {
             throw new Error('Missing required fields');
+        } else if (response.status === 403) {
+            throw new Error('Account not approved');
         } else {
             throw new Error('Failed to login');
         }
@@ -31,7 +33,13 @@ async function login(email, password) {
         switch (data.role){
             case 'admin':
                 window.location.href = '/Admin/Volunteers';
-            break;
+                break;
+            case 'volunteer':
+                window.location.href = '/Volunteer/Volunteers';
+                break;
+            case 'merchant':
+                window.location.href = '/Merchant/Merchants';
+                break;
         }
     }
 

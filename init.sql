@@ -351,6 +351,8 @@ INSERT INTO stocks (product_id, quantity, entry_date, availability, warehouse_id
 -- password1423
 INSERT INTO users (first_name, last_name, email, phone_number, password, role, status) VALUES
                                                                                            ('Admin', 'Admin', 'admin@admin.com', '1234567890', '$2y$10$KJ8zwrGJq9JfHywhUxxRheY.CgbYnBvGjUlhcXHup0DaF.IRtK/Sa', 'admin', 'approved'),
+                                                                                           ('Volunteer', 'Volunteer', 'volunteer@volunteer.com', '1234567890', '$2y$10$KJ8zwrGJq9JfHywhUxxRheY.CgbYnBvGjUlhcXHup0DaF.IRtK/Sa', 'volunteer', 'approved'),
+                                                                                           ('Merchant', 'Merchant', 'merchant@merchant.com', '1234567890', '$2y$10$KJ8zwrGJq9JfHywhUxxRheY.CgbYnBvGjUlhcXHup0DaF.IRtK/Sa', 'merchant', 'approved'),
                                                                                            ('John', 'Doe', 'john.doe@example.com', '0987654321', '$2y$10$KJ8zwrGJq9JfHywhUxxRheY.CgbYnBvGjUlhcXHup0DaF.IRtK/Sa', 'volunteer', 'approved'),
                                                                                            ('Jane', 'Doe', 'jane.doe@example.com', '0987654322', '$2y$10$KJ8zwrGJq9JfHywhUxxRheY.CgbYnBvGjUlhcXHup0DaF.IRtK/Sa', 'employee', 'pending'),
                                                                                            ('Alice', 'Smith', 'alice.smith@example.com', '0987654323', '$2y$10$KJ8zwrGJq9JfHywhUxxRheY.CgbYnBvGjUlhcXHup0DaF.IRtK/Sa', 'manager', 'approved'),
