@@ -188,4 +188,51 @@ async function getUserCompanies(userId) {
         }
 }
 
-export { registerVolunteer, registerMerchant, handleAprovals, getUser, getAllUsers, deleteUser, getUserSkills, getUserAvailabilities, getUserCompanies, modifyUser};
+async function getUserFile(userId) {
+    try {
+        const url = `${apiEndpoint}/users/getUserFile/${userId}`; // Remplacez avec votre endpoint approprié
+
+        const response = await fetch(url, {
+            method: 'GET'
+        });
+
+        if (!response.ok) {
+            switch (response.status) {
+                case 404:
+                    const errorData = await response.json();
+                    if (errorData.error.includes('not found')) {
+                        throw new Error(`Not Found: ${errorData.error}`);
+                    }
+                    break;
+                case 400:
+                    throw new Error(`This user doesn't have a file`);
+                case 500:
+                    throw new Error('Internal Server Error: Error occurred while retrieving the file.');
+                default:
+                    throw new Error(`HTTP Error: ${response.status}`);
+            }
+        }
+
+        // Obtenez le fichier en tant que Blob
+        const fileBlob = await response.blob();
+        const fileName = response.headers.get('Content-Disposition')?.split('filename=')[1]?.replace(/"/g, '') || 'file.pdf';
+
+        // Créez un lien pour télécharger le fichier
+        const fileURL = URL.createObjectURL(fileBlob);
+        const link = document.createElement('a');
+        link.href = fileURL;
+        link.download = fileName;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        // Libérer l'URL après le téléchargement
+        URL.revokeObjectURL(fileURL);
+
+    } catch (error) {
+        console.error('Error during file retrieval:', error.message);
+        alert('An error occurred while retrieving the file. Please try again.');
+    }
+}
+
+export { registerVolunteer, registerMerchant, handleAprovals, getUser, getAllUsers, deleteUser, getUserSkills, getUserAvailabilities, getUserCompanies, modifyUser, getUserFile};

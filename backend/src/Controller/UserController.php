@@ -3,11 +3,15 @@
 namespace Controller;
 
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\Exception\ORMException;
+use Doctrine\ORM\OptimisticLockException;
+use Doctrine\ORM\TransactionRequiredException;
 use Entity\CompanyModel;
 use Entity\UserCompanyModel;
 use Entity\UserModel;
 use Entity\TicketModel;
 use Doctrine\ORM\Exception\NotSupported;
+use SplFileInfo;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
@@ -100,6 +104,14 @@ class UserController
                         case 'getUserCompanies':
                             if (isset($uriParts)){
                                 return $this->getUserCompanies($uriParts[2]);
+                            }else{
+                                http_response_code(400);
+                                return ["message" => "User id not set"];
+                            }
+
+                        case 'getUserFile':
+                            if (isset($uriParts)){
+                                return $this->getUserFile($uriParts[2]);
                             }else{
                                 http_response_code(400);
                                 return ["message" => "User id not set"];
@@ -578,6 +590,58 @@ class UserController
             // Vous pouvez ajouter un logging ici pour l'erreur
             error_log("Erreur lors de la suppression de l'utilisateur avec l'ID $id : " . $e->getMessage());
             return false;
+        }
+    }
+
+    private function getUserFile($userId)
+    {
+        try {
+            // Récupérer l'utilisateur
+            $user = $this->entityManager->find(UserModel::class, $userId);
+
+            if (!$user) {
+                http_response_code(404);
+                return ["User with ID $userId not found."];
+            }
+
+            // Récupérer le chemin relatif du fichier
+            $relativeFilePath = $user->getFilePath();
+
+            if (!$relativeFilePath) {
+                http_response_code(400);
+                return ["Invalid file path. No file path associated with user ID $userId."];
+            }
+
+            // Construire le chemin absolu du fichier
+            $absoluteFilePath = $this->publicDir . $relativeFilePath;
+
+            // Vérifier si le fichier existe
+            if (!file_exists($absoluteFilePath)) {
+                http_response_code(404);
+                return ["File not found at path $absoluteFilePath."];
+            }
+
+            // Obtenir les informations du fichier
+            $fileInfo = new SplFileInfo($absoluteFilePath);
+            $fileSize = $fileInfo->getSize();
+            $fileName = $fileInfo->getBasename();
+            $fileMimeType = mime_content_type($absoluteFilePath);
+
+            // Définir les headers pour le téléchargement
+            header('Content-Type: ' . $fileMimeType);
+            header('Content-Disposition: attachment; filename="' . $fileName . '"');
+            header('Content-Length: ' . $fileSize);
+
+            // Lire le fichier et l'envoyer au navigateur
+            readfile($absoluteFilePath);
+            exit;
+
+        } catch (Exception $e) {
+            http_response_code(500);
+            return ["An error occurred while retrieving the file.", 'error' => $e->getMessage()];
+        } catch (OptimisticLockException $e) {
+        } catch (TransactionRequiredException $e) {
+        } catch (ORMException $e) {
         }
     }
 

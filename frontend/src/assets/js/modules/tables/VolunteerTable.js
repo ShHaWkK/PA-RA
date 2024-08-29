@@ -1,4 +1,4 @@
-import { getAllUsers } from '/assets/js/api/Users.js';
+import { getAllUsers, getUserFile } from '/assets/js/api/Users.js';
 import { setupSearch } from '/assets/js/modules/SearchBar.js';
 import {populateModifyUserForm,populateSkillsInModal,populateAvailabilitiesInModal} from "/assets/js/modules/modals/AdminUserModals.js";
 import {formatDateToFrench} from "../FormatDate.js";
@@ -29,7 +29,7 @@ export async function populateVolunteerTable(status) {
     const thead = document.createElement('thead');
     const headerRow = document.createElement('tr');
 
-    const headers = ['', 'First Name', 'Last Name', 'Email', 'Phone Number', 'Status', 'Availabilities', 'Skills', 'Modify', 'Created At', 'Updated At'];
+    const headers = ['', 'First Name', 'Last Name', 'Email', 'Phone Number', 'Status', 'Availabilities', 'Skills', 'Resume', 'Modify', 'Created At', 'Updated At'];
     headers.forEach(headerText => {
         const th = document.createElement('th');
         th.textContent = headerText;
@@ -82,6 +82,13 @@ export async function populateVolunteerTable(status) {
         skillsButton.onclick = () => viewSkills(user.id);
         skillsButtonCell.appendChild(skillsButton);
         row.appendChild(skillsButtonCell);
+
+        const resumeButtonCell = document.createElement('td');
+        const resumeButton = document.createElement('button');
+        resumeButton.textContent = 'Télécharger';
+        resumeButton.onclick = () => getUserFile(user.id);
+        resumeButtonCell.appendChild(resumeButton);
+        row.appendChild(resumeButtonCell);
 
         // Ajout du bouton "Modifier"
         const modifyButtonCell = document.createElement('td');

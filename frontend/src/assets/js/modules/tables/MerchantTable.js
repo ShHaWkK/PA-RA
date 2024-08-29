@@ -1,4 +1,4 @@
-import { getAllUsers } from '/assets/js/api/Users.js';
+import { getAllUsers, getUserFile } from '/assets/js/api/Users.js';
 import { setupSearch } from '/assets/js/modules/SearchBar.js';
 import {populateModifyUserForm,populateCompaniesInModal,populateSkillsInModal} from "/assets/js/modules/modals/AdminUserModals.js";
 import {formatDateToFrench} from "../FormatDate.js";
@@ -24,7 +24,7 @@ export async function populateMerchantTable(status) {
     const thead = document.createElement('thead');
     const headerRow = document.createElement('tr');
 
-    const headers = ['', 'First Name', 'Last Name', 'Email', 'Phone Number', 'Status', 'Company', 'Modify', 'Created At', 'Updated At'];
+    const headers = ['', 'First Name', 'Last Name', 'Email', 'Phone Number', 'Status', 'Company', 'Commercial License', 'Modify', 'Created At', 'Updated At'];
     headers.forEach(headerText => {
         const th = document.createElement('th');
         th.textContent = headerText;
@@ -70,6 +70,13 @@ export async function populateMerchantTable(status) {
         companyButton.onclick = () => viewCompany(user.id);
         companyButtonCell.appendChild(companyButton);
         row.appendChild(companyButtonCell);
+
+        const commercialLicenseButtonCell = document.createElement('td');
+        const commercialLicenseButton = document.createElement('button');
+        commercialLicenseButton.textContent = 'Télécharger';
+        commercialLicenseButton.onclick = () => getUserFile(user.id);
+        commercialLicenseButtonCell.appendChild(commercialLicenseButton);
+        row.appendChild(commercialLicenseButtonCell);
 
         // Ajout du bouton "Modifier"
         const modifyButtonCell = document.createElement('td');
