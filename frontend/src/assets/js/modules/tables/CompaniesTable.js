@@ -1,5 +1,6 @@
 import {formatDateToFrench, parseDate} from "../FormatDate.js";
 import { getAllCompanies } from "../../api/Companies.js";
+import { populateCompanyEmployeesModal } from "../../pages/AdminCompanyPage.js";
 
 export async function populateCompanyTable(queryParameters) {
     const loader = document.getElementById('loadingBodyCompany');
@@ -45,7 +46,7 @@ export async function populateCompanyTable(queryParameters) {
         const headerRow = document.createElement('tr');
 
         // Définir les en-têtes de la table
-        const headers = ['', 'Name', 'Address', 'Contact Info', 'SIRET', 'Renewal Date', 'Renewal Status', 'Created At', 'Updated At'];
+        const headers = ['', 'Name', 'Address', 'Contact Info', 'SIRET', 'Renewal Date', 'Renewal Status', 'Employees', 'Created At', 'Updated At'];
         headers.forEach(headerText => {
             const th = document.createElement('th');
             th.textContent = headerText;
@@ -90,6 +91,12 @@ export async function populateCompanyTable(queryParameters) {
             const renewalStatusCell = document.createElement('td');
             renewalStatusCell.textContent = company.renewal_status;
 
+            const employeesButtonCell = document.createElement('td');
+            const employeesButton = document.createElement('button');
+            employeesButton.textContent = 'Voir';
+            employeesButton.onclick = () => viewEmployees(company.id);
+            employeesButtonCell.appendChild(employeesButton);
+
             const createdAtCell = document.createElement('td');
             createdAtCell.textContent = company.created_at ? formatDateToFrench(company.created_at) : 'N/A';
 
@@ -104,6 +111,7 @@ export async function populateCompanyTable(queryParameters) {
             row.appendChild(siretCell);
             row.appendChild(renewalDateCell);
             row.appendChild(renewalStatusCell);
+            row.appendChild(employeesButtonCell);
             row.appendChild(createdAtCell);
             row.appendChild(updatedAtCell);
 
@@ -133,3 +141,10 @@ export async function populateCompanyTable(queryParameters) {
         }
     }
 }
+
+function viewEmployees(companyId) {
+    populateCompanyEmployeesModal(companyId);
+    const employeeModal = document.getElementById("companyEmployeesModal");
+    employeeModal.style.display = "block";
+}
+

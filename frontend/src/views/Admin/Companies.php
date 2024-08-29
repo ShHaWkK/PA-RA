@@ -36,6 +36,7 @@
 
         <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/AdminCompanyPage/addCompanyModal.php'); ?>
         <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/AdminCompanyPage/editCompanyModal.php'); ?>
+        <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/AdminCompanyPage/EmployeesModal.php'); ?>
 
 
         <!-- Script pour gérer les interactions avec la page -->

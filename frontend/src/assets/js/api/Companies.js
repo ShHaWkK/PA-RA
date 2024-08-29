@@ -56,6 +56,22 @@ async function getAllCompanies() {
     }
 }
 
+async function getEmployeesFromCompany(companyId) {
+    const url =apiEndpoint + `/companies/${companyId}/employees`;
+    console.log("url",url);
+
+    const response = await fetch(url, {
+        method: 'GET'
+    });
+
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to retrieve employees');
+    }
+
+    return await response.json();
+}
+
 async function updateCompany(id, companyData) {
     try {
         const response = await fetch(apiEndpoint + `/companies/${id}`, {
@@ -96,4 +112,4 @@ async function deleteCompany(id) {
     }
 }
 
-export { createCompany, getCompany, getAllCompanies, deleteCompany, updateCompany }
+export { createCompany, getCompany, getAllCompanies, deleteCompany, updateCompany, getEmployeesFromCompany}

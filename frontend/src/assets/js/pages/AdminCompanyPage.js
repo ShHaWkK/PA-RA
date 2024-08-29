@@ -1,5 +1,5 @@
 import { populateCompanyTable } from "../modules/tables/CompaniesTable.js";
-import { deleteCompany, getCompany, updateCompany, createCompany } from "../api/Companies.js";
+import { deleteCompany, getCompany, updateCompany, createCompany, getEmployeesFromCompany } from "../api/Companies.js";
 
 async function deleteCompanies() {
     const selectedRadio = document.querySelector('input[name="CompanySelection"]:checked');
@@ -55,6 +55,81 @@ async function populateEditCompanyModalData(companyId) {
     } finally {
         loadingIndicator.classList.add('hidden');
         formElement.classList.remove('hidden');
+    }
+}
+
+export async function populateCompanyEmployeesModal(companyID) {
+    // Afficher le loader
+    document.getElementById('loadingCompanyEmployeesDetails').classList.remove('hidden');
+
+    const modalBody = document.getElementById('modalBodyCompanyEmployeesDetails');
+    // Vider le contenu précédent du corps de la modale
+    modalBody.innerHTML = '';
+
+    try {
+        // Récupérer les employés de l'entreprise
+        console.log("companyID",companyID);
+        const employees = await getEmployeesFromCompany(companyID);
+
+        console.log(employees);
+
+        // Vérifier si le conteneur de la modale existe
+        const modalContent = document.getElementById('modalBodyCompanyEmployeesDetails');
+        if (!modalContent) {
+            console.error('Company employees modal content container not found.');
+            return;
+        }
+
+        // Effacer le contenu existant du modal
+        modalContent.innerHTML = '';
+
+        if (!employees || employees.length === 0) {
+            modalContent.textContent = 'No employees found for this company.';
+            return;
+        }
+
+        // Créer une liste pour afficher les employés
+        const employeeList = document.createElement('ul');
+        employeeList.classList.add('employee-list'); // Ajout d'une classe pour le style, si nécessaire
+
+        // Parcourir les employés et les ajouter à la liste
+        employees.forEach(employee => {
+            const employeeItem = document.createElement('li');
+            employeeItem.classList.add('employee-item'); // Ajout d'une classe pour le style, si nécessaire
+
+            // Contenu de l'employé
+            const employeeInfo = document.createElement('span');
+            employeeInfo.innerHTML = `
+                <strong>Name:</strong> ${employee.user_name} <br>
+                <strong>Email:</strong> ${employee.user_mail} <br>
+                <strong>Phone:</strong> ${employee.user_phone} <br>
+                <strong>Role:</strong> ${employee.role} <br>
+            `;
+
+            // Ajouter les informations de l'employé à l'élément de la liste
+            employeeItem.appendChild(employeeInfo);
+
+            // Ajouter l'élément à la liste
+            employeeList.appendChild(employeeItem);
+        });
+
+        // Ajouter la liste des employés au modal
+        modalContent.appendChild(employeeList);
+
+        // Afficher la fenêtre modale
+        document.getElementById('companyEmployeesModal').style.display = 'block';
+
+    } catch (error) {
+        console.error('Error populating company employees modal:', error.message);
+
+        const modalContent = document.getElementById('modalBodyCompanyEmployeesDetails');
+        if (modalContent) {
+            modalContent.textContent = 'No employees available for this company.';
+        }
+
+    } finally {
+        // Cacher le loader
+        document.getElementById('loadingCompanyEmployeesDetails').classList.add('hidden');
     }
 }
 
@@ -207,4 +282,16 @@ document.addEventListener('DOMContentLoaded', function() {
         event.preventDefault();
         await addCompany();
     };
+
+    // Fenêtre de vue des employés
+    const employeesSpan = document.getElementById("closeEmployeesModal");
+    const employeeModal = document.getElementById("companyEmployeesModal");
+
+    console.log("employeemodal",employeeModal);
+    console.log("employeeSpan",employeesSpan);
+
+    employeesSpan.onclick = function () {
+        employeeModal.style.display = 'none';
+    }
+
 });
