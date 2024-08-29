@@ -3,21 +3,17 @@ import { getAllSkills } from "../api/Skills.js"
 
 // Fonction pour ajouter un écouteur d'événement de soumission au formulaire
 function addVolunteerSubmitEvent() {
-    // Supprime les écouteurs d'événements existants, s'il y en a, pour éviter les soumissions multiples
     const form = document.getElementById('registrationForm');
-    const newForm = form.cloneNode(true);
-    form.parentNode.replaceChild(newForm, form);
 
-    newForm.addEventListener('submit', async function(event) {
+    form.addEventListener('submit', async function(event) {
         event.preventDefault();
 
-        const formData = new FormData(this);
+        const formData = new FormData(form);
         const jsonData = {};
 
         // Convertir FormData en objet JSON, en ignorant les disponibilités et les compétences
         formData.forEach((value, key) => {
             if (key.includes('availabilities') || key.includes('skills')) {
-                // Ignorer les clés de disponibilités et compétences
                 return;
             }
             if (jsonData[key]) {
@@ -27,7 +23,6 @@ function addVolunteerSubmitEvent() {
                 jsonData[key].push(value);
             } else {
                 jsonData[key] = value;
-                console.log("jsonData[key] = value", jsonData[key], value);
             }
         });
 
@@ -62,24 +57,21 @@ function addVolunteerSubmitEvent() {
 
         jsonData.skills = skills;
 
-        console.log(jsonData);
-
         // Extraire le fichier du formulaire
         const file = formData.get('resume'); // Remplacez 'resume' par l'ID de votre champ de fichier si différent
-        console.log("file",file);
+
+        console.log('jsonData:', jsonData);
+        console.log('file:', file);
 
         try {
             // Appel à la fonction d'inscription du volontaire avec les données utilisateur et le fichier
             const result = await registerVolunteer(jsonData, file);
+            console.log(result);
 
             if (!result.ok) {
                 switch (result.status) {
                     case 409:
                         alert("Un utilisateur avec cet e-mail existe déjà");
-                        break;
-                    default:
-                        console.log('Échec de l\'inscription du volontaire');
-                        alert('Échec de l\'inscription du volontaire');
                         break;
                 }
             } else {

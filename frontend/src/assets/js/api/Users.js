@@ -16,7 +16,6 @@ async function registerVolunteer(userData, file) {
     return await fetch(apiEndpoint + '/users/registerVolunteer', {
         method: 'POST',
         body: formData,
-        mode: 'no-cors'
     });
 }
 

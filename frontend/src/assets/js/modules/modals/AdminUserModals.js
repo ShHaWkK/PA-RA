@@ -206,7 +206,6 @@ document.addEventListener('DOMContentLoaded',
                 }
             }
 
-            addVolunteerSubmitEvent();
             populateSkillTable();
 
             // Fenêtre modale de suppression d'un bénévole
