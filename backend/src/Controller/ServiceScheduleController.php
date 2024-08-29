@@ -36,6 +36,9 @@ class ServiceScheduleController
                     return $this->createSchedule($input);
                 case 'GET':
                     if (isset($uriParts[1])) {
+                        if (isset($uriParts[2]) && $uriParts[2] === 'byDate' && isset($_GET['date'])) {
+                            return $this->getScheduleByDate((int) $uriParts[1], $_GET['date']);
+                        }
                         return $this->getScheduleByUser((int) $uriParts[1]);
                     } else {
                         return $this->getAllSchedules();
@@ -125,5 +128,21 @@ class ServiceScheduleController
             return ['error' => $e->getMessage()];
         }
     }
+
+    public function getScheduleByDate($userId, $date)
+{
+    try {
+        $schedules = $this->serviceScheduleService->getScheduleByDate($userId, $date);
+        if (!$schedules) {
+            http_response_code(404);
+            return ['error' => "No schedules found for user ID: $userId on date: $date"];
+        }
+        return json_decode($this->serializer->serialize($schedules, 'json'), true);
+    } catch (\Exception $e) {
+        error_log("Detailed Error in getScheduleByDate: " . $e->getMessage());
+        http_response_code(500);
+        return ['error' => 'Error retrieving schedules for user ID: ' . $userId . ' on date: ' . $date];
+    }
+}
 }
 ?>

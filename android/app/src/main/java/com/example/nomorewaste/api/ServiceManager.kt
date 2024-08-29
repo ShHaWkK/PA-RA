@@ -23,4 +23,20 @@ class ServiceManager {
             }
         })
     }
+    fun getUserScheduleByDate(userId: Int, date: String, callback: (List<ServiceSchedule>?, Throwable?) -> Unit) {
+        apiService.getUserScheduleByDate(userId, date).enqueue(object : Callback<List<ServiceSchedule>> {
+            override fun onResponse(call: Call<List<ServiceSchedule>>, response: Response<List<ServiceSchedule>>) {
+                if (response.isSuccessful) {
+                    callback(response.body(), null)
+                } else {
+                    callback(null, Throwable(response.message()))
+                }
+            }
+
+            override fun onFailure(call: Call<List<ServiceSchedule>>, t: Throwable) {
+                callback(null, t)
+            }
+        })
+    }
+
 }

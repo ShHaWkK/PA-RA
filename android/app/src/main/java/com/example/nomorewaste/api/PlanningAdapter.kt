@@ -8,7 +8,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.nomorewaste.R
 
 class PlanningAdapter(
-    private val plannings: List<ServiceSchedule>
+    private var plannings: List<ServiceSchedule>
 ) : RecyclerView.Adapter<PlanningAdapter.PlanningViewHolder>() {
 
     class PlanningViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -31,4 +31,9 @@ class PlanningAdapter(
     }
 
     override fun getItemCount(): Int = plannings.size
+
+    fun updateData(newPlannings: List<ServiceSchedule>) {
+        this.plannings = newPlannings
+        notifyDataSetChanged()
+    }
 }

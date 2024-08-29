@@ -17,7 +17,7 @@ class ServiceScheduleModel
     #[ORM\ManyToOne(targetEntity: ServiceModel::class, inversedBy: "schedules")]
     #[ORM\JoinColumn(nullable: false)]
     private $service;
-
+    
     #[ORM\Column(type: "datetime")]
     private $start_time;
 

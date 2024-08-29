@@ -101,5 +101,33 @@ class ServiceScheduleService
             throw new \Exception("Error deleting schedule ID: " . $id);
         }
     }
+
+    public function getScheduleByDate($userId, $date)
+    {
+        try {
+            $query = $this->entityManager->createQuery(
+                'SELECT ss FROM Entity\ServiceScheduleModel ss
+                 JOIN Entity\ServiceRegistrationModel sr WITH ss.service = sr.service
+                 WHERE sr.user_id = :userId AND ss.start_time >= :dateStart AND ss.end_time < :dateEnd'
+            )
+            ->setParameter('userId', $userId)
+            ->setParameter('dateStart', new \DateTime($date . ' 00:00:00'))
+            ->setParameter('dateEnd', new \DateTime($date . ' 23:59:59'));
+    
+            $result = $query->getResult();
+    
+            if (empty($result)) {
+                throw new \Exception("No schedules found for user ID: $userId on date: $date");
+            }
+    
+            return $result;
+        } catch (\Exception $e) {
+            error_log("Error in getScheduleByDate for user ID: $userId - " . $e->getMessage());
+            throw new \Exception("Error retrieving schedules for user ID: $userId on date: $date");
+        }
+    }
+    
+    
+
 }
 ?>

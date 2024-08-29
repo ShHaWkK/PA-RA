@@ -5,6 +5,9 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.nomorewaste.api.ServiceSchedule
 import com.example.nomorewaste.api.ServiceManager
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class PlanningViewModel : ViewModel() {
 
@@ -26,4 +29,17 @@ class PlanningViewModel : ViewModel() {
             }
         }
     }
+
+    fun loadUserScheduleForDate(userId: Int, date: Date) {
+        val formattedDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(date)
+        serviceManager.getUserScheduleByDate(userId, formattedDate) { schedules, throwable ->
+            if (schedules != null) {
+                _schedules.postValue(schedules)
+            } else {
+                _schedules.postValue(emptyList())
+                _error.postValue(throwable?.message ?: "Unknown error")
+            }
+        }
+    }
+
 }

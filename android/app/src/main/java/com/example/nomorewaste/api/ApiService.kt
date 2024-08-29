@@ -89,6 +89,9 @@ interface ApiService {
     @GET("service_schedules/{user_id}")
     fun getUserSchedule(@Path("user_id") userId: Int): Call<List<ServiceSchedule>>
 
+   @GET("service_schedules/{userId}/byDate")
+   fun getUserScheduleByDate(@Path("userId") userId: Int, @Query("date") date: String): Call<List<ServiceSchedule>>
+
     @GET("collections")
     fun getAllCollections(): Call<List<Collection>>
 
