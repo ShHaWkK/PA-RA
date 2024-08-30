@@ -488,6 +488,25 @@ INSERT INTO collection_products (collection_id, notification_id, quantity_collec
     (2, (SELECT id FROM product_notifications WHERE address = '5 Boulevard Saint-Germain, 75005 Paris, France'), 75);
 
 
+INSERT INTO services (name, description, start_schedule, end_schedule, capacity, location) VALUES
+('Séminaire de développement personnel', 'Un séminaire pour améliorer vos compétences en développement personnel.', '2024-08-31 10:00:00', '2024-08-31 13:00:00', 30, 'Bordeaux Warehouse'),
+('Atelier de peinture', 'Atelier de peinture pour les débutants et avancés.', '2024-09-01 09:00:00', '2024-09-01 12:00:00', 20, 'Lyon Warehouse'),
+('Cours de pâtisserie', 'Apprenez à préparer des pâtisseries françaises.', '2024-09-02 14:00:00', '2024-09-02 17:00:00', 15, 'Nice Warehouse'),
+('Yoga et méditation', 'Séance de yoga et méditation pour tous les niveaux.', '2024-09-03 08:00:00', '2024-09-03 10:00:00', 25, 'Paris Warehouse'),
+('Conférence sur le développement durable', 'Conférence pour sensibiliser au développement durable.', '2024-09-04 15:00:00', '2024-09-04 18:00:00', 50, 'Toulouse Warehouse'),
+('Atelier de bricolage', 'Atelier pour apprendre les bases du bricolage.', '2024-09-05 10:00:00', '2024-09-05 12:00:00', 20, 'Nantes Warehouse'),
+('Initiation à la photographie', 'Atelier pour débutants en photographie numérique.', '2024-09-06 09:00:00', '2024-09-06 11:00:00', 15, 'Marseille Warehouse'),
+('Cours de danse', 'Cours de danse contemporaine pour débutants.', '2024-09-07 14:00:00', '2024-09-07 16:00:00', 20, 'Paris Warehouse'),
+('Jardinage urbain', 'Atelier sur le jardinage en milieu urbain.', '2024-09-08 09:00:00', '2024-09-08 11:00:00', 30, 'Lille Warehouse'),
+('Séminaire sur la gestion du temps', 'Apprenez à mieux gérer votre temps et vos priorités.', '2024-09-09 10:00:00', '2024-09-09 13:00:00', 30, 'Strasbourg Warehouse'),
+('Atelier de couture', 'Atelier pour apprendre les bases de la couture.', '2024-09-10 11:00:00', '2024-09-10 13:00:00', 10, 'Limoges Warehouse'),
+('Cours de théâtre', 'Cours pour débutants sur les techniques de théâtre.', '2024-09-11 15:00:00', '2024-09-11 17:00:00', 25, 'Paris Warehouse'),
+('Randonnée en montagne', 'Randonnée guidée en montagne avec un expert.', '2024-09-12 08:00:00', '2024-09-12 14:00:00', 10, 'Grenoble Warehouse'),
+('Conférence sur l\'intelligence artificielle', 'Introduction aux bases de l\'IA et ses applications.', '2024-09-13 16:00:00', '2024-09-13 18:00:00', 40, 'Nice Warehouse'),
+('Atelier d\'écriture créative', 'Atelier pour développer vos compétences d\'écriture.', '2024-09-14 10:00:00', '2024-09-14 12:00:00', 15, 'Lyon Warehouse'),
+('Cours de musique', 'Cours de guitare pour les débutants.', '2024-09-15 13:00:00', '2024-09-15 15:00:00', 15, 'Bordeaux Warehouse');
+
+
 INSERT INTO service_schedules (service_id, start_time, end_time, location) VALUES
 ((SELECT id FROM services WHERE name = 'Séminaire de développement personnel'), '2024-08-31 10:00:00', '2024-08-31 13:00:00', 'Bordeaux Warehouse'),
 ((SELECT id FROM services WHERE name = 'Atelier de peinture'), '2024-09-01 09:00:00', '2024-09-01 12:00:00', 'Lyon Warehouse'),
@@ -505,20 +524,3 @@ INSERT INTO service_schedules (service_id, start_time, end_time, location) VALUE
 ((SELECT id FROM services WHERE name = 'Conférence sur l\intelligence artificielle'), '2024-09-13 16:00:00', '2024-09-13 18:00:00', 'Nice Warehouse'),
 ((SELECT id FROM services WHERE name = 'Atelier d\écriture créative'), '2024-09-14 10:00:00', '2024-09-14 12:00:00', 'Lyon Warehouse'),
 ((SELECT id FROM services WHERE name = 'Cours de musique'), '2024-09-15 13:00:00', '2024-09-15 15:00:00', 'Bordeaux Warehouse');
-INSERT INTO services (name, description, start_schedule, end_schedule, capacity, location) VALUES
-                                                                                               ('Séminaire de développement personnel', 'Un séminaire pour améliorer vos compétences en développement personnel.', '2024-08-31 10:00:00', '2024-08-31 13:00:00', 30, 'Bordeaux Warehouse'),
-                                                                                               ('Atelier de peinture', 'Atelier de peinture pour les débutants et avancés.', '2024-09-01 09:00:00', '2024-09-01 12:00:00', 20, 'Lyon Warehouse'),
-                                                                                               ('Cours de pâtisserie', 'Apprenez à préparer des pâtisseries françaises.', '2024-09-02 14:00:00', '2024-09-02 17:00:00', 15, 'Nice Warehouse'),
-                                                                                               ('Yoga et méditation', 'Séance de yoga et méditation pour tous les niveaux.', '2024-09-03 08:00:00', '2024-09-03 10:00:00', 25, 'Paris Warehouse'),
-                                                                                               ('Conférence sur le développement durable', 'Conférence pour sensibiliser au développement durable.', '2024-09-04 15:00:00', '2024-09-04 18:00:00', 50, 'Toulouse Warehouse'),
-                                                                                               ('Atelier de bricolage', 'Atelier pour apprendre les bases du bricolage.', '2024-09-05 10:00:00', '2024-09-05 12:00:00', 20, 'Nantes Warehouse'),
-                                                                                               ('Initiation à la photographie', 'Atelier pour débutants en photographie numérique.', '2024-09-06 09:00:00', '2024-09-06 11:00:00', 15, 'Marseille Warehouse'),
-                                                                                               ('Cours de danse', 'Cours de danse contemporaine pour débutants.', '2024-09-07 14:00:00', '2024-09-07 16:00:00', 20, 'Paris Warehouse'),
-                                                                                               ('Jardinage urbain', 'Atelier sur le jardinage en milieu urbain.', '2024-09-08 09:00:00', '2024-09-08 11:00:00', 30, 'Lille Warehouse'),
-                                                                                               ('Séminaire sur la gestion du temps', 'Apprenez à mieux gérer votre temps et vos priorités.', '2024-09-09 10:00:00', '2024-09-09 13:00:00', 30, 'Strasbourg Warehouse'),
-                                                                                               ('Atelier de couture', 'Atelier pour apprendre les bases de la couture.', '2024-09-10 11:00:00', '2024-09-10 13:00:00', 10, 'Limoges Warehouse'),
-                                                                                               ('Cours de théâtre', 'Cours pour débutants sur les techniques de théâtre.', '2024-09-11 15:00:00', '2024-09-11 17:00:00', 25, 'Paris Warehouse'),
-                                                                                               ('Randonnée en montagne', 'Randonnée guidée en montagne avec un expert.', '2024-09-12 08:00:00', '2024-09-12 14:00:00', 10, 'Grenoble Warehouse'),
-                                                                                               ('Conférence sur l\'intelligence artificielle', 'Introduction aux bases de l\'IA et ses applications.', '2024-09-13 16:00:00', '2024-09-13 18:00:00', 40, 'Nice Warehouse'),
-                                                                                               ('Atelier d\'écriture créative', 'Atelier pour développer vos compétences d\'écriture.', '2024-09-14 10:00:00', '2024-09-14 12:00:00', 15, 'Lyon Warehouse'),
-                                                                                               ('Cours de musique', 'Cours de guitare pour les débutants.', '2024-09-15 13:00:00', '2024-09-15 15:00:00', 15, 'Bordeaux Warehouse');
