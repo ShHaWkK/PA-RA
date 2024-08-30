@@ -18,7 +18,6 @@ class ServiceRegistrationService
         $this->entityManager = $entityManager;
         $this->emailService = $emailService;
     }
-
     public function createRegistration($data)
     {
         $service = $this->entityManager->find(ServiceModel::class, $data['service_id']);
@@ -31,7 +30,13 @@ class ServiceRegistrationService
         if (!$user) {
             throw new \Exception('User not found');
         }
-    
+        
+        // Vérification de la date actuelle par rapport à la date de début du service
+        $currentDateTime = new \DateTime();
+        if ($service->getStartSchedule() < $currentDateTime) {
+            throw new \Exception('You cannot register for a service that has already started.');
+        }
+
         // Check if the user is already registered for another service with a conflicting schedule
         $conflictingRegistrations = $this->entityManager->getRepository(ServiceRegistrationModel::class)
             ->createQueryBuilder('r')

@@ -108,7 +108,7 @@ class ServiceScheduleService
             $query = $this->entityManager->createQuery(
                 'SELECT ss FROM Entity\ServiceScheduleModel ss
                  JOIN Entity\ServiceRegistrationModel sr WITH ss.service = sr.service
-                 WHERE sr.user_id = :userId AND ss.start_time >= :dateStart AND ss.end_time < :dateEnd'
+                 WHERE sr.user_id = :userId AND ss.start_time >= :dateStart AND ss.end_time <= :dateEnd'
             )
             ->setParameter('userId', $userId)
             ->setParameter('dateStart', new \DateTime($date . ' 00:00:00'))
