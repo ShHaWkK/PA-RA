@@ -1,5 +1,4 @@
-// Path: src/main/java/com/example/nomorewaste/adapter/PlanningAdapter.kt
-package com.example.nomorewaste.adapter
+package com.example.nomorewaste.api
 
 import android.view.LayoutInflater
 import android.view.View
@@ -10,7 +9,7 @@ import com.example.nomorewaste.R
 import com.example.nomorewaste.api.*
 
 class PlanningAdapter(
-    private val planningItems: List<Any>
+    private var planningItems: List<Any>
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     companion object {
@@ -31,23 +30,12 @@ class PlanningAdapter(
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+        val inflater = LayoutInflater.from(parent.context)
         return when (viewType) {
-            TYPE_ROUTE -> {
-                val view = LayoutInflater.from(parent.context).inflate(R.layout.item_route, parent, false)
-                RouteViewHolder(view)
-            }
-            TYPE_COLLECTION -> {
-                val view = LayoutInflater.from(parent.context).inflate(R.layout.item_collection, parent, false)
-                CollectionViewHolder(view)
-            }
-            TYPE_DELIVERY -> {
-                val view = LayoutInflater.from(parent.context).inflate(R.layout.item_delivery, parent, false)
-                DeliveryViewHolder(view)
-            }
-            TYPE_SERVICE -> {
-                val view = LayoutInflater.from(parent.context).inflate(R.layout.item_service, parent, false)
-                ServiceViewHolder(view)
-            }
+            TYPE_ROUTE -> RouteViewHolder(inflater.inflate(R.layout.item_route, parent, false))
+            TYPE_COLLECTION -> CollectionViewHolder(inflater.inflate(R.layout.item_collections, parent, false))
+            TYPE_DELIVERY -> DeliveryViewHolder(inflater.inflate(R.layout.item_delivery, parent, false))
+            TYPE_SERVICE -> ServiceViewHolder(inflater.inflate(R.layout.item_services, parent, false))
             else -> throw IllegalArgumentException("Invalid view type")
         }
     }
@@ -63,6 +51,12 @@ class PlanningAdapter(
 
     override fun getItemCount(): Int = planningItems.size
 
+    fun updateData(newItems: List<Any>) {
+        planningItems = newItems
+        notifyDataSetChanged()
+    }
+
+    // ViewHolder for Route
     class RouteViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val name: TextView = itemView.findViewById(R.id.route_name)
         private val startTime: TextView = itemView.findViewById(R.id.route_start_time)
@@ -71,22 +65,24 @@ class PlanningAdapter(
 
         fun bind(route: Route) {
             name.text = route.name
-            startTime.text = route.startTime
-            endTime.text = route.endTime
+            startTime.text = route.startTime ?: "N/A"
+            endTime.text = route.endTime ?: "N/A"
             status.text = route.status
         }
     }
 
+    // ViewHolder for CollectionData
     class CollectionViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        private val date: TextView = itemView.findViewById(R.id.collection_date)
+        private val collectionDate: TextView = itemView.findViewById(R.id.collection_date)
         private val isCompleted: TextView = itemView.findViewById(R.id.collection_completed)
 
-        fun bind(collection: CollectionData) {
-            date.text = collection.collectionDate ?: "Unknown Date"
-            isCompleted.text = if (collection.isCompleted) "Completed" else "Pending"
+        fun bind(collectionData: CollectionData) {
+            collectionDate.text = collectionData.collectionDate ?: "Unknown Date"
+            isCompleted.text = if (collectionData.isCompleted) "Completed" else "Pending"
         }
     }
 
+    // ViewHolder for Delivery
     class DeliveryViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val routeName: TextView = itemView.findViewById(R.id.delivery_route_name)
         private val deliveryDate: TextView = itemView.findViewById(R.id.delivery_date)
@@ -101,6 +97,7 @@ class PlanningAdapter(
         }
     }
 
+    // ViewHolder for ServiceRegistration
     class ServiceViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val serviceName: TextView = itemView.findViewById(R.id.service_name)
         private val location: TextView = itemView.findViewById(R.id.service_location)
@@ -110,8 +107,8 @@ class PlanningAdapter(
         fun bind(serviceRegistration: ServiceRegistration) {
             serviceName.text = serviceRegistration.service?.name
             location.text = serviceRegistration.service?.location
-            startSchedule.text = serviceRegistration.service?.startSchedule
-            endSchedule.text = serviceRegistration.service?.endSchedule
+            startSchedule.text = serviceRegistration.service?.startSchedule ?: "N/A"
+            endSchedule.text = serviceRegistration.service?.endSchedule ?: "N/A"
         }
     }
 }

@@ -1,3 +1,4 @@
+// Path: src/main/java/com/example/nomorewaste/api/ApiService.kt
 package com.example.nomorewaste.api
 
 import okhttp3.ResponseBody
@@ -18,8 +19,9 @@ interface ApiService {
     @GET("users/{id}")
     fun getUser(@Path("id") id: Int): Call<User>
 
- @GET("availabilities/{id}")
- fun getAvailabilities(@Path("id") userId: Int): Call<ResponseBody>
+    @GET("availabilities/{id}")
+    fun getAvailabilities(@Path("id") userId: Int): Call<ResponseBody>
+
     @PUT("users/{id}")
     fun updateUser(@Path("id") id: Int, @Body user: User): Call<Void>
 
@@ -86,36 +88,34 @@ interface ApiService {
     @GET("service_proposals/{user_id}")
     fun getUserProposals(@Path("user_id") userId: Int): Call<List<ServiceProposal>>
 
-   @POST("collections/request")
-   fun createCollectionRequest(@Body requestData: Map<String, Any>): Call<Void>
-
-   // Méthode pour obtenir la planification d'un utilisateur
-   @GET("planning")
-   fun getUserSchedule(
-      @Query("user_id") userId: Int
-   ): Call<PlanningResponse>
-
-   // Méthode pour obtenir la planification d'un utilisateur pour une date spécifique
-   @GET("planning/byDate")
-   fun getUserScheduleByDate(
-      @Query("user_id") userId: Int,
-      @Query("date") date: String
-   ): Call<PlanningResponse>
+    @POST("collections/request")
+    fun createCollectionRequest(@Body requestData: Map<String, Any>): Call<Void>
 
     @GET("planning")
-    fun getUserScheduleByDateRange( @Query("user_id") userId: Int, @Query("start_date") startDate: String, @Query("end_date") endDate: String): Call<PlanningResponse>
+    fun getPlanning(
+        @Query("user_id") userId: Int
+    ): Call<PlanningResponse>
 
-   @GET("collections")
-   fun getAllCollections(): Call<List<CollectionData>>
+    @GET("planning/byDate")
+    fun getPlanningByDate(
+        @Query("user_id") userId: Int,
+        @Query("start_date") startDate: String,
+        @Query("end_date") endDate: String
+    ): Call<PlanningResponse>
 
-   @GET("collections/{id}")
-   fun getCollectionDetails(@Path("id") collectionId: Int): Call<CollectionDetails>
 
-   @POST("collections/{id}/export")
-   fun exportCollectionToExcel(@Path("id") collectionId: Int): Call<ResponseBody>
+    @GET("collections")
+    fun getAllCollections(): Call<List<CollectionData>>
 
-   @POST("collections/{id}/send-email")
-   fun sendCollectionExcelEmail(@Path("id") collectionId: Int, @Query("email") email: String): Call<Void>
+    @GET("collections/{id}")
+    fun getCollectionDetails(@Path("id") collectionId: Int): Call<CollectionDetails>
+
+    @POST("collections/{id}/export")
+    fun exportCollectionToExcel(@Path("id") collectionId: Int): Call<ResponseBody>
+
+    @POST("collections/{id}/send-email")
+    fun sendCollectionExcelEmail(@Path("id") collectionId: Int, @Query("email") email: String): Call<Void>
+
     @GET("product_notifications")
     fun getAllProductNotifications(): Call<List<ProductNotification>>
 
@@ -128,9 +128,9 @@ interface ApiService {
     @DELETE("product_notifications/{id}")
     fun deleteProductNotification(@Path("id") id: Int): Call<Void>
 
-   @GET("product_notifications")
-   fun getProductNotificationsForVolunteer(@Query("user_id") user_id: Int): Call<List<ProductNotification>>
-   @PUT("product_notifications/{id}")
-   fun updateProductNotification(@Path("id") id: Int, @Body request: UpdateProductNotificationRequest): Call<Void>
-}
+    @GET("product_notifications")
+    fun getProductNotificationsForVolunteer(@Query("user_id") user_id: Int): Call<List<ProductNotification>>
 
+    @PUT("product_notifications/{id}")
+    fun updateProductNotification(@Path("id") id: Int, @Body request: UpdateProductNotificationRequest): Call<Void>
+}
