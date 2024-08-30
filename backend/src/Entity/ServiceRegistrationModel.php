@@ -16,6 +16,10 @@ class ServiceRegistrationModel
     #[ORM\Column(type: "integer")]
     private $service_id;
 
+    #[ORM\ManyToOne(targetEntity: ServiceModel::class)]
+    #[ORM\JoinColumn(name: "service_id", referencedColumnName: "id", onDelete: "CASCADE")]
+    private $service;
+
     #[ORM\Column(type: "integer")]
     private $user_id;
 
@@ -40,9 +44,20 @@ class ServiceRegistrationModel
         return $this->service_id;
     }
 
+    public function getService(): ?ServiceModel
+    {
+        return $this->service;
+    }
+
     public function setServiceId(int $serviceId): self
     {
         $this->service_id = $serviceId;
+        return $this;
+    }
+
+    public function setService(?ServiceModel $service): self
+    {
+        $this->service = $service;
         return $this;
     }
 
@@ -89,4 +104,18 @@ class ServiceRegistrationModel
         $this->updated_at = $updatedAt;
         return $this;
     }
+
+    public function jsonSerialize() : array
+    {
+        return [
+            'id' => $this->id,
+            'serviceId' => $this->service ? $this->service->getId() : null,
+            'service' => $this->getService()?->jsonSerialize(),
+            'userId' => $this->user_id,
+            'registrationDate' => $this->registration_date->format('d-m-Y H:i:s'),
+            'createdAt' => $this->created_at->format('d-m-Y H:i:s'),
+            'updatedAt' => $this->updated_at->format('d-m-Y H:i:s')
+        ];
+    }
+
 }

@@ -132,7 +132,15 @@ class ServiceRegistrationController
     {
         try {
             $registrations = $this->serviceRegistrationService->getAllRegistrations();
-            return json_decode($this->serializer->serialize($registrations, 'json'), true);
+//            return json_decode($this->serializer->serialize($registrations, 'json'), true);
+
+            $serializedRegistrations = [];
+            foreach ($registrations as $registration) {
+                $serializedRegistrations[] = $registration->jsonSerialize();
+            }
+
+            return $serializedRegistrations;
+
         } catch (\Exception $e) {
             error_log("Exception in getAllRegistrations: " . $e->getMessage());
             http_response_code(500);

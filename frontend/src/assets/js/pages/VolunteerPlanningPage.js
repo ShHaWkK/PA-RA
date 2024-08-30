@@ -41,7 +41,7 @@ async function initializeCalendar() {
         loader.classList.add('hidden');
 
         var calendar = new Calendar('#calendar', events);
-        
+
         calendarElement.classList.remove('hidden');
 
     } catch (error) {

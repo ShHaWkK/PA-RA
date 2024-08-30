@@ -2,12 +2,9 @@
 namespace Controller;
 
 use Doctrine\ORM\EntityManager;
-use Doctrine\ORM\Query\Expr\Join;
 use Entity\RouteModel;
 use Entity\CollectionModel;
-use Entity\DeliveryModel;
 use Entity\ServiceRegistrationModel;
-use Entity\ServiceModel;
 use DateTime;
 
 class PlanningController
@@ -37,9 +34,11 @@ class PlanningController
         try {
             $routeRepository = $this->entityManager->getRepository(RouteModel::class);
             $collectionRepository = $this->entityManager->getRepository(CollectionModel::class);
+            $serviceRegistrationRepository = $this->entityManager->getRepository(ServiceRegistrationModel::class);
 
             $queryBuilderRoutes = $routeRepository->createQueryBuilder('r');
             $queryBuilderCollections = $collectionRepository->createQueryBuilder('c');
+            $queryBuilderServices = $serviceRegistrationRepository->createQueryBuilder('s');
 
             // Ajouter le filtre de date si les dates de début et de fin sont fournies
             if (!empty($startDate) && !empty($endDate)) {
@@ -53,6 +52,10 @@ class PlanningController
                 $queryBuilderCollections->andWhere('c.collection_date BETWEEN :startDate AND :endDate')
                     ->setParameter('startDate', $startDateObj)
                     ->setParameter('endDate', $endDateObj);
+
+                $queryBuilderServices->andWhere('s.service.schedule BETWEEN :startDate AND :endDate')
+                    ->setParameter('startDate', $startDateObj)
+                    ->setParameter('endDate', $endDateObj);
             }
 
             // Ajouter le filtre pour l'utilisateur si l'ID utilisateur est fourni
@@ -62,11 +65,15 @@ class PlanningController
 
                 $queryBuilderCollections->andWhere('c.volunteer = :userId')
                     ->setParameter('userId', $userId);
+
+                $queryBuilderServices->andWhere('s.user_id = :userId')
+                    ->setParameter('userId', $userId);
             }
 
             // Exécuter les requêtes
             $routes = $queryBuilderRoutes->getQuery()->getResult();
             $collections = $queryBuilderCollections->getQuery()->getResult();
+            $services = $queryBuilderServices->getQuery()->getResult(); // Correction ici
 
             // Construire la réponse JSON
             $response = [
@@ -76,6 +83,9 @@ class PlanningController
                 'collections' => array_map(function ($collection) {
                     return $collection->jsonSerialize();
                 }, $collections),
+                'services' => array_map(function ($service) { // Correction ici
+                    return $service->jsonSerialize();
+                }, $services),
             ];
 
             http_response_code(200);
@@ -83,8 +93,7 @@ class PlanningController
 
         } catch (\Exception $e) {
             http_response_code(500);
-            return ['error' => 'Internal Server Error'];
+            return ['error' => 'Internal Server Error', 'details' => $e->getMessage()]; // Ajout des détails de l'exception pour le débogage
         }
     }
-
 }

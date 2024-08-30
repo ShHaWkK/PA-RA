@@ -239,14 +239,14 @@ CREATE TABLE IF NOT EXISTS services (
 
 -- Table des inscriptions aux services (service_registrations)
 CREATE TABLE IF NOT EXISTS service_registrations (
-                                        id INT AUTO_INCREMENT PRIMARY KEY,
-                                        service_id INT NOT NULL,
-                                        user_id INT NOT NULL,
-                                        registration_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                                        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                                        FOREIGN KEY (service_id) REFERENCES services(id) ON DELETE CASCADE,
-                                        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+                                                     id INT AUTO_INCREMENT PRIMARY KEY,
+                                                     service_id INT NOT NULL,
+                                                     user_id INT NOT NULL,
+                                                     registration_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                                                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                                                     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                                                     FOREIGN KEY (service_id) REFERENCES services(id) ON DELETE CASCADE,
+                                                     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 -- Table des propositions de services (service_proposals)
@@ -262,16 +262,16 @@ CREATE TABLE IF NOT EXISTS service_proposals (
 );
 
 -- Table des plannings des services (service_schedules)
-    CREATE TABLE IF NOT EXISTS service_schedules (
-                                        id INT AUTO_INCREMENT PRIMARY KEY,
-                                        service_id INT NOT NULL,
-                                        start_time TIMESTAMP NOT NULL,
-                                        end_time TIMESTAMP NOT NULL,
-                                        location VARCHAR(255) NOT NULL,
-                                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                                        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                                        FOREIGN KEY (service_id) REFERENCES services(id) ON DELETE CASCADE
-    );
+CREATE TABLE IF NOT EXISTS service_schedules (
+                                                 id INT AUTO_INCREMENT PRIMARY KEY,
+                                                 service_id INT NOT NULL,
+                                                 start_time TIMESTAMP NOT NULL,
+                                                 end_time TIMESTAMP NOT NULL,
+                                                 location VARCHAR(255) NOT NULL,
+                                                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                                                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                                                 FOREIGN KEY (service_id) REFERENCES services(id) ON DELETE CASCADE
+);
 
 -- Table des stocks (stocks)
 CREATE TABLE IF NOT EXISTS stocks (
@@ -524,13 +524,13 @@ INSERT INTO collection_products (collection_id, notification_id, quantity_collec
                                                                                          (2, 3, 75);  -- Collecte 2 récupère 75 unités du Product C (notifié par Company 2)
 
 -- Insertion des services proposés
-INSERT INTO services (name, description, schedule, capacity, status, location) VALUES 
-                                                                        ('Conseils anti-gaspi', 'Sessions de conseils pour éviter le gaspillage alimentaire.', '2024-08-25 10:00:00', 20, 'open', 'Paris Warehouse'),
-                                                                        ('Cours de cuisine', 'Cours de cuisine pour apprendre à préparer des repas sans gaspiller.', '2024-08-26 15:00:00', 15, 'open', 'Nantes Warehouse'),
-                                                                        ('Partage de véhicules', 'Service de partage de véhicules entre adhérents.', '2024-08-27 09:00:00', 10, 'open', 'Marseille Warehouse'),
-                                                                        ('Echange de services', 'Echange de services entre particuliers (bricolage, électricité, plomberie).', '2024-08-28 14:00:00', 25, 'open', 'Limoges Warehouse'),
-                                                                        ('Services de réparation', 'Service de réparation pour divers objets et équipements.', '2024-08-29 11:00:00', 30, 'open', 'Paris Warehouse'),
-                                                                        ('Gardiennage', 'Service de gardiennage pour les membres.', '2024-08-30 13:00:00', 10, 'open', 'Nantes Warehouse');
+INSERT INTO services (name, description, schedule, capacity, status, location) VALUES
+                                                                                   ('Conseils anti-gaspi', 'Sessions de conseils pour éviter le gaspillage alimentaire.', '2024-08-25 10:00:00', 20, 'open', 'Paris Warehouse'),
+                                                                                   ('Cours de cuisine', 'Cours de cuisine pour apprendre à préparer des repas sans gaspiller.', '2024-08-26 15:00:00', 15, 'open', 'Nantes Warehouse'),
+                                                                                   ('Partage de véhicules', 'Service de partage de véhicules entre adhérents.', '2024-08-27 09:00:00', 10, 'open', 'Marseille Warehouse'),
+                                                                                   ('Echange de services', 'Echange de services entre particuliers (bricolage, électricité, plomberie).', '2024-08-28 14:00:00', 25, 'open', 'Limoges Warehouse'),
+                                                                                   ('Services de réparation', 'Service de réparation pour divers objets et équipements.', '2024-08-29 11:00:00', 30, 'open', 'Paris Warehouse'),
+                                                                                   ('Gardiennage', 'Service de gardiennage pour les membres.', '2024-08-30 13:00:00', 10, 'open', 'Nantes Warehouse');
 
 
 INSERT INTO service_proposals (name, description, status, created_by) VALUES 

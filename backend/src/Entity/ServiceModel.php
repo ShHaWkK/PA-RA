@@ -131,4 +131,19 @@ class ServiceModel
         $this->updated_at = $updatedAt;
         return $this;
     }
+
+    public function jsonSerialize(): array
+    {
+        return [
+            'id' => $this->id,
+            'name' => $this->name,
+            'description' => $this->description,
+            'schedule' => $this->schedule->format('d-m-Y H:i:s'), // ISO 8601 format
+            'capacity' => $this->capacity,
+            'status' => $this->status,
+            'location' => $this->location,
+            'created_at' => $this->created_at->format('d-m-Y H:i:s'),
+            'updated_at' => $this->updated_at->format('d-m-Y H:i:s')
+        ];
+    }
 }
