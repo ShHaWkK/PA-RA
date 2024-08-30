@@ -8,16 +8,26 @@ use Entity\ServiceModel;
 use Entity\UserModel;
 use Service\EmailService;
 
-class ServiceRegistrationService
+class ServiceRegistrationController
 {
     private $entityManager;
-    private $emailService;
+    private $serializer;
+    private $serviceRegistrationService;
 
-    public function __construct(EntityManager $entityManager, EmailService $emailService)
+    public function __construct(EntityManager $entityManager, EmailService $emailService) // Updated to include EmailService
     {
         $this->entityManager = $entityManager;
-        $this->emailService = $emailService;
+        $this->serviceRegistrationService = new ServiceRegistrationService($entityManager, $emailService); // Pass both dependencies
+
+        // Configure normalizer for date formats
+        $normalizers = [
+            new DateTimeNormalizer(['datetime_format' => 'Y-m-d H:i:s']),
+            new ObjectNormalizer()
+        ];
+        $encoders = [new JsonEncoder()];
+        $this->serializer = new Serializer($normalizers, $encoders);
     }
+    
     public function createRegistration($data)
     {
         $service = $this->entityManager->find(ServiceModel::class, $data['service_id']);
