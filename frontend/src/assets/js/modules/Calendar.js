@@ -54,11 +54,6 @@
     Calendar.prototype.drawMonth = function() {
         var self = this;
 
-        this.events.forEach(function(ev) {
-            ev.date = self.current.clone().date(Math.random() * (29 - 1) + 1);
-        });
-
-
         if(this.month) {
             this.oldMonth = this.month;
             this.oldMonth.className = 'month out ' + (self.next ? 'next' : 'prev');
@@ -139,7 +134,6 @@
         //Day Number
         var number = createElement('div', 'day-number', day.format('DD'));
 
-
         //Events
         var events = createElement('div', 'day-events');
         this.drawEvents(day, events);
@@ -148,23 +142,19 @@
         outer.appendChild(number);
         outer.appendChild(events);
         this.week.appendChild(outer);
-    }
+    };
 
     Calendar.prototype.drawEvents = function(day, element) {
-        if(day.month() === this.current.month()) {
-            var todaysEvents = this.events.reduce(function(memo, ev) {
-                if(ev.date.isSame(day, 'day')) {
-                    memo.push(ev);
-                }
-                return memo;
-            }, []);
+        if (day.isSame(this.current, 'month')) {
+            var todaysEvents = this.events.filter(ev => day.isSame(moment(ev.date), 'day'));
 
+            // Ajouter les nouveaux événements
             todaysEvents.forEach(function(ev) {
                 var evSpan = createElement('span', ev.color);
                 element.appendChild(evSpan);
             });
         }
-    }
+    };
 
     Calendar.prototype.getDayClass = function(day) {
         classes = ['day'];
@@ -313,8 +303,9 @@
             ele.className = className;
         }
         if(innerText) {
-            ele.innderText = ele.textContent = innerText;
+            ele.innerText = ele.textContent = innerText;
         }
         return ele;
     }
+
 }();

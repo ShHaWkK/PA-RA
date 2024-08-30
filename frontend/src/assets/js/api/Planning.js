@@ -5,7 +5,10 @@ async function getPlanning(userId, startDate = null, endDate = null) {
         if (startDate) params.append('start_date', startDate);
         if (endDate) params.append('end_date', endDate);
 
-        const response = await fetch(`${apiEndpoint}/planning?${params.toString()}`, {
+        const url= `${apiEndpoint}/planning?${params.toString()}`;
+        console.log(url);
+
+        const response = await fetch(url, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json'
@@ -18,8 +21,9 @@ async function getPlanning(userId, startDate = null, endDate = null) {
 
         const data = await response.json();
         return {
-            routes: data.routes.map(route => route), // Adjust this based on the actual response structure
-            collections: data.collections.map(collection => collection) // Adjust this based on the actual response structure
+            routes: data.routes.map(route => route),
+            collections: data.collections.map(collection => collection),
+            services: data.services.map(service => service)
         };
     } catch (error) {
         console.error('Error getting planning:', error.message);
