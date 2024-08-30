@@ -5,6 +5,9 @@ use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Query\Expr\Join;
 use Entity\RouteModel;
 use Entity\CollectionModel;
+use Entity\DeliveryModel;
+use Entity\ServiceRegistrationModel;
+use Entity\ServiceModel;
 use DateTime;
 
 class PlanningController
@@ -20,8 +23,9 @@ class PlanningController
     {
         if ($method === 'GET' && isset($uriParts[0])) {
             $userId = $_GET['user_id'] ?? null;
-            $date = $_GET['date'] ?? null;
-            return $this->getPlanning($userId, $date);
+            $startDate = $_GET['startDate'] ?? null;
+            $endDate = $_GET['endDate'] ?? null;
+            return $this->getPlanning($userId, $startDate, $endDate);
         }
 
         http_response_code(405);

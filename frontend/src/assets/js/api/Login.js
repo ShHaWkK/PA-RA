@@ -1,4 +1,4 @@
-import {setJwtCookie, setJwtToken} from "./Api.js";
+import {setJwtCookie,setCookie, setJwtToken} from "./Api.js";
 
 async function login(email, password) {
     const loginData = { email, password };
@@ -35,13 +35,15 @@ async function login(email, password) {
                 window.location.href = '/Admin/Volunteers';
                 break;
             case 'volunteer':
-                window.location.href = '/Volunteer/Volunteers';
+                window.location.href = '/Volunteer/Planning';
                 break;
             case 'merchant':
                 window.location.href = '/Merchant/Merchants';
                 break;
         }
     }
+
+    setCookie('user_id', data.id, 1);
 
     return await data;
 }

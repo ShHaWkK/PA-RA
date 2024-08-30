@@ -46,6 +46,9 @@ switch ($request) {
     case '/HomePage':
         require __DIR__ . '/views/HomePage.php';
         break;
+    case '/Login':
+        require __DIR__ . '/views/Login/Login.php';
+        break;
     case '/Merchant/SignUp':
         require __DIR__ . '/views/SignUp/MerchantSignUp.php';
         break;
@@ -58,20 +61,26 @@ switch ($request) {
             exit;
         }
         break;
-    case '/Volunteer/SignUp':
-        require __DIR__ . '/views/SignUp/VolunteerSignUp.php';
-        break;
-    case '/Volunteer/Volunteers':
+    case '/Merchant/Collections':
         if ($jwtToken) {
-            requireAuth($jwtToken, 'volunteer');
-            require __DIR__ . '/views/Volunteer/Volunteer.php';
+            requireAuth($jwtToken, 'merchant');
+            require __DIR__ . '/views/Merchant/Collections.php';
         } else {
             require __DIR__ . '/views/Login/Login.php';
             exit;
         }
         break;
-    case '/Login':
-        require __DIR__ . '/views/Login/Login.php';
+    case '/Volunteer/SignUp':
+        require __DIR__ . '/views/SignUp/VolunteerSignUp.php';
+        break;
+    case '/Volunteer/Planning':
+        if ($jwtToken) {
+            requireAuth($jwtToken, 'volunteer');
+            require __DIR__ . '/views/Volunteer/Planning.php';
+        } else {
+            require __DIR__ . '/views/Login/Login.php';
+            exit;
+        }
         break;
     case '/Admin/Volunteers':
         if ($jwtToken) {

@@ -9,6 +9,16 @@ function setJwtCookie(token, cookieName = 'jwt', expiresInDays = 1) {
     document.cookie = `${cookieName}=${token};${expires};path=/;Secure;SameSite=Strict`;
 }
 
+ function setCookie(name, value, days) {
+    let expires = "";
+    if (days) {
+        const date = new Date();
+        date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+        expires = "; expires=" + date.toUTCString();
+    }
+    document.cookie = name + "=" + (value || "") + expires + "; path=/";
+}
+
 function getCookie(cookieName) {
     const name = `${cookieName}=`;
     const decodedCookie = decodeURIComponent(document.cookie);
@@ -18,9 +28,11 @@ function getCookie(cookieName) {
             cookie = cookie.substring(1);
         }
         if (cookie.indexOf(name) === 0) {
+            console.log("cookie",cookie.substring(name.length, cookie.length));
             return cookie.substring(name.length, cookie.length);
         }
     }
+    console.log("no cookie found");
     return null;
 }
 
@@ -62,4 +74,4 @@ async function fetchWithAuth(endpoint, options = {}) {
     }
 }
 
-export { setJwtToken, fetchWithAuth, setJwtCookie, getCookie, deleteCookie };
+export { setJwtToken, fetchWithAuth, setJwtCookie, getCookie, setCookie, deleteCookie };
