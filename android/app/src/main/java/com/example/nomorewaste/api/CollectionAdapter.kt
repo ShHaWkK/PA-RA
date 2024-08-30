@@ -6,12 +6,12 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.example.nomorewaste.api.Collection
+import com.example.nomorewaste.api.CollectionData
 
 class CollectionAdapter(
-    private var collections: List<Collection>,
-    private val onExportClick: (Collection) -> Unit,
-    private val onSendEmailClick: (Collection) -> Unit,
+    private var collections: List<CollectionData>,
+    private val onExportClick: (CollectionData) -> Unit,
+    private val onSendEmailClick: (CollectionData) -> Unit,
     private val onViewNotificationsClick: () -> Unit
 ) : RecyclerView.Adapter<CollectionAdapter.CollectionViewHolder>() {
 
@@ -28,7 +28,7 @@ class CollectionAdapter(
 
     override fun getItemCount() = collections.size
 
-    fun updateData(newCollections: List<Collection>) {
+    fun updateData(newCollections: List<CollectionData>) {
         collections = newCollections
         notifyDataSetChanged()
     }
@@ -41,7 +41,7 @@ class CollectionAdapter(
         private val exportButton: Button = itemView.findViewById(R.id.button_export_excel)
         private val sendEmailButton: Button = itemView.findViewById(R.id.button_send_excel_email)
 
-        fun bind(collection: Collection) {
+        fun bind(collection: CollectionData) {
             dateTextView.text = collection.collectionDate ?: "Unknown Date"
             volunteerTextView.text = collection.volunteerName ?: "Unknown Volunteer"
             vehicleTextView.text = collection.vehicleLicensePlate ?: "Unknown Vehicle"

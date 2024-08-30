@@ -4,6 +4,7 @@ namespace Controller;
 
 use Entity\CompanyModel;
 use Doctrine\ORM\EntityManager;
+use Entity\UserCompanyModel;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
@@ -13,6 +14,7 @@ class CompanyController
 {
     private $entityManager;
     private $serializer;
+    private $userCompanies;
 
     public function __construct(EntityManager $entityManager)
     {
@@ -20,6 +22,7 @@ class CompanyController
         $normalizers = [new ObjectNormalizer()];
         $encoders = [new JsonEncoder()];
         $this->serializer = new Serializer($normalizers, $encoders);
+        $userCompanies = new UserCompanyModel();
     }
 
     public function processRequest($method, $uriParts, $input)
@@ -30,6 +33,11 @@ class CompanyController
                     return $this->createCompany($input);
                 case 'GET':
                     if (isset($uriParts[1])) {
+                        if (isset($uriParts[2])){
+                            if ($uriParts[2] == 'employees') {
+                                return $this->getCompanyEmployees($uriParts[1]);
+                            }
+                        }
                         return $this->getCompany((int) $uriParts[1]);
                     } else {
                         return $this->getAllCompanies();
@@ -93,7 +101,7 @@ class CompanyController
                 http_response_code(404);
                 return ['error' => 'Company not found'];
             }
-            return json_decode($this->serializer->serialize($company, 'json'), true);
+            return $company->jsonSerialize();
         } catch (\Exception $e) {
             error_log("Exception in getCompany: " . $e->getMessage());
             throw $e;
@@ -168,10 +176,37 @@ class CompanyController
         try {
             $companyRepository = $this->entityManager->getRepository(CompanyModel::class);
             $companies = $companyRepository->findAll();
-            return json_decode($this->serializer->serialize($companies, 'json'), true);
+            $serializedCompanies = [];
+            foreach ($companies as $company) {
+                $serializedCompanies[] = $company->jsonSerialize();
+            }
+
+            return $serializedCompanies;
+
         } catch (\Exception $e) {
             error_log("Exception in getAllCompanies: " . $e->getMessage());
             throw $e;
         }
     }
+
+    private function getCompanyEmployees($companyId)
+    {
+        try {
+            $company = $this->entityManager->find(CompanyModel::class, $companyId);
+            $employees = $this->entityManager->getRepository(UserCompanyModel::class)
+                ->findBy(['company' => $company]);
+
+            $serializedEmployees = [];
+            foreach ($employees as $employee) {
+                $serializedEmployees[] = $employee->jsonSerialize();
+            }
+
+            return $serializedEmployees;
+
+        } catch (\Exception $e) {
+            error_log("Exception in getAllCompanies: " . $e->getMessage());
+            throw $e;
+        }
+    }
+
 }

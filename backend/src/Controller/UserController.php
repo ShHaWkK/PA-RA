@@ -3,9 +3,15 @@
 namespace Controller;
 
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\Exception\ORMException;
+use Doctrine\ORM\OptimisticLockException;
+use Doctrine\ORM\TransactionRequiredException;
+use Entity\CompanyModel;
+use Entity\UserCompanyModel;
 use Entity\UserModel;
 use Entity\TicketModel;
 use Doctrine\ORM\Exception\NotSupported;
+use SplFileInfo;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
@@ -25,6 +31,7 @@ class UserController
     private $skillService;
     private $availabilityService;
     private $emailService;
+    private $publicDir;
 
     public function __construct(EntityManager $entityManager, EmailService $emailService)
     {
@@ -42,6 +49,7 @@ class UserController
         $this->skillService = new SkillService($entityManager);
         $this->availabilityService = new AvailabilityService($entityManager);
         $this->emailService = $emailService;
+        $this->publicDir = __DIR__ . '/../../public';
     }
 
 
@@ -52,8 +60,11 @@ class UserController
                 if (isset($uriParts[1])) {
                     switch ($uriParts[1]) {
                         case 'registerVolunteer':
+                            // Gérer la requête multipart/form-data pour extraire le JSON et le fichier
+                            $input = $this->handleMultipartRequest();
                             return $this->registerVolunteer($input);
                         case 'registerMerchant':
+                            $input = $this->handleMultipartRequest();
                             return $this->registerMerchant($input);
                         case 'addAvailability':
                             return $this->addAvailability($input);
@@ -73,6 +84,7 @@ class UserController
                     switch ($uriParts[1]) {
                         case 'generatePlanning':
                             return $this->generatePlanning();
+
                         case 'getSkills':
                             if (isset($uriParts[2])) {
                                 return $this->getUserSkills($uriParts[2]);
@@ -80,6 +92,7 @@ class UserController
                                 http_response_code(400);
                                 return ["message" => "User id not set"];
                             }
+
                         case 'getAvailabilities':
                             if (isset($uriParts[2])) {
                                 return $this->getUserAvailabilities($uriParts[2]);
@@ -87,8 +100,26 @@ class UserController
                                 http_response_code(400);
                                 return ["message" => "User id not set"];
                             }
+
+                        case 'getUserCompanies':
+                            if (isset($uriParts)){
+                                return $this->getUserCompanies($uriParts[2]);
+                            }else{
+                                http_response_code(400);
+                                return ["message" => "User id not set"];
+                            }
+
+                        case 'getUserFile':
+                            if (isset($uriParts)){
+                                return $this->getUserFile($uriParts[2]);
+                            }else{
+                                http_response_code(400);
+                                return ["message" => "User id not set"];
+                            }
+
                         case 'tickets':
                             return $this->getTicketsByUser((int)$uriParts[1]);
+
                         default:
                             return $this->getUser($uriParts[1]);
                     }
@@ -103,9 +134,10 @@ class UserController
                             return $this->updateUserStatus($uriParts[2], $input);
                     }
                 } else {
-                    return $this->updateUser($uriParts[1], $input);
+                    return $this->updateUser($uriParts[1],$input);
+//                    http_response_code(400);
+//                    return ['error' => 'User ID not specified'];
                 }
-
             case 'DELETE':
                 if (isset($uriParts[1])) {
                     return $this->deleteUser($uriParts[1]);
@@ -120,38 +152,88 @@ class UserController
         }
     }
 
+    private function handleMultipartRequest()
+    {
+        $input = [];
+
+        // Récupérer et décoder les données JSON du champ 'json_data'
+        if (isset($_POST['json_data'])) {
+            $jsonData = json_decode($_POST['json_data'], true);
+            if (json_last_error() === JSON_ERROR_NONE) {
+                $input = $jsonData;
+            } else {
+                http_response_code(400);
+                die(json_encode(['error' => 'Invalid JSON data']));
+            }
+        }
+
+        // Gérer le fichier uploadé dans 'file_data'
+        if (isset($_FILES['file_data']) && $_FILES['file_data']['error'] === UPLOAD_ERR_OK) {
+            $pdfFile = $_FILES['file_data'];
+            $uploadDir = $this->publicDir . '/UserFiles';
+
+            // Assurer que le répertoire existe
+            if (!is_dir($uploadDir)) {
+                mkdir($uploadDir, 0777, true);
+            }
+
+            // Générer un nom de fichier unique
+            $filename = uniqid() . '.pdf';
+            $filePath = $uploadDir . '/' . $filename;
+
+            // Déplacer le fichier uploadé vers le répertoire de destination
+            if (move_uploaded_file($pdfFile['tmp_name'], $filePath)) {
+                // Ajouter le chemin du fichier au tableau d'entrée
+                $input['file_path'] = '/UserFiles/' . $filename;
+            } else {
+                http_response_code(500);
+                die(json_encode(['error' => 'Failed to save the uploaded file']));
+            }
+        }
+
+        return $input;
+    }
+
     private function registerVolunteer($data)
     {
         $this->entityManager->beginTransaction();
-    
+
         try {
+            // Validation des champs requis
             if (!isset($data['first_name']) || !isset($data['last_name']) || !isset($data['email']) || !isset($data['phone_number']) || !isset($data['password'])) {
                 http_response_code(400);
                 return ['error' => 'Missing required fields'];
             }
-    
-            // Check if the email already exists
+
+            // Vérification si l'email existe déjà
             $existingUser = $this->entityManager->getRepository(UserModel::class)->findOneBy(['email' => $data['email']]);
             if ($existingUser) {
                 http_response_code(409);
                 return ['error' => 'Email already exists'];
             }
-    
-            // Generate verification code
+
+            // Générer un code de vérification
             $verificationCode = rand(100000, 999999);
             $data['verification_code'] = $verificationCode;
             $data['is_verified'] = false;
-    
+
+            // Créer et persister l'utilisateur
             $user = $this->userService->addUser($data, 'volunteer');
+
+            // Affecter le chemin du fichier s'il est présent
+            if (isset($data['file_path'])) {
+                $user->setFilePath($data['file_path']);
+            }
+
             $this->entityManager->persist($user);
             $this->entityManager->flush();
-    
-            // Handle skills assignment (if any)
+
+            // Assigner les compétences si elles sont présentes
             if (isset($data['skills'])) {
                 $this->skillService->addSkills($user, $data['skills']);
             }
-    
-            // Handle availabilities assignment
+
+            // Assigner les disponibilités si présentes
             if (isset($data['availabilities'])) {
                 foreach ($data['availabilities'] as $availabilityData) {
                     if (!isset($availabilityData['day_of_week']) || !isset($availabilityData['start_time']) || !isset($availabilityData['end_time'])) {
@@ -162,71 +244,96 @@ class UserController
                     $this->availabilityService->addAvailability($availabilityData);
                 }
             }
-    
-            $this->entityManager->flush();
+
+            // Commit transaction
             $this->entityManager->commit();
-    
-            // Send verification email
+
+            // Envoyer l'email de vérification
             $this->emailService->sendVerificationEmail($data['email'], $verificationCode);
-    
+
             return ['id' => $user->getId(), 'message' => 'Volunteer registered successfully. Verification code sent.'];
-    
+
         } catch (\Exception $e) {
+            // Rollback transaction en cas d'erreur
             $this->entityManager->rollback();
             error_log("Exception in registerVolunteer: " . $e->getMessage());
             http_response_code(500);
             return ['error' => 'Internal Server Error'];
         }
     }
-    
-    
 
     private function registerMerchant($data)
-{
-    $this->entityManager->beginTransaction();
+    {
+        $this->entityManager->beginTransaction();
 
-    try {
-        if (!isset($data['first_name']) || !isset($data['last_name']) || !isset($data['email']) || !isset($data['phone_number']) || !isset($data['password']) || !isset($data['company_name'])) {
-            http_response_code(400);
-            return ['error' => 'Missing required fields'];
+        try {
+            // Validation des champs requis
+            if (!isset($data['first_name']) || !isset($data['last_name']) || !isset($data['email']) || !isset($data['phone_number']) || !isset($data['password']) || (!isset($data['company_id']) && !isset($data['company_name']))) {
+                http_response_code(400);
+                return ['error' => 'Missing required fields'];
+            }
+
+            // Vérification si l'email existe déjà
+            $existingUser = $this->entityManager->getRepository(UserModel::class)->findOneBy(['email' => $data['email']]);
+            if ($existingUser) {
+                http_response_code(409);
+                return ['error' => 'Email already exists'];
+            }
+
+            // Génération du code de vérification
+            $verificationCode = rand(100000, 999999);
+            $data['verification_code'] = $verificationCode;
+            $data['is_verified'] = false;
+
+            // Création de l'utilisateur
+            $user = $this->userService->addUser($data, 'merchant');
+
+            // Affecter le chemin du fichier s'il est présent
+            if (isset($data['file_path'])) {
+                $user->setFilePath($data['file_path']);
+            }
+
+            $this->entityManager->persist($user);
+            $this->entityManager->flush();
+
+            // Gestion de l'association de l'entreprise
+            if (isset($data['company_id'])) {
+                // Si company_id est fourni, associer l'utilisateur à l'entreprise existante
+                $company = $this->entityManager->getRepository(CompanyModel::class)->find($data['company_id']);
+                if (!$company) {
+                    http_response_code(404);
+                    return ['error' => 'Company not found'];
+                }
+            } else {
+                // Sinon, créer une nouvelle entreprise
+                $company = $this->companyService->addCompany($data);
+                $this->entityManager->persist($company);
+                $this->entityManager->flush();
+            }
+
+            // Associer l'utilisateur à l'entreprise
+            $userCompany = new UserCompanyModel();
+            $userCompany->setUser($user)
+                ->setCompany($company)
+                ->setRole('merchant');
+            $this->entityManager->persist($userCompany);
+
+            // Finaliser la transaction
+            $this->entityManager->flush();
+            $this->entityManager->commit();
+
+            // Envoyer l'email de vérification
+            $this->emailService->sendVerificationEmail($data['email'], $verificationCode);
+
+            return ['id' => $user->getId(), 'message' => 'Merchant registered successfully. Verification code sent.'];
+
+        } catch (\Exception $e) {
+            $this->entityManager->rollback();
+            error_log("Exception in registerMerchant: " . $e->getMessage());
+            http_response_code(500);
+            return ['error' => 'Internal Server Error'];
         }
-
-        // Check if the email already exists
-        $existingUser = $this->entityManager->getRepository(UserModel::class)->findOneBy(['email' => $data['email']]);
-        if ($existingUser) {
-            http_response_code(409);
-            return ['error' => 'Email already exists'];
-        }
-
-        // Generate verification code
-        $verificationCode = rand(100000, 999999);
-        $data['verification_code'] = $verificationCode;
-        $data['is_verified'] = false;
-
-        $user = $this->userService->addUser($data, 'merchant');
-        $this->entityManager->persist($user);
-        $this->entityManager->flush();
-
-        // Handle company assignment
-        $this->companyService->addCompany($data);
-
-        $this->entityManager->flush();
-        $this->entityManager->commit();
-
-        // Send verification email
-        $this->emailService->sendVerificationEmail($data['email'], $verificationCode);
-
-        return ['id' => $user->getId(), 'message' => 'Merchant registered successfully. Verification code sent.'];
-
-    } catch (\Exception $e) {
-        $this->entityManager->rollback();
-
-        error_log("Exception in registerMerchant: " . $e->getMessage());
-        http_response_code(500);
-        return ['error' => 'Internal Server Error'];
     }
-}
-
 
     private function verifyCode($data)
     {
@@ -289,25 +396,19 @@ class UserController
                 http_response_code(400);
                 return ['error' => 'Missing status field'];
             }
-    
+
+            // Assuming $entityManager is available to interact with the database
             $user = $this->entityManager->getRepository(UserModel::class)->find($id);
-    
+
             if (!$user) {
                 http_response_code(404);
                 return ['error' => 'User not found'];
             }
-    
+
             $user->setStatus($data['status']);
             $this->entityManager->persist($user);
             $this->entityManager->flush();
-    
-            if ($data['status'] === 'approved') {
-                $this->emailService->sendApprovalEmail($user->getEmail());
-            } elseif ($data['status'] === 'rejected') {
-                error_log("Sending rejection email to: " . $user->getEmail());
-                $this->emailService->sendRejectionEmail($user->getEmail());
-            }
-    
+
             return ['message' => 'User status updated successfully'];
         } catch (\Exception $e) {
             error_log("Exception in updateUserStatus: " . $e->getMessage());
@@ -315,8 +416,8 @@ class UserController
             return ['error' => 'Internal Server Error'];
         }
     }
-    
-    
+
+
 
     private function getAllUsers()
     {
@@ -374,6 +475,11 @@ class UserController
 
         $skills = $user->getSkills();
 
+        if (!$skills) {
+            http_response_code(404);
+            return ['error' => 'Skill not found'];
+        }
+
         $serializedSkills = [];
         foreach ($skills as $skill) {
             $serializedSkills[] = $skill->jsonSerialize();
@@ -395,7 +501,7 @@ class UserController
 
         if (!$availabilities) {
             http_response_code(404);
-            return ['error' => 'Skill not found'];
+            return ['error' => 'Availability not found'];
         }
 
         $serializedAvailabilities = [];
@@ -406,46 +512,61 @@ class UserController
         return $serializedAvailabilities;
     }
 
+    public function getUserCompanies($userId)
+    {
+        $user = $this->entityManager->getRepository(UserModel::class)->find($userId);
+
+        if (!$user) {
+            http_response_code(404);
+            return ['message' => "User with ID $userId not found"];
+        }
+
+        $companies = $user->getCompanies();
+        if ($companies->isEmpty()) { // Vérifie si la collection est vide
+            http_response_code(404);
+            return ['error' => 'No companies found for this user'];
+        }
+
+        $serializedCompanies = [];
+        foreach ($companies as $company) { // Correction de la syntaxe
+            $serializedCompanies[] = $company->jsonSerialize();
+        }
+
+        return $serializedCompanies;
+    }
+
     private function updateUser($id, $input)
     {
         try {
+            // Verify if the input is an array
             if (!is_array($input)) {
                 http_response_code(400);
                 return ['error' => 'Invalid input format'];
             }
 
+            // Fetch the user from the database
             $user = $this->entityManager->getRepository(UserModel::class)->find($id);
 
+            // If the user is not found, return a 404 error
             if (!$user) {
                 http_response_code(404);
                 return ['error' => 'User not found'];
             }
 
-            $originalEmail = $user->getEmail();
-            $originalFirstName = $user->getFirstName();
-            $originalLastName = $user->getLastName();
-            $originalPassword = $user->getPassword();
-
+            // Update the user fields with the provided input
             $user->updateFields($input);
 
+            // Persist the changes and flush the entity manager
             $this->entityManager->persist($user);
             $this->entityManager->flush();
 
-            // Check for changes and send corresponding emails
-            if (isset($input['email']) && $input['email'] !== $originalEmail) {
-                $this->emailService->sendEmailChangeConfirmation($user->getEmail());
-            }
-            if (isset($input['first_name']) && $input['first_name'] !== $originalFirstName || isset($input['last_name']) && $input['last_name'] !== $originalLastName) {
-                $this->emailService->sendNameChangeNotification($user->getEmail(), $user->getFirstName(), $user->getLastName());
-            }
-            if (isset($input['password']) && $input['password'] !== $originalPassword) {
-                $this->emailService->sendPasswordChangeNotification($user->getEmail());
-            }
-
+            // Return a success message
             return ['message' => 'User updated successfully'];
         } catch (\Exception $e) {
+            // Log the exception
             error_log($e->getMessage());
 
+            // Return a 500 error in case of an exception
             http_response_code(500);
             return ['error' => 'Internal Server Error'];
         }
@@ -466,10 +587,64 @@ class UserController
             return ['message' => 'User deleted successfully'];
 
         } catch (\Exception $e) {
+            // Vous pouvez ajouter un logging ici pour l'erreur
             error_log("Erreur lors de la suppression de l'utilisateur avec l'ID $id : " . $e->getMessage());
             return false;
         }
     }
+
+    private function getUserFile($userId)
+    {
+        try {
+            // Récupérer l'utilisateur
+            $user = $this->entityManager->find(UserModel::class, $userId);
+
+            if (!$user) {
+                http_response_code(404);
+                return ["User with ID $userId not found."];
+            }
+
+            // Récupérer le chemin relatif du fichier
+            $relativeFilePath = $user->getFilePath();
+
+            if (!$relativeFilePath) {
+                http_response_code(400);
+                return ["Invalid file path. No file path associated with user ID $userId."];
+            }
+
+            // Construire le chemin absolu du fichier
+            $absoluteFilePath = $this->publicDir . $relativeFilePath;
+
+            // Vérifier si le fichier existe
+            if (!file_exists($absoluteFilePath)) {
+                http_response_code(404);
+                return ["File not found at path $absoluteFilePath."];
+            }
+
+            // Obtenir les informations du fichier
+            $fileInfo = new SplFileInfo($absoluteFilePath);
+            $fileSize = $fileInfo->getSize();
+            $fileName = $fileInfo->getBasename();
+            $fileMimeType = mime_content_type($absoluteFilePath);
+
+            // Définir les headers pour le téléchargement
+            header('Content-Type: ' . $fileMimeType);
+            header('Content-Disposition: attachment; filename="' . $fileName . '"');
+            header('Content-Length: ' . $fileSize);
+
+            // Lire le fichier et l'envoyer au navigateur
+            readfile($absoluteFilePath);
+            exit;
+
+        } catch (Exception $e) {
+            http_response_code(500);
+            return ["An error occurred while retrieving the file.", 'error' => $e->getMessage()];
+        } catch (OptimisticLockException $e) {
+        } catch (TransactionRequiredException $e) {
+        } catch (ORMException $e) {
+        }
+    }
+
     public function getTicketsByUser($userId)
     {
         try {
@@ -502,6 +677,8 @@ class UserController
             return ['error' => 'Internal Server Error'];
         }
     }
+
+
 
 }
 ?>

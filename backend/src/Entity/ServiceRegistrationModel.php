@@ -3,7 +3,6 @@
 namespace Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use Entity\ServiceModel;
 
 #[ORM\Entity]
 #[ORM\Table(name: "service_registrations")]
@@ -14,8 +13,10 @@ class ServiceRegistrationModel
     #[ORM\Column(type: "integer")]
     private $id;
 
-    // Remplacez la colonne integer par une association ManyToOne
-    #[ORM\ManyToOne(targetEntity: "Entity\ServiceModel")]
+    #[ORM\Column(type: "integer")]
+    private $service_id;
+
+    #[ORM\ManyToOne(targetEntity: ServiceModel::class)]
     #[ORM\JoinColumn(name: "service_id", referencedColumnName: "id", onDelete: "CASCADE")]
     private $service;
 
@@ -31,11 +32,16 @@ class ServiceRegistrationModel
     #[ORM\Column(type: "datetime", options: ["default" => "CURRENT_TIMESTAMP", "onUpdate" => "CURRENT_TIMESTAMP"])]
     private $updated_at;
 
-    // Getters et setters pour chaque propriété...
+    // Getters and setters for each property
 
     public function getId(): ?int
     {
         return $this->id;
+    }
+
+    public function getServiceId(): ?int
+    {
+        return $this->service_id;
     }
 
     public function getService(): ?ServiceModel
@@ -43,7 +49,13 @@ class ServiceRegistrationModel
         return $this->service;
     }
 
-    public function setService(ServiceModel $service): self
+    public function setServiceId(int $serviceId): self
+    {
+        $this->service_id = $serviceId;
+        return $this;
+    }
+
+    public function setService(?ServiceModel $service): self
     {
         $this->service = $service;
         return $this;
@@ -54,9 +66,9 @@ class ServiceRegistrationModel
         return $this->user_id;
     }
 
-    public function setUserId(int $user_id): self
+    public function setUserId(int $userId): self
     {
-        $this->user_id = $user_id;
+        $this->user_id = $userId;
         return $this;
     }
 
@@ -65,9 +77,9 @@ class ServiceRegistrationModel
         return $this->registration_date;
     }
 
-    public function setRegistrationDate(\DateTimeInterface $registration_date): self
+    public function setRegistrationDate(\DateTimeInterface $registrationDate): self
     {
-        $this->registration_date = $registration_date;
+        $this->registration_date = $registrationDate;
         return $this;
     }
 
@@ -76,9 +88,9 @@ class ServiceRegistrationModel
         return $this->created_at;
     }
 
-    public function setCreatedAt(\DateTimeInterface $created_at): self
+    public function setCreatedAt(\DateTimeInterface $createdAt): self
     {
-        $this->created_at = $created_at;
+        $this->created_at = $createdAt;
         return $this;
     }
 
@@ -87,9 +99,23 @@ class ServiceRegistrationModel
         return $this->updated_at;
     }
 
-    public function setUpdatedAt(\DateTimeInterface $updated_at): self
+    public function setUpdatedAt(\DateTimeInterface $updatedAt): self
     {
-        $this->updated_at = $updated_at;
+        $this->updated_at = $updatedAt;
         return $this;
     }
+
+    public function jsonSerialize() : array
+    {
+        return [
+            'id' => $this->id,
+            'serviceId' => $this->service ? $this->service->getId() : null,
+            'service' => $this->getService()?->jsonSerialize(),
+            'userId' => $this->user_id,
+            'registrationDate' => $this->registration_date->format('d-m-Y H:i:s'),
+            'createdAt' => $this->created_at->format('d-m-Y H:i:s'),
+            'updatedAt' => $this->updated_at->format('d-m-Y H:i:s')
+        ];
+    }
+
 }

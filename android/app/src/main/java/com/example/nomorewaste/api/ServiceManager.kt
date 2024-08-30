@@ -1,3 +1,4 @@
+// Path: src/main/java/com/example/nomorewaste/api/ServiceManager.kt
 package com.example.nomorewaste.api
 
 import retrofit2.Call
@@ -8,35 +9,59 @@ class ServiceManager {
 
     private val apiService: ApiService = RetrofitClient.getClient().create(ApiService::class.java)
 
-    fun getUserSchedule(userId: Int, callback: (List<ServiceSchedule>?, Throwable?) -> Unit) {
-        apiService.getUserSchedule(userId).enqueue(object : Callback<List<ServiceSchedule>> {
-            override fun onResponse(call: Call<List<ServiceSchedule>>, response: Response<List<ServiceSchedule>>) {
+    // Fonction pour obtenir la planification d'un utilisateur
+    fun getPlanning(userId: Int, callback: (List<Any>?, Throwable?) -> Unit) {
+        val call = apiService.getPlanning(userId)
+        call.enqueue(object : Callback<PlanningResponse> {
+            override fun onResponse(
+                call: Call<PlanningResponse>,
+                response: Response<PlanningResponse>
+            ) {
                 if (response.isSuccessful) {
-                    callback(response.body(), null)
+                    response.body()?.let {
+                        val planningItems = mutableListOf<Any>()
+                        planningItems.addAll(it.routes)
+                        planningItems.addAll(it.collections)
+                        planningItems.addAll(it.deliveries)
+                        planningItems.addAll(it.services)
+                        callback(planningItems, null)
+                    } ?: callback(null, Throwable("Response body is null"))
                 } else {
-                    callback(null, Throwable(response.message()))
+                    callback(null, Throwable("Error: ${response.message()}"))
                 }
             }
 
-            override fun onFailure(call: Call<List<ServiceSchedule>>, t: Throwable) {
+            override fun onFailure(call: Call<PlanningResponse>, t: Throwable) {
                 callback(null, t)
             }
         })
     }
-    fun getUserScheduleByDate(userId: Int, date: String, callback: (List<ServiceSchedule>?, Throwable?) -> Unit) {
-        apiService.getUserScheduleByDate(userId, date).enqueue(object : Callback<List<ServiceSchedule>> {
-            override fun onResponse(call: Call<List<ServiceSchedule>>, response: Response<List<ServiceSchedule>>) {
+
+    // Fonction pour obtenir la planification d'un utilisateur par date
+    fun getPlanningByDate(userId: Int, startDate: String, endDate: String, callback: (List<Any>?, Throwable?) -> Unit) {
+        val call = apiService.getPlanningByDate(userId, startDate, endDate)
+        call.enqueue(object : Callback<PlanningResponse> {
+            override fun onResponse(
+                call: Call<PlanningResponse>,
+                response: Response<PlanningResponse>
+            ) {
                 if (response.isSuccessful) {
-                    callback(response.body(), null)
+                    response.body()?.let {
+                        val planningItems = mutableListOf<Any>()
+                        planningItems.addAll(it.routes)
+                        planningItems.addAll(it.collections)
+                        planningItems.addAll(it.deliveries)
+                        planningItems.addAll(it.services)
+                        callback(planningItems, null)
+                    } ?: callback(null, Throwable("Response body is null"))
                 } else {
-                    callback(null, Throwable(response.message()))
+                    callback(null, Throwable("Error: ${response.message()}"))
                 }
             }
 
-            override fun onFailure(call: Call<List<ServiceSchedule>>, t: Throwable) {
+            override fun onFailure(call: Call<PlanningResponse>, t: Throwable) {
                 callback(null, t)
             }
         })
     }
-
 }

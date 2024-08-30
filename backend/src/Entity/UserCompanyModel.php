@@ -63,6 +63,19 @@ class UserCompanyModel
         $this->role = $role;
         return $this;
     }
-    
+
+        public function jsonSerialize(): array
+    {
+        return [
+            'user_id' => $this->getUser()->getId(),
+            'user_name' => $this->getUser()->getFirstName() . ' ' . $this->getUser()->getLastName(),
+            'user_mail' => $this->getUser()->getEmail(),
+            'user_phone' => $this->getUser()->getPhoneNumber(),
+            'role' => $this->getRole(),
+            'company_id' => $this->getCompany()->getId(),
+            'company_name' => $this->getCompany()->getName()
+        ];
+    }
+
 }
 ?>

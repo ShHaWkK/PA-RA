@@ -14,6 +14,9 @@ import com.example.nomorewaste.api.ServiceRegistrationRequest
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class ServiceRegistrationActivity : AppCompatActivity() {
 
@@ -66,15 +69,24 @@ class ServiceRegistrationActivity : AppCompatActivity() {
                 if (response.isSuccessful) {
                     val service = response.body()
                     service?.let {
-                        Log.d("ServiceRegistration", "Service details loaded: $it")
-                        serviceNameTextView.text = it.name
-                        serviceDescriptionTextView.text = it.description
-                        serviceStartTimeTextView.text = "Start Time: ${it.startSchedule}"
-                        serviceEndTimeTextView.text = "End Time: ${it.endSchedule}"
-                        serviceCapacityTextView.text = "Places restantes : ${it.capacity - it.currentRegistrations}"
+                        val currentDateTime = Date() // Date actuelle
+                        val serviceStartDateTime = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).parse(it.startSchedule)
 
-                        // Check if the user is already registered for this service
-                        checkUserRegistration(serviceId, userId)
+                        if (serviceStartDateTime.before(currentDateTime)) {
+                            // Si la date du service est passée
+                            Toast.makeText(this@ServiceRegistrationActivity, "Vous ne pouvez pas vous inscrire à un service qui a déjà commencé.", Toast.LENGTH_SHORT).show()
+                            registerButton.isEnabled = false // Désactiver le bouton d'inscription
+                        } else {
+                            // Mise à jour des détails du service
+                            serviceNameTextView.text = it.name
+                            serviceDescriptionTextView.text = it.description
+                            serviceStartTimeTextView.text = "Start Time: ${it.startSchedule}"
+                            serviceEndTimeTextView.text = "End Time: ${it.endSchedule}"
+                            serviceCapacityTextView.text = "Places restantes : ${it.capacity - it.currentRegistrations}"
+
+                            // Vérifier si l'utilisateur est déjà inscrit à ce service
+                            checkUserRegistration(serviceId, userId)
+                        }
                     } ?: run {
                         Log.e("ServiceRegistration", "Service is null")
                     }
@@ -90,6 +102,8 @@ class ServiceRegistrationActivity : AppCompatActivity() {
             }
         })
     }
+
+
 
     private fun checkUserRegistration(serviceId: Int, userId: Int) {
         apiService.getUserRegistrations(userId).enqueue(object : Callback<List<ServiceRegistration>> {

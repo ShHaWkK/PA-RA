@@ -1,3 +1,4 @@
+// Path: src/main/java/com/example/nomorewaste/PlanningsActivity.kt
 package com.example.nomorewaste
 
 import android.os.Bundle
@@ -7,8 +8,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.nomorewaste.api.CalendarAdapter
-import com.example.nomorewaste.api.PlanningAdapter
+import com.example.nomorewaste.adapter.PlanningAdapter
+import com.example.nomorewaste.api.*
 import com.example.nomorewaste.viewmodel.PlanningViewModel
 import java.util.*
 
@@ -19,29 +20,29 @@ class PlanningsActivity : AppCompatActivity() {
     private lateinit var recyclerViewPlannings: RecyclerView
     private lateinit var calendarAdapter: CalendarAdapter
     private lateinit var planningAdapter: PlanningAdapter
-    private val calendar = Calendar.getInstance()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_planning)
 
+        // Setup RecyclerView for calendar dates
         recyclerViewCalendar = findViewById(R.id.recycler_view_calendar)
         recyclerViewCalendar.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
 
+        // Setup RecyclerView for plannings
         recyclerViewPlannings = findViewById(R.id.recycler_view_plannings)
         recyclerViewPlannings.layoutManager = LinearLayoutManager(this)
 
         planningAdapter = PlanningAdapter(emptyList())
         recyclerViewPlannings.adapter = planningAdapter
 
-        val dates = generateWeekDates()
-        // Adapter pour les dates
-        calendarAdapter = CalendarAdapter(dates) { date ->
+        val today = Calendar.getInstance().time
+        calendarAdapter = CalendarAdapter(today) { date ->
             val sharedPreferences = getSharedPreferences("NoMoreWastePrefs", MODE_PRIVATE)
             val userId = sharedPreferences.getInt("USER_ID", -1)
 
             if (userId != -1) {
-                planningViewModel.loadUserScheduleForDate(userId, date) // Charge les plannings pour la date sélectionnée
+                planningViewModel.loadUserScheduleForDate(userId, date)
             } else {
                 Toast.makeText(this, "Utilisateur non connecté", Toast.LENGTH_SHORT).show()
             }
@@ -51,12 +52,12 @@ class PlanningsActivity : AppCompatActivity() {
 
         planningViewModel.schedules.observe(this, Observer { plannings ->
             if (plannings != null && plannings.isNotEmpty()) {
-                planningAdapter.updateData(plannings) // Met à jour l'adaptateur avec les nouveaux plannings
+                planningAdapter = PlanningAdapter(plannings)
+                recyclerViewPlannings.adapter = planningAdapter
             } else {
                 Toast.makeText(this, "Aucun planning trouvé", Toast.LENGTH_SHORT).show()
             }
         })
-
 
         planningViewModel.error.observe(this, Observer { errorMessage ->
             if (errorMessage != null) {
@@ -72,16 +73,5 @@ class PlanningsActivity : AppCompatActivity() {
         } else {
             Toast.makeText(this, "Utilisateur non connecté", Toast.LENGTH_SHORT).show()
         }
-    }
-
-    private fun generateWeekDates(): List<Date> {
-        val dates = mutableListOf<Date>()
-        val calendar = Calendar.getInstance()
-        calendar.set(Calendar.DAY_OF_WEEK, calendar.firstDayOfWeek)
-        for (i in 0..6) {
-            dates.add(calendar.time)
-            calendar.add(Calendar.DATE, 1)
-        }
-        return dates
     }
 }

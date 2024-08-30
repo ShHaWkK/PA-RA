@@ -36,33 +36,39 @@ class LoginController
             http_response_code(400);
             return ['error' => 'Missing required fields'];
         }
-    
+
         $email = $data['email'];
         $password = $data['password'];
-    
+
         $user = $this->entityManager->getRepository(UserModel::class)->findOneBy(['email' => $email]);
-    
+
         if (!$user) {
             http_response_code(401);
             return ['error' => 'Invalid email or password'];
         }
-    
+
         if (!password_verify($password, $user->getPassword())) {
             http_response_code(401);
             return ['error' => 'Invalid password'];
         }
-    
+
+        // Vérifier le statut de l'utilisateur
+        if ($user->getStatus() !== 'approved') {
+            http_response_code(403);
+            return ['error' => 'Account not approved'];
+        }
+
         // Générer un token JWT
         $payload = [
             'user_id' => $user->getId(),
             'role' => $user->getRole(),
+            'status' => $user->getStatus(), // Inclure le statut dans le payload si nécessaire
             'exp' => time() + 3600 // Expire in 1 hour
         ];
         $token = $this->jwtService->generateToken($payload);
-    
+
         return ['token' => $token, 'role' => $user->getRole(), 'id' => $user->getId()];
     }
-    
 
     public function checkSession($role)
     {

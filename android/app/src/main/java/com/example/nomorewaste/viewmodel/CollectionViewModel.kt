@@ -1,11 +1,10 @@
 package com.example.nomorewaste.viewmodel
 
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.nomorewaste.api.ApiService
-import com.example.nomorewaste.api.Collection
+import com.example.nomorewaste.api.CollectionData  // Assurez-vous d'importer le bon type
 import com.example.nomorewaste.api.CollectionDetails
 import com.example.nomorewaste.api.RetrofitClient
 import okhttp3.ResponseBody
@@ -17,8 +16,8 @@ class CollectionViewModel : ViewModel() {
 
     private val apiService: ApiService = RetrofitClient.getClient().create(ApiService::class.java)
 
-    private val _collections = MutableLiveData<List<Collection>>()  // Specify the type as List<Collection>
-    val collections: LiveData<List<Collection>> get() = _collections
+    private val _collections = MutableLiveData<List<CollectionData>>()  // Utilisez le type correct CollectionData
+    val collections: LiveData<List<CollectionData>> get() = _collections
 
     private val _collectionDetails = MutableLiveData<CollectionDetails>()
     val collectionDetails: LiveData<CollectionDetails> get() = _collectionDetails
@@ -33,8 +32,8 @@ class CollectionViewModel : ViewModel() {
     val sendEmailSuccess: LiveData<Boolean> get() = _sendEmailSuccess
 
     fun loadAllCollections() {
-        apiService.getAllCollections().enqueue(object : Callback<List<Collection>> {
-            override fun onResponse(call: Call<List<Collection>>, response: Response<List<Collection>>) {
+        apiService.getAllCollections().enqueue(object : Callback<List<CollectionData>> {  // Utilisez le type correct CollectionData
+            override fun onResponse(call: Call<List<CollectionData>>, response: Response<List<CollectionData>>) {
                 if (response.isSuccessful) {
                     _collections.postValue(response.body())
                 } else {
@@ -42,7 +41,7 @@ class CollectionViewModel : ViewModel() {
                 }
             }
 
-            override fun onFailure(call: Call<List<Collection>>, t: Throwable) {
+            override fun onFailure(call: Call<List<CollectionData>>, t: Throwable) {  // Utilisez le type correct CollectionData
                 _error.postValue("Failure: ${t.message}")
             }
         })
@@ -86,7 +85,6 @@ class CollectionViewModel : ViewModel() {
                 if (response.isSuccessful) {
                     _sendEmailSuccess.postValue(true)
                 } else {
-                    // Log error response for debugging
                     _error.postValue("Error sending Excel email: ${response.message()} - ${response.errorBody()?.string()}")
                 }
             }
@@ -96,5 +94,4 @@ class CollectionViewModel : ViewModel() {
             }
         })
     }
-
 }

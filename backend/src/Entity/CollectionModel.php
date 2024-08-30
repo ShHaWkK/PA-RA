@@ -26,6 +26,9 @@ class CollectionModel implements \JsonSerializable
     #[ORM\Column(type: "text", nullable: true)]
     private ?string $excel_path = null;
 
+    #[ORM\Column(type: "text", nullable: true)]
+    private ?string $pdf_path = null;
+
     #[ORM\Column(type: "datetime", options: ["default" => "CURRENT_TIMESTAMP"])]
     private $collection_date;
 
@@ -116,6 +119,17 @@ class CollectionModel implements \JsonSerializable
     public function setExcelPath(?string $excel_path): self
     {
         $this->excel_path = $excel_path;
+        return $this;
+    }
+
+    public function getPdfPath(): ?string
+    {
+        return $this->pdf_path;
+    }
+
+    public function setPdfPath(?string $pdf_path): self
+    {
+        $this->pdf_path = $pdf_path;
         return $this;
     }
 

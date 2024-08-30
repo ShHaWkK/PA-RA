@@ -20,6 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 
 require_once "../bootstrap.php";
 
+
 use Controller\ReminderController;
 use Controller\UserController;
 use Controller\CompanyController;
@@ -44,10 +45,12 @@ use Controller\MessageController;
 use Controller\RecipeController;
 use Controller\RecipeIngredientController;
 use Controller\ProductNotificationController;
+use Controller\PlanningController;
 use Service\PDFService;
 use Service\JWTService;
 use Service\EmailService;
 use Service\ExcelService;
+use Service\GoogleMapsService;
 use Middleware\JWTMiddleware;
 
 use PHPMailer\PHPMailer\PHPMailer;
@@ -69,10 +72,13 @@ $requestUri = parse_url($requestUri, PHP_URL_PATH);
 $uriParts = explode('/', trim($requestUri, '/'));
 
 // Google Maps API Key
-$googleMapsApiKey = 'AIzaSyA0nZoj1xey1WSaaA_BdLH5CRca48aYQC0';
+$googleMapsApiKey = getenv('GOOGLE_MAPS_API_KEY');
 
 // Instancie le service PDF
 $pdfService = new PDFService($googleMapsApiKey);
+
+// Instancie le service Excel
+$excelService = new ExcelService();
 
 // Instancie PHPMailer
 $mailer = new PHPMailer(true);
@@ -84,11 +90,12 @@ $mailer->Password = 'vhpewmlkxxrpnioj';
 $mailer->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
 $mailer->Port = 587;
 
-// Instancie ExcelService
-$excelService = new ExcelService();
-
 // Instancie EmailService
 $emailService = new EmailService($mailer);
+
+// Instancie GoogleMapsService
+$googleMapsService = new GoogleMapsService();
+
 
 $controllerMap = [
     'users' => UserController::class,
@@ -98,6 +105,8 @@ $controllerMap = [
     'availabilities' => AvailabilityController::class,
     'collections' => CollectionController::class,
     'deliveries' => DeliveryController::class,
+    'destinations' =>DeliveryController::class,
+    'routes' => DeliveryController::class,
     'products' => ProductController::class,
     'planned_routes' => PlannedRouteController::class,
     'reminders' => ReminderController::class,
@@ -118,7 +127,8 @@ $controllerMap = [
     'warehouses' => WarehouseController::class,
     'recipe' => RecipeController::class, 
     'recipe_ingredients' => RecipeIngredientController::class,
-    'product_notifications' => ProductNotificationController::class
+    'product_notifications' => ProductNotificationController::class,
+    'planning' => PlanningController::class
 ];
 
 // Vérifie si le contrôleur existe pour le premier élément de l'URI
@@ -155,7 +165,7 @@ try {
         // Pass both EntityManager and EmailService to ServiceProposalController
         $controller = new $controllerClass($entityManager, $emailService);
     }elseif ($controllerClass === DeliveryController::class || $controllerClass === PlannedRouteController::class) {
-        $controller = new $controllerClass($entityManager, $pdfService);
+        $controller = new $controllerClass($entityManager, $pdfService, $excelService, $emailService, $googleMapsService);
     } elseif ($controllerClass === LoginController::class) {
         $controller = new $controllerClass($entityManager, $jwtService);
     } elseif ($controllerClass === UserController::class) {

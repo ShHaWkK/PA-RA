@@ -20,16 +20,10 @@ class ServiceModel
     private $description;
 
     #[ORM\Column(type: "datetime")]
-    private $start_schedule;
-
-    #[ORM\Column(type: "datetime")]
-    private $end_schedule;
+    private $schedule;
 
     #[ORM\Column(type: "integer")]
     private $capacity;
-
-    #[ORM\Column(type: "integer", options: ["default" => 0])]
-    private $current_registrations;
 
     #[ORM\Column(type: "string", length: 50, options: ["default" => "open"])]
     private $status;
@@ -43,7 +37,7 @@ class ServiceModel
     #[ORM\Column(type: "datetime", options: ["default" => "CURRENT_TIMESTAMP", "onUpdate" => "CURRENT_TIMESTAMP"])]
     private $updated_at;
 
-    // Getters and setters for each property...
+    // Getters and setters for each property
 
     public function getId(): ?int
     {
@@ -72,25 +66,14 @@ class ServiceModel
         return $this;
     }
 
-    public function getStartSchedule(): ?\DateTimeInterface
+    public function getSchedule(): ?\DateTimeInterface
     {
-        return $this->start_schedule;
+        return $this->schedule;
     }
 
-    public function setStartSchedule(\DateTimeInterface $start_schedule): self
+    public function setSchedule(\DateTimeInterface $schedule): self
     {
-        $this->start_schedule = $start_schedule;
-        return $this;
-    }
-
-    public function getEndSchedule(): ?\DateTimeInterface
-    {
-        return $this->end_schedule;
-    }
-
-    public function setEndSchedule(\DateTimeInterface $end_schedule): self
-    {
-        $this->end_schedule = $end_schedule;
+        $this->schedule = $schedule;
         return $this;
     }
 
@@ -102,17 +85,6 @@ class ServiceModel
     public function setCapacity(int $capacity): self
     {
         $this->capacity = $capacity;
-        return $this;
-    }
-
-    public function getCurrentRegistrations(): ?int
-    {
-        return $this->current_registrations;
-    }
-
-    public function setCurrentRegistrations(int $current_registrations): self
-    {
-        $this->current_registrations = $current_registrations;
         return $this;
     }
 
@@ -159,5 +131,19 @@ class ServiceModel
         $this->updated_at = $updatedAt;
         return $this;
     }
-}
 
+    public function jsonSerialize(): array
+    {
+        return [
+            'id' => $this->id,
+            'name' => $this->name,
+            'description' => $this->description,
+            'schedule' => $this->schedule->format('d-m-Y H:i:s'), // ISO 8601 format
+            'capacity' => $this->capacity,
+            'status' => $this->status,
+            'location' => $this->location,
+            'created_at' => $this->created_at->format('d-m-Y H:i:s'),
+            'updated_at' => $this->updated_at->format('d-m-Y H:i:s')
+        ];
+    }
+}

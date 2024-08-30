@@ -45,7 +45,7 @@ class CollectionsActivity : AppCompatActivity() {
         // Initialize the button and set click listener
         buttonViewNotifications = findViewById(R.id.button_view_notifications)
         buttonViewNotifications.setOnClickListener {
-            Toast.makeText(this, "View Notifications Clicked", Toast.LENGTH_SHORT).show() // Debugging log
+            Toast.makeText(this, "View Notifications Clicked", Toast.LENGTH_SHORT).show()
             val intent = Intent(this, ProductNotificationActivity::class.java)
             startActivity(intent)
         }
@@ -71,7 +71,7 @@ class CollectionsActivity : AppCompatActivity() {
 
         collectionViewModel.error.observe(this, Observer { errorMessage ->
             if (errorMessage != null) {
-                Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show()  // Make it longer to ensure it's readable
+                Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show()
             }
         })
 

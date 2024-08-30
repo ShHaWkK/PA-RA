@@ -86,37 +86,36 @@ interface ApiService {
     @GET("service_proposals/{user_id}")
     fun getUserProposals(@Path("user_id") userId: Int): Call<List<ServiceProposal>>
 
-    @GET("service_schedules/{user_id}")
-    fun getUserSchedule(@Path("user_id") userId: Int): Call<List<ServiceSchedule>>
+   @POST("collections/request")
+   fun createCollectionRequest(@Body requestData: Map<String, Any>): Call<Void>
 
-   @GET("service_schedules/{userId}/byDate")
-   fun getUserScheduleByDate(@Path("userId") userId: Int, @Query("date") date: String): Call<List<ServiceSchedule>>
+   // Méthode pour obtenir la planification d'un utilisateur
+   @GET("planning")
+   fun getUserSchedule(
+      @Query("user_id") userId: Int
+   ): Call<PlanningResponse>
 
-    @GET("collections")
-    fun getAllCollections(): Call<List<Collection>>
+   // Méthode pour obtenir la planification d'un utilisateur pour une date spécifique
+   @GET("planning/byDate")
+   fun getUserScheduleByDate(
+      @Query("user_id") userId: Int,
+      @Query("date") date: String
+   ): Call<PlanningResponse>
 
-    @GET("collections/{id}")
-    fun getCollectionDetails(@Path("id") collectionId: Int): Call<CollectionDetails>
+    @GET("planning")
+    fun getUserScheduleByDateRange( @Query("user_id") userId: Int, @Query("start_date") startDate: String, @Query("end_date") endDate: String): Call<PlanningResponse>
 
-    @POST("collections")
-    fun createCollection(@Body collectionData: Map<String, Any>): Call<Collection>
+   @GET("collections")
+   fun getAllCollections(): Call<List<CollectionData>>
 
-    @PUT("collections/{id}")
-    fun updateCollection(@Path("id") collectionId: Int, @Body collectionData: Map<String, Any>): Call<Collection>
+   @GET("collections/{id}")
+   fun getCollectionDetails(@Path("id") collectionId: Int): Call<CollectionDetails>
 
-    @GET("collections/{id}/export")
-    fun exportCollectionToExcel(@Path("id") collectionId: Int): Call<ResponseBody>
+   @POST("collections/{id}/export")
+   fun exportCollectionToExcel(@Path("id") collectionId: Int): Call<ResponseBody>
 
-    // Update this POST request to include correct path and query parameters
-    @POST("collections/{id}/send_excel")
-    fun sendCollectionExcelEmail(
-        @Path("id") collectionId: Int,
-        @Query("email") email: String
-    ): Call<Void>
-
-    @POST("/collection_requests")
-    fun createCollectionRequest(@Body requestData: Map<String, Any>): Call<Void>
-
+   @POST("collections/{id}/send-email")
+   fun sendCollectionExcelEmail(@Path("id") collectionId: Int, @Query("email") email: String): Call<Void>
     @GET("product_notifications")
     fun getAllProductNotifications(): Call<List<ProductNotification>>
 

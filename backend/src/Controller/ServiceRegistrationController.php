@@ -8,7 +8,6 @@ use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
 use Service\ServiceRegistrationService;
-use Service\EmailService;
 
 class ServiceRegistrationController
 {
@@ -16,10 +15,11 @@ class ServiceRegistrationController
     private $serializer;
     private $serviceRegistrationService;
 
-    public function __construct(EntityManager $entityManager, EmailService $emailService)
+    public function __construct(EntityManager $entityManager)
     {
         $this->entityManager = $entityManager;
-        $this->serviceRegistrationService = new ServiceRegistrationService($entityManager, $emailService);
+        $this->serviceRegistrationService = new ServiceRegistrationService($entityManager);
+
         // Configurer le normalizer pour le format des dates
         $normalizers = [
             new DateTimeNormalizer(['datetime_format' => 'Y-m-d H:i:s']),
@@ -37,7 +37,7 @@ class ServiceRegistrationController
                     return $this->createRegistration($input);
                 case 'GET':
                     if (isset($uriParts[1])) {
-                        return $this->getRegistrationsByUser((int) $uriParts[1]);
+                        return $this->getRegistration((int) $uriParts[1]);
                     } else {
                         return $this->getAllRegistrations();
                     }
@@ -132,30 +132,20 @@ class ServiceRegistrationController
     {
         try {
             $registrations = $this->serviceRegistrationService->getAllRegistrations();
-            return json_decode($this->serializer->serialize($registrations, 'json'), true);
+//            return json_decode($this->serializer->serialize($registrations, 'json'), true);
+
+            $serializedRegistrations = [];
+            foreach ($registrations as $registration) {
+                $serializedRegistrations[] = $registration->jsonSerialize();
+            }
+
+            return $serializedRegistrations;
+
         } catch (\Exception $e) {
             error_log("Exception in getAllRegistrations: " . $e->getMessage());
             http_response_code(500);
             return ['error' => 'Internal Server Error'];
         }
     }
-
-    
-    public function getRegistrationsByUser($userId)
-    {
-        try {
-            $registrations = $this->serviceRegistrationService->getRegistrationsByUser($userId);
-            if (!$registrations || count($registrations) === 0) {
-                http_response_code(404);
-                return ['error' => 'No registrations found for this user'];
-            }
-            return json_decode($this->serializer->serialize($registrations, 'json'), true);
-        } catch (\Exception $e) {
-            error_log("Exception in getRegistrationsByUser: " . $e->getMessage());
-            http_response_code(500);
-            return ['error' => 'Internal Server Error'];
-        }
-    }
-    
 }
 ?>

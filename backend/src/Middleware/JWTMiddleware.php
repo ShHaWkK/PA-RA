@@ -8,10 +8,13 @@ use Exception;
 class JWTMiddleware
 {
     private $jwtService;
+    private $requiredRoles = [];
+    private $requiredStatus = 'approved';
 
-    public function __construct(JWTService $jwtService)
+    public function __construct(JWTService $jwtService, array $requiredRoles = [])
     {
         $this->jwtService = $jwtService;
+        $this->requiredRoles = $requiredRoles;
     }
 
     public function __invoke($request, $response, $next)
@@ -49,6 +52,12 @@ class JWTMiddleware
         if (!empty($this->requiredRoles) && !in_array($decoded->role, $this->requiredRoles)) {
             error_log("JWTMiddleware: Access denied for role: " . $decoded->role);
             return $response->withStatus(403)->withJson(['error' => 'Access denied']);
+        }
+
+        // Vérifier le statut de l'utilisateur
+        if ($decoded->status !== $this->requiredStatus) {
+            error_log("JWTMiddleware: User status is not approved");
+            return $response->withStatus(403)->withJson(['error' => 'Access denied: User status is not approved']);
         }
 
         $request = $request->withAttribute('user', $decoded);

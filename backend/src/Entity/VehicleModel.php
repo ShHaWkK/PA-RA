@@ -115,5 +115,19 @@ class VehicleModel
         $this->updated_at = $updated_at;
         return $this;
     }
+
+    public function jsonSerialize(): array
+    {
+        return [
+            'id' => $this->getId(),
+            'brand' => $this->getBrand(),
+            'model' => $this->getModel(),
+            'license_plate' => $this->getLicensePlate(),
+            'status' => $this->getStatus(),
+            'current_location' => $this->getCurrentLocation(),
+            'created_at' => $this->getCreatedAt()?->format('d-m-Y H:i:s'),
+            'updated_at' => $this->getUpdatedAt()?->format('d-m-Y H:i:s'),
+        ];
+    }
 }
 ?>
