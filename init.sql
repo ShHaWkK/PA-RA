@@ -502,8 +502,8 @@ INSERT INTO services (name, description, start_schedule, end_schedule, capacity,
 ('Atelier de couture', 'Atelier pour apprendre les bases de la couture.', '2024-09-10 11:00:00', '2024-09-10 13:00:00', 10, 'Limoges Warehouse'),
 ('Cours de théâtre', 'Cours pour débutants sur les techniques de théâtre.', '2024-09-11 15:00:00', '2024-09-11 17:00:00', 25, 'Paris Warehouse'),
 ('Randonnée en montagne', 'Randonnée guidée en montagne avec un expert.', '2024-09-12 08:00:00', '2024-09-12 14:00:00', 10, 'Grenoble Warehouse'),
-('Conférence sur l\'intelligence artificielle', 'Introduction aux bases de l\'IA et ses applications.', '2024-09-13 16:00:00', '2024-09-13 18:00:00', 40, 'Nice Warehouse'),
-('Atelier d\'écriture créative', 'Atelier pour développer vos compétences d\'écriture.', '2024-09-14 10:00:00', '2024-09-14 12:00:00', 15, 'Lyon Warehouse'),
+('Conférence sur l\intelligence artificielle', 'Introduction aux bases de l\IA et ses applications.', '2024-09-13 16:00:00', '2024-09-13 18:00:00', 40, 'Nice Warehouse'),
+('Atelier d\écriture créative', 'Atelier pour développer vos compétences d\écriture.', '2024-09-14 10:00:00', '2024-09-14 12:00:00', 15, 'Lyon Warehouse'),
 ('Cours de musique', 'Cours de guitare pour les débutants.', '2024-09-15 13:00:00', '2024-09-15 15:00:00', 15, 'Bordeaux Warehouse');
 
 
@@ -516,7 +516,7 @@ INSERT INTO service_schedules (service_id, start_time, end_time, location) VALUE
 ((SELECT id FROM services WHERE name = 'Atelier de bricolage'), '2024-09-05 10:00:00', '2024-09-05 12:00:00', 'Nantes Warehouse'), 
 ((SELECT id FROM services WHERE name = 'Initiation à la photographie'), '2024-09-06 09:00:00', '2024-09-06 11:00:00', 'Marseille Warehouse'),
 ((SELECT id FROM services WHERE name = 'Cours de danse'), '2024-09-07 14:00:00', '2024-09-07 16:00:00', 'Paris Warehouse'),
- ((SELECT id FROM services WHERE name = 'Jardinage urbain'), '2024-09-08 09:00:00', '2024-09-08 11:00:00', 'Lille Warehouse'),
+((SELECT id FROM services WHERE name = 'Jardinage urbain'), '2024-09-08 09:00:00', '2024-09-08 11:00:00', 'Lille Warehouse'),
 ((SELECT id FROM services WHERE name = 'Séminaire sur la gestion du temps'), '2024-09-09 10:00:00', '2024-09-09 13:00:00', 'Strasbourg Warehouse'),
 ((SELECT id FROM services WHERE name = 'Atelier de couture'), '2024-09-10 11:00:00', '2024-09-10 13:00:00', 'Limoges Warehouse'),
 ((SELECT id FROM services WHERE name = 'Cours de théâtre'), '2024-09-11 15:00:00', '2024-09-11 17:00:00', 'Paris Warehouse'),
