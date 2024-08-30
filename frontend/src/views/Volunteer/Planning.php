@@ -13,7 +13,7 @@
 <div class="back-office-container">
     <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/includes/VolunteerDashboard.php'); ?>
     <div class="back-office-content">
-        <h1>Espace Utilisateur</h1>
+        <h1>Planning</h1>
         <div id="calendar"></div>
 
         <?php

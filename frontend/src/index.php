@@ -82,6 +82,26 @@ switch ($request) {
             exit;
         }
         break;
+    case '/Volunteer/Collection':
+        if ($jwtToken) {
+            requireAuth($jwtToken, 'volunteer'); // ou autre vérification selon vos besoins
+
+            // Récupérer les paramètres collectionId et date depuis l'URL
+            $collectionId = isset($_GET['collectionId']) ? $_GET['collectionId'] : null;
+            $date = isset($_GET['date']) ? $_GET['date'] : null;
+
+            // Vous pouvez maintenant transmettre ces paramètres à la page ou gérer les erreurs si manquants
+            if ($collectionId && $date) {
+                require __DIR__ . '/views/Volunteer/Collection.php';
+            } else {
+                echo "Paramètres manquants : collectionId ou date";
+                exit;
+            }
+        } else {
+            require __DIR__ . '/views/Login/Login.php';
+            exit;
+        }
+        break;
     case '/Admin/Volunteers':
         if ($jwtToken) {
             requireAuth($jwtToken, 'admin');
@@ -167,15 +187,6 @@ switch ($request) {
         if ($jwtToken) {
             requireAuth($jwtToken, 'admin');
             require __DIR__ . '/views/Admin/Services.php';
-        } else {
-            require __DIR__ . '/views/Login/Login.php';
-            exit;
-        }
-        break;
-    case '/Volunteer':
-        if ($jwtToken) {
-            requireAuth($jwtToken, 'volunteer');
-            require __DIR__ . '/views/Volunteer/Volunteer.php';
         } else {
             require __DIR__ . '/views/Login/Login.php';
             exit;

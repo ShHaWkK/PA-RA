@@ -144,6 +144,30 @@
         this.week.appendChild(outer);
     };
 
+    Calendar.prototype.toggleNavigationButtons = function(enable) {
+        var leftButton = document.querySelector('.left');
+        var rightButton = document.querySelector('.right');
+
+        if (leftButton && rightButton) {
+            leftButton.disabled = !enable;
+            rightButton.disabled = !enable;
+        }
+    }
+
+    Calendar.prototype.nextMonth = function() {
+        this.toggleNavigationButtons(false); // Désactiver les boutons
+        this.current.add('months', 1);
+        this.next = true;
+        this.draw();
+    }
+
+    Calendar.prototype.prevMonth = function() {
+        this.toggleNavigationButtons(false); // Désactiver les boutons
+        this.current.subtract('months', 1);
+        this.next = false;
+        this.draw();
+    }
+
     Calendar.prototype.drawEvents = function(day, element) {
         if (day.isSame(this.current, 'month')) {
             var todaysEvents = this.events.filter(ev => day.isSame(moment(ev.date), 'day'));
@@ -173,13 +197,12 @@
 
         var currentOpened = document.querySelector('.details');
 
-        //Check to see if there is an open detais box on the current row
+        // Check to see if there is an open details box on the current row
         if(currentOpened && currentOpened.parentNode === el.parentNode) {
             details = currentOpened;
             arrow = document.querySelector('.arrow');
         } else {
-            //Close the open events on differnt week row
-            //currentOpened && currentOpened.parentNode.removeChild(currentOpened);
+            // Close the open events on different week row
             if(currentOpened) {
                 currentOpened.addEventListener('webkitAnimationEnd', function() {
                     currentOpened.parentNode.removeChild(currentOpened);
@@ -196,14 +219,13 @@
                 currentOpened.className = 'details out';
             }
 
-            //Create the Details Container
+            // Create the Details Container
             details = createElement('div', 'details in');
 
-            //Create the arrow
-            var arrow = createElement('div', 'arrow');
+            // Create the arrow
+            arrow = createElement('div', 'arrow');
 
-            //Create the event wrapper
-
+            // Create the event wrapper
             details.appendChild(arrow);
             el.parentNode.appendChild(details);
         }
@@ -221,7 +243,7 @@
     }
 
     Calendar.prototype.renderEvents = function(events, ele) {
-        //Remove any events in the current details element
+        // Remove any events in the current details element
         var currentWrapper = ele.querySelector('.events');
         var wrapper = createElement('div', 'events in' + (currentWrapper ? ' new' : ''));
 
@@ -230,12 +252,45 @@
             var square = createElement('div', 'event-category ' + ev.color);
             var span = createElement('span', '', ev.eventName);
 
-            div.appendChild(square);
-            div.appendChild(span);
-            wrapper.appendChild(div);
+            // Ensure collectionId and date are properly defined
+            var event_id = ev.id;
+            var date = ev.date ? ev.date.format('YYYY-MM-DD') : 'defaultDate';
+
+            // Determine the href based on the calendar type
+            var href;
+            switch (ev.calendar) {
+                case 'Collectes':
+                    href = `/Volunteer/Collection?collectionId=${event_id}&date=${date}`;
+                    break;
+                case 'Services':
+                    href = `/Volunteer/Service?collectionId=${event_id}&date=${date}`;
+                    break;
+                case 'Livraisons':
+                    href = `/Volunteer/Route?collectionId=${event_id}&date=${date}`;
+                    break;
+                default:
+                    href = '#';
+            }
+
+            console.log("href", href); // Check href value
+
+            // Create the link and set href
+            var link = document.createElement('a');
+            link.className = 'event-link';
+            link.href = href;
+
+            // Add span with text to the link
+            link.appendChild(span);
+
+            console.log("link", link); // Check created link
+
+            div.appendChild(square); // Append the square outside the link
+            div.appendChild(link);   // Append the link containing the span
+
+            wrapper.appendChild(div); // Append the event div to the wrapper
         });
 
-        if(!events.length) {
+        if (!events.length) {
             var div = createElement('div', 'event empty');
             var span = createElement('span', '', 'No Events');
 
@@ -243,7 +298,7 @@
             wrapper.appendChild(div);
         }
 
-        if(currentWrapper) {
+        if (currentWrapper) {
             currentWrapper.className = 'events out';
             currentWrapper.addEventListener('webkitAnimationEnd', function() {
                 currentWrapper.parentNode.removeChild(currentWrapper);
@@ -281,18 +336,6 @@
             legend.appendChild(entry);
         });
         this.el.appendChild(legend);
-    }
-
-    Calendar.prototype.nextMonth = function() {
-        this.current.add('months', 1);
-        this.next = true;
-        this.draw();
-    }
-
-    Calendar.prototype.prevMonth = function() {
-        this.current.subtract('months', 1);
-        this.next = false;
-        this.draw();
     }
 
     window.Calendar = Calendar;
