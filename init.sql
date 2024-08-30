@@ -1,4 +1,7 @@
-CREATE DATABASE IF NOT EXISTS no_more_waste;
+CREATE DATABASE IF NOT EXISTS no_more_waste
+    CHARACTER SET utf8mb4
+    COLLATE utf8mb4_unicode_ci;
+
 USE no_more_waste;
 
 -- Table des utilisateurs
@@ -14,6 +17,7 @@ CREATE TABLE IF NOT EXISTS users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     verification_code VARCHAR(6),
+    file_path TEXT,
     is_verified BOOLEAN DEFAULT FALSE
 );
 
@@ -127,7 +131,7 @@ CREATE TABLE IF NOT EXISTS collections (
 );
 
 
--- Table de liaison entre les collectes et les notifications de produits (collection_products)
+-- Cette table associative lie les produits aux collectes. Elle permet de spécifier quels produits sont collectés dans une collecte donnée et en relation avec quelle notification.
 CREATE TABLE IF NOT EXISTS collection_products (
     collection_id INT NOT NULL,
     notification_id INT NOT NULL,
