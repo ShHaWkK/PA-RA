@@ -1,0 +1,18 @@
+.route-header {
+    color: white;
+    padding: 15px;
+}
+
+.destination-section {
+    border: 1px solid #ccc;
+    margin: 15px;
+    padding: 10px;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+}
+
+.delivery-section {
+    margin-left: 20px;
+    padding: 5px;
+    border-left: 2px solid #4CAF50;
+}

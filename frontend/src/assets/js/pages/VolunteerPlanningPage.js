@@ -15,9 +15,7 @@ async function initializeCalendar() {
         const startDate = today.startOf('month').format('YYYY-MM-DD');
         const endDate = today.endOf('month').format('YYYY-MM-DD');
 
-        const planningData = await getPlanning(userId, startDate, endDate);
-
-        console.log(planningData);
+        const planningData = await getPlanning(userId);
 
         // Initialize events array
         const events = [];
@@ -25,13 +23,11 @@ async function initializeCalendar() {
         // Transform routes
         if (Array.isArray(planningData.routes)) {
             planningData.routes.forEach(route => {
-                console.log('Raw route start time:', route.start_time);
-
                 // Parse date and ignore time zones, use startOf('day') to ensure only date is considered
                 const date = moment(route.start_time, 'DD-MM-YYYY HH:mm:ss').startOf('day');
 
-                console.log('Route Date:', date.format());
                 events.push({
+                    id:route.id,
                     eventName: `Livraison: ${route.name}`,
                     calendar: 'Livraisons',
                     color: 'orange',
@@ -48,8 +44,8 @@ async function initializeCalendar() {
 
                 // Parse date and ignore time zones, use startOf('day') to ensure only date is considered
                 const date = moment(collection.collection_date, 'YYYY-MM-DD HH:mm:ss').startOf('day');
-                console.log('Collection Date:', date.format());
                 events.push({
+                    id: collection.id,
                     eventName: `Collecte: ${collection.volunteer_name}`,
                     calendar: 'Collectes',
                     color: 'blue',
@@ -62,14 +58,11 @@ async function initializeCalendar() {
 
         // Transform services
         if (Array.isArray(planningData.services)) {
-            console.log("services",planningData.services);
             planningData.services.forEach(service => {
-                console.log("service",service);
-
                 // Parse date and ignore time zones, use startOf('day') to ensure only date is considered
                 const date = moment(service.service.schedule, 'DD-MM-YYYY HH:mm:ss').startOf('day');
-                console.log('Service Date:', date.format());
                 events.push({
+                    id: service.id,
                     eventName: `Service: ${service.service.name}`,
                     calendar: 'Services',
                     color: 'green',
@@ -82,8 +75,6 @@ async function initializeCalendar() {
 
         loader.classList.add('hidden');
         calendarElement.classList.remove('hidden');
-
-        console.log("events added", events);
 
         const calendar = new Calendar('#calendar', events);
 

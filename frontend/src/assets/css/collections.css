@@ -1,0 +1,53 @@
+/* Style global pour le conteneur des sections de produits */
+#collecte-sections {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem; /* Espacement entre les sections */
+}
+
+/* Style pour chaque section de produit */
+.product-section {
+    background-color: #f9f9f9; /* Couleur de fond légère */
+    border: 1px solid #ddd; /* Bordure légère */
+    border-radius: 8px; /* Coins arrondis */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Ombre légère */
+    padding: 1rem; /* Espacement intérieur */
+    width: 80%; /* Largeur relative */
+    max-width: 600px; /* Largeur maximale */
+    text-align: center; /* Centrer le texte */
+}
+
+/* Style pour les labels et les champs d'entrée */
+.product-section label {
+    display: block;
+    margin: 0.5rem 0; /* Espacement au-dessus et en-dessous des labels */
+    font-weight: bold; /* Texte en gras pour les labels */
+}
+
+/* Style pour les champs d'entrée et les boutons */
+.product-section input[type="number"],
+.product-section input[type="checkbox"] {
+    margin: 0.5rem 0; /* Espacement au-dessus et en-dessous des champs */
+    padding: 0.5rem; /* Espacement intérieur */
+    border: 1px solid #ccc; /* Bordure légère */
+    border-radius: 4px; /* Coins arrondis pour les champs */
+}
+
+/* Style pour le bouton "Modifier" */
+.product-section .edit-button {
+    background-color: #007bff; /* Couleur de fond du bouton */
+    color: #fff; /* Couleur du texte du bouton */
+    border: none; /* Retirer la bordure du bouton */
+    border-radius: 4px; /* Coins arrondis du bouton */
+    padding: 0.5rem 1rem; /* Espacement intérieur du bouton */
+    cursor: pointer; /* Changer le curseur sur le bouton */
+    font-size: 1rem; /* Taille de la police du bouton */
+    margin-top: 1rem; /* Espacement au-dessus du bouton */
+}
+
+/* Style pour le bouton "Modifier" au survol */
+.product-section .edit-button:hover {
+    background-color: #0056b3; /* Couleur de fond du bouton au survol */
+    transition: background-color 0.3s; /* Transition de la couleur de fond */
+}

@@ -75,7 +75,7 @@
         <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/AdminCollectionPage/ModifyCollectionProductModal.php'); ?>
 
         <!-- Script pour gérer les interactions avec la page -->
-        <script type="module" src="/assets/js/pages/AdminCollectionPage.js"></script>
+        <script type="module" src="/assets/js/pages/VolunteerCollectionPage.js"></script>
     </div>
 </div>
 </body>

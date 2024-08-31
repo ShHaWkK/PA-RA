@@ -266,7 +266,7 @@
                     href = `/Volunteer/Service?collectionId=${event_id}&date=${date}`;
                     break;
                 case 'Livraisons':
-                    href = `/Volunteer/Route?collectionId=${event_id}&date=${date}`;
+                    href = `/Volunteer/Distribution?routeId=${event_id}`;
                     break;
                 default:
                     href = '#';

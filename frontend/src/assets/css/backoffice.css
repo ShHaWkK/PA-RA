@@ -1,12 +1,83 @@
 .back-office-container {
     display: flex;
-    height: 100vh; /* Hauteur de l'écran complet */
+    height: 100vh;
+    background-color: #e9ecef;
 }
 
 .back-office-content {
-    flex: 1; /* Le contenu principal prend tout l'espace restant */
+    flex: 1;
     padding: 20px;
-    margin-left: 250px; /* Marge à gauche pour le dashboard */
-    background-color: #f0f0f0; /* Couleur de fond du contenu */
-    overflow-y: auto; /* Activation du défilement vertical si nécessaire */
+    margin-left: 250px;
+    background-color: #ffffff;
+    overflow-y: auto;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.back-office-content h1 {
+    font-size: 1.8rem;
+    margin-bottom: 1rem;
+    border-bottom: 2px solid #007bff;
+    padding-bottom: 0.5rem;
+}
+
+.row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.row label {
+    font-weight: bold;
+    color: #495057;
+    margin-right: 0.5rem;
+}
+
+input[type="date"],
+select,
+input[type="button"],
+button {
+    padding: 0.5rem 1rem;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    font-size: 1rem;
+    color: #495057;
+    background-color: #ffffff;
+    margin: 0.5rem;
+}
+
+button,
+input[type="button"] {
+    font-family: Arial, sans-serif;
+    border: none;
+    cursor: pointer; /
+    transition: background-color 0.3s, box-shadow 0.3s; /
+    background-color: darkcyan;
+}
+
+.add-button {
+    background-color: #28a745;
+    color: #fff;
+}
+
+.add-button:hover {
+    background-color: #218838;
+}
+
+.delete-button {
+    background-color: #dc3545;
+    color: #fff;
+}
+
+.delete-button:hover {
+    background-color: #c82333;
+}
+
+.modify-button {
+    background-color: #007bff;
+    color: #fff;
+}
+
+.modify-button:hover {
+    background-color: #0056b3;
 }
