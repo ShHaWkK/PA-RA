@@ -5,6 +5,7 @@ import {
 } from "../modals/CollectionModals.js";
 import {formatDateToFrench, extractDateTime, parseDate} from "../FormatDate.js";
 import {populateDestinationsModal} from "../modals/DistributionModals.js";
+import {getCookie} from "../../api/Api.js";
 
 export let selectedRouteId;
 
@@ -207,6 +208,100 @@ export async function populateRouteTable(queryParameters) {
 
     } catch (error) {
         console.error('Error in populateRouteTable:', error.message);
+        document.getElementById('loadingBodyGeneral').classList.add('hidden');
+    }
+}
+
+export async function populateVolunteerRouteTable(queryParameters = {}) {
+    try {
+        const loader = document.getElementById('loadingBodyGeneral');
+        loader.classList.remove('hidden');
+
+        // Ajouter l'user_id au queryParameters
+        const userId = getCookie('user_id');
+        if (userId) {
+            queryParameters.driver_id = userId;
+        }
+
+        const backOfficeContent = document.querySelector('.distribution-table');
+        if (!backOfficeContent) {
+            console.error('Distribution content container not found.');
+            loader.classList.add('hidden');
+            return;
+        }
+
+        backOfficeContent.innerHTML = '';
+
+        // Construire la query string
+        const queryString = new URLSearchParams(queryParameters).toString();
+        const responseJson = await getAllRoutes(queryParameters);  // Passer queryParameters directement
+
+        const routes = responseJson.routes;
+
+        if (!routes || routes.length === 0) {
+            console.log('No routes found');
+            backOfficeContent.innerHTML = '<p>No routes available for the selected filters.</p>';
+            loader.classList.add('hidden');
+            return;
+        }
+
+        const table = document.createElement('table');
+        table.classList.add('distribution-table');
+        table.id = 'routeTable';
+
+        const thead = document.createElement('thead');
+        const headerRow = document.createElement('tr');
+        const headers = ['Route Name', 'Date', 'Vehicle', 'Completion', 'Details'];
+        headers.forEach(headerText => {
+            const th = document.createElement('th');
+            th.textContent = headerText;
+            headerRow.appendChild(th);
+        });
+
+        thead.appendChild(headerRow);
+        table.appendChild(thead);
+
+        const tbody = document.createElement('tbody');
+
+        routes.forEach(route => {
+            const row = document.createElement('tr');
+            row.dataset.routeId = route.id;
+
+            const nameCell = document.createElement('td');
+            nameCell.textContent = route.name;
+            row.appendChild(nameCell);
+
+            const routeDateCell = document.createElement('td');
+            routeDateCell.textContent = formatDateToFrench(parseDate(route.start_time).getTime());
+            row.appendChild(routeDateCell);
+
+            const vehicleCell = document.createElement('td');
+            vehicleCell.textContent = route.vehicle.license_plate;
+            row.appendChild(vehicleCell);
+
+            const completionCell = document.createElement('td');
+            completionCell.textContent = route.status === 'completed' ? 'Completed' : 'In Progress';
+            row.appendChild(completionCell);
+
+            const detailsCell = document.createElement('td');
+            const detailsButton = document.createElement('button');
+            detailsButton.textContent = 'Details';
+            detailsButton.addEventListener('click', (e) => {
+                e.preventDefault();
+                window.location.href = `/Volunteer/Distribution?routeId=${route.id}&date=${route.start_time}`;
+            });
+            detailsCell.appendChild(detailsButton);
+            row.appendChild(detailsCell);
+
+            tbody.appendChild(row);
+        });
+
+        table.appendChild(tbody);
+        backOfficeContent.appendChild(table);
+        loader.classList.add('hidden');
+
+    } catch (error) {
+        console.error('Error in populateVolunteerRouteTable:', error.message);
         document.getElementById('loadingBodyGeneral').classList.add('hidden');
     }
 }

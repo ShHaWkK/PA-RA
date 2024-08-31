@@ -46,7 +46,7 @@
         $loaderId = 'loadingBodyGeneral';
         include($_SERVER['DOCUMENT_ROOT'] . '/views/includes/Loader.php');
         ?>
-        =
+
         <!-- Script pour gérer les interactions avec la page -->
         <script type="module" src="/assets/js/pages/VolunteerAllCollectionsPage.js"></script>
     </div>
