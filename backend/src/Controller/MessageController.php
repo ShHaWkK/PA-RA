@@ -29,18 +29,26 @@ class MessageController
                     if (isset($uriParts[1]) && is_numeric($uriParts[1])) {
                         return $this->addMessage((int)$uriParts[1], $input);
                     }
-                    return new JsonResponse(['error' => 'Ticket ID not specified'], 400);
+                    $response = new JsonResponse(['error' => 'Ticket ID not specified'], 400);
+                    $response->send();
+                    exit();
                 case 'GET':
                     if (isset($uriParts[1]) && is_numeric($uriParts[1])) {
                         return $this->getTicketMessages((int)$uriParts[1]);
                     }
-                    return new JsonResponse(['error' => 'Ticket ID not specified'], 400);
+                    $response = new JsonResponse(['error' => 'Ticket ID not specified'], 400);
+                    $response->send();
+                    exit();
                 default:
-                    return new JsonResponse(['error' => 'Method Not Allowed'], 405);
+                    $response = new JsonResponse(['error' => 'Method Not Allowed'], 405);
+                    $response->send();
+                    exit();
             }
         } catch (\Exception $e) {
             error_log("Exception in processRequest: " . $e->getMessage());
-            return new JsonResponse(['error' => 'Internal Server Error'], 500);
+            $response = new JsonResponse(['error' => 'Internal Server Error'], 500);
+            $response->send();
+            exit();
         }
     }
 
@@ -49,25 +57,45 @@ class MessageController
         try {
             error_log("MessageController - Data received for creating message: " . json_encode($data));
 
-            if (!isset($data['author_id']) || !isset($data['recipient_id']) || !isset($data['content'])) {
-                return new JsonResponse(['error' => 'Missing required fields for new message'], 400);
+            // Vérifiez que l'ID de l'utilisateur est présent dans les données d'entrée
+            if (!isset($data['author_id']) || empty($data['author_id'])) {
+                $response = new JsonResponse(['error' => 'Unauthorized'], 401);
+                $response->send();
+                exit();
             }
 
+            // Assurez-vous que le contenu du message est bien envoyé
+            if (!isset($data['recipient_id']) || !isset($data['content'])) {
+                $response = new JsonResponse(['error' => 'Missing required fields for new message'], 400);
+                $response->send();
+                exit();
+            }
+
+            // Récupération du ticket
             $ticket = $this->entityManager->find(TicketModel::class, $ticketId);
             if (!$ticket) {
-                return new JsonResponse(['error' => 'Ticket not found'], 404);
+                $response = new JsonResponse(['error' => 'Ticket not found'], 404);
+                $response->send();
+                exit();
             }
 
+            // Récupération de l'auteur et du destinataire
             $author = $this->entityManager->find(UserModel::class, $data['author_id']);
-            if (!$author) {
-                return new JsonResponse(['error' => 'Author not found'], 404);
-            }
-
             $recipient = $this->entityManager->find(UserModel::class, $data['recipient_id']);
-            if (!$recipient) {
-                return new JsonResponse(['error' => 'Recipient not found'], 404);
+            if (!$author || !$recipient) {
+                $response = new JsonResponse(['error' => 'User not found'], 404);
+                $response->send();
+                exit();
             }
 
+            // Validation que l'utilisateur qui envoie le message est bien autorisé (author ou recipient)
+            if ($author->getId() !== $data['author_id'] && $recipient->getId() !== $data['author_id']) {
+                $response = new JsonResponse(['error' => 'User not authorized to send a message on this ticket'], 403);
+                $response->send();
+                exit();
+            }
+
+            // Création du message
             $message = new MessageModel();
             $message->setTicket($ticket);
             $message->setAuthor($author);
@@ -75,13 +103,15 @@ class MessageController
             $message->setContent($data['content']);
             $message->setCreatedAt(new \DateTime("now"));
 
+            // Sauvegarde du message dans la base de données
             $this->entityManager->persist($message);
             $this->entityManager->flush();
 
-            // Envoyer un courriel au destinataire
+            // Envoi d'un email au destinataire
             $this->sendEmailNotification($recipient->getEmail(), $message);
 
-            return new JsonResponse([
+            // Vérification avant d'envoyer la réponse
+            $response = new JsonResponse([
                 'message' => 'Message added successfully',
                 'message_id' => $message->getId(),
                 'ticket_id' => $ticket->getId(),
@@ -90,9 +120,14 @@ class MessageController
                 'content' => $message->getContent(),
                 'created_at' => $message->getCreatedAt()->format('Y-m-d H:i:s')
             ], 200);
+            $response->send();
+            exit();
+
         } catch (\Exception $e) {
             error_log("Exception in addMessage: " . $e->getMessage());
-            return new JsonResponse(['error' => 'Internal Server Error'], 500);
+            $response = new JsonResponse(['error' => 'Internal Server Error'], 500);
+            $response->send();
+            exit();
         }
     }
 
@@ -106,34 +141,47 @@ class MessageController
     public function getTicketMessages($ticketId)
     {
         try {
+            error_log("Début de getTicketMessages pour le ticket ID: $ticketId");
+
+            // Récupération du ticket
             $ticket = $this->entityManager->find(TicketModel::class, $ticketId);
             if (!$ticket) {
-                http_response_code(404);
-                return json_encode(['error' => 'Ticket not found']);
+                error_log("Ticket non trouvé pour ID: $ticketId");
+                $response = new JsonResponse(['error' => 'Ticket not found'], 404);
+                $response->send();
+                exit();
             }
-    
+
+            // Récupération des messages
             $messages = $ticket->getMessages();
-            if (!$messages || $messages->isEmpty()) {
-                http_response_code(404);
-                return json_encode(['error' => 'No messages found']);
+            if ($messages->isEmpty()) {
+                error_log("Aucun message trouvé pour le ticket ID: $ticketId");
+                $response = new JsonResponse(['message' => 'Il n\'y a aucun message dans ce ticket.'], 200);
+                $response->send();
+                exit();
             }
-    
+
             $messageData = [];
             foreach ($messages as $message) {
                 $messageData[] = [
                     'id' => $message->getId(),
-                    'author' => $message->getAuthor()->getFirstName() . ' ' . $message->getAuthor()->getLastName(),
-                    'recipient' => $message->getRecipient()->getFirstName() . ' ' . $message->getRecipient()->getLastName(),
+                    'author' => $message->getAuthor() ? $message->getAuthor()->getFirstName() . ' ' . $message->getAuthor()->getLastName() : 'Unknown',
+                    'recipient' => $message->getRecipient() ? $message->getRecipient()->getFirstName() . ' ' . $message->getRecipient()->getLastName() : 'Unknown',
                     'content' => $message->getContent(),
                     'createdAt' => $message->getCreatedAt()->format('Y-m-d H:i:s')
                 ];
             }
-    
-            return json_encode($messageData);
+
+            error_log("Final message data before sending: " . json_encode($messageData));
+            $response = new JsonResponse($messageData, 200);
+            $response->send();
+            exit();
+
         } catch (\Exception $e) {
-            error_log("Exception in getTicketMessages: " . $e->getMessage());
-            http_response_code(500);
-            return json_encode(['error' => 'Internal Server Error']);
+            error_log("Error in getTicketMessages: " . $e->getMessage());
+            $response = new JsonResponse(['error' => 'Internal Server Error'], 500);
+            $response->send();
+            exit();
         }
     }
 }

@@ -2,6 +2,7 @@
 // Path: backend/src/Controller/CollectionController.php
 namespace Controller;
 
+
 use Entity\CollectionModel;
 use Entity\CollectionProductModel;
 use Entity\VehicleModel;
@@ -27,7 +28,7 @@ class CollectionController
         $this->emailService = $emailService;
     }
 
-    public function processRequest($method, $uriParts, $input)
+    public function processRequest(string $method, array $uriParts, array $input = null): array
     {
         try {
             switch ($method) {
@@ -72,11 +73,10 @@ class CollectionController
                             return $this->updateCollection((int) $uriParts[1], $input);
                         }
                     }
-                    http_response_code(400);
-                    return ['error' => 'Collection ID not specified'];
+                    throw new Exception('Collection ID not specified', 400);
                 case 'DELETE':
                     if (isset($uriParts[1])) {
-                        return $this->deleteCollection((int) $uriParts[1]);
+                        return $this->deleteCollection((int)$uriParts[1]);
                     }
                     http_response_code(400);
                     return ['error' => 'Collection ID not specified'];
@@ -98,10 +98,9 @@ class CollectionController
                     http_response_code(400);
                     return ['error' => 'Collection ID not specified'];
                 default:
-                    http_response_code(405);
-                    return ['error' => 'Method Not Allowed'];
+                    throw new Exception('Method Not Allowed', 405);
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             error_log("Exception in processRequest: " . $e->getMessage());
             throw $e;
         }

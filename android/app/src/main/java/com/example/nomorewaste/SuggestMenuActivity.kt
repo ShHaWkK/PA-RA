@@ -28,8 +28,8 @@ class SuggestMenuActivity : AppCompatActivity() {
         recipeAdapter = RecipeAdapter(recipes)
         recyclerViewSuggestedRecipes.adapter = recipeAdapter
 
-        // Get recipes passed from the previous activity
-        recipes = intent.getSerializableExtra("recipes") as List<Recipe> // Cast as Serializable list
+        // Récupère les recettes passées depuis l'activité précédente
+        recipes = intent.getParcelableArrayListExtra<Recipe>("recipes") ?: listOf()
         recipeAdapter.updateData(recipes)
 
         spinnerFilter.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
@@ -45,7 +45,7 @@ class SuggestMenuActivity : AppCompatActivity() {
         val filteredRecipes = if (filter == "All") {
             recipes
         } else {
-            recipes.filter { it.tags?.contains(filter) == true }
+            recipes.filter { it.tags.contains(filter) }
         }
         recipeAdapter.updateData(filteredRecipes)
     }

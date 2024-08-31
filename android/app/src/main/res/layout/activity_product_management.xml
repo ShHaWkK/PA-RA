@@ -1,67 +1,50 @@
-<?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="16dp">
 
-    <EditText
-        android:id="@+id/editTextProductName"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Nom du produit"
-        android:minHeight="48dp" />
-
-    <EditText
-        android:id="@+id/editTextProductBarcode"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Code-barres du produit"
-        android:minHeight="48dp" />
-
-    <EditText
-        android:id="@+id/editTextQuantity"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Quantité"
-        android:minHeight="48dp" />
-
-    <EditText
-        android:id="@+id/editTextExpirationDate"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Date de péremption (YYYY-MM-DD)"
-        android:minHeight="48dp" />
-
     <Spinner
-        android:id="@+id/spinnerWarehouse"
+        android:id="@+id/filterSpinner"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
         android:minHeight="48dp"
-        android:spinnerMode="dropdown" />
+        android:padding="8dp"/>
 
-    <Button
-        android:id="@+id/buttonAddProduct"
+    <!-- ProgressBar to show the warehouse capacity -->
+    <ProgressBar
+        android:id="@+id/progressBarCapacity"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Ajouter le produit" />
+        android:layout_marginTop="8dp"
+        android:indeterminate="false"
+        android:progress="0"
+        style="?android:attr/progressBarStyleHorizontal" />
 
-    <Button
-        android:id="@+id/buttonUpdateProduct"
-        android:layout_width="match_parent"
+    <TextView
+        android:id="@+id/warehouseCapacityTextView"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Mettre à jour le produit" />
-
-    <Button
-        android:id="@+id/buttonDeleteProduct"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Supprimer le produit" />
+        android:layout_marginTop="4dp"
+        android:text="Warehouse Capacity: 0%"
+        android:textSize="16sp"/>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewProducts"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:paddingTop="8dp" />
+        android:layout_marginTop="8dp"/>
+
+    <Button
+        android:id="@+id/buttonAddProduct"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Ajouter le Produit"
+        android:layout_marginTop="8dp"
+        android:backgroundTint="@color/purple_500"
+        android:textColor="@android:color/white"/>
+
 </LinearLayout>

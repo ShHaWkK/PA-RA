@@ -1,15 +1,25 @@
-<?xml version="1.0" encoding="utf-8"?>
+<!-- activity_planning.xml -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="16dp">
+    tools:context=".PlanningsActivity">
 
-    <!-- Ajoutez vos éléments d'interface utilisateur ici -->
-    <TextView
+    <!-- CalendarView for selecting dates -->
+    <CalendarView
+        android:id="@+id/calendar_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Planning"
-        android:textSize="18sp"
-        android:textStyle="bold" />
+        android:layout_marginTop="16dp" />
+
+    <!-- RecyclerView for displaying planning details -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler_view_plannings"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginTop="16dp" />
+
 </LinearLayout>

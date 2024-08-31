@@ -1,0 +1,85 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="@color/background_color">
+
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        app:cardElevation="4dp"
+        app:cardCornerRadius="8dp"
+        app:cardBackgroundColor="@color/white">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <TextView
+                android:id="@+id/text_service_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Service Name"
+                android:textStyle="bold"
+                android:textSize="24sp"
+                android:textColor="@color/primary_text_color"
+                android:layout_gravity="center_horizontal" />
+
+            <TextView
+                android:id="@+id/text_service_description"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Service Description"
+                android:layout_marginTop="8dp"
+                android:textSize="16sp"
+                android:textColor="@color/secondary_text_color" />
+
+            <TextView
+                android:id="@+id/text_service_start_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Start Time"
+                android:layout_marginTop="8dp"
+                android:textSize="16sp"
+                android:textColor="@color/secondary_text_color" />
+
+            <TextView
+                android:id="@+id/text_service_end_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="End Time"
+                android:layout_marginTop="8dp"
+                android:textSize="16sp"
+                android:textColor="@color/secondary_text_color" />
+
+            <TextView
+                android:id="@+id/text_service_capacity"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Capacity"
+                android:layout_marginTop="8dp"
+                android:textSize="16sp"
+                android:textColor="@color/secondary_text_color" />
+
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+    <Button
+        android:id="@+id/button_register_service"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:backgroundTint="@color/colorPrimary"
+        android:text="S'inscrire à ce service"
+        android:textStyle="bold"
+        android:textColor="@color/white"
+        android:padding="12dp"
+        android:elevation="4dp"
+        android:layout_marginBottom="8dp" />
+
+</LinearLayout>

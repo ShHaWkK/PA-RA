@@ -63,7 +63,7 @@ class ServiceController
     public function createService($data)
     {
         try {
-            if (!isset($data['name']) || !isset($data['description']) || !isset($data['schedule']) || !isset($data['capacity']) || !isset($data['status']) || !isset($data['location'])) {
+            if (!isset($data['name']) || !isset($data['description']) || !isset($data['start_schedule']) || !isset($data['end_schedule']) || !isset($data['capacity']) || !isset($data['status']) || !isset($data['location'])) {
                 http_response_code(400);
                 return ['error' => 'Missing required fields for new service'];
             }
@@ -91,13 +91,15 @@ class ServiceController
                 return;
             }
             
-            // Filtrer et simplifier la réponse
+            // Filtrer et simplifier la réponse en renvoyant le schedule comme un objet
             $filteredService = [
                 'id' => $service->getId(),
                 'name' => $service->getName(),
                 'description' => $service->getDescription(),
-                'schedule' => $service->getSchedule()->format('Y-m-d H:i:s'),
+                'start_schedule' => $service->getStartSchedule()->format('Y-m-d H:i:s'),
+                'end_schedule' => $service->getEndSchedule()->format('Y-m-d H:i:s'),
                 'capacity' => $service->getCapacity(),
+                'current_registrations' => $service->getCurrentRegistrations(),
                 'status' => $service->getStatus(),
                 'location' => $service->getLocation(),
                 'createdAt' => $service->getCreatedAt()->format('Y-m-d H:i:s'),
@@ -120,6 +122,7 @@ class ServiceController
             exit();
         }
     }
+    
     
     public function updateService($id, $data)
     {

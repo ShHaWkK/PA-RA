@@ -1,7 +1,6 @@
 import tkinter as tk
 from tkinter import messagebox
 from src.api.ticket_api import TicketAPI
-import json
 import logging
 
 class ChatView:
@@ -11,13 +10,14 @@ class ChatView:
         self.recipient_id = recipient_id
         self.ticket_id = ticket_id
 
-        self.message_system = TicketAPI()  # Use TicketAPI instead of MessageAPI
+        self.message_system = TicketAPI()
 
         self.setup_ui()
+        self.check_ticket_status()
 
     def setup_ui(self):
         self.master.title("Chat")
-        self.master.geometry("600x400")
+        self.master.geometry("800x600")
 
         self.chat_frame = tk.Frame(self.master)
         self.chat_frame.pack(fill=tk.BOTH, expand=True)
@@ -34,32 +34,72 @@ class ChatView:
         self.send_button = tk.Button(self.entry_frame, text="Envoyer", command=self.send_message)
         self.send_button.pack(side=tk.RIGHT)
 
-        self.populate_messages()
+    def check_ticket_status(self):
+        ticket_info = self.message_system.get_ticket(self.ticket_id)
+        logging.debug(f"Ticket info fetched: {ticket_info}")
 
-    def populate_messages(self):
+        if 'error' in ticket_info:
+            self.disable_chat(ticket_info['error'])
+            return
+
+        if not ticket_info.get('chat_enabled', True):
+            self.disable_chat(ticket_info.get('message', 'Chat is disabled'))
+        elif ticket_info.get('chat_read_only', False):
+            self.populate_messages(read_only=True)
+        else:
+            self.populate_messages()
+
+    def disable_chat(self, reason):
+        self.chat_text.config(state=tk.NORMAL)
+        self.chat_text.delete(1.0, tk.END)
+        self.chat_text.insert(tk.END, reason)
+        self.chat_text.config(state=tk.DISABLED)
+
+        self.message_entry.config(state=tk.DISABLED)
+        self.send_button.config(state=tk.DISABLED)
+
+    def populate_messages(self, read_only=False):
         response = self.message_system.get_ticket_messages(self.ticket_id)
         logging.debug(f"Raw messages fetched: {response}")
 
-        if 'error' in response:
-            messagebox.showerror("Erreur", response['error'])
-            return
-
-        try:
-            messages = json.loads(response) if isinstance(response, str) else response
-        except json.JSONDecodeError as e:
-            logging.error(f"Failed to decode JSON response: {e}")
-            messagebox.showerror("Erreur", "Erreur de format de réponse JSON.")
-            return
-
-        if isinstance(messages, list):
+        if isinstance(response, dict) and 'message' in response and response['message'] == "Il n'y a aucun message dans ce ticket.":
             self.chat_text.config(state=tk.NORMAL)
             self.chat_text.delete(1.0, tk.END)
-            for msg in messages:
-                self.chat_text.insert(tk.END, f"{msg['author']}: {msg['content']}\n")
+            self.chat_text.insert(tk.END, "Il n'y a aucun message dans ce ticket.\n")
             self.chat_text.config(state=tk.DISABLED)
+        elif isinstance(response, list):
+            self.chat_text.config(state=tk.NORMAL)
+            self.chat_text.delete(1.0, tk.END)
+
+            for msg in response:
+                if isinstance(msg.get('author'), dict):
+                    author_name = f"{msg['author'].get('firstName', 'Unknown')} {msg['author'].get('lastName', '')}".strip()
+                else:
+                    author_name = msg.get('author', 'Unknown')
+
+
+                if isinstance(msg.get('recipient'), dict):
+                    recipient_name = f"{msg['recipient'].get('firstName', 'Unknown')} {msg['recipient'].get('lastName', '')}".strip()
+                else:
+                    recipient_name = msg.get('recipient', 'Unknown')
+
+                content = msg.get('content', '')
+                self.chat_text.insert(tk.END, f"{author_name} to {recipient_name}: {content}\n")
+
+            self.chat_text.config(state=tk.DISABLED)
+
+            if not read_only:
+                self.message_entry.config(state=tk.NORMAL)
+                self.send_button.config(state=tk.NORMAL)
+            else:
+                self.message_entry.config(state=tk.DISABLED)
+                self.send_button.config(state=tk.DISABLED)
         else:
-            logging.error(f"Unexpected response format: {messages}")
-            messagebox.showerror("Erreur", "Format de réponse inattendu.")
+            logging.error(f"Unexpected response format: {response}")
+            self.chat_text.config(state=tk.NORMAL)
+            self.chat_text.delete(1.0, tk.END)
+            self.chat_text.insert(tk.END, "Erreur lors du chargement des messages.\n")
+            self.chat_text.config(state=tk.DISABLED)
 
     def send_message(self):
         content = self.message_entry.get()

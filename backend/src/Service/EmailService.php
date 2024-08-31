@@ -17,6 +17,7 @@ class EmailService
         $this->publicDir = __DIR__ . '/../../public';
     }
 
+
     public function sendVerificationEmail($email, $verificationCode)
     {
         try {
@@ -122,6 +123,21 @@ class EmailService
         }
     }
 
+    public function sendUnsubscribeNotificationEmail(UserModel $user, ServiceModel $service)
+{
+    try {
+        $this->mailer->setFrom('morewaste1@gmail.com', 'No More Waste');
+        $this->mailer->addAddress($email);
+        $this->mailer->isHTML(true);
+        $this->mailer->Subject = 'Désinscription de service';
+        $this->mailer->Body = 'Vous avez été désinscrit du service ' . $service->getName()
+            . '. Merci pour votre participation.';
+            'Cordialement,<br>L\'équipe NO MORE WASTE';
+        $this->mailer->send();
+    } catch (Exception $e) {
+        error_log("Message could not be sent. Mailer Error: {$this->mailer->ErrorInfo}");
+    }
+
     public function sendExcelFile($to, $subject, $body, $fileName, $fileContent)
     {
         try {
@@ -141,6 +157,57 @@ class EmailService
             return false; // Email failed to send
         }
     }
+
+}
+
+
+    public function sendRegistrationConfirmationEmail(UserModel $user, ServiceModel $service)
+    {
+        try {
+            $this->mailer->setFrom('morewaste1@gmail.com', 'No More Waste');
+            $this->mailer->addAddress($user->getEmail());
+            $this->mailer->isHTML(true);
+            $this->mailer->Subject = 'NO MORE WASTE - Confirmation de votre inscription';
+
+            $this->mailer->Body = 
+                'Cher ' . $user->getFirstName() . ',<br><br>' .
+                'Nous vous confirmons votre inscription à notre service "' . $service->getName() . '".<br><br>' .
+                'Détails de votre inscription :<br>' .
+                '<ul>' .
+                '<li>Service : ' . $service->getName() . '</li>' .
+                '<li>Date de début : ' . $service->getStartSchedule()->format('Y-m-d H:i:s') . '</li>' .
+                '<li>Lieu : ' . $service->getLocation() . '</li>' .
+                '</ul><br>' .
+                'Merci pour votre engagement auprès de NO MORE WASTE.<br><br>' .
+                'Cordialement,<br>L\'équipe NO MORE WASTE';
+
+            $this->mailer->send();
+        } catch (Exception $e) {
+            error_log("Message could not be sent. Mailer Error: {$this->mailer->ErrorInfo}");
+        }
+    }
+
+    public function sendExcelFile(string $to, string $subject, string $body, string $fileName, string $fileContent): bool
+    {
+        try {
+            $this->mailer->setFrom('morewaste1@gmail.com', 'No More Waste');
+            $this->mailer->addAddress($to);
+            $this->mailer->isHTML(true);
+            $this->mailer->Subject = $subject;
+            $this->mailer->Body    = $body;
+
+            // Attacher le fichier Excel
+            $this->mailer->addStringAttachment($fileContent, $fileName, 'base64', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            $this->mailer->send();
+
+            return true; // Email sent successfully
+        } catch (Exception $e) {
+            error_log("Message could not be sent. Mailer Error: {$this->mailer->ErrorInfo}");
+            return false; // Email failed to send
+        }
+    }
+
+    
 
 }
 ?>

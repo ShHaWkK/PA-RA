@@ -4,16 +4,21 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.CheckBox
+import android.widget.ImageButton
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.nomorewaste.R
 
-class ProductAdapter(private var productList: List<Product>) : RecyclerView.Adapter<ProductAdapter.ProductViewHolder>() {
+class ProductAdapter(
+    private var productList: List<Product>,
+    private val onEditClick: (Product) -> Unit,
+    private val onDeleteClick: (Product) -> Unit
+) : RecyclerView.Adapter<ProductAdapter.ProductViewHolder>() {
 
     private val selectedProducts = mutableSetOf<Product>()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ProductViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_products, parent, false)
+        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_product, parent, false)
         return ProductViewHolder(view)
     }
 
@@ -24,38 +29,29 @@ class ProductAdapter(private var productList: List<Product>) : RecyclerView.Adap
 
     override fun getItemCount(): Int = productList.size
 
-    fun updateData(newProducts: List<Product>) {
-        productList = newProducts
-        notifyDataSetChanged()
+    fun getSelectedProducts(): List<Product> {
+        return selectedProducts.toList()
     }
-
-    fun getSelectedProducts(): List<Product> = selectedProducts.toList()
 
     inner class ProductViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val productName: TextView = itemView.findViewById(R.id.productName)
+        private val productQuantity: TextView = itemView.findViewById(R.id.productQuantity)
+        private val productVolume: TextView = itemView.findViewById(R.id.productVolume)
         private val checkBox: CheckBox = itemView.findViewById(R.id.checkbox)
 
         fun bind(product: Product) {
-            // Ensure the product has a valid name and barcode before proceeding
-            if (!product.name.isNullOrBlank() && !product.barcode.isNullOrBlank()) {
-                productName.text = "Produit: ${product.name} - Quantité: ${product.volume} g"
-                checkBox.isChecked = selectedProducts.contains(product)
+            productName.text = product.name ?: "Nom non disponible"
+            productQuantity.text = "Quantité : ${product.volume}"
+            productVolume.text = "Volume : ${product.volume} m³"
+            checkBox.isChecked = selectedProducts.contains(product)
 
-                checkBox.setOnCheckedChangeListener { _, isChecked ->
-                    if (isChecked) {
-                        selectedProducts.add(product)
-                    } else {
-                        selectedProducts.remove(product)
-                    }
+            checkBox.setOnCheckedChangeListener { _, isChecked ->
+                if (isChecked) {
+                    selectedProducts.add(product)
+                } else {
+                    selectedProducts.remove(product)
                 }
-            } else {
-                // Handle products with missing name or barcode
-                productName.text = "Produit inconnu"
-                checkBox.isEnabled = false
             }
         }
     }
-
-
-
 }

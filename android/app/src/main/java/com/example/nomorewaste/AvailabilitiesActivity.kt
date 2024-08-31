@@ -6,11 +6,10 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.nomorewaste.api.ApiService
-import com.example.nomorewaste.api.Availability
-import com.example.nomorewaste.api.AvailabilityAdapter
-import com.example.nomorewaste.api.RetrofitClient
+import com.example.nomorewaste.api.*
 import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
+import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -42,30 +41,47 @@ class AvailabilitiesActivity : AppCompatActivity() {
     }
 
     private fun getAvailabilities(userId: Int) {
-        apiService.getAvailabilities(userId).enqueue(object : Callback<Any> {
-            override fun onResponse(call: Call<Any>, response: Response<Any>) {
+        apiService.getAvailabilities(userId).enqueue(object : Callback<ResponseBody> {
+            override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
                 if (response.isSuccessful) {
-                    val responseBody = response.body()
-                    if (responseBody is List<*>) {
-                        val availabilityList = responseBody.filterIsInstance<Availability>()
-                        Log.d("AvailabilitiesActivity", "Availabilities List: $availabilityList")
-                        recyclerView.adapter = AvailabilityAdapter(availabilityList)
-                    } else if (responseBody is Map<*, *>) {
-                        val singleAvailability = Gson().fromJson(Gson().toJson(responseBody), Availability::class.java)
-                        Log.d("AvailabilitiesActivity", "Single Availability: $singleAvailability")
-                        recyclerView.adapter = AvailabilityAdapter(listOf(singleAvailability))
-                    } else {
-                        Toast.makeText(this@AvailabilitiesActivity, "Unexpected response format", Toast.LENGTH_SHORT).show()
+                    response.body()?.let { responseBody ->
+                        val responseStr = responseBody.string()
+                        Log.d("AvailabilitiesActivity", "Response JSON: $responseStr")
+
+                        val gson = Gson()
+                        val listType = object : TypeToken<List<AvailabilityResponse>>() {}.type
+
+                        try {
+                            // Try parsing the response as a list
+                            val availabilityList: List<AvailabilityResponse> = gson.fromJson(responseStr, listType) ?: emptyList()
+
+                            if (availabilityList.isNotEmpty()) {
+                                recyclerView.adapter = AvailabilityAdapter(availabilityList)
+                            } else {
+                                Toast.makeText(this@AvailabilitiesActivity, "No availabilities found", Toast.LENGTH_SHORT).show()
+                            }
+                        } catch (e: Exception) {
+                            // If parsing as a list fails, try parsing as a single object
+                            try {
+                                val singleAvailability: AvailabilityResponse? = gson.fromJson(responseStr, AvailabilityResponse::class.java)
+                                if (singleAvailability != null) {
+                                    recyclerView.adapter = AvailabilityAdapter(listOf(singleAvailability))
+                                } else {
+                                    Toast.makeText(this@AvailabilitiesActivity, "No availabilities found", Toast.LENGTH_SHORT).show()
+                                }
+                            } catch (e: Exception) {
+                                Toast.makeText(this@AvailabilitiesActivity, "Failed to parse response", Toast.LENGTH_SHORT).show()
+                            }
+                        }
                     }
                 } else {
                     Toast.makeText(this@AvailabilitiesActivity, "Erreur de récupération des disponibilités", Toast.LENGTH_SHORT).show()
                 }
             }
 
-            override fun onFailure(call: Call<Any>, t: Throwable) {
+            override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
                 Toast.makeText(this@AvailabilitiesActivity, "Échec de la connexion : ${t.message}", Toast.LENGTH_SHORT).show()
             }
         })
     }
-
 }

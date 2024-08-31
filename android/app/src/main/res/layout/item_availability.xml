@@ -1,26 +1,20 @@
-<!-- res/layout/item_availability_planning.xml -->
+<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal"
-    android:padding="8dp"
-    android:background="@drawable/planning_item_background">
+    android:orientation="vertical"
+    android:padding="8dp">
 
     <TextView
         android:id="@+id/time_slot"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:gravity="center_vertical"
-        android:textSize="14sp"
-        android:textColor="@android:color/black" />
+        android:text="Time Slot" />
 
     <TextView
-        android:id="@+id/activity_description"
-        android:layout_width="0dp"
+        android:id="@+id/day_of_week"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_weight="2"
-        android:gravity="center_vertical"
-        android:textSize="14sp"
-        android:textColor="@android:color/black" />
+        android:text="Day of Week" />
+
 </LinearLayout>

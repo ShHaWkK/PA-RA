@@ -1,31 +1,72 @@
-<?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- res/layout/item_product.xml -->
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:padding="8dp">
+    android:orientation="horizontal"
+    android:padding="8dp"
+    android:gravity="center_vertical">
 
+    <!-- Product Name -->
     <TextView
         android:id="@+id/productName"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Nom du produit" />
+        android:layout_weight="2"
+        android:text="Nom du produit"
+        android:textSize="14sp"
+        android:textColor="#000000"
+        android:maxLines="1"
+        android:ellipsize="end"/>
 
-    <TextView
-        android:id="@+id/productBarcode"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Code-barres" />
-
-    <TextView
-        android:id="@+id/productExpirationDate"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Date de péremption" />
-
+    <!-- Product Quantity -->
     <TextView
         android:id="@+id/productQuantity"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Quantité" />
+        android:layout_weight="1"
+        android:text="Quantité"
+        android:textSize="14sp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"/>
+
+    <!-- Product Volume -->
+    <TextView
+        android:id="@+id/productVolume"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="Volume"
+        android:textSize="14sp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"/>
+
+    <!-- Edit Button -->
+    <ImageButton
+        android:id="@+id/buttonEditProduct"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginStart="4dp"
+        android:padding="10dp"
+        android:contentDescription="Edit Product"
+        android:src="@drawable/ic_edit2"
+        android:background="?attr/selectableItemBackgroundBorderless"/>
+
+    <!-- Delete Button -->
+    <ImageButton
+        android:id="@+id/buttonDeleteProduct"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginStart="4dp"
+        android:padding="10dp"
+        android:contentDescription="Delete Product"
+        android:src="@drawable/ic_delete2"
+        android:background="?attr/selectableItemBackgroundBorderless"/>
+
+    <!-- Optional CheckBox if needed -->
+    <CheckBox
+        android:id="@+id/checkbox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"/>
 </LinearLayout>

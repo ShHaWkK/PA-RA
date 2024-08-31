@@ -25,11 +25,11 @@ class ServiceProposalModel
     #[ORM\Column(type: "integer")]
     private $created_by;
 
-    #[ORM\Column(type: "datetime", options: ["default" => "CURRENT_TIMESTAMP"])]
-    private $created_at;
+    #[ORM\Column(type: "datetime", name: "created_at", options: ["default" => "CURRENT_TIMESTAMP"])]
+    private $createdAt;
 
-    #[ORM\Column(type: "datetime", options: ["default" => "CURRENT_TIMESTAMP", "onUpdate" => "CURRENT_TIMESTAMP"])]
-    private $updated_at;
+    #[ORM\Column(type: "datetime", name: "updated_at", options: ["default" => "CURRENT_TIMESTAMP", "onUpdate" => "CURRENT_TIMESTAMP"])]
+    private $updatedAt;
 
     // Getters and setters...
 
@@ -84,23 +84,23 @@ class ServiceProposalModel
 
     public function getCreatedAt(): ?\DateTimeInterface
     {
-        return $this->created_at;
+        return $this->createdAt;
     }
 
     public function setCreatedAt(\DateTimeInterface $createdAt): self
     {
-        $this->created_at = $createdAt;
+        $this->createdAt = $createdAt;
         return $this;
     }
 
     public function getUpdatedAt(): ?\DateTimeInterface
     {
-        return $this->updated_at;
+        return $this->updatedAt;
     }
 
     public function setUpdatedAt(\DateTimeInterface $updatedAt): self
     {
-        $this->updated_at = $updatedAt;
+        $this->updatedAt = $updatedAt;
         return $this;
     }
 }

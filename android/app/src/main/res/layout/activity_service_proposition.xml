@@ -1,0 +1,26 @@
+<!-- Path: res/layout/activity_service_proposition.xml -->
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <EditText
+        android:id="@+id/editText_service_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Nom du service" />
+
+    <EditText
+        android:id="@+id/editText_service_description"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Description du service" />
+
+    <Button
+        android:id="@+id/button_propose_service"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Proposer ce service" />
+</LinearLayout>

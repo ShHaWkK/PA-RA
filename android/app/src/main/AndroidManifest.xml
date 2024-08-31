@@ -1,5 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools">
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.example.nomorewaste">
 
     <uses-permission android:name="android.permission.INTERNET" />
 
@@ -127,6 +128,21 @@
             android:exported="true"
             android:label="Select Products"
             android:theme="@style/Theme.Nomorewaste" />
+
+        <activity android:name=".DeleteProductActivity" />
+        <activity android:name=".AddProductActivity" />
+        <activity android:name=".EditProductActivity" />
+        <activity android:name=".ProductDetailActivity" />
+        <activity android:name=".ServiceActivity" />
+        <activity android:name=".ServicePropositionActivity" />
+        <activity android:name=".ServiceRegistrationActivity" />
+        <activity android:name=".MyRegistrationsActivity" />
+        <activity android:name=".MyProposalsActivity" />
+        <activity android:name=".ServiceDetailsActivity" />
+        <activity android:name=".CollectionsActivity" />
+        <activity android:name=".ProductNotificationActivity" />
+        <activity android:name=".CollectionDetailsActivity" />
+        <activity android:name=".RequestCollectionActivity"/>
 
     </application>
 </manifest>

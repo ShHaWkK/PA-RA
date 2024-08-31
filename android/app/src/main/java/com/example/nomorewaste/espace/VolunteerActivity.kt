@@ -1,4 +1,3 @@
-// VolunteerActivity.kt
 package com.example.nomorewaste.espace
 
 import android.content.Context
@@ -12,20 +11,11 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.nomoreswaste.LoginActivity
-import com.example.nomorewaste.AvailabilitiesActivity
-import com.example.nomorewaste.PlanningsActivity
-import com.example.nomorewaste.InventoryActivity
-import com.example.nomorewaste.ProductManagementActivity
-import com.example.nomorewaste.RecipesActivity
-import com.example.nomorewaste.SuggestMenuActivity
-import com.example.nomorewaste.R
-import com.example.nomorewaste.SelectProductsActivity
-import com.example.nomorewaste.UserManagementActivity
+import com.example.nomorewaste.*
 import com.example.nomorewaste.api.ApiService
-import com.example.nomorewaste.api.Availability
-import com.example.nomorewaste.api.AvailabilityAdapter
 import com.example.nomorewaste.api.RetrofitClient
 import com.example.nomorewaste.api.User
+import com.example.nomorewaste.SelectProductsActivity
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -42,9 +32,11 @@ class VolunteerActivity : AppCompatActivity() {
     private lateinit var buttonManageUser: Button
     private lateinit var buttonViewPlannings: Button
     private lateinit var buttonManageProducts: Button
+    private lateinit var buttonServices: Button
     private lateinit var buttonInventory: Button
     private lateinit var buttonRecipes: Button
     private lateinit var buttonSuggestMenu: Button
+    private lateinit var buttonCollections: Button  // New button for Collections
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -58,9 +50,11 @@ class VolunteerActivity : AppCompatActivity() {
         buttonManageUser = findViewById(R.id.button_manage_user)
         buttonViewPlannings = findViewById(R.id.button_view_plannings)
         buttonManageProducts = findViewById(R.id.button_manage_products)
+        buttonServices = findViewById(R.id.button_services)
         buttonInventory = findViewById(R.id.button_inventory)
         buttonRecipes = findViewById(R.id.button_recipes)
         buttonSuggestMenu = findViewById(R.id.button_suggest_menu)
+        buttonCollections = findViewById(R.id.button_collections)  // Initialize the button
 
         recyclerView.layoutManager = LinearLayoutManager(this)
 
@@ -106,6 +100,12 @@ class VolunteerActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
+        buttonServices.setOnClickListener {
+            Log.d("VolunteerDashboard", "buttonServices clicked")
+            val intent = Intent(this, ServiceActivity::class.java)
+            startActivity(intent)
+        }
+
         buttonInventory.setOnClickListener {
             Log.d("VolunteerDashboard", "buttonInventory clicked")
             val intent = Intent(this, InventoryActivity::class.java)
@@ -121,6 +121,12 @@ class VolunteerActivity : AppCompatActivity() {
         buttonSuggestMenu.setOnClickListener {
             Log.d("VolunteerDashboard", "buttonSuggestMenu clicked")
             val intent = Intent(this, SelectProductsActivity::class.java)
+            startActivity(intent)
+        }
+
+        buttonCollections.setOnClickListener {
+            Log.d("VolunteerDashboard", "buttonCollections clicked")
+            val intent = Intent(this, CollectionsActivity::class.java)
             startActivity(intent)
         }
     }

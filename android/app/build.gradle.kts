@@ -62,6 +62,14 @@ dependencies {
     implementation ("androidx.room:room-runtime:2.4.3")
     annotationProcessor ("androidx.room:room-compiler:2.4.3")
     implementation ("com.journeyapps:zxing-android-embedded:4.3.0")
+    implementation ("androidx.recyclerview:recyclerview:1.2.1")
+    //implementation ("androidx.lifecycle:lifecycle-viewmodel-ktx:2.3.1")
+    //implementation ("androidx.lifecycle:lifecycle-livedata-ktx:2.3.1")
     implementation ("com.google.zxing:core:3.4.0")
+    implementation ("com.airbnb.android:lottie:5.2.0")
+    implementation ("com.github.bumptech.glide:glide:4.12.0")
+    implementation ("com.google.firebase:firebase-messaging:23.0.0")
+    implementation ("androidx.cardview:cardview:1.0.0")
+    implementation ("com.squareup.retrofit2:converter-scalars:2.9.0")
 
 }

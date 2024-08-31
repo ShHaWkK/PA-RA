@@ -1,20 +1,18 @@
 package com.example.nomorewaste.api
 
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.nomorewaste.R
-import com.example.nomorewaste.api.Availability
 
-class AvailabilityAdapter(private val availabilities: List<Availability>) :
+class AvailabilityAdapter(private val availabilities: List<AvailabilityResponse>) :
     RecyclerView.Adapter<AvailabilityAdapter.ViewHolder>() {
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val timeSlotTextView: TextView = view.findViewById(R.id.time_slot)
-        val activityDescriptionTextView: TextView = view.findViewById(R.id.activity_description)
+        val dayOfWeekTextView: TextView = view.findViewById(R.id.day_of_week)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -25,8 +23,8 @@ class AvailabilityAdapter(private val availabilities: List<Availability>) :
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val availability = availabilities[position]
-        holder.timeSlotTextView.text = "${availability.start_time} - ${availability.end_time}"
-        holder.activityDescriptionTextView.text = availability.day_of_week
+        holder.timeSlotTextView.text = "${availability.startTime ?: "N/A"} - ${availability.endTime ?: "N/A"}"
+        holder.dayOfWeekTextView.text = availability.dayOfWeek ?: "N/A"
     }
 
     override fun getItemCount() = availabilities.size

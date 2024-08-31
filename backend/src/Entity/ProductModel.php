@@ -48,7 +48,7 @@ class ProductModel implements JsonSerializable
     {
         return $this->name;
     }
-
+    
     public function setName(string $name): self
     {
         $this->name = $name;
@@ -63,6 +63,12 @@ class ProductModel implements JsonSerializable
     public function setBarcode(string $barcode): self
     {
         $this->barcode = $barcode;
+        return $this;
+    }
+
+    public function setid (int $id): self
+    {
+        $this->id = $id;
         return $this;
     }
 

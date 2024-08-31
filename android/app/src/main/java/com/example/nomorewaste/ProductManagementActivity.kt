@@ -1,16 +1,18 @@
-// ProductManagementActivity.kt
 package com.example.nomorewaste
 
+import android.content.Intent
 import android.os.Bundle
-import android.util.Log
+import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.nomorewaste.api.ApiService
-import com.example.nomorewaste.api.Product
-import com.example.nomorewaste.api.ProductAdapter
+import com.example.nomorewaste.api.CapacityData
 import com.example.nomorewaste.api.RetrofitClient
+import com.example.nomorewaste.api.Stock
+import com.example.nomorewaste.api.StockAdapter
 import com.example.nomorewaste.api.Warehouse
 import retrofit2.Call
 import retrofit2.Callback
@@ -18,76 +20,57 @@ import retrofit2.Response
 
 class ProductManagementActivity : AppCompatActivity() {
 
-    private lateinit var editTextProductName: EditText
-    private lateinit var editTextProductBarcode: EditText
-    private lateinit var editTextQuantity: EditText
-    private lateinit var editTextExpirationDate: EditText
-    private lateinit var spinnerWarehouse: Spinner
-    private lateinit var buttonAddProduct: Button
-    private lateinit var buttonUpdateProduct: Button
-    private lateinit var buttonDeleteProduct: Button
-    private lateinit var recyclerViewProducts: RecyclerView
-
+    private lateinit var filterSpinner: Spinner
+    private lateinit var recyclerViewStocks: RecyclerView
     private lateinit var apiService: ApiService
-    private var warehouses: List<Warehouse> = listOf()
+    private lateinit var stockAdapter: StockAdapter
+    private lateinit var warehouseMap: Map<String, Warehouse>
+    private lateinit var warehouseCapacityTextView: TextView
+    private lateinit var progressBarCapacity: ProgressBar
+    private lateinit var buttonAddProduct: Button
+    private var selectedWarehouseId: Int? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_product_management)
 
-        editTextProductName = findViewById(R.id.editTextProductName)
-        editTextProductBarcode = findViewById(R.id.editTextProductBarcode)
-        editTextQuantity = findViewById(R.id.editTextQuantity)
-        editTextExpirationDate = findViewById(R.id.editTextExpirationDate)
-        spinnerWarehouse = findViewById(R.id.spinnerWarehouse)
+        filterSpinner = findViewById(R.id.filterSpinner)
+        recyclerViewStocks = findViewById(R.id.recyclerViewProducts)
+        warehouseCapacityTextView = findViewById(R.id.warehouseCapacityTextView)
+        progressBarCapacity = findViewById(R.id.progressBarCapacity)
         buttonAddProduct = findViewById(R.id.buttonAddProduct)
-        buttonUpdateProduct = findViewById(R.id.buttonUpdateProduct)
-        buttonDeleteProduct = findViewById(R.id.buttonDeleteProduct)
-        recyclerViewProducts = findViewById(R.id.recyclerViewProducts)
 
-        recyclerViewProducts.layoutManager = LinearLayoutManager(this)
+        recyclerViewStocks.layoutManager = LinearLayoutManager(this)
+        stockAdapter = StockAdapter(
+            listOf(),
+            context = this,
+            onDeleteClick = { stock ->
+                deleteProduct(stock)
+            }
+        )
 
-        val retrofit = RetrofitClient.getClient()
-        apiService = retrofit.create(ApiService::class.java)
+        recyclerViewStocks.adapter = stockAdapter
+
+        apiService = RetrofitClient.getClient().create(ApiService::class.java)
 
         loadWarehouses()
-        loadProducts()
+
+        filterSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
+                val selectedWarehouseName = parent.getItemAtPosition(position) as String
+                val selectedWarehouse = warehouseMap[selectedWarehouseName]
+                selectedWarehouseId = selectedWarehouse?.id
+                if (selectedWarehouse != null) {
+                    loadStocksByWarehouse(selectedWarehouse.id)
+                    updateCapacityProgress(selectedWarehouse)
+                }
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>) {}
+        }
 
         buttonAddProduct.setOnClickListener {
-            val name = editTextProductName.text.toString().trim()
-            val barcode = editTextProductBarcode.text.toString().trim()
-            val quantity = editTextQuantity.text.toString().trim().toIntOrNull()
-            val expirationDate = editTextExpirationDate.text.toString().trim()
-            val selectedWarehouse = warehouses[spinnerWarehouse.selectedItemPosition]
-
-            if (name.isNotEmpty() && barcode.isNotEmpty() && quantity != null && expirationDate.isNotEmpty()) {
-                addProduct(name, barcode, quantity, expirationDate, selectedWarehouse.id)
-            } else {
-                Toast.makeText(this, "Veuillez remplir tous les champs", Toast.LENGTH_SHORT).show()
-            }
-        }
-
-        buttonUpdateProduct.setOnClickListener {
-            val name = editTextProductName.text.toString().trim()
-            val barcode = editTextProductBarcode.text.toString().trim()
-            val quantity = editTextQuantity.text.toString().trim().toIntOrNull()
-            val expirationDate = editTextExpirationDate.text.toString().trim()
-            val selectedWarehouse = warehouses[spinnerWarehouse.selectedItemPosition]
-
-            if (name.isNotEmpty() && barcode.isNotEmpty() && quantity != null && expirationDate.isNotEmpty()) {
-                updateProduct(name, barcode, quantity, expirationDate, selectedWarehouse.id)
-            } else {
-                Toast.makeText(this, "Veuillez remplir tous les champs", Toast.LENGTH_SHORT).show()
-            }
-        }
-
-        buttonDeleteProduct.setOnClickListener {
-            val barcode = editTextProductBarcode.text.toString().trim()
-            if (barcode.isNotEmpty()) {
-                deleteProduct(barcode)
-            } else {
-                Toast.makeText(this, "Veuillez entrer le code-barres du produit", Toast.LENGTH_SHORT).show()
-            }
+            onAddProductClicked()
         }
     }
 
@@ -95,81 +78,91 @@ class ProductManagementActivity : AppCompatActivity() {
         apiService.getWarehouses().enqueue(object : Callback<List<Warehouse>> {
             override fun onResponse(call: Call<List<Warehouse>>, response: Response<List<Warehouse>>) {
                 if (response.isSuccessful) {
-                    warehouses = response.body() ?: listOf()
-                    val warehouseNames = warehouses.map { it.name }
+                    val warehouses = response.body() ?: listOf()
+                    warehouseMap = warehouses.associateBy { it.name }
+                    val warehouseNames = warehouseMap.keys.toList()
                     val adapter = ArrayAdapter(this@ProductManagementActivity, android.R.layout.simple_spinner_item, warehouseNames)
-                    spinnerWarehouse.adapter = adapter
+                    adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                    filterSpinner.adapter = adapter
                 } else {
-                    Log.e("ProductManagement", "Error loading warehouses: ${response.errorBody()?.string()}")
                     Toast.makeText(this@ProductManagementActivity, "Erreur de chargement des entrepôts", Toast.LENGTH_SHORT).show()
                 }
             }
 
             override fun onFailure(call: Call<List<Warehouse>>, t: Throwable) {
-                Log.e("ProductManagement", "Failure: ${t.message}", t)
                 Toast.makeText(this@ProductManagementActivity, "Échec de la connexion : ${t.message}", Toast.LENGTH_SHORT).show()
             }
         })
     }
 
-    private fun loadProducts() {
-        apiService.getProducts().enqueue(object : Callback<List<Product>> {
-            override fun onResponse(call: Call<List<Product>>, response: Response<List<Product>>) {
+    private fun loadStocksByWarehouse(warehouseId: Int) {
+        apiService.getStocksByWarehouse(warehouseId).enqueue(object : Callback<List<Stock>> {
+            override fun onResponse(call: Call<List<Stock>>, response: Response<List<Stock>>) {
                 if (response.isSuccessful) {
-                    recyclerViewProducts.adapter = ProductAdapter(response.body() ?: listOf())
+                    val stocks = response.body() ?: listOf()
+                    stockAdapter.updateData(stocks)
                 } else {
-                    Toast.makeText(this@ProductManagementActivity, "Erreur lors du chargement des produits", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@ProductManagementActivity, "Erreur de chargement des stocks", Toast.LENGTH_SHORT).show()
                 }
             }
 
-            override fun onFailure(call: Call<List<Product>>, t: Throwable) {
+            override fun onFailure(call: Call<List<Stock>>, t: Throwable) {
                 Toast.makeText(this@ProductManagementActivity, "Échec de la connexion : ${t.message}", Toast.LENGTH_SHORT).show()
             }
         })
     }
 
-    private fun addProduct(name: String, barcode: String, quantity: Int, expirationDate: String, warehouseId: Int) {
-        val product = Product(name, barcode, expirationDate, quantity.toFloat(), warehouseId, false)
-        apiService.addProduct(product).enqueue(object : Callback<Void> {
-            override fun onResponse(call: Call<Void>, response: Response<Void>) {
+    private fun updateCapacityProgress(warehouse: Warehouse) {
+        apiService.getWarehouseCapacity(warehouse.id).enqueue(object : Callback<CapacityData> {
+            override fun onResponse(call: Call<CapacityData>, response: Response<CapacityData>) {
                 if (response.isSuccessful) {
-                    Toast.makeText(this@ProductManagementActivity, "Produit ajouté avec succès", Toast.LENGTH_SHORT).show()
-                    loadProducts()
+                    val capacityData = response.body()
+                    if (capacityData != null) {
+                        try {
+                            val percentage = (capacityData.occupiedCapacity.toFloat() / capacityData.totalCapacity.toFloat()) * 100
+                            progressBarCapacity.progress = percentage.toInt()
+                            progressBarCapacity.visibility = View.VISIBLE
+                            warehouseCapacityTextView.text = "Warehouse Capacity: ${"%.2f".format(percentage)}%"
+                            updateProgressBarColor(percentage)
+                        } catch (e: NumberFormatException) {
+                            e.printStackTrace()
+                            Toast.makeText(this@ProductManagementActivity, "Invalid capacity data received", Toast.LENGTH_SHORT).show()
+                        }
+                    }
                 } else {
-                    Toast.makeText(this@ProductManagementActivity, "Erreur lors de l'ajout du produit", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@ProductManagementActivity, "Erreur de chargement de la capacité", Toast.LENGTH_SHORT).show()
                 }
             }
 
-            override fun onFailure(call: Call<Void>, t: Throwable) {
+            override fun onFailure(call: Call<CapacityData>, t: Throwable) {
                 Toast.makeText(this@ProductManagementActivity, "Échec de la connexion : ${t.message}", Toast.LENGTH_SHORT).show()
             }
         })
     }
 
-    private fun updateProduct(name: String, barcode: String, quantity: Int, expirationDate: String, warehouseId: Int) {
-        val product = Product(name, barcode, expirationDate, quantity.toFloat(), warehouseId, false)
-        apiService.updateProduct(barcode, product).enqueue(object : Callback<Void> {
-            override fun onResponse(call: Call<Void>, response: Response<Void>) {
-                if (response.isSuccessful) {
-                    Toast.makeText(this@ProductManagementActivity, "Produit mis à jour avec succès", Toast.LENGTH_SHORT).show()
-                    loadProducts()
-                } else {
-                    Toast.makeText(this@ProductManagementActivity, "Erreur lors de la mise à jour du produit", Toast.LENGTH_SHORT).show()
-                }
-            }
-
-            override fun onFailure(call: Call<Void>, t: Throwable) {
-                Toast.makeText(this@ProductManagementActivity, "Échec de la connexion : ${t.message}", Toast.LENGTH_SHORT).show()
-            }
-        })
+    private fun updateProgressBarColor(percentage: Float) {
+        val color = when {
+            percentage < 50 -> ContextCompat.getColor(this, R.color.green)
+            percentage < 75 -> ContextCompat.getColor(this, R.color.yellow)
+            percentage < 90 -> ContextCompat.getColor(this, R.color.orange)
+            percentage < 100 -> ContextCompat.getColor(this, R.color.red)
+            else -> ContextCompat.getColor(this, R.color.dark_red)
+        }
+        progressBarCapacity.progressDrawable.setColorFilter(color, android.graphics.PorterDuff.Mode.SRC_IN)
     }
 
-    private fun deleteProduct(barcode: String) {
-        apiService.deleteProduct(barcode).enqueue(object : Callback<Void> {
+    private fun onAddProductClicked() {
+        val intent = Intent(this, AddProductActivity::class.java)
+        startActivity(intent)
+    }
+
+    private fun deleteProduct(stock: Stock) {
+        val productId = stock.id.toString()
+        apiService.deleteProduct(productId).enqueue(object : Callback<Void> {
             override fun onResponse(call: Call<Void>, response: Response<Void>) {
                 if (response.isSuccessful) {
                     Toast.makeText(this@ProductManagementActivity, "Produit supprimé avec succès", Toast.LENGTH_SHORT).show()
-                    loadProducts()
+                    selectedWarehouseId?.let { loadStocksByWarehouse(it) }
                 } else {
                     Toast.makeText(this@ProductManagementActivity, "Erreur lors de la suppression du produit", Toast.LENGTH_SHORT).show()
                 }
