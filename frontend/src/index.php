@@ -102,6 +102,15 @@ switch ($request) {
             exit;
         }
         break;
+    case '/Volunteer/Collections':
+        if ($jwtToken) {
+            requireAuth($jwtToken, 'volunteer');
+            require __DIR__ . '/views/Volunteer/Collections.php';
+        } else {
+            require __DIR__ . '/views/Login/Login.php';
+            exit;
+        }
+        break;
     case '/Volunteer/Distribution':
         if ($jwtToken) {
             requireAuth($jwtToken, 'volunteer');
@@ -118,6 +127,16 @@ switch ($request) {
             require __DIR__ . '/views/Login/Login.php';
             exit;
         }
+        break;
+    case '/Volunteer/Distributions':
+        if ($jwtToken) {
+            requireAuth($jwtToken, 'volunteer');
+                require __DIR__ . '/views/Volunteer/Distributions.php';
+        } else {
+            require __DIR__ . '/views/Login/Login.php';
+            exit;
+        }
+        break;
     case '/Volunteer/Service':
         if ($jwtToken) {
             requireAuth($jwtToken, 'volunteer');
@@ -127,7 +146,7 @@ switch ($request) {
             if ($routeId) {
                 require __DIR__ . '/views/Volunteer/Service.php';
             } else {
-                echo "Paramètre manquant : routeId";
+                echo "Paramètre manquant : serviceId";
                 exit;
             }
         } else {

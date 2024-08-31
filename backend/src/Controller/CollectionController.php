@@ -491,6 +491,17 @@ class CollectionController
                 }
             }
 
+            // Filtrage par ID du chauffeur
+            if (isset($queryParameters['volunteer_id'])) {
+                $volunteerId = filter_var($queryParameters['volunteer_id'], FILTER_VALIDATE_INT, FILTER_NULL_ON_FAILURE);
+                if ($volunteerId !== null) {
+                    $queryBuilder->andWhere('c.volunteer = :volunteer_id')
+                        ->setParameter('volunteer_id', $volunteerId);
+                } else {
+                    error_log("Invalid volunteer_id parameter: " . $queryParameters['volunteer_id']);
+                }
+            }
+
             // Exécutez la requête et récupérez les résultats
             $collections = $queryBuilder->getQuery()->getResult();
 

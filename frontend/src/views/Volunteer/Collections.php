@@ -14,7 +14,7 @@
 </head>
 <body>
 <div class="back-office-container">
-    <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/includes/AdminDashboard.php'); ?>
+    <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/includes/VolunteerDashboard.php'); ?>
     <div class="back-office-content">
         <h1>Tableau de Bord des Collectes</h1>
 
@@ -34,30 +34,10 @@
             </select>
         </div>
 
-        <div class="row">
-            <!--            <button class="add-button" id="addCollectionButton"> Ajouter </button>-->
-            <input class="add-button" type="button" onclick="location.href='/Admin/Collections/NewCollection';" value="New collection" />
-            <button class="delete-button" id="deleteCollectionButton"> Supprimer </button>
-            <button class="modify-button" id="modifyCollectionButton"> Modifier </button>
-        </div>
-
         <!-- Tableau des Collectes -->
         <div class="collection-table">
             <table>
-                <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Entreprise</th>
-                    <th>Produit</th>
-                    <th>Véhicule</th>
-                    <th>Date de Collecte</th>
-                    <th>Date de Création</th>
-                    <th>Date de Mise à Jour</th>
-                    <th>Actions</th>
-                </tr>
-                </thead>
                 <tbody id="collectionTableBody">
-                <!-- Les lignes du tableau seront générées dynamiquement par JavaScript -->
                 </tbody>
             </table>
         </div>
@@ -66,16 +46,9 @@
         $loaderId = 'loadingBodyGeneral';
         include($_SERVER['DOCUMENT_ROOT'] . '/views/includes/Loader.php');
         ?>
-
-        <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/AdminCollectionPage/VolunteerDetailsModal.php'); ?>
-        <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/AdminCollectionPage/VehicleDetailsModal.php'); ?>
-        <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/AdminCollectionPage/CollectedProductsModal.php'); ?>
-        <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/AdminCollectionPage/ModifyCollectionModal.php'); ?>
-        <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/AdminCollectionPage/AssignProductToCollectionModal.php'); ?>
-        <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/AdminCollectionPage/ModifyCollectionProductModal.php'); ?>
-
+        =
         <!-- Script pour gérer les interactions avec la page -->
-        <script type="module" src="/assets/js/pages/VolunteerCollectionPage.js"></script>
+        <script type="module" src="/assets/js/pages/VolunteerAllCollectionsPage.js"></script>
     </div>
 </div>
 </body>

@@ -177,3 +177,96 @@ export async function populateCollectionTable(date, completion) {
         document.getElementById('loadingBodyGeneral').classList.add('hidden');
     }
 }
+
+export async function populateVolunteerCollectionTable(date, completion, volunteerId) {
+    document.getElementById('loadingBodyGeneral').classList.remove('hidden');
+
+    const backOfficeContent = document.querySelector('.collection-table');
+    if (!backOfficeContent) {
+        console.error('Back office content container not found.');
+        return;
+    }
+
+    backOfficeContent.innerHTML = '';
+
+    const table = document.createElement('table');
+    table.classList.add('collection-table');
+    table.id = 'collectionTable';
+
+    const thead = document.createElement('thead');
+    const headerRow = document.createElement('tr');
+    const headers = ['Véhicule', 'Date de Collecte', 'Complétion', 'Détails'];
+    headers.forEach(headerText => {
+        const th = document.createElement('th');
+        th.textContent = headerText;
+        headerRow.appendChild(th);
+    });
+
+    thead.appendChild(headerRow);
+    table.appendChild(thead);
+
+    backOfficeContent.appendChild(table);
+
+    try {
+        const queryParameters = {};
+        if (date && date.trim() !== "") {
+            queryParameters.date = date;
+        }
+        if (completion !== undefined) {
+            queryParameters.completed = completion;
+        }
+        if (volunteerId) {
+            queryParameters.volunteerId = volunteerId;
+        }
+
+        const collections = await getCollections(queryParameters);
+
+        if (!collections || collections.length === 0) {
+            console.log('No collections found');
+            document.getElementById('loadingBodyGeneral').classList.add('hidden');
+            return;
+        }
+
+        document.getElementById('loadingBodyGeneral').classList.add('hidden');
+
+        const tbody = document.createElement('tbody');
+
+        collections.forEach(collection => {
+            const row = document.createElement('tr');
+            row.dataset.collectionId = collection.id;
+
+            const vehicleCell = document.createElement('td');
+            vehicleCell.textContent = collection.vehicle_license_plate;
+
+            const collectionDateCell = document.createElement('td');
+            collectionDateCell.textContent = formatDateToFrench(new Date(collection.collection_date).getTime());
+
+            const completionCell = document.createElement('td');
+            completionCell.textContent = collection.is_completed ? 'Completed' : 'Ongoing';
+
+            const detailsCell = document.createElement('td');
+            const detailsButton = document.createElement('button');
+            detailsButton.textContent = 'Détails';
+            detailsButton.addEventListener('click', (e) => {
+                e.preventDefault();
+                const url = `/Volunteer/Collection?collectionId=${collection.id}&date=${collection.collection_date}`;
+                window.location.href = url;
+            });
+            detailsCell.appendChild(detailsButton);
+
+
+            row.appendChild(vehicleCell);
+            row.appendChild(collectionDateCell);
+            row.appendChild(completionCell);
+            row.appendChild(detailsCell);
+
+            tbody.appendChild(row);
+        });
+
+        table.appendChild(tbody);
+
+    } catch (error) {
+        console.error('Error in populateCollectionTable:', error.message);
+        document.getElementById('loadingBodyGeneral').classList.add('hidden');
+    }
+}
