@@ -13,8 +13,7 @@
         <li><a href="/Volunteer/Planning">Planning</a></li>
         <li><a href="/Volunteer/Collections">Collectes</a></li>
         <li><a href="/Volunteer/Distributions">Livraisons</a></li>
-        <li><a href="/Volunteer/Distributions">Inscriptions</a></li>
-        <li><a href="/Volunteer/Distributions">Inscriptions</a></li>
+        <li><a href="/Volunteer/Services">Inscriptions Services</a></li>
     </ul>
 </div>
 </body>

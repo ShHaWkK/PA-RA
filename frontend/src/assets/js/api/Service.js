@@ -101,7 +101,12 @@ async function getAllServices() {
         if (!response.ok) {
             throw new Error('Failed to get all services');
         }
-        return await response.json();
+
+        const result = await response.json();
+
+        console.log("result",result);
+
+        return result;
     } catch (error) {
         console.error('Error getting all services:', error.message);
         throw error;
