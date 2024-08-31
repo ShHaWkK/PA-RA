@@ -20,7 +20,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 
 require_once "../bootstrap.php";
 
-
 use Controller\ReminderController;
 use Controller\UserController;
 use Controller\CompanyController;
@@ -93,9 +92,7 @@ $mailer->Port = 587;
 // Instancie EmailService
 $emailService = new EmailService($mailer);
 
-// Instancie GoogleMapsService
 $googleMapsService = new GoogleMapsService();
-
 
 $controllerMap = [
     'users' => UserController::class,
@@ -125,7 +122,7 @@ $controllerMap = [
     'vehicles' => VehicleController::class,
     'scan' => ScanController::class,
     'warehouses' => WarehouseController::class,
-    'recipe' => RecipeController::class, 
+    'recipe' => RecipeController::class,
     'recipe_ingredients' => RecipeIngredientController::class,
     'product_notifications' => ProductNotificationController::class,
     'planning' => PlanningController::class
@@ -157,15 +154,6 @@ if (!array_key_exists($route, $controllerMap)) {
 // Instancie le contrôleur approprié
 $controllerClass = $controllerMap[$route];
 try {
-    if ($controllerClass === ServiceRegistrationController::class) {
-        $controller = new $controllerClass($entityManager, $emailService);
-    } elseif ($controllerClass === ServiceScheduleController::class) {
-        $controller = new $controllerClass($entityManager, $emailService);
-    } else if ($controllerClass === ServiceProposalController::class) {
-        // Pass both EntityManager and EmailService to ServiceProposalController
-        $controller = new $controllerClass($entityManager, $emailService);
-    }elseif ($controllerClass === DeliveryController::class || $controllerClass === PlannedRouteController::class) {
-        $controller = new $controllerClass($entityManager, $pdfService, $excelService, $emailService, $googleMapsService);
     if ($controllerClass === DeliveryController::class || $controllerClass === PlannedRouteController::class) {
         $controller = new $controllerClass($entityManager, $pdfService, $excelService, $emailService, $googleMapsService);
     } elseif ($controllerClass === LoginController::class) {
@@ -200,25 +188,21 @@ $input = json_decode(file_get_contents('php://input'), true);
 error_log("Données d'entrée: " . json_encode($input));
 
 try {
+    // Vérifier les routes nécessitant une vérification JWT
     $requiresAuth = in_array($route, ['admin', 'volunteer', 'merchant']);
     if ($requiresAuth) {
         $decodedToken = $jwtMiddleware->verifyToken();
         $response = $controller->processRequest($_SERVER['REQUEST_METHOD'], $uriParts, $input, $decodedToken);
     } else {
+        // Ajout de la vérification des tickets d'un utilisateur spécifique
         if ($route === 'users' && isset($uriParts[2]) && $uriParts[2] === 'tickets') {
             $userId = (int) $uriParts[1];
             $response = $controller->getTicketsByUser($userId);
-        } else if ($route === 'tickets' && isset($uriParts[1]) && $uriParts[1] === 'assign' && isset($uriParts[2])) {
-            $ticketId = (int)$uriParts[2];
-            $response = $controller->assignAdminToTicket($ticketId, $input);
         } else if ($route === 'tickets' && isset($uriParts[2]) && $uriParts[2] === 'messages') {
             $ticketId = (int) $uriParts[1];
             error_log("Redirection vers MessageController pour ticketId: $ticketId");
-
-            // Correction ici : passez les deux arguments nécessaires
-            $controller = new MessageController($entityManager, $emailService);
-
-            $response = $controller->processRequest($_SERVER['REQUEST_METHOD'], $uriParts, $input);
+            $controller = new MessageController($entityManager);
+            $response = $controller->processRequest($_SERVER['REQUEST_METHOD'], $uriParts, $input); // Redirige vers MessageController
         } else {
             $response = $controller->processRequest($_SERVER['REQUEST_METHOD'], $uriParts, $input);
         }
