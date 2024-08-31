@@ -159,7 +159,7 @@ class ServiceProposalController
         }
     }
 
-    public function deleteProposal($id)
+    private function deleteProposal($id)
     {
         $proposal = $this->entityManager->find(ServiceProposalModel::class, $id);
         if (!$proposal) {

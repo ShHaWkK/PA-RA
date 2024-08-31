@@ -70,5 +70,10 @@
     "header_volunteer_signup": "¡Hazte Voluntario!",
     "header_contact": "Contacto",
     "error_message": "Lo sentimos, la página que estás buscando no existe.",
-    "go_home": "Volver al inicio"
+    "go_home": "Volver al inicio",
+    "resume_label": "Sube tu currículum (solo PDF)",
+    "resume_help": "Por favor, sube un archivo PDF con tu currículum. El tamaño máximo del archivo es de 5 MB.",
+    "license_label": "Sube tu licencia comercial (solo PDF)",
+    "license_help": "Por favor, sube un archivo PDF de tu licencia comercial válida. El tamaño máximo del archivo es de 5 MB."
+
 }

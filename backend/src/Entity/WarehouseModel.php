@@ -166,4 +166,3 @@ class WarehouseModel implements JsonSerializable
         ];
     }
 }
-?>

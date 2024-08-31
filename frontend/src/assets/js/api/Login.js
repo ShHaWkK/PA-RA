@@ -1,4 +1,4 @@
-import {setJwtCookie, setJwtToken} from "./Api.js";
+import {setJwtCookie,setCookie, setJwtToken} from "./Api.js";
 
 async function login(email, password) {
     const loginData = { email, password };
@@ -15,6 +15,8 @@ async function login(email, password) {
             throw new Error('Invalid email or password');
         } else if (response.status === 400) {
             throw new Error('Missing required fields');
+        } else if (response.status === 403) {
+            throw new Error('Account not approved');
         } else {
             throw new Error('Failed to login');
         }
@@ -25,8 +27,23 @@ async function login(email, password) {
     if (data.token) {
         setJwtCookie(data.token);
         setJwtToken(data.token);
-        window.location.href = '/Admin';
+
+        console.log(data.role);
+
+        switch (data.role){
+            case 'admin':
+                window.location.href = '/Admin/Volunteers';
+                break;
+            case 'volunteer':
+                window.location.href = '/Volunteer/Planning';
+                break;
+            case 'merchant':
+                window.location.href = '/Merchant/Merchants';
+                break;
+        }
     }
+
+    setCookie('user_id', data.id, 1);
 
     return await data;
 }
@@ -39,6 +56,8 @@ async function authenticate(jwtToken, role) {
             'Content-Type': 'application/json'
         }
     });
+
+    console.log("jwt:",jwtToken)
 
     if (!response.ok) {
         if (response.status === 401) {

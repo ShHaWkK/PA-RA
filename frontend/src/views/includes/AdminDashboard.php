@@ -10,10 +10,14 @@
 <div class="dashboard-sidebar">
     <h2>Dashboard</h2>
     <ul>
-        <li><a href="#volunteers">Volunteers</a></li>
-        <li><a href="#merchants">Merchants</a></li>
-        <li><a href="#companies">Companies</a></li>
-        <li><a href="#collections">Collections</a></li>
+        <li><a href="/Admin/Volunteers">Volunteers</a></li>
+        <li><a href="/Admin/Merchants">Merchants</a></li>
+        <li><a href="/Admin/Companies">Entreprises</a></li>
+        <li><a href="/Admin/Warehouses">Entrepots</a></li>
+        <li><a href="/Admin/Stocks">Stocks</a></li>
+        <li><a href="/Admin/Collections">Collectes</a></li>
+        <li><a href="/Admin/Distributions">Distributions</a></li>
+        <li><a href="/Admin/Services">Services</a></li>
     </ul>
 </div>
 </body>

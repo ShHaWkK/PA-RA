@@ -68,7 +68,11 @@
     "header_home": "Home",
     "header_merchant_signup": "Merchant Signup",
     "header_volunteer_signup": "Become a Volunteer!",
-    "header_contact": "Contact", 
+    "header_contact": "Contact",
+    "resume_label": "Upload your resume (PDF only)",
+    "resume_help": "Please upload a PDF file containing your resume. The maximum file size is 5 MB.",
+    "license_label": "Upload your business license (PDF only)",
+    "license_help": "Please upload a PDF file of your valid business license. The maximum file size is 5 MB.",
 
     "error_message": "Sorry, the page you are looking for does not exist.",
     "go_home": "Go back to home"

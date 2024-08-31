@@ -1,0 +1,73 @@
+/* Form Styling */
+#registrationForm {
+    background: #fff;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    max-width: 600px;
+    margin: 2rem auto;
+    font-family: 'Arial', sans-serif;
+}
+
+#registrationForm h2 {
+    text-align: center;
+    margin-bottom: 1.5rem;
+    color: #006400;
+}
+
+#registrationForm div {
+    margin-bottom: 1rem;
+}
+
+#registrationForm label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+    color: #333;
+}
+
+#registrationForm input[type="text"],
+#registrationForm input[type="email"],
+#registrationForm input[type="tel"],
+#registrationForm input[type="password"],
+#registrationForm input[type="date"] {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 1rem;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+#registrationForm input[type="text"]:focus,
+#registrationForm input[type="email"]:focus,
+#registrationForm input[type="tel"]:focus,
+#registrationForm input[type="password"]:focus,
+#registrationForm input[type="date"]:focus {
+    border-color: #006400;
+    box-shadow: 0 0 5px rgba(0, 128, 0, 0.5);
+}
+
+#registrationForm button {
+    width: 100%;
+    padding: 0.75rem;
+    border: none;
+    border-radius: 4px;
+    background-color: #006400;
+    color: white;
+    font-size: 1.25rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+#registrationForm button:hover {
+    background-color: #228B22;
+    transform: translateY(-2px);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    #registrationForm {
+        padding: 1rem;
+    }
+}

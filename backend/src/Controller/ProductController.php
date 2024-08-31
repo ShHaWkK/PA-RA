@@ -123,21 +123,20 @@ class ProductController
             // Sauvegarde du produit
             $this->entityManager->persist($product);
             $this->entityManager->flush();
-    
-            // Création de l'entrée de stock
-            $stock = new StockModel();
-            $stock->setProductId($product->getId());
-            $stock->setQuantity(1);
-            $stock->setAvailability('available');
-            $stock->setWarehouse($warehouse);  // Associer l'objet WarehouseModel directement
-            $stock->setEntryDate(new \DateTime("now"));
-            $stock->setCreatedAt(new \DateTime("now"));
-            $stock->setUpdatedAt(new \DateTime("now"));
-    
-            $this->entityManager->persist($stock);
-            $this->entityManager->flush();
-    
-            return ['id' => $product->getId(), 'message' => 'Product created and stock entry added successfully'];
+
+//            $stock = new StockModel();
+//            $stock->setProductId($product->getId());
+//            $stock->setQuantity(1);
+//            $stock->setAvailability('available');
+//            $stock->setWarehouseId($data['warehouse_id']);
+//            $stock->setEntryDate(new \DateTime("now"));
+//            $stock->setCreatedAt(new \DateTime("now"));
+//            $stock->setUpdatedAt(new \DateTime("now"));
+//
+//            $this->entityManager->persist($stock);
+//            $this->entityManager->flush();
+
+            return ['id' => $product->getId(), 'message' => 'Product created successfully'];
         } catch (\Exception $e) {
             error_log("Exception in createProduct: " . $e->getMessage());
             error_log("Stack trace: " . $e->getTraceAsString());
@@ -190,31 +189,17 @@ class ProductController
     public function getProductByID($id)
     {
         try {
-            error_log("Fetching product with ID: " . $id);
-            // Vérifiez si l'ID est bien passé
-            if (!is_numeric($id)) {
-                error_log("Invalid ID: " . $id);
-                http_response_code(400);
-                return ['error' => 'Invalid ID'];
-            }
-            
-            $product = $this->entityManager->getRepository(ProductModel::class)->find($id);
-    
+            $product = $this->entityManager->getRepository(ProductModel::class)->findOneBy(['id' => $id]);
             if (!$product) {
-                error_log("Product not found for ID: " . $id);
                 http_response_code(404);
                 return ['error' => 'Product not found'];
             }
-    
-            error_log("Product found: " . json_encode($product));
             return $product->jsonSerialize();
         } catch (\Exception $e) {
-            error_log("Exception in getProductByID: " . $e->getMessage());
+            error_log("Exception in getProductByBarcode: " . $e->getMessage());
             throw $e;
         }
     }
-    
-    
 
     public function updateProduct($barcode, $data)
     {

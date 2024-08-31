@@ -7,7 +7,7 @@ error_reporting(E_ALL);
 //-------------------- CORS --------------------//
 // Autorise les requêtes depuis localhost
 header("Access-Control-Allow-Origin: http://localhost:3000");
-header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
+header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS, PATCH");
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
 header("Access-Control-Allow-Credentials: true");
 
@@ -165,6 +165,8 @@ try {
         // Pass both EntityManager and EmailService to ServiceProposalController
         $controller = new $controllerClass($entityManager, $emailService);
     }elseif ($controllerClass === DeliveryController::class || $controllerClass === PlannedRouteController::class) {
+        $controller = new $controllerClass($entityManager, $pdfService, $excelService, $emailService, $googleMapsService);
+    if ($controllerClass === DeliveryController::class || $controllerClass === PlannedRouteController::class) {
         $controller = new $controllerClass($entityManager, $pdfService, $excelService, $emailService, $googleMapsService);
     } elseif ($controllerClass === LoginController::class) {
         $controller = new $controllerClass($entityManager, $jwtService);

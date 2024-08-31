@@ -17,38 +17,42 @@ class CompanyService
 
     public function addCompany($data)
     {
-        error_log("Adding company with name: " . $data['company_name']);
-
-        $company = new CompanyModel();
-        $company->setName($data['company_name']);
-        $company->setSiret($data['siret']);
-        $company->setAddress($data['address']);
-        
-        // Vérifiez si 'contact_info' est défini avant de l'utiliser
-        if (isset($data['contact_info'])) {
-            $company->setContactInfo($data['contact_info']);
-        } else {
-            // Définir une valeur par défaut ou gérer le cas où 'contact_info' n'est pas fourni
-            $company->setContactInfo('');
+        // Validation des données
+        if (empty($data['company_name']) || empty($data['siret']) || empty($data['address']) || empty($data['renewal_date'])) {
+            throw new \InvalidArgumentException('Missing required company data.');
         }
 
-        // Vérifiez si 'renewal_date' est défini avant de l'utiliser
-        if (isset($data['renewal_date'])) {
+        try {
+            // Début de la transaction
+            $this->entityManager->beginTransaction();
+
+            error_log("Adding company with name: " . $data['company_name']);
+
+            $company = new CompanyModel();
+            $company->setName($data['company_name']);
+            $company->setSiret($data['siret']);
+            $company->setAddress($data['address']);
+            $company->setContactInfo($data['contact_info'] ?? ''); // Utiliser une chaîne vide par défaut si non fourni
             $company->setRenewalDate(new \DateTime($data['renewal_date']));
-        } else {
-            // Définir une valeur par défaut ou gérer le cas où 'renewal_date' n'est pas fourni
-            $company->setRenewalDate(new \DateTime());
+            $company->setRenewalStatus($data['renewal_status'] ?? 'pending');
+            $company->setHasStock($data['has_stock'] ?? false);
+            $company->setLastNotified(isset($data['last_notified']) ? new \DateTime($data['last_notified']) : null);
+
+            $this->entityManager->persist($company);
+            $this->entityManager->flush();
+
+            // Validation de la transaction
+            $this->entityManager->commit();
+
+            error_log("Company added successfully with ID: " . $company->getId());
+
+            return $company;
+        } catch (\Exception $e) {
+            // Annulation de la transaction en cas d'erreur
+            $this->entityManager->rollback();
+            error_log("Error adding company: " . $e->getMessage());
+            throw $e;
         }
-
-        $company->setRenewalStatus('pending');
-
-        $this->entityManager->persist($company);
-        $this->entityManager->flush();
-
-        error_log("Company added successfully with ID: " . $company->getId());
-
-        return $company;
     }
 }
-
 ?>

@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="<?php echo strtolower($userLanguage); ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Formulaire d'inscription</title>
+    <title>Volunteers</title>
     <link rel="stylesheet" href="/assets/css/global.css">
     <link rel="stylesheet" href="/assets/css/table.css">
     <link rel="stylesheet" href="/assets/css/backoffice.css">
@@ -24,11 +24,9 @@
                 <option value="pending"> En attente  </option>
             </select>
         </div>
-
         <div class="row">
-            <button class="add-button" > Ajouter </button>
-            <button class="delete-button" > Supprimer </button>
-            <button class="neutral-button" id='modifyButton'> Modifier </button>
+            <button class="add-button" id="addVolunteerButton"> Ajouter </button>
+            <button class="delete-button" id="deleteVolunteerButton"> Supprimer </button>
         </div>
 
         <div class="row">
@@ -37,9 +35,21 @@
             <button class="neutral-button" id='putOnHoldButton'> Mettre en attente </button>
         </div>
 
+        <?php
+        $loaderId = 'loadingBodyGeneral';
+        include($_SERVER['DOCUMENT_ROOT'] . '/views/includes/Loader.php');
+        ?>
+
         <div class="volunteer-table"></div>
-        <script type="module" src="/assets/js/pages/AdminVolunteerPage.js"></script>
+        <script type="module" src="/assets/js/pages/AdminUserPages.js"></script>
     </div>
+
+    <!--    Ajout des fenêtres modales-->
+    <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/AdminUsersPages/AddVolunteerModal.php'); ?>
+    <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/AdminUsersPages/DeleteVolunteerModal.php'); ?>
+    <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/AdminUsersPages/ModifyVolunteerModal.php'); ?>
+    <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/AdminUsersPages/VolunteerSkillModal.php'); ?>
+    <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/AdminUsersPages/VolunteerAvailabilitiesModal.php'); ?>
 
 </div>
 </body>

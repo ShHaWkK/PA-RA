@@ -1,0 +1,141 @@
+import { getAllUsers, getUserFile } from '/assets/js/api/Users.js';
+import { setupSearch } from '/assets/js/modules/SearchBar.js';
+import {populateModifyUserForm,populateCompaniesInModal,populateSkillsInModal} from "/assets/js/modules/modals/AdminUserModals.js";
+import {formatDateToFrench} from "../FormatDate.js";
+
+export var selectedUserIdMerchant;
+
+export async function populateMerchantTable(status) {
+
+    // On affiche le Loader
+    document.getElementById('loadingBodyGeneral').classList.remove('hidden');
+
+    document.querySelector('.merchant-table').innerHTML = '';
+
+    const users = await getAllUsers('merchant', status);
+
+    // On enlève le Loader
+    document.getElementById('loadingBodyGeneral').classList.add('hidden');
+
+    const table = document.createElement('table');
+    table.classList.add('merchant-table'); // Ajout de la classe merchant-table pour le style
+    table.id = 'merchantTable';
+
+    const thead = document.createElement('thead');
+    const headerRow = document.createElement('tr');
+
+    const headers = ['', 'First Name', 'Last Name', 'Email', 'Phone Number', 'Status', 'Company', 'Commercial License', 'Modify', 'Created At', 'Updated At'];
+    headers.forEach(headerText => {
+        const th = document.createElement('th');
+        th.textContent = headerText;
+        headerRow.appendChild(th);
+    });
+
+    thead.appendChild(headerRow);
+    table.appendChild(thead);
+
+    const tbody = document.createElement('tbody');
+
+    users.forEach(user => {
+        const row = document.createElement('tr');
+        row.dataset.userId = user.id; // Ajout de l'id utilisateur en tant que dataset
+
+        // Ajout de la checkbox dans la première cellule
+        const checkboxCell = document.createElement('td');
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.value = user.id; // Utilisation de l'id de l'utilisateur comme value de la checkbox
+        checkboxCell.appendChild(checkbox);
+        row.appendChild(checkboxCell);
+
+        // Ajout des autres cellules avec les données de l'utilisateur
+        const cells = [
+            user.first_name,
+            user.last_name,
+            user.email,
+            user.phone_number,
+            user.status
+        ];
+
+        cells.forEach(cellText => {
+            const td = document.createElement('td');
+            td.textContent = cellText;
+            row.appendChild(td);
+        });
+
+        // Ajout des boutons "Voir" pour l'entreprise
+        const companyButtonCell = document.createElement('td');
+        const companyButton = document.createElement('button');
+        companyButton.textContent = 'Voir';
+        companyButton.onclick = () => viewCompany(user.id);
+        companyButtonCell.appendChild(companyButton);
+        row.appendChild(companyButtonCell);
+
+        const commercialLicenseButtonCell = document.createElement('td');
+        const commercialLicenseButton = document.createElement('button');
+        commercialLicenseButton.textContent = 'Télécharger';
+        commercialLicenseButton.onclick = () => getUserFile(user.id);
+        commercialLicenseButtonCell.appendChild(commercialLicenseButton);
+        row.appendChild(commercialLicenseButtonCell);
+
+        // Ajout du bouton "Modifier"
+        const modifyButtonCell = document.createElement('td');
+        const modifyButton = document.createElement('button');
+        modifyButton.textContent = 'Modifier';
+        modifyButton.id = 'modifyUserButton_' + user.id;
+        modifyButton.className = 'modify-user-button';
+        modifyButton.value = user.id;
+        modifyButton.onclick = () => openModifyUserModal(user.id);
+        modifyButtonCell.appendChild(modifyButton);
+        row.appendChild(modifyButtonCell);
+
+        // Ajout des dates dans les bonnes colonnes avec formatage
+        const createdAtCell = document.createElement('td');
+        createdAtCell.textContent = formatDateToFrench(user.created_at);
+        row.appendChild(createdAtCell);
+
+        const updatedAtCell = document.createElement('td');
+        updatedAtCell.textContent = formatDateToFrench(user.updated_at);
+        row.appendChild(updatedAtCell);
+
+        tbody.appendChild(row);
+    });
+
+    table.appendChild(tbody);
+
+    // Sélectionner le conteneur back-office-content et y attacher le tableau
+    const backOfficeContent = document.querySelector('.merchant-table');
+    if (backOfficeContent) {
+        backOfficeContent.innerHTML = ''; // Effacer le contenu existant si nécessaire
+        backOfficeContent.appendChild(table);
+
+        setupSearch(users,'merchantTable');
+    } else {
+        console.error('Back office content container not found.');
+    }
+}
+
+// Fonctions pour les boutons "Voir" et "Modifier"
+function viewSkills(userId) {
+    selectedUserIdMerchant = userId;
+    populateSkillsInModal(selectedUserIdMerchant);
+    var skillModal = document.getElementById("volunteerSkillModal");
+    console.log("click on skills");
+    skillModal.style.display = "block";
+}
+
+function viewCompany(userId){
+    selectedUserIdMerchant = userId;
+    populateCompaniesInModal(selectedUserIdMerchant);
+    var companyModal = document.getElementById("userCompaniesModal");
+    console.log("click on companies");
+    companyModal.style.display = "block";
+}
+
+function openModifyUserModal(userId) {
+    selectedUserIdMerchant = userId;
+    var modifyModal = document.getElementById("modifyUserModal");
+    populateModifyUserForm(userId);
+    console.log("click on modify");
+    modifyModal.style.display = "block";
+}

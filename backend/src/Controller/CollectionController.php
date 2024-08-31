@@ -10,19 +10,18 @@ use Entity\UserModel;
 use Entity\ProductNotificationModel;
 use Doctrine\ORM\EntityManager;
 use Service\ExcelService;
-use Service\EmailService;
 use Doctrine\ORM\EntityNotFoundException;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
-use Exception;
 
 class CollectionController
 {
-    private EntityManager $entityManager;
-    private ExcelService $excelService;
-    private EmailService $emailService;
+    private $entityManager;
+    private $excelService;
+    private $emailService;
 
-    public function __construct(EntityManager $entityManager, ExcelService $excelService, EmailService $emailService)
+
+    public function __construct(EntityManager $entityManager, $excelService, $emailService)
     {
         $this->entityManager = $entityManager;
         $this->excelService = $excelService;
@@ -34,39 +33,70 @@ class CollectionController
         try {
             switch ($method) {
                 case 'POST':
-                    if (isset($uriParts[2])) {
-                        if ($uriParts[2] === 'send_excel') {
-                            return $this->sendCollectionExcelEmail((int)$uriParts[1], $input['email'] ?? null);
-                        } elseif ($uriParts[2] === 'export') {
-                            return $this->exportCollectionToExcel((int)$uriParts[1]);
+                    if ( isset($uriParts[2]) ) {
+                        if($uriParts[2] === 'send_excel')
+                        {
+                            return $this->sendCollectionExcelEmail($uriParts[1],$uriParts[3]);
                         }
-                    } else {
+                        elseif ($uriParts[2] === 'export')
+                        {
+                            return $this->exportCollectionToExcel($uriParts[1]);
+                        }
+                    }else {
                         return $this->createCollection($input);
                     }
                 case 'GET':
                     if (isset($uriParts[1])) {
                         if (isset($uriParts[2])) {
                             if ($uriParts[2] === 'products') {
-                                return $this->getProductsFromCollection((int)$uriParts[1]);
+                                return $this->getProductsFromCollection((int) $uriParts[1]);
                             } elseif ($uriParts[2] === 'get_excel') {
-                                return $this->getCollectionExcel((int)$uriParts[1]);
+                                return $this->getCollectionExcel($uriParts[1]);
+                            } else {
+                                http_response_code(400);
+                                return ['error' => 'Invalid endpoint'];
                             }
                         } else {
-                            return $this->getCollection((int)$uriParts[1]);
+                            return $this->getCollection((int) $uriParts[1]);
                         }
                     } else {
+                        if(!empty($_GET)){
+                            return $this->getCollectionsByCriteria($_GET);
+                        }
                         return $this->getAllCollections();
                     }
                 case 'PUT':
                     if (isset($uriParts[1])) {
-                        return $this->updateCollection((int)$uriParts[1], $input);
+                        if (isset($uriParts[2])) {
+                            return $this->assignProduct((int) $uriParts[1], $input['products']);
+                        } else {
+                            return $this->updateCollection((int) $uriParts[1], $input);
+                        }
                     }
                     throw new Exception('Collection ID not specified', 400);
                 case 'DELETE':
                     if (isset($uriParts[1])) {
                         return $this->deleteCollection((int)$uriParts[1]);
                     }
-                    throw new Exception('Collection ID not specified', 400);
+                    http_response_code(400);
+                    return ['error' => 'Collection ID not specified'];
+                case 'PATCH':
+                    if (isset($uriParts[1])) {
+                        if (isset($input['products'])) {
+                            if (isset($uriParts[2]) && $uriParts[2] === 'remove') {
+                                return $this->removeProductsFromCollection((int) $uriParts[1], $input['products']);
+                            } elseif (isset($uriParts[2]) && $uriParts[2] === 'update') {
+                                return $this->modifyProduct((int) $uriParts[1], $input['products']);
+                            }else
+                            {
+                                return $this->assignProduct((int) $uriParts[1], $input['products']);
+                            }
+                        }
+                        http_response_code(400);
+                        return ['error' => 'Products not specified'];
+                    }
+                    http_response_code(400);
+                    return ['error' => 'Collection ID not specified'];
                 default:
                     throw new Exception('Method Not Allowed', 405);
             }
@@ -75,7 +105,6 @@ class CollectionController
             throw $e;
         }
     }
-
 
 
     public function createCollection($data)
@@ -425,89 +454,68 @@ class CollectionController
         }
     }
 
-    public function getCollectionsByDate(string $date)
+    public function getCollectionsByCriteria(array $queryParameters)
     {
         try {
-            // Créez un objet DateTime pour le début de la journée
-            $startOfDay = new \DateTime($date . ' 00:00:00');
-            // Créez un objet DateTime pour la fin de la journée
-            $endOfDay = new \DateTime($date . ' 23:59:59');
-
             // Créez une instance de QueryBuilder
             $collectionRepository = $this->entityManager->getRepository(CollectionModel::class);
-            $queryBuilder = $collectionRepository->createQueryBuilder('c')
-                ->where('c.collection_date >= :start')
-                ->andWhere('c.collection_date <= :end')
-                ->setParameter('start', $startOfDay)
-                ->setParameter('end', $endOfDay);
+            $queryBuilder = $collectionRepository->createQueryBuilder('c');
+
+            // Filtrage par statut de complétion
+            if (isset($queryParameters['completed'])) {
+                $completed = filter_var($queryParameters['completed'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+                if ($completed !== null) {
+                    $queryBuilder->andWhere('c.is_completed = :completed')
+                        ->setParameter('completed', $completed);
+                } else {
+                    error_log("Invalid completed parameter: " . $queryParameters['completed']);
+                }
+            }
+
+            // Filtrage par date
+            if (isset($queryParameters['date'])) {
+                $date = $queryParameters['date'];
+                $startDate = \DateTime::createFromFormat('Y-m-d', $date);
+                if ($startDate) {
+                    $startDate->setTime(0, 0, 0); // Début de la journée
+                    $endDate = clone $startDate;
+                    $endDate->setTime(23, 59, 59); // Fin de la journée
+
+                    $queryBuilder->andWhere('c.collection_date >= :start_date')
+                        ->andWhere('c.collection_date <= :end_date')
+                        ->setParameter('start_date', $startDate)
+                        ->setParameter('end_date', $endDate);
+                } else {
+                    error_log("Invalid date format: " . $date);
+                }
+            }
+
+            // Filtrage par ID du chauffeur
+            if (isset($queryParameters['volunteer_id'])) {
+                $volunteerId = filter_var($queryParameters['volunteer_id'], FILTER_VALIDATE_INT, FILTER_NULL_ON_FAILURE);
+                if ($volunteerId !== null) {
+                    $queryBuilder->andWhere('c.volunteer = :volunteer_id')
+                        ->setParameter('volunteer_id', $volunteerId);
+                } else {
+                    error_log("Invalid volunteer_id parameter: " . $queryParameters['volunteer_id']);
+                }
+            }
 
             // Exécutez la requête et récupérez les résultats
             $collections = $queryBuilder->getQuery()->getResult();
 
-            // Retournez les collections en utilisant jsonSerialize
-            return array_map(function ($collection) {
-                return $collection->jsonSerialize();
-            }, $collections);
-        } catch (\Exception $e) {
-            error_log("Exception in getCollectionsByDate: " . $e->getMessage());
-            throw $e;
-        }
-    }
-
-    private function getCollectionsByCompletion(bool $completed)
-    {
-        try {
-            $collectionRepository = $this->entityManager->getRepository(CollectionModel::class);
-            $collections = $collectionRepository->createQueryBuilder('c')
-                ->where('c.is_completed = :completed')
-                ->setParameter('completed', $completed)
-                ->getQuery()
-                ->getResult();
-
+            // Vérifiez si des collections ont été trouvées
             if (empty($collections)) {
                 http_response_code(404);
-                return ['error' => 'No collections found for the specified completion status'];
+                return ['error' => 'No collections found with the given criteria'];
             }
-
-            $serializedCollections = [];
-            foreach ($collections as $collection) {
-                $serializedCollections[] = $collection->jsonSerialize();
-            }
-
-            return $serializedCollections;
-        } catch (\Exception $e) {
-            error_log("Exception in getCollectionsByCompletion: " . $e->getMessage());
-            throw $e;
-        }
-    }
-
-    private function getCollectionsByDateAndCompletion(?string $date, bool $completed)
-    {
-        try {
-            $collectionRepository = $this->entityManager->getRepository(CollectionModel::class);
-            $queryBuilder = $collectionRepository->createQueryBuilder('c')
-                ->where('c.is_completed = :completed')
-                ->setParameter('completed', $completed);
-
-            // Si la date est fournie, ajoutez le filtre de date
-            if ($date !== null) {
-                $startOfDay = new \DateTime($date . ' 00:00:00');
-                $endOfDay = new \DateTime($date . ' 23:59:59');
-                $queryBuilder->andWhere('c.collection_date >= :start')
-                    ->andWhere('c.collection_date <= :end')
-                    ->setParameter('start', $startOfDay)
-                    ->setParameter('end', $endOfDay);
-            }
-
-            // Exécutez la requête et récupérez les résultats
-            $collections = $queryBuilder->getQuery()->getResult();
 
             // Retournez les collections en utilisant jsonSerialize
             return array_map(function ($collection) {
                 return $collection->jsonSerialize();
             }, $collections);
         } catch (\Exception $e) {
-            error_log("Exception in getCollectionsByDateAndCompletion: " . $e->getMessage());
+            error_log("Exception in getCollectionsByCriteria: " . $e->getMessage());
             throw $e;
         }
     }
