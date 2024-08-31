@@ -1,3 +1,4 @@
+// Path: src/main/java/com/example/nomorewaste/api/PlanningResponse.kt
 package com.example.nomorewaste.api
 
 data class PlanningResponse(
@@ -22,12 +23,3 @@ data class PlanningResponse(
                 return combinedList
         }
 }
-
-
-
-data class ServiceDetail(
-        val name: String,
-        val location: String,
-        val startSchedule: String,
-        val endSchedule: String
-)

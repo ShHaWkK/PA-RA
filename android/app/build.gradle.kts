@@ -62,6 +62,7 @@ dependencies {
     implementation ("androidx.room:room-runtime:2.4.3")
     annotationProcessor ("androidx.room:room-compiler:2.4.3")
     implementation ("com.journeyapps:zxing-android-embedded:4.3.0")
+    implementation ("androidx.recyclerview:recyclerview:1.2.1")
     //implementation ("androidx.lifecycle:lifecycle-viewmodel-ktx:2.3.1")
     //implementation ("androidx.lifecycle:lifecycle-livedata-ktx:2.3.1")
     implementation ("com.google.zxing:core:3.4.0")

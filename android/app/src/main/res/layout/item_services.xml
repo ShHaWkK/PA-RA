@@ -1,9 +1,9 @@
-<!-- Path: res/layout/item_services.xml -->
+<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:padding="8dp">
+    android:padding="16dp">
 
     <TextView
         android:id="@+id/service_name"
@@ -13,24 +13,9 @@
         android:textSize="16sp" />
 
     <TextView
-        android:id="@+id/service_location"
+        android:id="@+id/service_schedule"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Location"
+        android:text="Schedule"
         android:textSize="14sp" />
-
-    <TextView
-        android:id="@+id/service_start_schedule"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Start Schedule"
-        android:textSize="14sp" />
-
-    <TextView
-        android:id="@+id/service_end_schedule"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="End Schedule"
-        android:textSize="14sp" />
-
 </LinearLayout>

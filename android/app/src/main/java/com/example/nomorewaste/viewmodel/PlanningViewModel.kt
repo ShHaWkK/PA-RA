@@ -1,43 +1,44 @@
+// Path: src/main/java/com/example/nomorewaste/viewmodel/PlanningViewModel.kt
 package com.example.nomorewaste.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.example.nomorewaste.api.ServiceSchedule
-import com.example.nomorewaste.api.ServiceManager
+import androidx.lifecycle.viewModelScope
+import com.example.nomorewaste.api.ApiClient
+import com.example.nomorewaste.model.PlanningItem
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.*
 
 class PlanningViewModel : ViewModel() {
 
-    private val serviceManager = ServiceManager()
+    private val _planningData = MutableLiveData<List<PlanningItem>>()
+    val planningData: LiveData<List<PlanningItem>> get() = _planningData
 
-    private val _schedules = MutableLiveData<List<ServiceSchedule>>().apply { value = emptyList() }
-    val schedules: LiveData<List<ServiceSchedule>> get() = _schedules
+    private val _errorMessage = MutableLiveData<String>()
+    val errorMessage: LiveData<String> get() = _errorMessage
 
-    private val _error = MutableLiveData<String>()
-    val error: LiveData<String> get() = _error
+    private val dateFormatter = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
 
-    fun loadUserSchedule(userId: Int) {
-        serviceManager.getUserSchedule(userId) { schedules, throwable ->
-            if (schedules != null) {
-                _schedules.postValue(schedules)
-            } else {
-                _schedules.postValue(emptyList())
-                _error.postValue(throwable?.message ?: "Erreur inconnue")
+    fun fetchPlanningByUserIdAndDate(userId: Int, date: Date) {
+        val formattedDate = dateFormatter.format(date)
+        Log.d("PlanningViewModel", "Fetching planning for date: $formattedDate")
+
+        viewModelScope.launch(Dispatchers.IO) {  // Assurez-vous que ce code s'exécute sur un thread de fond
+            try {
+                val planningItems = ApiClient.fetchPlanningByUserIdAndDate(userId, formattedDate)
+                _planningData.postValue(planningItems)  // Utilisez postValue pour les changements de background
+            } catch (e: Exception) {
+                _errorMessage.postValue("Erreur lors de la récupération des plannings : ${e.message}")
+                Log.e("PlanningViewModel", "Erreur lors de la récupération des plannings: ${e.message}")
             }
         }
     }
 
-    fun loadUserScheduleForDate(userId: Int, date: Date) {
-        val formattedDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(date)
-        serviceManager.getUserScheduleByDate(userId, formattedDate) { schedules, throwable ->
-            if (schedules != null) {
-                _schedules.postValue(schedules)
-            } else {
-                _schedules.postValue(emptyList())
-                _error.postValue(throwable?.message ?: "Erreur inconnue")
-            }
-        }
-    }
+
+
 }

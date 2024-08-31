@@ -1,22 +1,21 @@
-<!-- Path: res/layout/item_collection.xml -->
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:padding="8dp">
+    android:padding="16dp">
 
     <TextView
         android:id="@+id/collection_date"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Collection Date"
-        android:textStyle="bold"
         android:textSize="16sp" />
 
     <TextView
-        android:id="@+id/collection_completed"
+        android:id="@+id/volunteer_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Completed" />
+        android:text="Volunteer Name"
+        android:textSize="14sp" />
 </LinearLayout>

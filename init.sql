@@ -273,7 +273,6 @@ CREATE TABLE IF NOT EXISTS service_schedules (
                                                  FOREIGN KEY (service_id) REFERENCES services(id) ON DELETE CASCADE
 );
 
--- Table des stocks (stocks)
 CREATE TABLE IF NOT EXISTS stocks (
                                       id INT AUTO_INCREMENT PRIMARY KEY,
                                       product_id INT NOT NULL,

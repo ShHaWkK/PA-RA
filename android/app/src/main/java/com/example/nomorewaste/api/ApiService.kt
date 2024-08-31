@@ -91,18 +91,24 @@ interface ApiService {
     @POST("collections/request")
     fun createCollectionRequest(@Body requestData: Map<String, Any>): Call<Void>
 
+
     @GET("planning")
-    fun getPlanning(
-        @Query("user_id") userId: Int
+    fun getPlanningByDate(
+        @Query("date") date: String
     ): Call<PlanningResponse>
 
-    @GET("planning/byDate")
-    fun getPlanningByDate(
+    @GET("planning")
+    fun getPlanningByUserIdAndDate(
+        @Query("user_id") userId: Int,
+        @Query("date") date: String
+    ): Call<PlanningResponse>
+
+    @GET("planning")
+    fun getPlanningByUserIdAndDateRange(
         @Query("user_id") userId: Int,
         @Query("start_date") startDate: String,
         @Query("end_date") endDate: String
     ): Call<PlanningResponse>
-
 
     @GET("collections")
     fun getAllCollections(): Call<List<CollectionData>>

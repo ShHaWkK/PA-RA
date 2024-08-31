@@ -1,34 +1,21 @@
-<!-- Path: res/layout/item_delivery.xml -->
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:padding="8dp">
-
-    <TextView
-        android:id="@+id/delivery_route_name"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Route Name"
-        android:textStyle="bold"
-        android:textSize="16sp" />
+    android:padding="16dp">
 
     <TextView
         android:id="@+id/delivery_date"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Delivery Date" />
+        android:text="Delivery Date"
+        android:textSize="16sp" />
 
     <TextView
-        android:id="@+id/delivery_recipient_type"
+        android:id="@+id/recipient_type"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Recipient Type" />
-
-    <TextView
-        android:id="@+id/delivery_status"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Status" />
+        android:text="Recipient Type"
+        android:textSize="14sp" />
 </LinearLayout>
