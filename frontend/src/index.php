@@ -118,6 +118,22 @@ switch ($request) {
             require __DIR__ . '/views/Login/Login.php';
             exit;
         }
+    case '/Volunteer/Service':
+        if ($jwtToken) {
+            requireAuth($jwtToken, 'volunteer');
+
+            $routeId = isset($_GET['serviceRegistrationId']) || null;
+
+            if ($routeId) {
+                require __DIR__ . '/views/Volunteer/Service.php';
+            } else {
+                echo "Paramètre manquant : routeId";
+                exit;
+            }
+        } else {
+            require __DIR__ . '/views/Login/Login.php';
+            exit;
+        }
         break;
     case '/Admin/Volunteers':
         if ($jwtToken) {

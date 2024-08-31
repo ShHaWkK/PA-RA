@@ -263,7 +263,7 @@
                     href = `/Volunteer/Collection?collectionId=${event_id}&date=${date}`;
                     break;
                 case 'Services':
-                    href = `/Volunteer/Service?collectionId=${event_id}&date=${date}`;
+                    href = `/Volunteer/Service?serviceRegistrationId=${event_id}`;
                     break;
                 case 'Livraisons':
                     href = `/Volunteer/Distribution?routeId=${event_id}`;

@@ -19,7 +19,7 @@ async function createServiceRegistration(registrationData) {
 
 async function getServiceRegistrationByID(registration_id) {
     try {
-        const response = await fetch(apiEndpoint + '/service_registrations/id/' + registration_id, {
+        const response = await fetch(apiEndpoint + '/service_registrations/' + registration_id, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json'
