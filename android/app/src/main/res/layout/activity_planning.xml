@@ -1,4 +1,4 @@
-<!-- activity_planning.xml -->
+<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -7,12 +7,33 @@
     android:orientation="vertical"
     tools:context=".PlanningsActivity">
 
+    <!-- Header -->
+    <TextView
+        android:id="@+id/headerText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="Planning"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:padding="16dp" />
+
     <!-- CalendarView for selecting dates -->
     <CalendarView
         android:id="@+id/calendar_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp" />
+
+    <!-- Progress bar for loading -->
+    <ProgressBar
+        android:id="@+id/progress_bar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:visibility="gone"
+        android:indeterminate="true"
+        android:padding="16dp"/>
 
     <!-- RecyclerView for displaying planning details -->
     <androidx.recyclerview.widget.RecyclerView

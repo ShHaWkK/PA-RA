@@ -1,4 +1,3 @@
-// Path: src/main/java/com/example/nomorewaste/viewmodel/PlanningViewModel.kt
 package com.example.nomorewaste.viewmodel
 
 import android.util.Log
@@ -10,7 +9,6 @@ import com.example.nomorewaste.api.ApiClient
 import com.example.nomorewaste.model.PlanningItem
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -26,12 +24,15 @@ class PlanningViewModel : ViewModel() {
 
     fun fetchPlanningByUserIdAndDate(userId: Int, date: Date) {
         val formattedDate = dateFormatter.format(date)
-        Log.d("PlanningViewModel", "Fetching planning for date: $formattedDate")
-
-        viewModelScope.launch(Dispatchers.IO) {  // Assurez-vous que ce code s'exécute sur un thread de fond
+        viewModelScope.launch(Dispatchers.IO) {
             try {
                 val planningItems = ApiClient.fetchPlanningByUserIdAndDate(userId, formattedDate)
-                _planningData.postValue(planningItems)  // Utilisez postValue pour les changements de background
+                val filteredItems = filterPlanningByDate(planningItems, date)
+
+                _planningData.postValue(filteredItems)
+
+                Log.d("PlanningViewModel", "Data fetched for date: $formattedDate with ${filteredItems.size} items")
+
             } catch (e: Exception) {
                 _errorMessage.postValue("Erreur lors de la récupération des plannings : ${e.message}")
                 Log.e("PlanningViewModel", "Erreur lors de la récupération des plannings: ${e.message}")
@@ -39,6 +40,20 @@ class PlanningViewModel : ViewModel() {
         }
     }
 
+    private fun filterPlanningByDate(planningItems: List<PlanningItem>, selectedDate: Date): List<PlanningItem> {
+        val selectedDateStr = dateFormatter.format(selectedDate)
+        return planningItems.filter {
+            val itemDateStr = dateFormatter.format(parseDate(it.startTime))
+            itemDateStr == selectedDateStr
+        }
+    }
 
-
+    private fun parseDate(dateString: String): Date {
+        return try {
+            dateFormatter.parse(dateString) ?: Date()
+        } catch (e: Exception) {
+            Log.e("PlanningViewModel", "Erreur de parsing de la date : ${e.message}")
+            Date()
+        }
+    }
 }
