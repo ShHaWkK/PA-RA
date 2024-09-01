@@ -23,6 +23,12 @@
             <button class="delete-button" id="deleteServiceButton">Delete</button>
         </div>
 
+        <select >
+            <option value="all">Tous</option>
+            <option value="upcoming">A venir</option>
+            <option value="past">Passés</option>
+        </select>
+
         <div class="progress-container">
             <div class="progress-label" id="progress-label"></div>
             <div class="progress-bar" id="progress-bar"></div>

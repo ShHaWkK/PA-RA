@@ -3,6 +3,8 @@
 namespace Controller;
 
 use Doctrine\ORM\EntityManager;
+use Entity\ServiceModel;
+use Entity\ServiceRegistrationModel;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
@@ -72,7 +74,20 @@ class ServiceRegistrationController
                 return ['error' => 'Missing required fields for registration'];
             }
 
-            $registration = $this->serviceRegistrationService->createRegistration($data);
+            $service = $this->entityManager->getRepository(ServiceModel::class)->find($data['service_id']);
+
+            if (!$service) {
+                http_response_code(404);
+                return ['error' => 'Service not found'];
+            }
+
+            $registration = new ServiceRegistrationModel();
+            $registration->setService($service);  // Assignez l'objet ServiceModel
+            $registration->setUserId($data['user_id']);
+            $registration->setRegistrationDate(new \DateTime());
+
+            $this->entityManager->persist($registration);
+            $this->entityManager->flush();
 
             return ['id' => $registration->getId(), 'message' => 'Registration created successfully'];
         } catch (\Exception $e) {

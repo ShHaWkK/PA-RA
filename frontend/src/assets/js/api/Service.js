@@ -131,5 +131,38 @@ async function getServiceCapacity(service_id) {
     }
 }
 
+async function getServicesByDate(date, filter = 'all') {
+    try {
+        // Formatage de la date au format 'YYYY-MM-DD'
+        const formattedDate = new Date(date).toISOString().split('T')[0];
 
-export { createService, getServiceByID, updateService, deleteService, getAllServices, getServiceCapacity };
+        // Construction de l'URL avec les paramètres de requête
+        const queryParams = new URLSearchParams({ date: formattedDate, filter });
+        const url = `${apiEndpoint}/services/get/by_date?${queryParams.toString()}`;
+
+        // Appel de l'API
+        const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        // Vérification de la réponse
+        if (!response.ok) {
+            throw new Error('Failed to get services by date');
+        }
+
+        // Analyse de la réponse JSON
+        const result = await response.json();
+
+        console.log("result", result);
+        return result;
+    } catch (error) {
+        console.error('Error getting services by date:', error.message);
+        throw error;
+    }
+}
+
+
+export { createService, getServiceByID, updateService, deleteService, getAllServices, getServiceCapacity, getServicesByDate};

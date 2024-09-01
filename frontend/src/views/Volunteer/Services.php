@@ -13,21 +13,32 @@
 <div class="back-office-container">
     <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/includes/VolunteerDashboard.php'); ?>
     <div class="back-office-content">
-        <h1>Available Services</h1>
+        <h1>Services</h1>
 
-        <div class="row">
             <label for="serviceDate">Service date:</label>
             <input type="date" id="serviceDate" name="service-date"/>
-            <button id="allServiceDates" > Toutes les dates </button>
-        </div>
+
+        <label for="serviceDateStatus"> Statut </label>
+        <select id="serviceDateStatus">
+                <option value="upcoming">A venir</option>
+                <option value="all">Tous</option>
+                <option value="past">Passés</option>
+            </select>
+
+        <label for="registrationStatus"> Inscription </label>
+        <select id="registrationStatus">
+            <option value="all">Toutes</option>
+            <option value="registered">Déjà inscrit</option>
+            <option value="unregistered">Non inscrit</option>
+        </select>
 
         <div class="services-table">
             <table id="servicesTable">
                 <thead>
                 <tr>
                     <th>Service Name</th>
-                    <th>Description</th>
                     <th>Date</th>
+                    <th>Description</th>
                     <th>Capacity</th>
                     <th>Action</th>
                 </tr>
