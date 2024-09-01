@@ -1,4 +1,3 @@
-// Path: src/main/java/com/example/nomorewaste/api/ApiClient.kt
 package com.example.nomorewaste.api
 
 import android.util.Log
@@ -20,12 +19,10 @@ object ApiClient {
         client.newCall(request).execute().use { response ->
             if (!response.isSuccessful) throw Exception("Unexpected code $response")
 
-            // Assurez-vous que la réponse est traitée en UTF-8
             val responseBody = response.body?.string() ?: throw Exception("Empty response body")
 
             val jsonObject = JSONObject(responseBody)
 
-            // Parse the JSON response and convert it to a list of planning items
             return parsePlanningItems(jsonObject)
         }
     }
@@ -39,6 +36,8 @@ object ApiClient {
             val planningItem = PlanningItem(
                 id = routeObject.getInt("id"),
                 title = routeObject.getString("name"),
+                startTime = routeObject.getString("start_time"),
+                endTime = routeObject.optString("end_time", "null"),
                 dateRange = "${routeObject.getString("start_time")} - ${routeObject.optString("end_time", "null")}"
             )
             planningItems.add(planningItem)
@@ -50,6 +49,8 @@ object ApiClient {
             val planningItem = PlanningItem(
                 id = collectionObject.getInt("id"),
                 title = "Collection on ${collectionObject.getString("collection_date")}",
+                startTime = collectionObject.getString("collection_date"),
+                endTime = "",
                 dateRange = collectionObject.getString("collection_date")
             )
             planningItems.add(planningItem)
@@ -62,6 +63,8 @@ object ApiClient {
             val planningItem = PlanningItem(
                 id = serviceObject.getInt("id"),
                 title = serviceDetails.getString("name"),
+                startTime = serviceDetails.getString("schedule"),
+                endTime = "",
                 dateRange = serviceDetails.getString("schedule")
             )
             planningItems.add(planningItem)

@@ -1,4 +1,3 @@
-// Path: src/main/java/com/example/nomorewaste/api/PlanningAdapter.kt
 package com.example.nomorewaste.api
 
 import android.util.Log
@@ -15,8 +14,11 @@ class PlanningAdapter(private var planningItems: List<PlanningItem>) : RecyclerV
     fun updateData(newItems: List<PlanningItem>) {
         this.planningItems = newItems
         notifyDataSetChanged()
+
+        // Ajoutez un log pour vérifier la mise à jour des données
         Log.d("PlanningAdapter", "Updating data with ${newItems.size} items")
     }
+
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PlanningViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.item_planning, parent, false)
