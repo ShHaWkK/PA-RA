@@ -48,17 +48,17 @@ class ServiceService
             }
             
             // Log the fetched service details
-            error_log("Service found: " . json_encode([
-                'ID' => $service->getId(),
-                'Name' => $service->getName(),
-                'Description' => $service->getDescription(),
-                'Status' => $service->getStatus(),
-                'Location' => $service->getLocation(),
-                'Capacity' => $service->getCapacity(),
-                'CurrentRegistrations' => $service->getCurrentRegistrations(),
-                'StartSchedule' => $service->getStartSchedule()->format('Y-m-d H:i:s'),
-                'EndSchedule' => $service->getEndSchedule()->format('Y-m-d H:i:s'),
-            ]));
+//            error_log("Service found: " . json_encode([
+//                'ID' => $service->getId(),
+//                'Name' => $service->getName(),
+//                'Description' => $service->getDescription(),
+//                'Status' => $service->getStatus(),
+//                'Location' => $service->getLocation(),
+//                'Capacity' => $service->getCapacity(),
+//                'CurrentRegistrations' => $service->getCurrentRegistrations(),
+//                'StartSchedule' => $service->getStartSchedule()->format('Y-m-d H:i:s'),
+//                'EndSchedule' => $service->getEndSchedule()->format('Y-m-d H:i:s'),
+//            ]));
             
             return $service;
             

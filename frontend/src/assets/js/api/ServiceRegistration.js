@@ -56,7 +56,7 @@ async function updateServiceRegistration(registration_id, registrationData) {
 
 async function deleteServiceRegistration(registration_id) {
     try {
-        const response = await fetch(apiEndpoint + '/service_registrations/id/' + registration_id, {
+        const response = await fetch(apiEndpoint + '/service_registrations/' + registration_id, {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json'

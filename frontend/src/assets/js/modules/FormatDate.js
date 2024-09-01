@@ -32,10 +32,3 @@ export function extractDateTime(dateTimeStr) {
         timeOnly: time,
     };
 }
-
-// Exemple d'utilisation
-// const dateTimeStr = '20-08-2024 17:00:32';
-// // const { dateOnly, timeOnly } = extractDateTime(dateTimeStr);
-//
-// console.log('Date:', dateOnly); // Affiche la date
-// console.log('Time:', timeOnly); // Affiche l'heure

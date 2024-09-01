@@ -42,6 +42,10 @@ async function populateServicesTable() {
             nameCell.textContent = service.name;
             row.appendChild(nameCell);
 
+            const dateCell = document.createElement('td');
+            dateCell.textContent = service.schedule;
+            row.appendChild(dateCell);
+
             const descriptionCell = document.createElement('td');
             descriptionCell.textContent = service.description;
             row.appendChild(descriptionCell);

@@ -15,12 +15,19 @@
     <div class="back-office-content">
         <h1>Available Services</h1>
 
+        <div class="row">
+            <label for="serviceDate">Service date:</label>
+            <input type="date" id="serviceDate" name="service-date"/>
+            <button id="allServiceDates" > Toutes les dates </button>
+        </div>
+
         <div class="services-table">
             <table id="servicesTable">
                 <thead>
                 <tr>
                     <th>Service Name</th>
                     <th>Description</th>
+                    <th>Date</th>
                     <th>Capacity</th>
                     <th>Action</th>
                 </tr>

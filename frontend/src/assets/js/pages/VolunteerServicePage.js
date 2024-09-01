@@ -1,11 +1,13 @@
-import {getServiceRegistrationByID} from "../api/ServiceRegistration.js";
+import {deleteServiceRegistration, getServiceRegistrationByID} from "../api/ServiceRegistration.js";
 
 function getServiceRegistrationIdFromURL() {
     const params = new URLSearchParams(window.location.search);
+    console.log(params.get('serviceRegistrationId'));
     return params.get('serviceRegistrationId');
 }
 
 function displayServiceRegistrationDetails(data) {
+
     // Updating the service name in the header
     const serviceNameHeader = document.getElementById('service-name-header');
     serviceNameHeader.textContent = data.service.name;
@@ -26,8 +28,6 @@ function displayServiceRegistrationDetails(data) {
         <p><strong>Registration Date:</strong> ${new Date(data.registrationDate).toLocaleString()}</p>
     `;
 
-    const loader = document.getElementById('loadingServiceDetails');
-    loader.style.display = 'none';
 }
 
 async function initializePage() {
@@ -39,14 +39,36 @@ async function initializePage() {
     }
 
     try {
+        const loader = document.getElementById("loadingServiceDetails");
+        loader.classList.remove('hidden');
         const data = await getServiceRegistrationByID(registrationId);
         displayServiceRegistrationDetails(data);
+        loader.classList.add('hidden');
     } catch (error) {
         console.error('Error initializing the page:', error);
-        // Handle the error appropriately, possibly showing an error message on the page
     }
-}
 
+    document.getElementById('unsubscribeButton').addEventListener('click', async function() {
+        // Affiche une alerte de confirmation
+        const confirmation = confirm("Êtes-vous sûr de vouloir vous désinscrire ?");
+
+        if (confirmation) {
+            try {
+                const registrationId = getServiceRegistrationIdFromURL();
+
+                if (!registrationId) {
+                    throw new Error("L'ID de l'inscription n'est pas fourni dans l'URL");
+                }
+
+                const result = await deleteServiceRegistration(registrationId);
+                alert(result.message);
+                window.location.href = "/Volunteer/Services";
+            } catch (error) {
+                alert('Erreur lors de la désinscription : ' + error.message);
+            }
+        }
+    });
+}
 document.addEventListener('DOMContentLoaded',function (){
     initializePage();
 });

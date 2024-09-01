@@ -138,7 +138,7 @@ class ServiceModel
             'id' => $this->id,
             'name' => $this->name,
             'description' => $this->description,
-            'schedule' => $this->schedule->format('d-m-Y H:i:s'), // ISO 8601 format
+            'schedule' => $this->schedule->format('d-m-Y H:i:s'),
             'capacity' => $this->capacity,
             'status' => $this->status,
             'location' => $this->location,

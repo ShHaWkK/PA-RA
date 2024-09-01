@@ -15,6 +15,7 @@
         <h1 class="service-header" id="service-name-header">Service Name</h1>
         <div id="service-info"></div>
         <div id="registration-info"></div>
+        <button class="delete-button" id="unsubscribeButton">Se désinscrire</button>
         <?php
         $loaderId = 'loadingServiceDetails';
         include($_SERVER['DOCUMENT_ROOT'] . '/views/includes/Loader.php');
