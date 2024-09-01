@@ -39,7 +39,12 @@ class ServiceRegistrationController
                     return $this->createRegistration($input);
                 case 'GET':
                     if (isset($uriParts[1])) {
-                        return $this->getRegistration((int) $uriParts[1]);
+                        if (isset($uriParts[2])){
+                            return $this->getRegistrationByServiceAndUserId((int) $uriParts[1],(int) $uriParts[2]);
+                        }else{
+                            return $this->getRegistration((int) $uriParts[1]);
+
+                        }
                     } else {
                         return $this->getAllRegistrations();
                     }
@@ -162,5 +167,19 @@ class ServiceRegistrationController
             return ['error' => 'Internal Server Error'];
         }
     }
+
+    private function getRegistrationByServiceAndUserId(int $userId, int $serviceId)
+    {
+        error_log("we are here");
+        $registrationRepository = $this->entityManager->getRepository(ServiceRegistrationModel::class);
+
+        $registration = $registrationRepository->findOneBy([
+            'user_id' => $userId,
+            'service_id' => $serviceId,
+        ]);
+
+        return $registration ? $registration->jsonSerialize() : null;
+    }
+
 }
 ?>

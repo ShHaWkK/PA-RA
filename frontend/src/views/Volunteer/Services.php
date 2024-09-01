@@ -15,7 +15,7 @@
     <div class="back-office-content">
         <h1>Services</h1>
 
-            <label for="serviceDate">Service date:</label>
+            <label for="serviceDate"> Date:</label>
             <input type="date" id="serviceDate" name="service-date"/>
 
         <label for="serviceDateStatus"> Statut </label>
@@ -29,7 +29,6 @@
         <select id="registrationStatus">
             <option value="all">Toutes</option>
             <option value="registered">Déjà inscrit</option>
-            <option value="unregistered">Non inscrit</option>
         </select>
 
         <div class="services-table">

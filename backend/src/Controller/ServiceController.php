@@ -3,6 +3,7 @@
 namespace Controller;
 
 use Doctrine\ORM\EntityManager;
+use Entity\ServiceRegistrationModel;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
@@ -58,7 +59,8 @@ class ServiceController
                                         http_response_code(400); // Bad Request
                                         return ['error' => 'Date parameter is missing'];
                                     }
-
+                                case 'by_user':
+                                    return $this->getServicesByUserId($uriParts[1]);
                                 default:
                                     return $this->getService((int) $uriParts[1]);
                             }
@@ -236,6 +238,28 @@ class ServiceController
             return $filteredServices;
         } catch (\Exception $e) {
             error_log("Exception in getServicesByDate: " . $e->getMessage());
+            throw $e;
+        }
+    }
+
+
+    public function getServicesByUserId(int $userId): array
+    {
+        try {
+            $qb = $this->entityManager->createQueryBuilder();
+
+            $qb->select('s')
+                ->from(ServiceModel::class, 's')
+                ->innerJoin(ServiceRegistrationModel::class, 'sr', 'WITH', 's.id = sr.service_id')
+                ->where('sr.user_id = :userId')
+                ->setParameter('userId', $userId);
+
+            $query = $qb->getQuery();
+            $services = $query->getResult();
+
+            return array_map(fn($service) => $service->jsonSerialize(), $services);
+        } catch (\Exception $e) {
+            error_log("Exception in getServicesByUserId: " . $e->getMessage());
             throw $e;
         }
     }

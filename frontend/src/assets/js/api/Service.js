@@ -164,5 +164,25 @@ async function getServicesByDate(date, filter = 'all') {
     }
 }
 
+async function getServicesByUser(userId) {
+    try {
+        const response = await fetch(`${apiEndpoint}/services/${userId}/by_user`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
 
-export { createService, getServiceByID, updateService, deleteService, getAllServices, getServiceCapacity, getServicesByDate};
+        if (!response.ok) {
+            throw new Error('Failed to fetch services');
+        }
+
+        const result = await response.json();
+        return result;
+    } catch (error) {
+        console.error('Error fetching services:', error.message);
+        throw error;
+    }
+}
+
+export { createService, getServiceByID, updateService, deleteService, getAllServices, getServiceCapacity, getServicesByDate, getServicesByUser};

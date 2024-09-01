@@ -1,6 +1,6 @@
-import {getServicesByDate} from "../api/Service.js";
+import {getServicesByDate, getServicesByUser} from "../api/Service.js";
 import {getCookie} from "../api/Api.js";
-import {registerUserToService} from "../api/ServiceRegistration.js";
+import {registerUserToService, getRegistrationByServiceAndUserId} from "../api/ServiceRegistration.js";
 
 document.addEventListener('DOMContentLoaded', function () {
     // Fonction pour définir la date d'aujourd'hui
@@ -12,25 +12,26 @@ document.addEventListener('DOMContentLoaded', function () {
     // Définir la date d'aujourd'hui comme valeur par défaut
     setDefaultDate();
 
-    // Fonction pour peupler le tableau des services
     async function populateServicesTable() {
         try {
             const tableBody = document.querySelector('#servicesTable tbody');
-
             tableBody.classList.add('hidden');
-
-
 
             const loader = document.getElementById('loadingBodyGeneral');
             loader.classList.remove('hidden');
 
-            // Obtenir la date sélectionnée et le statut du service
             const selectedDate = document.getElementById('serviceDate').value;
             const filter = document.getElementById('serviceDateStatus').value;
 
-            // Appeler l'API pour obtenir les services filtrés par date et statut
             let services = await getServicesByDate(selectedDate, filter);
 
+            const registrationStatus = document.getElementById('registrationStatus').value;
+            if (registrationStatus !== 'all') {
+                const userId = getCookie('user_id');
+                services = await getServicesByUser(userId);
+            }
+
+            // Réinitialiser le contenu du tableau
             const servicesTableBody = document.querySelector('#servicesTable tbody');
             servicesTableBody.innerHTML = '';
 
@@ -40,11 +41,27 @@ document.addEventListener('DOMContentLoaded', function () {
                 return;
             }
 
-            services.forEach(service => {
+            // Traiter les services de manière asynchrone
+            const rows = await Promise.all(services.map(async service => {
                 const row = document.createElement('tr');
 
                 const nameCell = document.createElement('td');
-                nameCell.textContent = service.name;
+                if (registrationStatus !== 'all') {
+                    const userId = getCookie('user_id');
+                    try {
+                        const registrationData = await getRegistrationByServiceAndUserId(userId, service.id);
+                        const registrationId = registrationData ? registrationData.id : null;
+                        const nameLink = document.createElement('a');
+                        nameLink.href = `/Volunteer/Service?serviceRegistrationId=${registrationId}`;
+                        nameLink.textContent = service.name;
+                        nameCell.appendChild(nameLink);
+                    } catch (error) {
+                        console.error('Error getting registration data:', error.message);
+                        nameCell.textContent = service.name; // Afficher le nom du service même en cas d'erreur
+                    }
+                } else {
+                    nameCell.textContent = service.name;
+                }
                 row.appendChild(nameCell);
 
                 const dateCell = document.createElement('td');
@@ -82,16 +99,18 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
                 });
 
-                if (filter === 'upcoming' && service.status === 'open' && service.capacity !== 0){
-                        actionCell.appendChild(registerButton);
-                }
-                else{
-                        actionCell.textContent = 'Registrations Closed';
+                if (filter === 'upcoming' && service.status === 'open' && service.capacity !== 0) {
+                    actionCell.appendChild(registerButton);
+                } else {
+                    actionCell.textContent = 'Registrations Closed';
                 }
 
                 row.appendChild(actionCell);
-                servicesTableBody.appendChild(row);
-            });
+                return row; // Retourne la ligne pour la fonction Promise.all
+            }));
+
+            // Ajouter toutes les lignes au tableau
+            rows.forEach(row => servicesTableBody.appendChild(row));
 
             loader.classList.add('hidden');
             tableBody.classList.remove('hidden');
@@ -105,4 +124,5 @@ document.addEventListener('DOMContentLoaded', function () {
 
     document.getElementById('serviceDate').addEventListener('change', populateServicesTable);
     document.getElementById('serviceDateStatus').addEventListener('change', populateServicesTable);
+    document.getElementById('registrationStatus').addEventListener('change', populateServicesTable);
 });

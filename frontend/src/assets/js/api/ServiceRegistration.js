@@ -90,6 +90,29 @@ async function getAllServiceRegistrations() {
     }
 }
 
+async function getRegistrationByServiceAndUserId(userId, serviceId) {
+    try {
+        const url = `${apiEndpoint}/service_registrations/${userId}/${serviceId}`;
+
+        const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`Failed to get registration: ${response.statusText}`);
+        }
+
+        return await response.json();
+    } catch (error) {
+        // Log et lancer une erreur pour gestion ultérieure
+        console.error('Error getting registration data:', error.message);
+        throw error;
+    }
+}
+
 async function registerUserToService(registrationData) {
     try {
         const response = await fetch(apiEndpoint + '/service_registrations', {
@@ -109,4 +132,4 @@ async function registerUserToService(registrationData) {
     }
 }
 
-export { createServiceRegistration, getServiceRegistrationByID, updateServiceRegistration, deleteServiceRegistration, getAllServiceRegistrations, registerUserToService };
+export { createServiceRegistration, getServiceRegistrationByID, updateServiceRegistration, getRegistrationByServiceAndUserId, deleteServiceRegistration, getAllServiceRegistrations, registerUserToService };
