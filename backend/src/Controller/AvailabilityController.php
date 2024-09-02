@@ -3,6 +3,7 @@ namespace Controller;
 
 use Entity\AvailabilityModel;
 use Doctrine\ORM\EntityManager;
+use Entity\UserModel;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
@@ -22,7 +23,7 @@ class AvailabilityController
                 return $object->getId();
             }
         ]);
-        
+
         $encoders = [new JsonEncoder()];
         $this->serializer = new Serializer([$normalizer], $encoders);
     }
@@ -81,8 +82,10 @@ class AvailabilityController
                 return ['error' => 'Missing required fields for new availability'];
             }
 
+            $user = $this->entityManager->getRepository(UserModel::class)->findOneBy(['id' => $data['user_id']]);
+
             $availability = new AvailabilityModel();
-            $availability->setUserId($data['user_id']);
+            $availability->setUser($user);
             $availability->setDayOfWeek($data['day_of_week']);
             $availability->setStartTime(new \DateTime($data['start_time']));
             $availability->setEndTime(new \DateTime($data['end_time']));

@@ -6,6 +6,7 @@ use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\TransactionRequiredException;
+use Entity\AvailabilityModel;
 use Entity\CompanyModel;
 use Entity\SkillModel;
 use Entity\UserCompanyModel;
@@ -379,6 +380,24 @@ class UserController
     {
         try {
             return $this->availabilityService->addAvailability($data);
+        } catch (\Exception $e) {
+            http_response_code(500);
+            return ['error' => 'Internal Server Error'];
+        }
+    }
+
+    public function removeAvailability($availabilityId)
+    {
+        try {
+            $availability = $this->entityManager->find(AvailabilityModel::class, $availabilityId);
+            if (!$availability) {
+                throw new \Exception('Availability not found');
+            }
+
+            $this->entityManager->remove($availability);
+            $this->entityManager->flush();
+
+            return ['message' => 'Availability removed successfully'];
         } catch (\Exception $e) {
             http_response_code(500);
             return ['error' => 'Internal Server Error'];

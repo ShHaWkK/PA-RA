@@ -8,6 +8,7 @@ import {
 } from "../api/Users.js";
 import {getCookie} from "../api/Api.js";
 import { getAllSkills} from "../api/Skills.js";
+import {createAvailability, deleteAvailability} from "../api/Availabilities.js";
 
 async function populateUserProfile(userId) {
     try {
@@ -45,7 +46,7 @@ async function populateUserSkills(userId) {
                 const selectInput = document.createElement('input');
                 selectInput.type = 'checkbox';
                 selectInput.name = `skills[${skill.id}][selected]`;
-                selectInput.value = 1;
+                selectInput.value = skill.id;
                 selectInput.checked = skill.selected || true; // cocher si déjà sélectionné
                 selectInput.disabled = true;
                 selectCell.appendChild(selectInput);
@@ -86,7 +87,7 @@ async function populateUserAvailabilities(userId) {
                 const selectInput = document.createElement('input');
                 selectInput.type = 'checkbox';
                 selectInput.name = `availabilities[${index}][selected]`;
-                selectInput.value = 1;
+                selectInput.value = availability.id;
                 selectInput.checked = availability.selected || true; // cocher si déjà sélectionné
                 selectInput.disabled = true;
                 selectCell.appendChild(selectInput);
@@ -182,37 +183,37 @@ function resetAvailabilitiesTable() {
                 <td><input type="time" name="availabilities[0][end_time]" value="18:00"></td>
             </tr>
             <tr>
-                <td><input type="checkbox" name="availabilities[1][selected]" value="1"></td>
+                <td><input type="checkbox" name="availabilities[1][selected]" value="2"></td>
                 <td><input type="text" name="availabilities[1][day_of_week]" value="Tuesday" readonly></td>
                 <td><input type="time" name="availabilities[1][start_time]" value="06:00"></td>
                 <td><input type="time" name="availabilities[1][end_time]" value="18:00"></td>
             </tr>
             <tr>
-                <td><input type="checkbox" name="availabilities[2][selected]" value="1"></td>
+                <td><input type="checkbox" name="availabilities[2][selected]" value="3"></td>
                 <td><input type="text" name="availabilities[2][day_of_week]" value="Wednesday" readonly></td>
                 <td><input type="time" name="availabilities[2][start_time]" value="06:00"></td>
                 <td><input type="time" name="availabilities[2][end_time]" value="18:00"></td>
             </tr>
             <tr>
-                <td><input type="checkbox" name="availabilities[3][selected]" value="1"></td>
+                <td><input type="checkbox" name="availabilities[3][selected]" value="4"></td>
                 <td><input type="text" name="availabilities[3][day_of_week]" value="Thursday" readonly></td>
                 <td><input type="time" name="availabilities[3][start_time]" value="06:00"></td>
                 <td><input type="time" name="availabilities[3][end_time]" value="18:00"></td>
             </tr>
             <tr>
-                <td><input type="checkbox" name="availabilities[4][selected]" value="1"></td>
+                <td><input type="checkbox" name="availabilities[4][selected]" value="5"></td>
                 <td><input type="text" name="availabilities[4][day_of_week]" value="Friday" readonly></td>
                 <td><input type="time" name="availabilities[4][start_time]" value="06:00"></td>
                 <td><input type="time" name="availabilities[4][end_time]" value="18:00"></td>
             </tr>
             <tr>
-                <td><input type="checkbox" name="availabilities[5][selected]" value="1"></td>
+                <td><input type="checkbox" name="availabilities[5][selected]" value="6"></td>
                 <td><input type="text" name="availabilities[5][day_of_week]" value="Saturday" readonly></td>
                 <td><input type="time" name="availabilities[5][start_time]" value="06:00"></td>
                 <td><input type="time" name="availabilities[5][end_time]" value="18:00"></td>
             </tr>
             <tr>
-                <td><input type="checkbox" name="availabilities[6][selected]" value="1"></td>
+                <td><input type="checkbox" name="availabilities[6][selected]" value="7"></td>
                 <td><input type="text" name="availabilities[6][day_of_week]" value="Sunday" readonly></td>
                 <td><input type="time" name="availabilities[6][start_time]" value="06:00"></td>
                 <td><input type="time" name="availabilities[6][end_time]" value="18:00"></td>
@@ -221,8 +222,7 @@ function resetAvailabilitiesTable() {
 }
 
 async function updateSkills() {
-    // Récupérer l'ID de l'utilisateur
-    const userId = getCookie('user_id'); // Assurez-vous de définir cette fonction pour obtenir l'ID utilisateur
+    const userId = getCookie('user_id');
 
     try {
         // Récupérer les compétences sélectionnées dans le formulaire
@@ -238,13 +238,15 @@ async function updateSkills() {
         const userSkills = await getUserSkills(userId);
         console.log("userSkills",userSkills);
 
-        // Déterminer les compétences à ajouter et à supprimer
-        const existingSkillIds = userSkills.map(skill => skill.id);
-        console.log("existingSkillIds",existingSkillIds);
+        // Convertir les skill IDs en chaînes de caractères pour une comparaison correcte
+        const existingSkillIds = userSkills.map(skill => String(skill.id));
+        console.log("existingSkillIds", existingSkillIds);
+
         const skillsToAdd = selectedSkills.filter(skillId => !existingSkillIds.includes(skillId));
-        console.log("skillsToAdd",skillsToAdd);
+        console.log("skillsToAdd", skillsToAdd);
+
         const skillsToRemove = existingSkillIds.filter(skillId => !selectedSkills.includes(skillId));
-        console.log("skillsToRemove",skillsToRemove)
+        console.log("skillsToRemove", skillsToRemove);
 
         // Ajouter les nouvelles compétences
         for (const skillId of skillsToAdd) {
@@ -263,6 +265,71 @@ async function updateSkills() {
     }
 }
 
+async function updateAvailabilities() {
+    const userId = getCookie('user_id');
+
+    try {
+        // Récupérer les disponibilités sélectionnées dans le formulaire
+        const selectedAvailabilities = [];
+        const table = document.getElementById('availabilities');
+        const rows = table.querySelectorAll('tbody tr');
+
+        rows.forEach((row) => {
+            const checkbox = row.querySelector('input[type="checkbox"]');
+            if (checkbox && checkbox.checked) {
+                const dayOfWeek = row.querySelector('input[name$="[day_of_week]"]').value;
+                const startTime = row.querySelector('input[name$="[start_time]"]').value;
+                const endTime = row.querySelector('input[name$="[end_time]"]').value;
+
+                selectedAvailabilities.push({
+                    user_id: userId,
+                    day_of_week: dayOfWeek,
+                    start_time: startTime,
+                    end_time: endTime
+                });
+            }
+        });
+
+        // Récupérer les disponibilités existantes de l'utilisateur
+        const userAvailabilities = await getUserAvailabilities(userId);
+        console.log("userAvailabilities", userAvailabilities);
+
+        // Déterminer les disponibilités à ajouter et à supprimer
+        const existingAvailabilityIds = userAvailabilities.map(avail => `${avail.day_of_week}-${avail.start_time}-${avail.end_time}`);
+        console.log("existingAvailabilityIds", existingAvailabilityIds);
+
+        const availabilitiesToAdd = selectedAvailabilities.filter(selected => {
+            const key = `${selected.day_of_week}-${selected.start_time}-${selected.end_time}`;
+            return !existingAvailabilityIds.includes(key);
+        });
+        console.log("availabilitiesToAdd", availabilitiesToAdd);
+
+        const availabilitiesToRemove = userAvailabilities.filter(existing => {
+            const key = `${existing.day_of_week}-${existing.start_time}-${existing.end_time}`;
+            return !selectedAvailabilities.some(selected =>
+                selected.day_of_week === existing.day_of_week &&
+                selected.start_time === existing.start_time &&
+                selected.end_time === existing.end_time
+            );
+        }).map(avail => avail.id);
+        console.log("availabilitiesToRemove", availabilitiesToRemove);
+
+        // Ajouter les nouvelles disponibilités
+        for (const availability of availabilitiesToAdd) {
+            await createAvailability(availability);
+        }
+
+        // Supprimer les disponibilités obsolètes
+        for (const availability of availabilitiesToRemove) {
+            await deleteAvailability(availability);
+        }
+
+        alert('Disponibilités mises à jour avec succès !');
+    } catch (error) {
+        console.error('Erreur lors de la mise à jour des disponibilités:', error);
+        alert('Une erreur est survenue lors de la mise à jour des disponibilités.');
+    }
+}
 
 document.addEventListener('DOMContentLoaded', async function () {
     const loader = document.getElementById('loading-body');
@@ -317,11 +384,15 @@ document.addEventListener('DOMContentLoaded', async function () {
 
         try {
             const result = await modifyUser(userId, formData);
-            await updateSkills();
+            async function update(){
+                updateSkills();
+                updateAvailabilities();
+            }
+            await update();
             console.log('Modification succeeded', result);
             alert('Modification réussie');
 
-            // window.location.reload();
+            window.location.reload();
 
         } catch (error) {
             console.error('Erreur lors de la modification de l\'utilisateur:', error);
