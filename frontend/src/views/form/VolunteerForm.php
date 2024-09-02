@@ -26,15 +26,15 @@
         <label for="phone_number"><?php echo htmlspecialchars($data['phone_label']); ?></label>
         <input type="tel" id="phone_number" name="phone_number" required>
     </div>
-    <div>
+    <div id="passwordDiv">
         <label for="password"><?php echo htmlspecialchars($data['password_label2']); ?></label>
         <input type="password" id="password" name="password" required>
     </div>
 
     <!-- Ajout du champ pour l'upload de fichier PDF -->
-    <div>
+    <div id="volunteerFile">
         <label for="resume"><?php echo htmlspecialchars($data['resume_label']); ?></label>
-        <input type="file" id="resume" name="resume" accept="application/pdf" required>
+        <input type="file" id="resume" name="resume" accept="application/pdf">
         <p><?php echo htmlspecialchars($data['resume_help']); ?></p>
     </div>
 
@@ -49,9 +49,6 @@
             </tr>
             </thead>
             <tbody>
-            <?php
-            $loaderId = 'loading-body';
-            include ($_SERVER['DOCUMENT_ROOT'] . '/views/includes/Loader.php'); ?>
             <!-- Les compétences seront ajoutées ici dynamiquement -->
             </tbody>
         </table>
@@ -113,8 +110,12 @@
     </div>
 
     <div>
-        <button type="submit"><?php echo htmlspecialchars($data['submit_button2']); ?></button>
+        <button id ="volunteerFormSubmit" type="submit"><?php echo htmlspecialchars($data['submit_button2']); ?></button>
     </div>
 </form>
+<?php
+$loaderId = 'loading-body';
+include ($_SERVER['DOCUMENT_ROOT'] . '/views/includes/Loader.php'); ?>
+
 </body>
 </html>

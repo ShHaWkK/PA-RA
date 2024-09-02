@@ -14,6 +14,7 @@
         <li><a href="/Volunteer/Collections">Collectes</a></li>
         <li><a href="/Volunteer/Distributions">Livraisons</a></li>
         <li><a href="/Volunteer/Services">Inscriptions Services</a></li>
+        <li><a href="/Volunteer/Profile">Profil</a></li>
     </ul>
 </div>
 </body>

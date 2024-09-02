@@ -18,6 +18,7 @@
         <li><a href="/Admin/Collections">Collectes</a></li>
         <li><a href="/Admin/Distributions">Distributions</a></li>
         <li><a href="/Admin/Services">Services</a></li>
+        <li><a href="/Admin/Profile">Profil</a></li>
     </ul>
 </div>
 </body>

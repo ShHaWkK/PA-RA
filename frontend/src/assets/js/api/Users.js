@@ -155,7 +155,6 @@ async function getUserSkills(userId){
     return await response.json();
 }
 
-
 async function getUserAvailabilities(userId){
     const response = await fetch(apiEndpoint+`/users/getAvailabilities/${userId}`, {
         method: 'GET',
@@ -235,4 +234,64 @@ async function getUserFile(userId) {
     }
 }
 
-export { registerVolunteer, registerMerchant, handleAprovals, getUser, getAllUsers, deleteUser, getUserSkills, getUserAvailabilities, getUserCompanies, modifyUser, getUserFile};
+async function addUserSkill(userId, skillId) {
+    try {
+        const response = await fetch(`${apiEndpoint}/users/userSkills/add`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                user_id: userId,
+                skill_id: skillId
+            })
+        });
+
+        console.log(response);
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            console.error('Error adding skill:', errorData);
+            throw new Error(errorData.message || 'Failed to add skill');
+        }
+
+        const result = await response.json();
+        console.log('Skill added successfully:', result);
+        return result;
+
+    } catch (error) {
+        console.error('Error:', error.message);
+        throw error;
+    }
+}
+
+async function removeUserSkill(userId, skillId) {
+    try {
+        const response = await fetch(`${apiEndpoint}/users/userSkills/remove`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                user_id: userId,
+                skill_id: skillId
+            })
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            console.error('Error removing skill:', errorData);
+            throw new Error(errorData.message || 'Failed to remove skill');
+        }
+
+        const result = await response.json();
+        console.log('Skill removed successfully:', result);
+        return result;
+
+    } catch (error) {
+        console.error('Error:', error.message);
+        throw error;
+    }
+}
+
+export { registerVolunteer, registerMerchant, handleAprovals, getUser, getAllUsers, deleteUser, getUserSkills, getUserAvailabilities, getUserCompanies, modifyUser, getUserFile, addUserSkill, removeUserSkill};

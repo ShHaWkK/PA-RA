@@ -42,7 +42,7 @@ async function login(email, password) {
                 break;
         }
     }
-
+    setCookie('user_role', data.role, 1);
     setCookie('user_id', data.id, 1);
 
     return await data;
