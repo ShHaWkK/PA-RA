@@ -7,10 +7,12 @@ use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\TransactionRequiredException;
 use Entity\CompanyModel;
+use Entity\SkillModel;
 use Entity\UserCompanyModel;
 use Entity\UserModel;
 use Entity\TicketModel;
 use Doctrine\ORM\Exception\NotSupported;
+use Entity\UserSkillModel;
 use SplFileInfo;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
@@ -70,6 +72,18 @@ class UserController
                             return $this->addAvailability($input);
                         case 'verifyCode':
                             return $this->verifyCode($input);
+                        case 'userSkills':
+                            if (isset($uriParts[2]) && $uriParts[2] === 'add') {
+                                // Lire le corps de la requête
+                                $input = json_decode(file_get_contents('php://input'), true);
+                                if (!isset($input['user_id']) || !isset($input['skill_id'])) {
+                                    http_response_code(400);
+                                    return ['error' => 'User ID and Skill ID are required'];
+                                }
+                                return $this->addUserSkill($input['user_id'], $input['skill_id']);
+                            }
+                            http_response_code(400);
+                            return ['error' => 'Invalid endpoint'];
                         default:
                             http_response_code(400);
                             return ['error' => 'Invalid endpoint'];
@@ -84,7 +98,6 @@ class UserController
                     switch ($uriParts[1]) {
                         case 'generatePlanning':
                             return $this->generatePlanning();
-
                         case 'getSkills':
                             if (isset($uriParts[2])) {
                                 return $this->getUserSkills($uriParts[2]);
@@ -92,7 +105,6 @@ class UserController
                                 http_response_code(400);
                                 return ["message" => "User id not set"];
                             }
-
                         case 'getAvailabilities':
                             if (isset($uriParts[2])) {
                                 return $this->getUserAvailabilities($uriParts[2]);
@@ -100,26 +112,22 @@ class UserController
                                 http_response_code(400);
                                 return ["message" => "User id not set"];
                             }
-
                         case 'getUserCompanies':
-                            if (isset($uriParts)){
+                            if (isset($uriParts[2])) {
                                 return $this->getUserCompanies($uriParts[2]);
-                            }else{
+                            } else {
                                 http_response_code(400);
                                 return ["message" => "User id not set"];
                             }
-
                         case 'getUserFile':
-                            if (isset($uriParts)){
+                            if (isset($uriParts[2])) {
                                 return $this->getUserFile($uriParts[2]);
-                            }else{
+                            } else {
                                 http_response_code(400);
                                 return ["message" => "User id not set"];
                             }
-
                         case 'tickets':
                             return $this->getTicketsByUser((int)$uriParts[1]);
-
                         default:
                             return $this->getUser($uriParts[1]);
                     }
@@ -134,12 +142,20 @@ class UserController
                             return $this->updateUserStatus($uriParts[2], $input);
                     }
                 } else {
-                    return $this->updateUser($uriParts[1],$input);
-//                    http_response_code(400);
-//                    return ['error' => 'User ID not specified'];
+                    return $this->updateUser($uriParts[1], $input);
                 }
+
             case 'DELETE':
                 if (isset($uriParts[1])) {
+                    if ($uriParts[1] === 'userSkills' && $uriParts[2] === 'remove') {
+                        // Lire le corps de la requête
+                        $input = json_decode(file_get_contents('php://input'), true);
+                        if (!isset($input['user_id']) || !isset($input['skill_id'])) {
+                            http_response_code(400);
+                            return ['error' => 'User ID and Skill ID are required'];
+                        }
+                        return $this->removeUserSkill($input['user_id'], $input['skill_id']);
+                    }
                     return $this->deleteUser($uriParts[1]);
                 } else {
                     http_response_code(400);
@@ -510,6 +526,79 @@ class UserController
         }
 
         return $serializedAvailabilities;
+    }
+
+    public function addUserSkill($userId, $skillId)
+    {
+        // Obtenir l'utilisateur
+        $user = $this->entityManager->getRepository(UserModel::class)->find($userId);
+
+        if (!$user) {
+            http_response_code(404);
+            return ['message' => "User with ID $userId not found"];
+        }
+
+        // Obtenir la compétence
+        $skill = $this->entityManager->getRepository(SkillModel::class)->find($skillId);
+
+        if (!$skill) {
+            http_response_code(404);
+            return ['message' => "Skill with ID $skillId not found"];
+        }
+
+        // Vérifier si la compétence est déjà associée à l'utilisateur
+        $userSkill = $this->entityManager->getRepository(UserSkillModel::class)
+            ->findOneBy(['user_id' => $userId, 'skill_id' => $skillId]);
+
+        if ($userSkill) {
+            http_response_code(400);
+            return ['message' => 'Skill is already associated with this user'];
+        }
+
+        // Créer une nouvelle association utilisateur-compétence
+        $userSkill = new UserSkillModel();
+        $userSkill->setUserId($userId);
+        $userSkill->setSkillId($skillId);
+
+        // Persister les changements dans la base de données
+        $this->entityManager->persist($userSkill);
+        $this->entityManager->flush();
+
+        return ['message' => 'Skill added successfully'];
+    }
+
+    public function removeUserSkill($userId, $skillId)
+    {
+        // Obtenir l'utilisateur
+        $user = $this->entityManager->getRepository(UserModel::class)->find($userId);
+
+        if (!$user) {
+            http_response_code(404);
+            return ['message' => "User with ID $userId not found"];
+        }
+
+        // Obtenir la compétence
+        $skill = $this->entityManager->getRepository(SkillModel::class)->find($skillId);
+
+        if (!$skill) {
+            http_response_code(404);
+            return ['message' => "Skill with ID $skillId not found"];
+        }
+
+        // Trouver l'association utilisateur-compétence
+        $userSkill = $this->entityManager->getRepository(UserSkillModel::class)
+            ->findOneBy(['user_id' => $userId, 'skill_id' => $skillId]);
+
+        if (!$userSkill) {
+            http_response_code(404);
+            return ['message' => 'Skill not associated with this user'];
+        }
+
+        // Supprimer l'association
+        $this->entityManager->remove($userSkill);
+        $this->entityManager->flush();
+
+        return ['message' => 'Skill removed successfully'];
     }
 
     public function getUserCompanies($userId)
