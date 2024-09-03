@@ -232,10 +232,16 @@
     "vehicle_label": "Zugewiesenes Fahrzeug:",
     "driver_label": "Zugewiesener Fahrer:",
     "status_in_progress": "In Bearbeitung",
-    "status_completed": "Abgeschlossen",
     "company_employees" : "Mitarbeiter des Unternehmens",
     "volunteer_label": "Zugewiesener Fahrer:",
     "collected_checkbox_label": "Gesammeltes Produkt:",
     "quantity_collected_label": "Gesammelte Menge:",
-    "add_products_title": "Produkte zur Sammlung hinzufügen"
+    "add_products_title": "Produkte zur Sammlung hinzufügen",
+    "add_company_title": "Eine Firma hinzufügen",
+    "edit_company_title": "Firma bearbeiten",
+    "contact_info_label": "Kontaktinformationen:",
+    "renewal_status_label": "Erneuerungsstatus:",
+    "status_completed": "Abgeschlossen",
+    "add_company_button": "Firma hinzufügen",
+    "dates_all": "Alle Termine"
 }

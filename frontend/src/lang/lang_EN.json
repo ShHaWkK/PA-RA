@@ -237,5 +237,11 @@
     "volunteer_label": "Assigned Driver:",
     "collected_checkbox_label": "Collected Product:",
     "quantity_collected_label": "Quantity Collected:",
-    "add_products_title": "Add Products to Collection"
+    "add_products_title": "Add Products to Collection",
+    "add_company_title": "Add a Company",
+    "edit_company_title": "Edit the Company",
+    "contact_info_label": "Contact Information:",
+    "renewal_status_label": "Renewal Status:",
+    "add_company_button": "Add the Company",
+    "dates_all" : "All dates"
 }

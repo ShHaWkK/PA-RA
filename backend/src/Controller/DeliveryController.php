@@ -67,8 +67,8 @@ class DeliveryController
                                     return ['error' => 'ID not specified'];
                                 }
                             default:
-                                return $this->testGoogleMaps();
-//                                return $this->createRoute($input);
+//                                return $this->testGoogleMaps();
+                                return $this->createRoute($input);
                         }
                     } else {
                         http_response_code(400);
@@ -313,6 +313,9 @@ class DeliveryController
             // Persistance de la nouvelle route en base de données
             $this->entityManager->persist($route);
             $this->entityManager->flush();
+
+            $this->exportRouteToExcel($route->getId());
+            $this->generateDeliveryPDF($route->getId());
 
             // Retourne la réponse avec les détails de la route créée
             return [
@@ -816,6 +819,7 @@ class DeliveryController
                 if (isset($data['status'])) {
                     $entity->setStatus($data['status']);
                 }
+
             }
 
             // Vérification des champs de la livraison
@@ -873,6 +877,9 @@ class DeliveryController
 
             // Persister les changements dans la base de données
             $this->entityManager->flush();
+
+            $this->exportRouteToExcel($entity->getId());
+            $this->generateDeliveryPDF($entity->getId());
 
             return [
                 'id' => $entity->getId(),
@@ -1218,21 +1225,38 @@ class DeliveryController
         }
     }
 
-    public function generateDeliveryPDF($id)
+    public function generateDeliveryPDF(int $routeId)
     {
         try {
-            $delivery = $this->entityManager->find(DeliveryModel::class, $id);
-            if (!$delivery) {
+            // Récupérer les données de la route
+            $route = $this->entityManager->find(RouteModel::class, $routeId);
+            if (!$route) {
                 http_response_code(404);
-                return ['error' => 'Delivery not found'];
+                return ['error' => 'Route not found'];
             }
 
-            $pdf = $this->pdfService->createPDF($delivery);
+            // Générer le PDF
+            $pdfContent = $this->pdfService->createPDF($route);
 
-            header('Content-Type: application/pdf');
-            header('Content-Disposition: attachment; filename="delivery_' . $id . '.pdf"');
-            echo $pdf;
-            exit;
+            // Définir le chemin du fichier PDF
+            $pdfFilePath = sys_get_temp_dir() . '/delivery_' . $routeId . '.pdf';
+            file_put_contents($pdfFilePath, $pdfContent);
+
+            // Mettre à jour le modèle de route avec le chemin du fichier PDF
+            $route->setPdfPath($pdfFilePath);
+            $this->entityManager->flush();
+
+            // Récupérer l'email du conducteur associé à la route
+            $driver = $route->getDriver();
+            if ($driver) {
+                $recipientEmail = $driver->getEmail();
+            } else {
+                throw new \Exception('Driver not found for the route');
+            }
+
+            // Envoi du fichier PDF par email
+            $this->emailService->sendRoutePDFEmail($pdfFilePath, $recipientEmail);
+
         } catch (\Exception $e) {
             error_log("Exception in generateDeliveryPDF: " . $e->getMessage());
             throw $e;

@@ -14,8 +14,9 @@
     $loaderId = 'loading-body';
     include ($_SERVER['DOCUMENT_ROOT'] . '/views/includes/Loader.php');
     ?>
-
+<center>
 <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/form/VolunteerForm.php'); ?>
+</center>
 
 <!-- Partie traitement API -->
 <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/assets/js/modules/env.php'); ?>

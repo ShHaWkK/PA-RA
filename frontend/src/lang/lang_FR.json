@@ -236,5 +236,11 @@
     "volunteer_label": "Conducteur assigné:",
     "collected_checkbox_label": "Produit collecté :",
     "quantity_collected_label": "Quantité Collectée :",
-    "add_products_title": "Ajouter des produits à la collecte"
+    "add_products_title": "Ajouter des produits à la collecte",
+    "add_company_title": "Ajouter une Société",
+    "edit_company_title": "Modifier la Société",
+    "contact_info_label": "Informations de contact :",
+    "renewal_status_label": "Statut de renouvellement :",
+    "add_company_button": "Ajouter la Société",
+    "dates_all" : "Toutes les dates"
 }

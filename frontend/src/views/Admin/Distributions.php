@@ -21,7 +21,7 @@
             <div class="row">
                 <label for="distributionDate"><?php echo $data['create_route_start_date']; ?></label>
                 <input type="date" id="distributionDate" name="distribution-date"/>
-                <button id="allDistributionDates"><?php echo $data['search_placeholder']; ?></button>
+                <button id="allDistributionDates"><?php echo $data['dates_all']; ?></button>
             </div>
 
             <div class="row">

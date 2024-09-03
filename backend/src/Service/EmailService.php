@@ -2,6 +2,8 @@
 // Path: backend/src/Service/EmailService.php
 namespace Service;
 
+use Doctrine\ORM\EntityManager;
+use Entity\RouteModel;
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
@@ -9,6 +11,7 @@ class EmailService
 {
     private $mailer;
     private string $publicDir;
+    private $entityManager;
 
     public function __construct(PHPMailer $mailer)
     {
@@ -142,5 +145,31 @@ class EmailService
         }
     }
 
+    public function sendRoutePDFEmail(string $pdfFilePath, string $to): bool
+    {
+        try {
+            // Lire le contenu du fichier PDF
+            $pdfContent = file_get_contents($pdfFilePath);
+            $fileName = basename($pdfFilePath);
+
+            // Configurer le mailer
+            $this->mailer->setFrom('morewaste1@gmail.com', 'No More Waste');
+            $this->mailer->addAddress($to);
+            $this->mailer->isHTML(true);
+            $this->mailer->Subject = "Votre route de livraison en PDF";
+            $this->mailer->Body    = "Veuillez trouver ci-joint la route de livraison au format PDF.";
+
+            // Attacher le fichier PDF
+            $this->mailer->addStringAttachment($pdfContent, $fileName, 'base64', 'application/pdf');
+
+            // Envoyer l'email
+            $this->mailer->send();
+            return true;
+
+        } catch (\Exception $e) {
+            error_log("Erreur lors de l'envoi de l'email avec le PDF : " . $e->getMessage());
+            return false;
+        }
+    }
 }
 ?>
