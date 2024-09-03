@@ -18,7 +18,7 @@
 
         <div class="back-office-content">
 
-            <h1>Collecte du <span id="collect-date-header"></span></h1>
+            <h1><?php echo $data['collection_of_label']; ?> <span id="collect-date-header"></span></h1>
 
             <div id="collecte-sections">
                 <!-- Sections des produits seront ajoutées ici dynamiquement -->

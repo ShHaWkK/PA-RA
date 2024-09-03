@@ -5,7 +5,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stocks</title>
+    <title><?php echo $data['stocks_heading']; ?></title>
     <link rel="stylesheet" href="/assets/css/global.css">
     <link rel="stylesheet" href="/assets/css/table.css">
     <link rel="stylesheet" href="/assets/css/backoffice.css">
@@ -17,16 +17,15 @@
     <div class="back-office-container">
         <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/includes/AdminDashboard.php'); ?>
         <div class="back-office-content">
-            <h1>Stocks</h1>
+            <h1><?php echo $data['stocks_heading']; ?></h1>
 
-            <label for="warehouseSelect"><h2>Warehouse:</h2></label>
+            <label for="warehouseSelect"><h2><?php echo $data['dashboard_warehouses']; ?>:</h2></label>
             <select name="warehouse" id="warehouseSelect" class="warehouseSelect"></select>
 
             <div class="row">
-                <button class="add-button" id="addStockButton"> Nouveau Stock </button>
-                <!--            <button class="add-button" id="depositStockButton"> Ajouter </button>-->
-                <button class="withdraw-button" id="withdrawStockButton"> Retirer </button>
-                <button class="delete-button" id="deleteStockButton"> Supprimer </button>
+                <button class="add-button" id="addStockButton"><?php echo $data['stocks_add_button']; ?></button>
+                <button class="withdraw-button" id="withdrawStockButton"><?php echo $data['stocks_withdraw_button']; ?></button>
+                <button class="delete-button" id="deleteStockButton"><?php echo $data['stocks_delete_button']; ?></button>
             </div>
 
             <div class="progress-label" id="progress-label"></div>
@@ -41,10 +40,9 @@
 
             <div class="stock-table"></div>
             <script type="module" src="/assets/js/pages/AdminStockPage.js"></script>
-            <script src="/assets/js/modules/modals/StockModals.js"></script>
-        </div>
+            <script src="/assets/js/modules/modals/StockModals.js"></script> </div>
 
-        <!--    Ajout des fenêtres modales-->
+        <!-- Ajout des fenêtres modales -->
         <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/AdminStockPage/ProductDetailModal.php'); ?>
         <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/AdminStockPage/AddStockModal.php'); ?>
         <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/AdminStockPage/WithdrawStockModal.php'); ?>

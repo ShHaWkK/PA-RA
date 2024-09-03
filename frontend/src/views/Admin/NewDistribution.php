@@ -5,7 +5,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Créer une Livraison</title>
+    <title><?php echo $data['create_delivery_title']; ?></title>
     <link rel="stylesheet" href="/assets/css/global.css">
     <link rel="stylesheet" href="/assets/css/modal.css">
     <link rel="stylesheet" href="/assets/css/table.css">
@@ -17,34 +17,34 @@
     <div class="back-office-container">
         <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/includes/AdminDashboard.php'); ?>
         <div class="back-office-content">
-            <h1>Créer une Livraison</h1>
+            <h1><?php echo $data['create_delivery_title']; ?></h1>
 
             <div id="createRouteForm">
                 <div class="form-group">
-                    <label for="routeName">Nom de la Route :</label>
+                    <label for="routeName"><?php echo $data['create_route_name']; ?></label>
                     <input type="text" id="routeName" name="name" required/>
                 </div>
 
-                <h2>Sélectionner le Véhicule</h2>
+                <h2><?php echo $data['dashboard_companies']; ?></h2>
                 <div class="vehicle-table"></div>
                 <?php
                 $loaderId = 'loadingBodyVehicle';
                 include($_SERVER['DOCUMENT_ROOT'] . '/views/includes/Loader.php');
                 ?>
 
-                <h2>Sélectionner le Chauffeur</h2>
+                <h2><?php echo $data['dashboard_title']; ?></h2>
                 <div class="volunteer-table"></div>
 
                 <div class="form-group">
-                    <label for="startDate">Date de Début :</label>
+                    <label for="startDate"><?php echo $data['create_route_start_date']; ?></label>
                     <input type="datetime-local" id="startDate" name="date" required>
                 </div>
 
-                <h2>Destinations</h2>
+                <h2><?php echo $data['dashboard_distributions']; ?></h2>
                 <div id="destinationContainer"></div>
-                <button type="button" id="addDestinationButton">Ajouter une Destination</button>
+                <button type="button" id="addDestinationButton"><?php echo $data['create_delivery_add_destination']; ?></button>
 
-                <button id="createDelivery" class="add-button">Créer Livraison</button>
+                <button id="createDelivery" class="add-button"><?php echo $data['create_delivery_create']; ?></button>
             </div>
 
             <?php

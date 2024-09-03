@@ -1,9 +1,13 @@
+<?php
+require_once($_SERVER['DOCUMENT_ROOT'] . '/views/includes/lang.php');
+?>
+
 <!DOCTYPE html>
 <html lang="<?php echo strtolower($userLanguage); ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Volunteers</title>
+    <title><?php echo htmlspecialchars($data['volunteers_title']); ?></title>
     <link rel="stylesheet" href="/assets/css/global.css">
     <link rel="stylesheet" href="/assets/css/table.css">
     <link rel="stylesheet" href="/assets/css/backoffice.css">
@@ -16,26 +20,26 @@
         <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/includes/AdminDashboard.php'); ?>
 
         <div class="back-office-content">
-            <h1>Bénévoles</h1>
+            <h1><?php echo htmlspecialchars($data['volunteers_heading']); ?></h1>
 
             <div class="row">
-                <input type="text" id="searchInput" placeholder="Rechercher...">
+                <input type="text" id="searchInput" placeholder="<?php echo htmlspecialchars($data['search_placeholder']); ?>">
                 <select name="status" id="volunteer-status-select">
-                    <option value=""> Tous </option>
-                    <option value="approved"> Approuvé </option>
-                    <option value="rejected"> Rejeté </option>
-                    <option value="pending"> En attente  </option>
+                    <option value=""><?php echo htmlspecialchars($data['status_all']); ?></option>
+                    <option value="approved"><?php echo htmlspecialchars($data['status_approved']); ?></option>
+                    <option value="rejected"><?php echo htmlspecialchars($data['status_rejected']); ?></option>
+                    <option value="pending"><?php echo htmlspecialchars($data['status_pending']); ?></option>
                 </select>
             </div>
             <div class="row">
-                <button class="add-button" id="addVolunteerButton"> Ajouter </button>
-                <button class="delete-button" id="deleteVolunteerButton"> Supprimer </button>
+                <button class="add-button" id="addVolunteerButton"><?php echo htmlspecialchars($data['add_button']); ?></button>
+                <button class="delete-button" id="deleteVolunteerButton"><?php echo htmlspecialchars($data['delete_button']); ?></button>
             </div>
 
             <div class="row">
-                <button class="add-button" id='approveBtn'> Approuver </button>
-                <button class="delete-button" id='rejectButton'> Refuser </button>
-                <button class="neutral-button" id='putOnHoldButton'> Mettre en attente </button>
+                <button class="add-button" id='approveBtn'><?php echo htmlspecialchars($data['approve_button']); ?></button>
+                <button class="delete-button" id='rejectButton'><?php echo htmlspecialchars($data['reject_button']); ?></button>
+                <button class="neutral-button" id='putOnHoldButton'><?php echo htmlspecialchars($data['put_on_hold_button']); ?></button>
             </div>
 
             <?php

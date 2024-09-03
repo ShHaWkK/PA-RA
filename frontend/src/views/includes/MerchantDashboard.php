@@ -1,18 +1,18 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="<?php echo strtolower($userLanguage); ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Vertical</title>
+    <title><?php echo $data['dashboard_title']; ?></title>
     <link rel="stylesheet" href="/assets/css/dashboard.css">
 </head>
 <body>
 <div class="dashboard-sidebar">
-    <h2>Dashboard</h2>
+    <h2><?php echo $data['dashboard_title']; ?></h2>
     <ul>
-        <li><a href="/Merchant/Collections">Demandes de collectes</a></li>
-        <li><a href="/Merchant/Profile">Profil</a></li>
-        <li><a href="#" id="deconnection-link"> Deconnection </a> </li>
+        <li><a href="/Merchant/Collections"><?php echo $data['merchant_collections']; ?></a></li>
+        <li><a href="/Merchant/Profile"><?php echo $data['dashboard_profile']; ?></a></li>
+        <li><a href="#" id="deconnection-link"><?php echo $data['dashboard_logout']; ?></a></li>
     </ul>
 </div>
 

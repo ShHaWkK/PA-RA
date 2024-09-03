@@ -37,8 +37,8 @@
         ?>
 
         <div class="back-office-content">
-            <h1> Profil
-                <button class="modify-button">Modifier</button>
+            <h1> <?php echo $data['profile_label'] ?>
+                <button class="modify-button"><?php echo $data['modify_button'] ?></button>
             </h1>
             <center>
                 <?php require_once($_SERVER['DOCUMENT_ROOT'] .$formFile); ?>

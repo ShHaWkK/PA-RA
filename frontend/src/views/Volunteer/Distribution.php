@@ -15,7 +15,7 @@
         <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/includes/VolunteerDashboard.php'); ?>
 
         <div class="back-office-content">
-            <h1 class="route-header" id="route-name-header">Route Details</h1>
+            <h1 class="route-header" id="route-name-header"><?php echo $data['route_details_label']; ?></h1>
             <div id="route-info"></div>
             <div id="destinations-container"></div>
             <?php

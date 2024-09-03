@@ -5,7 +5,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tableau de Bord des Collectes</title>
+    <title><?php echo $data['collections_dashboard_title']; ?></title>
     <link rel="stylesheet" href="/assets/css/global.css">
     <link rel="stylesheet" href="/assets/css/modal.css">
     <link rel="stylesheet" href="/assets/css/table.css">
@@ -18,44 +18,41 @@
     <div class="back-office-container">
         <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/includes/AdminDashboard.php'); ?>
         <div class="back-office-content">
-            <h1>Tableau de Bord des Collectes</h1>
+            <h1><?php echo $data['collections_dashboard_heading']; ?></h1>
 
             <div class="row">
-                <label for="collectionDate">Collection date:</label>
+                <label for="collectionDate"><?php echo $data['collection_date_label']; ?></label>
                 <input type="date" id="collectionDate" name="collection-date"/>
-                <button id="allCollectionDates" > Toutes les dates </button>
+                <button id="allCollectionDates"><?php echo $data['all_dates_button']; ?></button>
             </div>
 
             <div class="row">
-                <label for="completionSelector">Completion:</label>
-
+                <label for="completionSelector"><?php echo $data['completion_label']; ?></label>
                 <select name="completion" id="completionSelector">
-                    <option value="">All</option>
-                    <option value="true">Completed</option>
-                    <option value="false">Ongoing</option>
+                    <option value=""><?php echo $data['all_option']; ?></option>
+                    <option value="true"><?php echo $data['completed_option']; ?></option>
+                    <option value="false"><?php echo $data['ongoing_option']; ?></option>
                 </select>
             </div>
 
             <div class="row">
-                <!--            <button class="add-button" id="addCollectionButton"> Ajouter </button>-->
-                <input class="add-button" type="button" onclick="location.href='/Admin/Collections/NewCollection';" value="New collection" />
-                <button class="delete-button" id="deleteCollectionButton"> Supprimer </button>
-                <button class="modify-button" id="modifyCollectionButton"> Modifier </button>
+                <input class="add-button" type="button" onclick="location.href='/Admin/Collections/NewCollection';" value="<?php echo $data['new_collection_button']; ?>" />
+                <button class="delete-button" id="deleteCollectionButton"><?php echo $data['delete_button']; ?></button>
+                <button class="modify-button" id="modifyCollectionButton"><?php echo $data['modify_button']; ?></button>
             </div>
 
-            <!-- Tableau des Collectes -->
             <div class="collection-table">
                 <table>
                     <thead>
                     <tr>
-                        <th>ID</th>
-                        <th>Entreprise</th>
-                        <th>Produit</th>
-                        <th>Véhicule</th>
-                        <th>Date de Collecte</th>
-                        <th>Date de Création</th>
-                        <th>Date de Mise à Jour</th>
-                        <th>Actions</th>
+                        <th><?php echo $data['id_heading']; ?></th>
+                        <th><?php echo $data['company_heading']; ?></th>
+                        <th><?php echo $data['product_heading']; ?></th>
+                        <th><?php echo $data['vehicle_heading']; ?></th>
+                        <th><?php echo $data['collection_date_heading']; ?></th>
+                        <th><?php echo $data['creation_date_heading']; ?></th>
+                        <th><?php echo $data['update_date_heading']; ?></th>
+                        <th><?php echo $data['actions_heading']; ?></th>
                     </tr>
                     </thead>
                     <tbody id="collectionTableBody">
@@ -76,7 +73,6 @@
             <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/AdminCollectionPage/AssignProductToCollectionModal.php'); ?>
             <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/AdminCollectionPage/ModifyCollectionProductModal.php'); ?>
 
-            <!-- Script pour gérer les interactions avec la page -->
             <script type="module" src="/assets/js/pages/AdminCollectionPage.js"></script>
         </div>
     </div>
