@@ -1,27 +1,27 @@
 <div id="addWarehouseModal" class="modal">
     <div class="modal-content">
         <span class="close" id="closeAddWarehouseModal">&times;</span>
-        <h2>Ajouter un Entrepôt</h2>
+        <h2><?php echo $data['add_warehouse_modal_title']; ?></h2>
         <form id="addWarehouseForm">
-            <label for="addNameInput">Nom de l'entrepôt :</label>
+            <label for="addNameInput"><?php echo $data['add_warehouse_form_name_label']; ?></label>
             <input type="text" id="addNameInput" name="name" required>
 
-            <label for="addAddressInput">Adresse :</label>
+            <label for="addAddressInput"><?php echo $data['add_warehouse_form_address_label']; ?></label>
             <input type="text" id="addAddressInput" name="address" required>
 
-            <label for="addContactInfoInput">Informations de contact :</label>
+            <label for="addContactInfoInput"><?php echo $data['add_warehouse_form_contact_label']; ?></label>
             <input type="text" id="addContactInfoInput" name="contact_info">
 
-            <label for="addCapacityInput">Capacité :</label>
+            <label for="addCapacityInput"><?php echo $data['add_warehouse_form_capacity_label']; ?></label>
             <input type="number" id="addCapacityInput" name="capacity" min="0">
 
-            <label for="addCityInput">Ville :</label>
+            <label for="addCityInput"><?php echo $data['add_warehouse_form_city_label']; ?></label>
             <input type="text" id="addCityInput" name="city">
 
-            <label for="addCountryInput">Pays :</label>
+            <label for="addCountryInput"><?php echo $data['add_warehouse_form_country_label']; ?></label>
             <input type="text" id="addCountryInput" name="country">
 
-            <button type="submit">Ajouter l'entrepôt</button>
+            <button type="submit"><?php echo $data['add_warehouse_button']; ?></button>
         </form>
         <?php
         $loaderId = 'loadingAddWarehouse';

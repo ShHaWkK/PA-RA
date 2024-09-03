@@ -18,8 +18,6 @@
         <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/includes/AdminDashboard.php'); ?>
         <div class="back-office-content">
             <h1><?php echo $data['distribution_dashboard_title']; ?></h1>
-
-            <h2><?php echo $data['dashboard_distributions']; ?> :</h2>
             <div class="row">
                 <label for="distributionDate"><?php echo $data['create_route_start_date']; ?></label>
                 <input type="date" id="distributionDate" name="distribution-date"/>

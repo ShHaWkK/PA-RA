@@ -2,15 +2,15 @@
     <div class="modal-content">
         <span class="close" id="closeEditProductModal">&times;</span>
         <form id="editCollectedProductForm">
-            <label for="collectedCheckbox">Produit collecté :</label>
+            <label for="collectedCheckbox"><?php echo $data['collected_checkbox_label']; ?></label>
             <input type="checkbox" id="collectedCheckbox" name="is_collected">
 
             <div id="quantityCollectedContainer" style="display: none;">
-                <label for="quantityCollected">Quantité Collectée :</label>
+                <label for="quantityCollected"><?php echo $data['quantity_collected_label']; ?></label>
                 <input type="number" id="quantityCollected" name="quantity_collected">
             </div>
 
-            <button type="submit" id="modifyCollectedProductButton">Enregistrer les modifications</button>
+            <button type="submit" id="modifyCollectedProductButton"><?php echo $data['save_changes_button']; ?></button>
         </form>
         <?php
         $loaderId = 'loadingModifyProductCollection';

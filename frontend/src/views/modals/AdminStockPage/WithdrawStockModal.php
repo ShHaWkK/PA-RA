@@ -2,23 +2,23 @@
 <div id="withdrawStockModal" class="modal">
     <div class="modal-content">
         <span id="closeWithdrawModal" class="close">&times;</span>
-        <h2>Retirer du stock</h2>
+        <h2><?php echo $data['withdraw_stock_title']; ?></h2>
 
-        <label for="withdrawQuantity">Quantité à retirer:</label>
+        <label for="withdrawQuantity"><?php echo $data['withdraw_quantity_label']; ?></label>
         <input type="number" id="withdrawQuantity" name="withdrawQuantity" min="1" required>
 
-        <label for="currentStockVolume">Volume du stock actuel:</label>
+        <label for="currentStockVolume"><?php echo $data['current_stock_volume_label']; ?></label>
         <input type="number" id="currentStockVolume" name="currentStockVolume" disabled>
 
-        <label for="warehouseVolume">Volume de l'entrepôt:</label>
+        <label for="warehouseVolume"><?php echo $data['warehouse_volume_label']; ?></label>
         <input type="number" id="warehouseVolume" name="warehouseVolume" disabled>
 
-        <label for="withdrawVolume">Volume à retirer:</label>
+        <label for="withdrawVolume"><?php echo $data['withdraw_volume_label']; ?></label>
         <input type="number" id="withdrawVolume" name="withdrawVolume" disabled>
 
-        <label for="postWithdrawStockVolume">Volume du stock après retrait:</label>
+        <label for="postWithdrawStockVolume"><?php echo $data['post_withdraw_stock_volume_label']; ?></label>
         <input type="number" id="postWithdrawStockVolume" name="postWithdrawStockVolume" disabled>
 
-        <button id="confirmWithdrawButton">Confirmer le retrait</button>
+        <button id="confirmWithdrawButton"><?php echo $data['confirm_withdraw_button']; ?></button>
     </div>
 </div>

@@ -82,10 +82,28 @@ input[type="button"] {
 }
 
 .modify-button {
-    background-color: #007bff;
+    background-color: #FFD700;
     color: #fff;
 }
 
 .modify-button:hover {
+    background-color: #FFA500;
+}
+
+button {
+    background-color: #007bff;
+    color: #fff;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+.neutral-button{
+    background-color: #007bff;
+    color: #fff;
+}
+
+neutral-button:hover {
     background-color: #0056b3;
 }
