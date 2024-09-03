@@ -13,35 +13,38 @@
     <link rel="stylesheet" href="/assets/css/formvolunteer.css">
 </head>
 <body>
-<div class="back-office-container">
-    <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/includes/AdminDashboard.php'); ?>
-    <div class="back-office-content">
-        <h1>Companies</h1>
+<div class="column">
+    <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/includes/HeaderBackOffice.php'); ?>
+    <div class="back-office-container">
+        <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/includes/AdminDashboard.php'); ?>
+        <div class="back-office-content">
+            <h1>Companies</h1>
 
-        <div class="row">
-            <button class="add-button" id="addCompanyButton">Ajouter</button>
-            <button class="delete-button" id="deleteCompanyButton"> Supprimer </button>
-            <button class="modify-button" id="modifyCompanyButton"> Modifier </button>
+            <div class="row">
+                <button class="add-button" id="addCompanyButton">Ajouter</button>
+                <button class="delete-button" id="deleteCompanyButton"> Supprimer </button>
+                <button class="modify-button" id="modifyCompanyButton"> Modifier </button>
+            </div>
+
+            <div class="company-table">
+                <table>
+                </table>
+            </div>
+
+            <?php
+            $loaderId = 'loadingBodyCompany';
+            include($_SERVER['DOCUMENT_ROOT'] . '/views/includes/Loader.php');
+            ?>
+
+            <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/AdminCompanyPage/addCompanyModal.php'); ?>
+            <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/AdminCompanyPage/editCompanyModal.php'); ?>
+            <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/AdminCompanyPage/EmployeesModal.php'); ?>
+
+
+            <!-- Script pour gérer les interactions avec la page -->
+            <script type="module" src="/assets/js/pages/AdminCompanyPage.js"></script>
+
         </div>
-
-        <div class="company-table">
-            <table>
-            </table>
-        </div>
-
-        <?php
-        $loaderId = 'loadingBodyCompany';
-        include($_SERVER['DOCUMENT_ROOT'] . '/views/includes/Loader.php');
-        ?>
-
-        <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/AdminCompanyPage/addCompanyModal.php'); ?>
-        <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/AdminCompanyPage/editCompanyModal.php'); ?>
-        <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/AdminCompanyPage/EmployeesModal.php'); ?>
-
-
-        <!-- Script pour gérer les interactions avec la page -->
-        <script type="module" src="/assets/js/pages/AdminCompanyPage.js"></script>
-
     </div>
 </div>
 </body>

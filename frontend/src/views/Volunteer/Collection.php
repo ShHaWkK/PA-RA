@@ -11,27 +11,25 @@
     <link rel="stylesheet" href="/assets/css/formvolunteer.css">
 </head>
 <body>
-<div class="back-office-container">
-    <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/includes/VolunteerDashboard.php'); ?>
+<div class="column">
+    <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/includes/HeaderBackOffice.php'); ?>
+    <div class="back-office-container">
+        <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/includes/VolunteerDashboard.php'); ?>
 
-    <div class="back-office-content">
+        <div class="back-office-content">
 
-        <h1>Collecte du <span id="collect-date-header"></span></h1>
+            <h1>Collecte du <span id="collect-date-header"></span></h1>
 
-        <div id="collecte-sections">
-            <!-- Sections des produits seront ajoutées ici dynamiquement -->
-            <?php
-            $loaderId = 'loadingBodyCollectedProducts';
-            include($_SERVER['DOCUMENT_ROOT'] . '/views/includes/Loader.php');
-            ?>
+            <div id="collecte-sections">
+                <!-- Sections des produits seront ajoutées ici dynamiquement -->
+                <?php
+                $loaderId = 'loadingBodyCollectedProducts';
+                include($_SERVER['DOCUMENT_ROOT'] . '/views/includes/Loader.php');
+                ?>
+            </div>
         </div>
-
     </div>
-
 </div>
-
 <script type="module" src="/assets/js/pages/VolunteerCollectionPage.js"></script>
-
-
 </body>
 </html>

@@ -15,7 +15,10 @@
         <li><a href="/Volunteer/Distributions">Livraisons</a></li>
         <li><a href="/Volunteer/Services">Inscriptions Services</a></li>
         <li><a href="/Volunteer/Profile">Profil</a></li>
+        <li><a href="#" id="deconnection-link"> Deconnection </a> </li>
     </ul>
 </div>
+
+<script type="module" src="../../assets/js/modules/Dashboard.js"></script>
 </body>
 </html>

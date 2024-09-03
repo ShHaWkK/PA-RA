@@ -12,34 +12,37 @@
 </head>
 
 <body>
-<div class="back-office-container">
-    <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/includes/MerchantDashboard.php'); ?>
-    <div class="back-office-content">
-        <h1>Add Product Notification</h1>
-        <form id="addNotificationForm">
-            <label for="productSelect">Product:</label>
-            <select id="productSelect" required>
-                <!-- Options will be populated dynamically -->
-            </select>
-            <br><br>
+<div class="column">
+    <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/includes/HeaderBackOffice.php'); ?>
+    <div class="back-office-container">
+        <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/includes/MerchantDashboard.php'); ?>
+        <div class="back-office-content">
+            <h1>Add Product Notification</h1>
+            <form id="addNotificationForm">
+                <label for="productSelect">Product:</label>
+                <select id="productSelect" required>
+                    <!-- Options will be populated dynamically -->
+                </select>
+                <br><br>
 
-            <label for="quantity">Quantity:</label>
-            <input type="number" id="quantity" name="quantity" required>
-            <br><br>
+                <label for="quantity">Quantity:</label>
+                <input type="number" id="quantity" name="quantity" required>
+                <br><br>
 
-            <label for="date">Wished Collection Date:</label>
-            <input type="date" id="date" name="date" required>
-            <br><br>
+                <label for="date">Wished Collection Date:</label>
+                <input type="date" id="date" name="date" required>
+                <br><br>
 
-            <label for="address">Address:</label>
-            <textarea id="address" name="address" rows="3" required></textarea>
-            <br><br>
+                <label for="address">Address:</label>
+                <textarea id="address" name="address" rows="3" required></textarea>
+                <br><br>
 
-            <button type="submit">Add Demand</button>
-        </form>
+                <button type="submit">Add Demand</button>
+            </form>
+        </div>
     </div>
-</div>
 
-<script type="module" src="/assets/js/pages/MerchantAddCollectionDemand.js"></script>
+    <script type="module" src="/assets/js/pages/MerchantAddCollectionDemand.js"></script>
+</div>
 </body>
 </html>

@@ -11,8 +11,11 @@
     <h2>Dashboard</h2>
     <ul>
         <li><a href="/Merchant/Collections">Demandes de collectes</a></li>
-        <li><a href="/Merchants/Profile">Profil</a></li>
+        <li><a href="/Merchant/Profile">Profil</a></li>
+        <li><a href="#" id="deconnection-link"> Deconnection </a> </li>
     </ul>
 </div>
+
+<script type="module" src="../../assets/js/modules/Dashboard.js"></script>
 </body>
 </html>

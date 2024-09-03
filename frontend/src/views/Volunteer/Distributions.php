@@ -12,44 +12,47 @@
     <link rel="stylesheet" href="/assets/css/backoffice.css">
 </head>
 <body>
-<div class="back-office-container">
-    <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/includes/VolunteerDashboard.php'); ?>
-    <div class="back-office-content">
-        <h1>Tableau de Bord des Distributions</h1>
+<div class="column">
+    <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/includes/HeaderBackOffice.php'); ?>
+    <div class="back-office-container">
+        <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/includes/VolunteerDashboard.php'); ?>
+        <div class="back-office-content">
+            <h1>Tableau de Bord des Distributions</h1>
 
 
-        <h2>Routes :</h2>
-        <div class="row">
-            <label for="distributionDate">Distribution date:</label>
-            <input type="date" id="distributionDate" name="distribution-date"/>
-            <button id="allDistributionDates" > Toutes les dates </button>
+            <h2>Routes :</h2>
+            <div class="row">
+                <label for="distributionDate">Distribution date:</label>
+                <input type="date" id="distributionDate" name="distribution-date"/>
+                <button id="allDistributionDates" > Toutes les dates </button>
+            </div>
+
+            <div class="row">
+                <label for="completionSelector">Completion:</label>
+
+                <select name="completion" id="completionSelector">
+                    <option value="">All</option>
+                    <option value="in_progress">In progress</option>
+                    <option value="pending">Pending</option>
+                    <option value="completed">Completed</option>
+                </select>
+            </div>
+
+            <!-- Tableau des trournées -->
+            <div class="distribution-table">
+                <table>
+                </table>
+            </div>
+
+            <?php
+            $loaderId = 'loadingBodyGeneral';
+            include($_SERVER['DOCUMENT_ROOT'] . '/views/includes/Loader.php');
+            ?>
+
+            <!-- Script pour gérer les interactions avec la page -->
+            <script type="module" src="/assets/js/pages/VolunteerAllDistributionsPage.js"></script>
+
         </div>
-
-        <div class="row">
-            <label for="completionSelector">Completion:</label>
-
-            <select name="completion" id="completionSelector">
-                <option value="">All</option>
-                <option value="in_progress">In progress</option>
-                <option value="pending">Pending</option>
-                <option value="completed">Completed</option>
-            </select>
-        </div>
-
-        <!-- Tableau des trournées -->
-        <div class="distribution-table">
-            <table>
-            </table>
-        </div>
-
-        <?php
-        $loaderId = 'loadingBodyGeneral';
-        include($_SERVER['DOCUMENT_ROOT'] . '/views/includes/Loader.php');
-        ?>
-
-        <!-- Script pour gérer les interactions avec la page -->
-        <script type="module" src="/assets/js/pages/VolunteerAllDistributionsPage.js"></script>
-
     </div>
 </div>
 </body>

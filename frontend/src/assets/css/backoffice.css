@@ -7,7 +7,7 @@
 .back-office-content {
     flex: 1;
     padding: 20px;
-    margin-left: 250px;
+    margin: 5vh;
     background-color: #ffffff;
     overflow-y: auto;
     border-radius: 8px;
@@ -25,13 +25,20 @@
 .row {
     display: flex;
     flex-wrap: wrap;
-    gap: 1rem;
+    /*gap: 1rem;*/
 }
 
 .row label {
     font-weight: bold;
     color: #495057;
     margin-right: 0.5rem;
+}
+
+.column {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    /*gap: 1rem;*/
 }
 
 input[type="date"],

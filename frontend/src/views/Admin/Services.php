@@ -10,43 +10,46 @@
     <link rel="stylesheet" href="/assets/css/progressbar.css">
 </head>
 <body>
-<div class="back-office-container">
-    <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/includes/AdminDashboard.php'); ?>
-    <div class="back-office-content">
-        <h1>Services</h1>
+<div class="column">
+    <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/includes/HeaderBackOffice.php'); ?>
+    <div class="back-office-container">
+        <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/includes/AdminDashboard.php'); ?>
+        <div class="back-office-content">
+            <h1>Services</h1>
 
-        <label for="serviceSelect"><h2>Service:</h2></label>
-        <select name="service" id="serviceSelect"></select>
+            <label for="serviceSelect"><h2>Service:</h2></label>
+            <select name="service" id="serviceSelect"></select>
 
-        <div class="row">
-            <button class="add-button" id="addServiceButton">New Service</button>
-            <button class="delete-button" id="deleteServiceButton">Delete</button>
+            <div class="row">
+                <button class="add-button" id="addServiceButton">New Service</button>
+                <button class="delete-button" id="deleteServiceButton">Delete</button>
+            </div>
+
+            <select >
+                <option value="all">Tous</option>
+                <option value="upcoming">A venir</option>
+                <option value="past">Passés</option>
+            </select>
+
+            <div class="progress-container">
+                <div class="progress-label" id="progress-label"></div>
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
+            <input type="hidden" id="available-capacity" />
+
+            <?php
+            $loaderId = 'loadingBodyGeneral';
+            include($_SERVER['DOCUMENT_ROOT'] . '/views/includes/Loader.php');
+            ?>
+
+            <div class="service-table"></div>
+            <script type="module" src="/assets/js/pages/AdminServicePage.js"></script>
+            <script type="module" src="/assets/js/modules/modals/ServiceModals.js"></script>
         </div>
 
-        <select >
-            <option value="all">Tous</option>
-            <option value="upcoming">A venir</option>
-            <option value="past">Passés</option>
-        </select>
-
-        <div class="progress-container">
-            <div class="progress-label" id="progress-label"></div>
-            <div class="progress-bar" id="progress-bar"></div>
-        </div>
-        <input type="hidden" id="available-capacity" />
-
-        <?php
-        $loaderId = 'loadingBodyGeneral';
-        include($_SERVER['DOCUMENT_ROOT'] . '/views/includes/Loader.php');
-        ?>
-
-        <div class="service-table"></div>
-        <script type="module" src="/assets/js/pages/AdminServicePage.js"></script>
-        <script type="module" src="/assets/js/modules/modals/ServiceModals.js"></script>
+        <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/ServiceDetailModal.php'); ?>
+        <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/AddServiceModal.php'); ?>
     </div>
-
-    <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/ServiceDetailModal.php'); ?>
-    <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/AddServiceModal.php'); ?>
 </div>
 </body>
 </html>

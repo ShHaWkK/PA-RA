@@ -12,41 +12,44 @@
     <link rel="stylesheet" href="/assets/css/progressbar.css">
 </head>
 <body>
-<div class="back-office-container">
-    <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/includes/AdminDashboard.php'); ?>
-    <div class="back-office-content">
-        <h1>Stocks</h1>
+<div class="column">
+    <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/includes/HeaderBackOffice.php'); ?>
+    <div class="back-office-container">
+        <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/includes/AdminDashboard.php'); ?>
+        <div class="back-office-content">
+            <h1>Stocks</h1>
 
-        <label for="warehouseSelect"><h2>Warehouse:</h2></label>
-        <select name="warehouse" id="warehouseSelect" class="warehouseSelect"></select>
+            <label for="warehouseSelect"><h2>Warehouse:</h2></label>
+            <select name="warehouse" id="warehouseSelect" class="warehouseSelect"></select>
 
-        <div class="row">
-            <button class="add-button" id="addStockButton"> Nouveau Stock </button>
-            <!--            <button class="add-button" id="depositStockButton"> Ajouter </button>-->
-            <button class="withdraw-button" id="withdrawStockButton"> Retirer </button>
-            <button class="delete-button" id="deleteStockButton"> Supprimer </button>
+            <div class="row">
+                <button class="add-button" id="addStockButton"> Nouveau Stock </button>
+                <!--            <button class="add-button" id="depositStockButton"> Ajouter </button>-->
+                <button class="withdraw-button" id="withdrawStockButton"> Retirer </button>
+                <button class="delete-button" id="deleteStockButton"> Supprimer </button>
+            </div>
+
+            <div class="progress-label" id="progress-label"></div>
+            <div class="progress-container">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
+
+            <?php
+            $loaderId = 'loadingBodyGeneral';
+            include($_SERVER['DOCUMENT_ROOT'] . '/views/includes/Loader.php');
+            ?>
+
+            <div class="stock-table"></div>
+            <script type="module" src="/assets/js/pages/AdminStockPage.js"></script>
+            <script src="/assets/js/modules/modals/StockModals.js"></script>
         </div>
 
-        <div class="progress-label" id="progress-label"></div>
-        <div class="progress-container">
-            <div class="progress-bar" id="progress-bar"></div>
-        </div>
+        <!--    Ajout des fenêtres modales-->
+        <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/AdminStockPage/ProductDetailModal.php'); ?>
+        <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/AdminStockPage/AddStockModal.php'); ?>
+        <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/AdminStockPage/WithdrawStockModal.php'); ?>
 
-        <?php
-        $loaderId = 'loadingBodyGeneral';
-        include($_SERVER['DOCUMENT_ROOT'] . '/views/includes/Loader.php');
-        ?>
-
-        <div class="stock-table"></div>
-        <script type="module" src="/assets/js/pages/AdminStockPage.js"></script>
-        <script src="/assets/js/modules/modals/StockModals.js"></script>
     </div>
-
-    <!--    Ajout des fenêtres modales-->
-    <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/AdminStockPage/ProductDetailModal.php'); ?>
-    <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/AdminStockPage/AddStockModal.php'); ?>
-    <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/AdminStockPage/WithdrawStockModal.php'); ?>
-
 </div>
 </body>
 </html>
