@@ -17,9 +17,12 @@
         <li><a href="/Admin/Stocks">Stocks</a></li>
         <li><a href="/Admin/Collections">Collectes</a></li>
         <li><a href="/Admin/Distributions">Distributions</a></li>
-        <li><a href="/Admin/Services">Services</a></li>
+<!--        <li><a href="/Admin/Services">Services</a></li>-->
         <li><a href="/Admin/Profile">Profil</a></li>
+        <li><a href="#" id="deconnection-link"> Deconnection </a> </li>
     </ul>
 </div>
+
+<script type="module" src="../../assets/js/modules/Dashboard.js"></script>
 </body>
 </html>
