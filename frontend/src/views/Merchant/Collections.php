@@ -1,21 +1,47 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Formulaire d'inscription</title>
+    <title>Available Collections</title>
     <link rel="stylesheet" href="/assets/css/global.css">
-    <link rel="stylesheet" href="/assets/css/calendar.css">
+    <link rel="stylesheet" href="/assets/css/modal.css">
+    <link rel="stylesheet" href="/assets/css/table.css">
+    <link rel="stylesheet" href="/assets/css/backoffice.css">
 </head>
-
 <body>
 <div class="back-office-container">
-    <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/includes/AdminDashboard.php'); ?>
+    <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/includes/MerchantDashboard.php'); ?>
     <div class="back-office-content">
-        <h1>Espace commerçant</h1>
-        <div id="calendar"></div>
-<!--        <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.5.1/moment.min.js"></script>-->
-        <script src="../../assets/js/modules/Calendar.js"></script>
+        <h1>Demandes de collectes</h1>
+
+        <button id="addNotificationButton" class="add-button">Faire une demande</button>
+
+        <label for="collectionDate"> Date:</label>
+        <input type="date" id="collectionDate" name="collection-date"/>
+
+        <label for="collectionDateStatus"> Statut </label>
+        <select id="collectionDateStatus">
+            <option value="all">Toutes</option>
+            <option value="upcoming">A venir</option>
+            <option value="completed">Effectués</option>
+            <option value="assigned">Assignées</option>
+        </select>
+
+        <button id="deleteNotificationButton" class="delete-button">Retirer</button>
+
+        <div class="product-notification-table"></div>
+        <?php
+        $loaderId = 'loadingBodyNotification';
+        include($_SERVER['DOCUMENT_ROOT'] . '/views/includes/Loader.php');
+        ?>
+
     </div>
 </div>
+
+<!-- Include JavaScript -->
+<script type="module" src="/assets/js/pages/MerchantCollectionsPage.js"></script>
+
+<?php require_once($_SERVER['DOCUMENT_ROOT'] . '/views/modals/AdminStockPage/productDetailModal.php'); ?>
 </body>
+</html>

@@ -53,19 +53,19 @@ switch ($request) {
         require __DIR__ . '/views/SignUp/MerchantSignUp.php';
         break;
     case '/Merchant':
-    case '/Merchant/Merchants':
+    case '/Merchant/Collections':
         if ($jwtToken) {
             requireAuth($jwtToken, 'merchant');
-            require __DIR__ . '/views/Merchant/Merchant.php';
+            require __DIR__ . '/views/Merchant/Collections.php';
         } else {
             require __DIR__ . '/views/Login/Login.php';
             exit;
         }
         break;
-    case '/Merchant/Collections':
+    case '/Merchant/Collections/AddDemand':
         if ($jwtToken) {
             requireAuth($jwtToken, 'merchant');
-            require __DIR__ . '/views/Merchant/Collections.php';
+            require __DIR__ . '/views/Merchant/AddCollectionDemand.php';
         } else {
             require __DIR__ . '/views/Login/Login.php';
             exit;

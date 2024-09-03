@@ -180,11 +180,24 @@ class ProductNotificationController
                     ->setParameter('address', $queryParams['address']);
             }
 
+            // Ajout des conditions pour 'company_id'
+            if (isset($queryParams['company_id'])) {
+                $qb->andWhere('p.company_id = :company_id')
+                    ->setParameter('company_id', $queryParams['company_id']);
+            }
+
             // Vérification du champ 'is_assigned' dans les paramètres
             if (isset($queryParams['is_assigned'])) {
                 $isAssigned = filter_var($queryParams['is_assigned'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
                 $qb->andWhere('p.is_assigned = :is_assigned')
                     ->setParameter('is_assigned', $isAssigned);
+            }
+
+            // Ajout des conditions pour 'is_collected'
+            if (isset($queryParams['is_collected'])) {
+                $isCollected = filter_var($queryParams['is_collected'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+                $qb->andWhere('p.is_collected = :is_collected')
+                    ->setParameter('is_collected', $isCollected);
             }
 
             // Exécution de la requête

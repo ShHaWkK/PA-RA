@@ -10,7 +10,7 @@
 <div class="dashboard-sidebar">
     <h2>Dashboard</h2>
     <ul>
-        <li><a href="/Merchant/Collections">Merchants</a></li>
+        <li><a href="/Merchant/Collections">Demandes de collectes</a></li>
         <li><a href="/Merchants/Profile">Profil</a></li>
     </ul>
 </div>

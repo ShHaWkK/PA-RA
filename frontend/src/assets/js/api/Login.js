@@ -1,4 +1,5 @@
 import {setJwtCookie,setCookie, setJwtToken} from "./Api.js";
+import {getUserCompanies} from "./Users.js";
 
 async function login(email, password) {
     const loginData = { email, password };
@@ -38,7 +39,10 @@ async function login(email, password) {
                 window.location.href = '/Volunteer/Planning';
                 break;
             case 'merchant':
-                window.location.href = '/Merchant/Merchants';
+                const company = await getUserCompanies(data.id);
+                console.log("company",company);
+                setCookie('company_id', company[0].id, 1);
+                window.location.href = '/Merchant/Collections';
                 break;
         }
     }
