@@ -1,4 +1,4 @@
-// ProductNotification.kt
+/*
 package com.example.nomorewaste.api
 
 import com.google.gson.annotations.SerializedName
@@ -20,8 +20,11 @@ data class ProductNotification(
     val notifiedAt: String?
 )
 
-data class Company(
+c
+
+data class Product(
     val id: Int,
     val name: String?,
-    val address: String?
+    val description: String?
 )
+*/

@@ -3,6 +3,7 @@ package com.example.nomorewaste.api
 
 import com.google.gson.annotations.SerializedName
 
+// Data class for Product entity
 data class Product(
     @SerializedName("name") val name: String?,
     @SerializedName("barcode") val barcode: String?,
@@ -11,9 +12,7 @@ data class Product(
     @SerializedName("volume") val volume: Float,
     @SerializedName("warehouse_id") val warehouseId: Int,
     @SerializedName("scanned") val scanned: Boolean = false
-)
-
-{
+) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is Product) return false
@@ -30,3 +29,23 @@ data class Product(
         return result
     }
 }
+
+// Data class for ProductNotification entity
+data class ProductNotification(
+    val id: Int,
+    val company: Company?,
+    val product: Product?,
+    @SerializedName("notified_quantity") val notifiedQuantity: Int,
+    val address: String,
+    @SerializedName("is_assigned") val isAssigned: Boolean,
+    @SerializedName("is_collected") val isCollected: Boolean,
+    @SerializedName("wished_collection_date") val wishedCollectionDate: String?,
+    @SerializedName("notified_at") val notifiedAt: String?
+)
+
+// Data class for Company entity
+data class Company(
+    val id: Int,
+    val name: String?,
+    val address: String?
+)

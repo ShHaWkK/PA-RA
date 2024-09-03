@@ -35,7 +35,13 @@ class ProductNotificationController
                     }
                 case 'PUT':
                     if (isset($uriParts[1])) {
-                        return $this->updateProductNotification((int) $uriParts[1], $input);
+                        if (isset($input['is_collected'])) {
+                            return $this->updateIsCollected((int) $uriParts[1], $input['is_collected']);
+                        } elseif (isset($input['notified_quantity'])) {
+                            return $this->updateNotifiedQuantity((int) $uriParts[1], $input['notified_quantity']);
+                        } else {
+                            return $this->updateProductNotification((int) $uriParts[1], $input);
+                        }
                     }
                     http_response_code(400);
                     return ['error' => 'ProductNotification ID not specified'];
@@ -51,7 +57,8 @@ class ProductNotificationController
             }
         } catch (\Exception $e) {
             error_log("Exception in processRequest: " . $e->getMessage());
-            throw $e;
+            http_response_code(500);
+            return ['error' => 'An error occurred while processing the request: ' . $e->getMessage()];
         }
     }
 
@@ -150,6 +157,55 @@ class ProductNotificationController
         }
     }
 
+    
+public function updateNotifiedQuantity($id, $quantity)
+{
+    try {
+        $productNotification = $this->entityManager->find(ProductNotificationModel::class, $id);
+
+        if (!$productNotification) {
+            http_response_code(404);
+            return ['error' => 'ProductNotification not found'];
+        }
+
+        // Mise à jour de notified_quantity
+        $productNotification->setNotifiedQuantity((int)$quantity);
+
+        // Enregistrer les modifications
+        $this->entityManager->persist($productNotification);
+        $this->entityManager->flush();
+
+        return ['id' => $productNotification->getId(), 'message' => 'Notified quantity updated successfully'];
+    } catch (\Exception $e) {
+        http_response_code(500);
+        return ['error' => 'An error occurred while updating notified quantity: ' . $e->getMessage()];
+    }
+}
+
+public function updateIsCollected($id, $isCollected)
+{
+    try {
+        $productNotification = $this->entityManager->find(ProductNotificationModel::class, $id);
+
+        if (!$productNotification) {
+            http_response_code(404);
+            return ['error' => 'ProductNotification not found'];
+        }
+
+        // Mise à jour de is_collected
+        $productNotification->setIsCollected((bool)$isCollected);
+
+        // Enregistrer les modifications
+        $this->entityManager->persist($productNotification);
+        $this->entityManager->flush();
+
+        return ['id' => $productNotification->getId(), 'message' => 'is_collected status updated successfully'];
+    } catch (\Exception $e) {
+        http_response_code(500);
+        return ['error' => 'An error occurred while updating is_collected status: ' . $e->getMessage()];
+    }
+}
+
     public function getAllProductNotifications(?array $queryParams)
     {
         try {
@@ -180,24 +236,11 @@ class ProductNotificationController
                     ->setParameter('address', $queryParams['address']);
             }
 
-            // Ajout des conditions pour 'company_id'
-            if (isset($queryParams['company_id'])) {
-                $qb->andWhere('p.company_id = :company_id')
-                    ->setParameter('company_id', $queryParams['company_id']);
-            }
-
             // Vérification du champ 'is_assigned' dans les paramètres
             if (isset($queryParams['is_assigned'])) {
                 $isAssigned = filter_var($queryParams['is_assigned'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
                 $qb->andWhere('p.is_assigned = :is_assigned')
                     ->setParameter('is_assigned', $isAssigned);
-            }
-
-            // Ajout des conditions pour 'is_collected'
-            if (isset($queryParams['is_collected'])) {
-                $isCollected = filter_var($queryParams['is_collected'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
-                $qb->andWhere('p.is_collected = :is_collected')
-                    ->setParameter('is_collected', $isCollected);
             }
 
             // Exécution de la requête

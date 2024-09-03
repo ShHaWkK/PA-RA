@@ -50,7 +50,7 @@ class ProductNotificationViewModel : ViewModel() {
                 if (response.isSuccessful) {
                     Log.d("ProductNotificationViewModel", "Update successful for ID: $id")
                     _successMessage.postValue("Product notification updated successfully!")
-                    loadProductNotificationsForVolunteer(volunteerId) // Rafraîchir la liste après mise à jour
+                    loadProductNotificationsForVolunteer(volunteerId) // Refresh list after update
                 } else {
                     Log.e("ProductNotificationViewModel", "Error updating notification: ${response.message()}")
                     _error.postValue("Error updating notification: ${response.message()}")
@@ -63,5 +63,4 @@ class ProductNotificationViewModel : ViewModel() {
             }
         })
     }
-
 }

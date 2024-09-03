@@ -1,3 +1,4 @@
+// src/main/java/com/example/nomorewaste/ProductNotificationActivity.kt
 package com.example.nomorewaste
 
 import android.content.Context
@@ -22,13 +23,13 @@ class ProductNotificationActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_product_notifications)
 
-        // Récupérer l'ID du bénévole
+        // Retrieve volunteer ID
         volunteerId = getSharedPreferences("NoMoreWastePrefs", Context.MODE_PRIVATE).getInt("USER_ID", -1)
 
         if (volunteerId == -1) {
-            Toast.makeText(this, "Erreur: ID du bénévole manquant", Toast.LENGTH_SHORT).show()
-            Log.e("ProductNotificationActivity", "ID du bénévole manquant")
-            finish() // Fermer l'activité si l'ID du bénévole est manquant
+            Toast.makeText(this, "Error: Missing volunteer ID", Toast.LENGTH_SHORT).show()
+            Log.e("ProductNotificationActivity", "Missing volunteer ID")
+            finish() // Close activity if the volunteer ID is missing
             return
         }
 
@@ -41,7 +42,7 @@ class ProductNotificationActivity : AppCompatActivity() {
         }
         recyclerView.adapter = adapter
 
-        // Observer pour la liste des notifications de produit
+        // Observe product notifications list
         viewModel.productNotifications.observe(this, Observer { notifications ->
             if (notifications != null) {
                 Log.d("ProductNotificationActivity", "Loaded ${notifications.size} product notifications.")
@@ -49,7 +50,7 @@ class ProductNotificationActivity : AppCompatActivity() {
             }
         })
 
-        // Observer pour les messages d'erreur
+        // Observe error messages
         viewModel.error.observe(this, Observer { errorMessage ->
             if (errorMessage != null) {
                 Log.e("ProductNotificationActivity", "Error: $errorMessage")
@@ -57,7 +58,7 @@ class ProductNotificationActivity : AppCompatActivity() {
             }
         })
 
-        // Observer pour les messages de succès
+        // Observe success messages
         viewModel.successMessage.observe(this, Observer { successMessage ->
             if (successMessage != null) {
                 Log.d("ProductNotificationActivity", "Success: $successMessage")
@@ -65,7 +66,7 @@ class ProductNotificationActivity : AppCompatActivity() {
             }
         })
 
-        // Charger les notifications de produit pour le bénévole
+        // Load product notifications for the volunteer
         viewModel.loadProductNotificationsForVolunteer(volunteerId)
     }
 }

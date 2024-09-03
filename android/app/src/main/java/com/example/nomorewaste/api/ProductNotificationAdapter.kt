@@ -1,3 +1,4 @@
+// src/main/java/com/example/nomorewaste/ProductNotificationAdapter.kt
 package com.example.nomorewaste
 
 import android.view.LayoutInflater
